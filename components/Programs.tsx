@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   BookOpen,
-  Check,
+  CheckCircle2,
   MessageCircle,
   Palette,
   Puzzle,
@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
+import Container from "@/components/ui/Container";
 import { site } from "@/lib/site";
 
 const programmes = [
@@ -23,17 +24,9 @@ const programmes = [
     slug: "/programmes/playgroup",
     image: "/images/programmes/playgroup.jpg",
     icon: Puzzle,
-    label: "A comfortable beginning",
-    title: "First steps into preschool, made gentle and reassuring.",
-    description:
-      "Our Playgroup programme helps young children settle into a regular routine, connect with teachers and begin exploring the world beyond home at their own pace.",
-    highlights: [
-      "Sensory and movement-based experiences",
-      "Early vocabulary and communication",
-      "Music, stories and group participation",
-    ],
-    outcome:
-      "Children gradually feel secure in the classroom, express their needs more clearly and begin participating with confidence.",
+    summary:
+      "A gentle introduction to preschool routines, communication, movement and learning with others.",
+    highlights: ["Settling-in support", "Language and sensory play"],
   },
   {
     name: "Nursery",
@@ -41,17 +34,9 @@ const programmes = [
     slug: "/programmes/nursery",
     image: "/images/programmes/nursery.jpg",
     icon: Palette,
-    label: "Curiosity takes shape",
-    title: "Everyday discoveries become meaningful learning.",
-    description:
-      "Nursery introduces children to early language, numbers, patterns and classroom habits through conversation, guided play and practical activities.",
-    highlights: [
-      "Phonics and pre-reading readiness",
-      "Numbers, shapes and simple patterns",
-      "Creative expression and independence",
-    ],
-    outcome:
-      "Children become more expressive, follow familiar routines independently and show growing interest in early concepts.",
+    summary:
+      "Playful early learning that introduces phonics, numbers, creativity and independent classroom habits.",
+    highlights: ["Early literacy and numeracy", "Creative expression"],
   },
   {
     name: "Junior KG",
@@ -59,17 +44,9 @@ const programmes = [
     slug: "/programmes/junior-kg",
     image: "/images/programmes/junior-kg.jpg",
     icon: BookOpen,
-    label: "Stronger foundations",
-    title: "Clear concepts, confident communication and active thinking.",
-    description:
-      "Junior KG combines structured learning with exploration so children can strengthen literacy, numeracy and communication without losing the joy of discovery.",
-    highlights: [
-      "Phonics, vocabulary and early writing",
-      "Number sense and logical thinking",
-      "General awareness and confident expression",
-    ],
-    outcome:
-      "Children begin handling classroom tasks with greater focus, explain their ideas more confidently and develop stronger academic foundations.",
+    summary:
+      "Stronger foundations in language, mathematics, awareness and confident classroom participation.",
+    highlights: ["Concept-building", "Communication and early writing"],
   },
   {
     name: "Senior KG",
@@ -77,225 +54,157 @@ const programmes = [
     slug: "/programmes/senior-kg",
     image: "/images/programmes/senior-kg.jpg",
     icon: School,
-    label: "Ready for the next step",
-    title: "Thoughtful preparation for a smooth move to formal school.",
-    description:
-      "Senior KG supports school readiness through purposeful practice, independent work habits and age-appropriate challenges in literacy and numeracy.",
-    highlights: [
-      "Reading, writing and comprehension",
-      "Mathematics and reasoning",
-      "Responsibility and independent working",
-    ],
-    outcome:
-      "Children approach primary school with better concentration, stronger communication and the confidence to manage a more structured classroom.",
+    summary:
+      "Thoughtful preparation for primary school through structured learning and greater independence.",
+    highlights: ["School readiness", "Reading, writing and reasoning"],
   },
 ];
 
+const transition = {
+  duration: 0.6,
+  ease: [0.22, 1, 0.36, 1] as const,
+};
+
 export default function Programs() {
+  const shouldReduceMotion = useReducedMotion();
+
   const programmeMessage = encodeURIComponent(
     "Hello Kidzee Sector 12 Dwarka, I would like help choosing the right preschool programme for my child."
   );
 
-  const programmeWhatsApp = `https://wa.me/919667038673?text=${programmeMessage}`;
+  const programmeWhatsApp = `${site.whatsappBase}?text=${programmeMessage}`;
 
   return (
     <section
       id="programmes"
       aria-labelledby="programmes-heading"
-      className="relative overflow-hidden bg-[#fffaf3] py-20 sm:py-24 lg:py-28"
+      className="relative isolate overflow-hidden bg-[#fffaf3] py-20 sm:py-24 lg:py-28"
     >
       <div
         aria-hidden="true"
-        className="absolute -left-40 top-16 h-96 w-96 rounded-full bg-[#eadcf3]/70 blur-3xl"
+        className="absolute -left-40 top-16 -z-10 h-96 w-96 rounded-full bg-[#eadcf3]/70 blur-3xl"
       />
 
       <div
         aria-hidden="true"
-        className="absolute -right-40 bottom-20 h-96 w-96 rounded-full bg-[#fff0b8]/70 blur-3xl"
+        className="absolute -right-40 bottom-20 -z-10 h-96 w-96 rounded-full bg-[#fff0b8]/70 blur-3xl"
       />
 
-      <div className="container relative">
-        <motion.div
-          initial={{ opacity: 0, y: 22 }}
-          whileInView={{ opacity: 1, y: 0 }}
+      <Container>
+        <motion.header
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 22 }}
+          whileInView={
+            shouldReduceMotion ? undefined : { opacity: 1, y: 0 }
+          }
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6 }}
+          transition={transition}
           className="mx-auto max-w-4xl text-center"
         >
-          <span className="eyebrow">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#ddcce8] bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#5b2a86] shadow-sm">
             <Sparkles size={15} aria-hidden="true" />
             Preschool programmes
-          </span>
+          </div>
 
-          <h2 id="programmes-heading" className="title mx-auto max-w-4xl">
-            The right learning experience for every stage of early childhood.
+          <h2
+            id="programmes-heading"
+            className="mt-6 text-balance text-4xl font-black leading-[1.08] tracking-[-0.04em] text-[#2c1735] sm:text-5xl lg:text-[56px]"
+          >
+            Learning planned for each stage between{" "}
+            <span className="text-[#5b2a86]">two and six years</span>
           </h2>
 
-          <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-[#6f6474] sm:text-lg">
-            At Kidzee Sector 12, Dwarka, children move through each programme
-            with familiar routines, age-appropriate challenges and the support
-            they need to grow with confidence.
+          <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-[#6f6474] sm:text-lg">
+            Each programme builds on what children are ready to understand and
+            practise at their age, while keeping stories, conversation,
+            movement and hands-on learning part of the school day.
           </p>
-        </motion.div>
+        </motion.header>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6, delay: 0.08 }}
-          className="relative mt-12 rounded-[30px] border border-[#eadff1] bg-white p-5 shadow-[0_18px_55px_rgba(71,35,91,0.07)] sm:p-7 lg:p-9"
-        >
-          <div
-            aria-hidden="true"
-            className="absolute left-[13%] right-[13%] top-[50px] hidden h-px bg-[#decbe9] lg:block"
-          />
-
-          <div className="relative grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {programmes.map((programme, index) => (
-              <div
-                key={programme.name}
-                className="rounded-[22px] border border-[#eee4f3] bg-[#fffdf9] px-4 py-5 text-center"
-              >
-                <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#5b2a86] text-sm font-extrabold text-white">
-                  {index + 1}
-                </span>
-
-                <p className="mt-4 text-xs font-extrabold uppercase tracking-[0.14em] text-[#7a459c]">
-                  {programme.age}
-                </p>
-
-                <h3 className="mt-2 text-xl font-extrabold text-[#311048]">
-                  {programme.name}
-                </h3>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        <div className="mt-12 space-y-7 lg:mt-14">
+        <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {programmes.map((programme, index) => {
             const Icon = programme.icon;
-            const imageOnRight = index % 2 !== 0;
 
             return (
               <motion.article
                 key={programme.name}
-                initial={{ opacity: 0, y: 28 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.12 }}
-                transition={{ duration: 0.65 }}
-                className="overflow-hidden rounded-[32px] border border-[#eadff1] bg-white shadow-[0_22px_60px_rgba(71,35,91,0.08)]"
+                initial={
+                  shouldReduceMotion ? false : { opacity: 0, y: 24 }
+                }
+                whileInView={
+                  shouldReduceMotion
+                    ? undefined
+                    : { opacity: 1, y: 0 }
+                }
+                viewport={{ once: true, amount: 0.16 }}
+                transition={{
+                  ...transition,
+                  duration: 0.5,
+                  delay: shouldReduceMotion ? 0 : index * 0.06,
+                }}
+                whileHover={shouldReduceMotion ? undefined : { y: -6 }}
+                className="group flex h-full flex-col overflow-hidden rounded-[30px] border border-[#eadff1] bg-white shadow-[0_16px_46px_rgba(71,35,91,0.08)] transition-[border-color,box-shadow] duration-300 hover:border-[#d8c5e4] hover:shadow-[0_24px_60px_rgba(71,35,91,0.14)]"
               >
-                <div className="grid lg:grid-cols-[0.92fr_1.08fr]">
+                <div className="relative aspect-[1.35/1] overflow-hidden">
+                  <Image
+                    src={programme.image}
+                    alt={`${programme.name} classroom experience at Kidzee Sector 12 Dwarka`}
+                    fill
+                    sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                  />
+
                   <div
-                    className={`relative min-h-[330px] overflow-hidden sm:min-h-[400px] lg:min-h-[520px] ${
-                      imageOnRight ? "lg:order-2" : ""
-                    }`}
-                  >
-                    <Image
-                      src={programme.image}
-                      alt={`${programme.name} children learning at Kidzee Sector 12 Dwarka`}
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 46vw"
-                      className="object-cover transition-transform duration-700 hover:scale-[1.03]"
-                    />
+                    aria-hidden="true"
+                    className="absolute inset-0 bg-gradient-to-t from-[#281036]/65 via-transparent to-transparent"
+                  />
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#25112f]/80 via-transparent to-transparent" />
-
-                    <div className="absolute left-5 top-5 sm:left-7 sm:top-7">
-                      <span className="inline-flex rounded-full bg-white px-4 py-2 text-sm font-extrabold text-[#5b2a86] shadow-lg">
-                        {programme.age}
-                      </span>
-                    </div>
-
-                    <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-                      <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#f6c84b]">
-                        {programme.label}
-                      </p>
-
-                      <p className="mt-2 max-w-xl text-2xl font-extrabold leading-snug text-white sm:text-3xl">
-                        {programme.title}
-                      </p>
-                    </div>
+                  <div className="absolute left-5 top-5 rounded-full bg-white/95 px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-[#5b2a86] shadow-md backdrop-blur">
+                    {programme.age}
                   </div>
 
-                  <div
-                    className={`flex flex-col justify-center p-6 sm:p-9 lg:p-11 ${
-                      imageOnRight ? "lg:order-1" : ""
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-5">
-                      <div>
-                        <p className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#7a459c]">
-                          Programme {index + 1}
-                        </p>
+                  <div className="absolute bottom-5 left-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f6c84b] text-[#32153f] shadow-lg">
+                    <Icon size={22} aria-hidden="true" />
+                  </div>
+                </div>
 
-                        <h3 className="mt-2 text-4xl font-extrabold tracking-[-0.035em] text-[#311048] sm:text-5xl">
-                          {programme.name}
-                        </h3>
-                      </div>
+                <div className="flex flex-1 flex-col p-6">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[#7a459c]">
+                    Programme {index + 1}
+                  </p>
 
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#f3eaf9] text-[#5b2a86]">
-                        <Icon size={26} aria-hidden="true" />
-                      </div>
-                    </div>
+                  <h3 className="mt-2 text-2xl font-black tracking-[-0.025em] text-[#311048]">
+                    {programme.name}
+                  </h3>
 
-                    <p className="mt-6 text-base leading-8 text-[#6f6474]">
-                      {programme.description}
-                    </p>
+                  <p className="mt-4 text-sm leading-7 text-[#665a6b]">
+                    {programme.summary}
+                  </p>
 
-                    <div className="mt-7 border-t border-[#eee5f2] pt-6">
-                      <p className="text-sm font-extrabold text-[#311048]">
-                        What children explore
-                      </p>
-
-                      <ul className="mt-4 space-y-3">
-                        {programme.highlights.map((highlight) => (
-                          <li
-                            key={highlight}
-                            className="flex items-start gap-3 text-sm font-semibold leading-6 text-[#55495a] sm:text-base"
-                          >
-                            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#f6c84b] text-[#311048]">
-                              <Check
-                                size={15}
-                                strokeWidth={3}
-                                aria-hidden="true"
-                              />
-                            </span>
-
-                            {highlight}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="mt-7 rounded-[22px] bg-[#fff8e8] p-5">
-                      <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#7a459c]">
-                        Progress parents can notice
-                      </p>
-
-                      <p className="mt-3 text-sm leading-7 text-[#5f5364] sm:text-base">
-                        {programme.outcome}
-                      </p>
-                    </div>
-
-                    <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                      <Link href={programme.slug} className="btn btn-primary">
-                        Explore {programme.name}
-                        <ArrowRight size={18} aria-hidden="true" />
-                      </Link>
-
-                      <a
-                        href={programmeWhatsApp}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn-secondary"
+                  <ul className="mt-5 space-y-3 border-t border-[#eee5f2] pt-5">
+                    {programme.highlights.map((highlight) => (
+                      <li
+                        key={highlight}
+                        className="flex items-start gap-2.5 text-sm font-semibold leading-6 text-[#55495a]"
                       >
-                        <MessageCircle size={18} aria-hidden="true" />
-                        Ask about this programme
-                      </a>
-                    </div>
-                  </div>
+                        <CheckCircle2
+                          size={17}
+                          strokeWidth={2.4}
+                          aria-hidden="true"
+                          className="mt-1 shrink-0 text-[#5b2a86]"
+                        />
+                        {highlight}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    href={programme.slug}
+                    aria-label={`Learn more about the ${programme.name} programme`}
+                    className="mt-6 inline-flex items-center gap-2 text-sm font-black text-[#5b2a86] transition-colors hover:text-[#431d60] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#f6c84b]/45"
+                  >
+                    View {programme.name}
+                    <ArrowRight size={17} aria-hidden="true" />
+                  </Link>
                 </div>
               </motion.article>
             );
@@ -303,47 +212,51 @@ export default function Programs() {
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 22 }}
+          whileInView={
+            shouldReduceMotion ? undefined : { opacity: 1, y: 0 }
+          }
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6 }}
-          className="mt-10 overflow-hidden rounded-[32px] bg-[#311048] px-6 py-10 text-white shadow-[0_22px_60px_rgba(49,16,72,0.2)] sm:px-9 lg:flex lg:items-center lg:justify-between lg:gap-10 lg:px-12"
+          transition={transition}
+          className="mt-10 overflow-hidden rounded-[32px] bg-[#311048] px-6 py-8 text-white shadow-[0_22px_60px_rgba(49,16,72,0.2)] sm:px-9 sm:py-9 lg:flex lg:items-center lg:justify-between lg:gap-10 lg:px-12"
         >
           <div className="max-w-3xl">
-            <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#f6c84b]">
-              Choosing a programme
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#f6c84b]">
+              Not sure where to begin?
             </p>
 
-            <h3 className="mt-3 text-3xl font-extrabold tracking-[-0.03em] sm:text-4xl">
-              Unsure which programme is suitable for your child?
+            <h3 className="mt-3 text-balance text-2xl font-black tracking-[-0.03em] sm:text-3xl">
+              Tell us your child’s age and we’ll guide you to the right
+              programme.
             </h3>
 
-            <p className="mt-4 max-w-2xl leading-7 text-white/75">
-              Share your child’s age with our team or plan a visit to understand
-              the classroom routine before beginning admission.
+            <p className="mt-3 max-w-2xl leading-7 text-white/75">
+              Parents can also visit the centre and understand the classroom
+              routine before deciding.
             </p>
           </div>
 
-          <div className="mt-7 flex shrink-0 flex-col gap-3 sm:flex-row lg:mt-0 lg:flex-col">
+          <div className="mt-7 flex shrink-0 flex-col gap-3 sm:flex-row lg:mt-0">
+            <Link
+              href="/programmes"
+              className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[#f6c84b] px-6 text-sm font-black text-[#311048] transition hover:-translate-y-0.5 hover:bg-[#ffda69] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/30"
+            >
+              Compare all programmes
+              <ArrowRight size={17} aria-hidden="true" />
+            </Link>
+
             <a
               href={programmeWhatsApp}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn bg-[#f6c84b] text-[#311048] hover:bg-[#ffda69]"
+              className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/30"
             >
-              Get programme guidance
-              <ArrowRight size={18} aria-hidden="true" />
-            </a>
-
-            <a
-              href={`tel:${site.phone}`}
-              className="text-center text-sm font-extrabold text-white underline decoration-white/40 underline-offset-4 transition hover:decoration-white"
-            >
-              Call {site.phoneDisplay}
+              <MessageCircle size={17} aria-hidden="true" />
+              Ask on WhatsApp
             </a>
           </div>
         </motion.div>
-      </div>
+      </Container>
     </section>
   );
 }
