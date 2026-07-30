@@ -1,158 +1,244 @@
 import Image from "next/image";
-import Link from "next/link";
 import {
   ArrowRight,
   CheckCircle2,
   Clock3,
   MapPin,
+  MessageCircle,
+  ShieldCheck,
   Star,
+  Utensils,
+  UsersRound,
 } from "lucide-react";
 
+import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
+import { design, joinClasses } from "@/lib/design";
 import { site } from "@/lib/site";
 
-const highlights = [
-  "Playgroup to Senior KG",
-  "3-day trial available",
-  "Daycare until 7 PM",
-];
+const trustPoints = [
+  {
+    icon: CheckCircle2,
+    title: "3-Day Trial",
+    description: "Help your child settle in comfortably.",
+  },
+  {
+    icon: UsersRound,
+    title: "Thoughtful Ratios",
+    description: "1:8 for Playgroup and Nursery.",
+  },
+  {
+    icon: Utensils,
+    title: "Meals Included",
+    description: "Fresh meals during preschool hours.",
+  },
+  {
+    icon: Clock3,
+    title: "Daycare Till 7 PM",
+    description: "Flexible support for working families.",
+  },
+] as const;
 
 export default function Hero() {
   return (
     <section
-      aria-labelledby="hero-heading"
-      className="relative isolate overflow-hidden bg-[radial-gradient(circle_at_8%_12%,rgba(246,200,75,0.17),transparent_29%),radial-gradient(circle_at_90%_34%,rgba(91,42,134,0.10),transparent_32%),linear-gradient(135deg,#fffdf8_0%,#fcf8fc_52%,#f8f1fb_100%)] pt-[74px]"
+      aria-labelledby="home-hero-heading"
+      className={joinClasses(
+        "relative isolate overflow-hidden pt-[82px]",
+        design.backgrounds.gradient,
+      )}
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 opacity-40"
+        className="pointer-events-none absolute inset-0 -z-10"
       >
-        <div className="absolute left-[7%] top-[22%] h-24 w-24 rounded-full border border-[#5B2A86]/10" />
-        <div className="absolute right-[5%] top-[16%] h-16 w-16 rounded-full bg-[#F6C84B]/15 blur-xl" />
-        <div className="absolute bottom-[8%] left-[45%] h-28 w-28 rounded-full bg-[#7D42A8]/10 blur-3xl" />
+        <div className="absolute -left-20 top-32 h-64 w-64 rounded-full border border-[#5B2A86]/[0.06]" />
+
+        <div className="absolute left-[7%] top-[24%] h-24 w-24 rounded-full border border-[#5B2A86]/10" />
+
+        <div className="absolute right-[7%] top-[12%] h-40 w-40 rounded-full bg-[#F6C84B]/20 blur-3xl" />
+
+        <div className="absolute bottom-[5%] left-[44%] h-48 w-48 rounded-full bg-[#5B2A86]/10 blur-3xl" />
       </div>
 
-      <Container className="grid min-h-[650px] items-center gap-12 py-8 lg:grid-cols-[0.92fr_1.08fr] lg:gap-14 lg:py-10">
-        <div className="relative z-10 max-w-[665px]">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#5B2A86]/10 bg-white/75 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#5B2A86] shadow-[0_8px_24px_rgba(48,22,62,0.05)] backdrop-blur">
-            <MapPin aria-hidden="true" size={15} />
-            Kidzee Preschool, Sector 12B, Dwarka
+      <Container className="grid min-h-[700px] items-center gap-14 pb-20 pt-10 lg:grid-cols-[0.94fr_1.06fr] lg:gap-16 lg:pb-24 lg:pt-14">
+        <div className="relative z-10 max-w-[660px]">
+          <div className={design.badges.light}>
+            <MapPin aria-hidden="true" size={16} strokeWidth={2.4} />
+
+            <span>Admissions Open · Sector 12B, Dwarka</span>
           </div>
 
           <h1
-            id="hero-heading"
-            className="mt-5 max-w-[650px] text-balance text-[clamp(3rem,5.3vw,5.05rem)] font-black leading-[0.98] tracking-[-0.045em] text-[#2C1735]"
+            id="home-hero-heading"
+            className={joinClasses(
+              design.typography.heroTitle,
+              "mt-6 max-w-[670px] text-balance",
+            )}
           >
-            A happy first step into school, close to home.
+            Premium Preschool &amp; Daycare in Sector 12, Dwarka
           </h1>
 
-          <p className="mt-6 max-w-[610px] text-[1.06rem] leading-8 text-[#665A6B] lg:text-[1.15rem]">
-            Preschool programmes for children aged 2–6 years, along with
-            daycare until 7 PM, nutritious meals and transport support for
-            families in and around Dwarka.
+          <p className="mt-5 max-w-[610px] text-balance text-xl font-bold leading-8 text-[#5B2A86] sm:text-[1.35rem] sm:leading-9">
+            A caring start where curiosity grows and confidence blossoms.
           </p>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <a
-              href={site.whatsapp}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Book a visit to Kidzee Preschool Sector 12 Dwarka on WhatsApp"
-              className="inline-flex min-h-[56px] items-center justify-center gap-2 rounded-full bg-[#5B2A86] px-7 text-sm font-black text-white shadow-[0_16px_36px_rgba(91,42,134,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#4F2376] hover:shadow-[0_20px_42px_rgba(91,42,134,0.28)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45"
-            >
-              Book a school visit
-              <ArrowRight aria-hidden="true" size={18} />
-            </a>
+          <p
+            className={joinClasses(
+              design.typography.body,
+              "mt-4 max-w-[620px]",
+            )}
+          >
+            Kidzee Sector 12, Dwarka offers preschool programmes for
+            children aged 2–6 years, along with daycare, meals and
+            transport support for nearby families.
+          </p>
 
-            <Link
-              href="/programmes"
-              className="inline-flex min-h-[56px] items-center justify-center rounded-full border border-[#5B2A86]/15 bg-white/70 px-7 text-sm font-black text-[#5B2A86] shadow-[0_8px_24px_rgba(48,22,62,0.05)] backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-[#5B2A86]/25 hover:bg-white hover:shadow-[0_14px_32px_rgba(53,28,67,0.1)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45"
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Button
+              href={site.whatsappVisit}
+              external
+              variant="primary"
+              size="lg"
+              leftIcon={<MessageCircle aria-hidden="true" size={18} />}
+              rightIcon={<ArrowRight aria-hidden="true" size={18} />}
+              className="sm:min-w-[215px]"
+              aria-label="Book a visit to Kidzee Sector 12 Dwarka through WhatsApp"
             >
-              Explore programmes
-            </Link>
+              Book a School Visit
+            </Button>
+
+            <Button
+              href="/programmes"
+              variant="secondary"
+              size="lg"
+              className="sm:min-w-[195px]"
+            >
+              Explore Programmes
+            </Button>
           </div>
 
-          <ul className="mt-8 flex flex-wrap gap-x-7 gap-y-3 text-sm font-bold text-[#534658]">
-            {highlights.map((highlight) => (
-              <li key={highlight} className="flex items-center gap-2">
-                <CheckCircle2
-                  aria-hidden="true"
-                  size={18}
-                  strokeWidth={2.2}
-                  className="shrink-0 text-[#5B2A86]"
-                />
-                {highlight}
-              </li>
-            ))}
-          </ul>
+          <div className="mt-9 grid grid-cols-2 gap-3">
+            {trustPoints.map(({ icon: Icon, title, description }) => (
+              <div
+                key={title}
+                className="group rounded-[20px] border border-[#E9E0ED] bg-white/80 p-4 shadow-[0_10px_30px_rgba(40,16,52,0.05)] backdrop-blur-sm transition duration-300 hover:-translate-y-0.5 hover:border-[#DCCBE5] hover:bg-white hover:shadow-[0_16px_38px_rgba(40,16,52,0.08)]"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F8F4FC] text-[#5B2A86]">
+                    <Icon
+                      aria-hidden="true"
+                      size={17}
+                      strokeWidth={2.25}
+                    />
+                  </span>
 
-          <div className="mt-8 flex items-start gap-3 border-t border-[#5B2A86]/10 pt-6">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#5B2A86]/[0.08] text-[#5B2A86]">
-              <Clock3 aria-hidden="true" size={19} />
+                  <div>
+                    <p className="text-sm font-black leading-5 text-[#281034] sm:text-[0.95rem]">
+                      {title}
+                    </p>
+
+                    <p className="mt-1 hidden text-xs leading-5 text-[#7A737D] sm:block">
+                      {description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-7 flex items-start gap-3 border-t border-[#5B2A86]/10 pt-6">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#F8F4FC] text-[#5B2A86]">
+              <Clock3 aria-hidden="true" size={19} strokeWidth={2.2} />
             </div>
 
             <div>
-              <p className="text-sm font-black text-[#3D2B44]">
-                Preschool: 8:30 AM–1:00 PM
+              <p className="text-sm font-black text-[#281034]">
+                Preschool: {site.preschoolHours.display}
               </p>
 
               <p className="mt-1 text-sm leading-6 text-[#675B6B]">
-                Daycare available from 12:30 PM until 7:00 PM.
+                Daycare: {site.daycareHours.display}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="relative mx-auto w-full max-w-[700px] lg:pl-2">
+        <div className="relative mx-auto w-full max-w-[710px] lg:pl-3">
           <div
             aria-hidden="true"
-            className="absolute -left-8 top-10 h-40 w-40 rounded-full bg-[#F6C84B]/25 blur-3xl"
+            className="absolute -left-10 top-12 h-48 w-48 rounded-full bg-[#F6C84B]/25 blur-3xl"
           />
 
           <div
             aria-hidden="true"
-            className="absolute -right-10 bottom-4 h-52 w-52 rounded-full bg-[#7D42A8]/15 blur-3xl"
+            className="absolute -right-10 bottom-8 h-60 w-60 rounded-full bg-[#5B2A86]/15 blur-3xl"
           />
 
-          <div className="relative overflow-hidden rounded-[36px] border-[7px] border-white bg-white shadow-[0_34px_100px_rgba(58,21,76,0.20)] sm:rounded-[44px] sm:border-[9px]">
-            <Image
-              src="/images/hero-main.jpg"
-              alt="Children enjoying a classroom activity with their teacher at Kidzee Sector 12 Dwarka"
-              width={1100}
-              height={950}
-              priority
-              sizes="(max-width: 1024px) 100vw, 53vw"
-              className="h-[440px] w-full object-cover object-center sm:h-[560px] lg:h-[600px]"
-            />
+          <div className="group relative">
+            <div className={design.images.frame}>
+              <Image
+                src="/images/hero-main.jpg"
+                alt="Children learning with their teacher at Kidzee Sector 12 Dwarka"
+                width={1100}
+                height={950}
+                priority
+                sizes="(max-width: 1024px) 100vw, 53vw"
+                className="h-[430px] w-full object-cover object-center transition duration-700 ease-out group-hover:scale-[1.018] sm:h-[560px] lg:h-[610px]"
+              />
 
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#2B1538]/10 via-transparent to-transparent"
-            />
-          </div>
-
-          <div className="absolute -bottom-6 left-3 flex min-w-[270px] items-center gap-4 rounded-[26px] border border-white/80 bg-white/95 p-4 shadow-[0_20px_55px_rgba(48,22,62,0.16)] backdrop-blur sm:-left-5 sm:min-w-[280px] sm:p-5">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#F6C84B]/25">
-              <Star
+              <div
                 aria-hidden="true"
-                size={27}
-                className="fill-[#F6C84B] text-[#D9A600]"
+                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#281034]/20 via-transparent to-white/[0.03]"
               />
             </div>
 
-            <div>
-              <strong className="text-lg text-[#2E1837]">
-                Rated by parents on Google
-              </strong>
-
-              <p className="mt-1 text-sm text-[#6F6474]">
-                Read genuine family experiences
-              </p>
+            <div className="absolute right-3 top-3 rounded-full border border-white/80 bg-white/90 px-4 py-2 text-xs font-black uppercase tracking-[0.1em] text-[#5B2A86] shadow-[0_12px_30px_rgba(40,16,52,0.10)] backdrop-blur sm:right-5 sm:top-5">
+              Playgroup to Senior KG
             </div>
-          </div>
 
-          <div className="absolute right-3 top-4 hidden rounded-full border border-white/80 bg-white/90 px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-[#5B2A86] shadow-[0_12px_30px_rgba(48,22,62,0.10)] backdrop-blur sm:block">
-            Preschool &amp; Daycare
+            <div className="absolute -bottom-8 left-3 max-w-[330px] rounded-[24px] border border-white/90 bg-white/95 p-4 shadow-[0_22px_60px_rgba(40,16,52,0.16)] backdrop-blur sm:-left-5 sm:p-5">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#FFF4CC]">
+                  <Star
+                    aria-hidden="true"
+                    size={25}
+                    className="fill-[#F6C84B] text-[#D7A500]"
+                  />
+                </div>
+
+                <div>
+                  <p className="text-base font-black text-[#281034] sm:text-lg">
+                    Trusted by local families
+                  </p>
+
+                  <p className="mt-1 text-sm leading-5 text-[#6F6474]">
+                    Read genuine parent experiences on our Google profile.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="absolute -right-3 bottom-20 hidden max-w-[230px] rounded-[22px] border border-white/90 bg-[#281034]/95 p-4 text-white shadow-[0_20px_55px_rgba(40,16,52,0.24)] backdrop-blur md:block lg:-right-7">
+              <div className="flex items-start gap-3">
+                <ShieldCheck
+                  aria-hidden="true"
+                  size={22}
+                  className="mt-0.5 shrink-0 text-[#F6C84B]"
+                />
+
+                <div>
+                  <p className="text-sm font-black">
+                    Safe, caring environment
+                  </p>
+
+                  <p className="mt-1 text-xs leading-5 text-white/70">
+                    Designed around the comfort and wellbeing of young
+                    children.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </Container>

@@ -1,20 +1,13 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { motion } from "framer-motion";
 import {
-  ArrowRight,
-  Baby,
-  CalendarDays,
   CheckCircle2,
   Clock3,
   MapPin,
   MessageCircle,
   Phone,
-  School,
   Send,
-  Sparkles,
-  UsersRound,
 } from "lucide-react";
 
 import Button from "@/components/ui/Button";
@@ -29,6 +22,8 @@ interface VisitFormData {
   preferredTime: string;
 }
 
+type VisitFormErrors = Partial<Record<keyof VisitFormData, string>>;
+
 const initialFormData: VisitFormData = {
   parentName: "",
   phone: "",
@@ -36,33 +31,6 @@ const initialFormData: VisitFormData = {
   programme: "",
   preferredTime: "",
 };
-
-const visitBenefits = [
-  {
-    icon: School,
-    title: "Explore the preschool",
-    description:
-      "See the classrooms, play areas, activity spaces and daycare environment in person.",
-  },
-  {
-    icon: UsersRound,
-    title: "Meet the school team",
-    description:
-      "Speak with our educators and understand how children are supported throughout the day.",
-  },
-  {
-    icon: Baby,
-    title: "Discuss your child",
-    description:
-      "Share your child’s age, routine and requirements so our team can guide you properly.",
-  },
-  {
-    icon: CalendarDays,
-    title: "Understand admission",
-    description:
-      "Learn about programmes, timings, meals, daycare, transport and the admission process.",
-  },
-];
 
 const programmeOptions = [
   {
@@ -91,16 +59,15 @@ const programmeOptions = [
   },
   {
     value: "3-Day Trial",
-    label: "3-Day Trial",
+    label: "3-day trial",
   },
-];
+] as const;
 
 const visitTimeOptions = [
   "Morning",
   "Afternoon",
-  "Saturday visit",
   "Please call me to confirm",
-];
+] as const;
 
 function createWhatsAppLink(message: string) {
   const phoneNumber = site.phone.replace(/\D/g, "");
@@ -112,15 +79,8 @@ export default function CTA() {
   const [formData, setFormData] =
     useState<VisitFormData>(initialFormData);
 
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof VisitFormData, string>>
-  >({});
-
+  const [errors, setErrors] = useState<VisitFormErrors>({});
   const [submitted, setSubmitted] = useState(false);
-
-  const generalEnquiryLink = createWhatsAppLink(
-    "Hello Kidzee Sector 12, Dwarka. I would like to know more about admissions, daycare or the 3-day trial."
-  );
 
   function updateField(
     field: keyof VisitFormData,
@@ -133,16 +93,14 @@ export default function CTA() {
 
     setErrors((current) => ({
       ...current,
-      [field]: "",
+      [field]: undefined,
     }));
 
     setSubmitted(false);
   }
 
   function validateForm() {
-    const nextErrors: Partial<
-      Record<keyof VisitFormData, string>
-    > = {};
+    const nextErrors: VisitFormErrors = {};
 
     if (!formData.parentName.trim()) {
       nextErrors.parentName = "Please enter the parent’s name.";
@@ -153,19 +111,21 @@ export default function CTA() {
     if (!cleanedPhone) {
       nextErrors.phone = "Please enter a mobile number.";
     } else if (cleanedPhone.length !== 10) {
-      nextErrors.phone = "Please enter a valid 10-digit mobile number.";
+      nextErrors.phone =
+        "Please enter a valid 10-digit mobile number.";
     }
 
     if (!formData.childAge.trim()) {
       nextErrors.childAge = "Please enter the child’s age.";
     }
 
-    if (!formData.preferredTime) {
-      nextErrors.preferredTime = "Please select a preferred visit time.";
-    }
-
     if (!formData.programme) {
       nextErrors.programme = "Please select a programme.";
+    }
+
+    if (!formData.preferredTime) {
+      nextErrors.preferredTime =
+        "Please select a preferred visit time.";
     }
 
     setErrors(nextErrors);
@@ -192,12 +152,10 @@ export default function CTA() {
       `Preferred visit time: ${formData.preferredTime}`,
     ].join("\n");
 
-    const whatsappUrl = createWhatsAppLink(message);
-
     setSubmitted(true);
 
     window.open(
-      whatsappUrl,
+      createWhatsAppLink(message),
       "_blank",
       "noopener,noreferrer"
     );
@@ -207,202 +165,120 @@ export default function CTA() {
     <section
       id="book-a-visit"
       aria-labelledby="book-visit-heading"
-      className="relative overflow-hidden bg-[#FFF9F1] py-20 sm:py-24 lg:py-28"
+      className="relative overflow-hidden bg-[#FFF9F1] py-16 sm:py-20 lg:py-24"
     >
       <div
         aria-hidden="true"
-        className="absolute -left-24 top-16 h-80 w-80 rounded-full bg-[#F2E8F8] blur-3xl"
+        className="pointer-events-none absolute -left-36 top-10 h-80 w-80 rounded-full bg-[#EADDF1] blur-3xl"
       />
 
       <div
         aria-hidden="true"
-        className="absolute -right-24 bottom-10 h-80 w-80 rounded-full bg-[#FFF0B8] blur-3xl"
+        className="pointer-events-none absolute -right-36 bottom-0 h-80 w-80 rounded-full bg-[#F6C84B]/20 blur-3xl"
       />
 
       <Container className="relative">
-        <div className="overflow-hidden rounded-[42px] bg-[#2C1735] shadow-[0_35px_90px_rgba(44,23,53,0.24)]">
-          <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.55, ease: "easeOut" }}
-              className="relative overflow-hidden px-7 py-10 text-white sm:px-10 sm:py-12 lg:px-12 lg:py-14"
-            >
+        <div className="overflow-hidden rounded-[34px] bg-[#2D1736] shadow-[0_30px_80px_rgba(45,23,54,0.22)]">
+          <div className="grid lg:grid-cols-[0.88fr_1.12fr]">
+            <div className="relative overflow-hidden px-7 py-10 text-white sm:px-10 sm:py-12 lg:px-12 lg:py-14">
               <div
                 aria-hidden="true"
-                className="absolute -left-20 top-12 h-64 w-64 rounded-full bg-[#7A3AA5]/30 blur-3xl"
+                className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-[#7A459C]/25 blur-3xl"
               />
 
               <div
                 aria-hidden="true"
-                className="absolute -bottom-20 right-0 h-72 w-72 rounded-full bg-[#F6C84B]/10 blur-3xl"
+                className="pointer-events-none absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-[#F6C84B]/10 blur-3xl"
               />
 
               <div className="relative">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-4 py-2 text-sm font-black text-[#F6D86F] backdrop-blur">
-                  <Sparkles aria-hidden="true" size={17} />
-                  Book a school visit
-                </div>
+                <p className="text-sm font-black uppercase tracking-[0.16em] text-[#F6D86F]">
+                  Admissions and centre visits
+                </p>
 
                 <h2
                   id="book-visit-heading"
-                  className="mt-6 text-balance text-4xl font-black leading-[1.08] tracking-[-0.04em] sm:text-5xl lg:text-[56px]"
+                  className="mt-5 text-balance text-4xl font-black leading-[1.08] tracking-[-0.04em] sm:text-5xl"
                 >
-                  The best way to choose a preschool is to{" "}
-                  <span className="block text-[#F6C84B]">
-                    experience it yourself
-                  </span>
+                  Visit the centre before choosing a programme.
                 </h2>
 
-                <p className="mt-6 max-w-2xl text-base leading-8 text-[#E8DDF1] sm:text-lg">
-                  Visit Kidzee Sector 12B, Dwarka, meet our school team and
-                  understand how your child will learn, play and settle into
-                  the daily routine.
+                <p className="mt-6 max-w-xl text-base leading-8 text-white/75 sm:text-lg">
+                  Meet our team, see the learning spaces and discuss the
+                  programme most suitable for your child’s age and routine.
                 </p>
 
-                <div className="mt-9 grid gap-4 sm:grid-cols-2">
-                  {visitBenefits.map((benefit, index) => {
-                    const Icon = benefit.icon;
-
-                    return (
-                      <motion.article
-                        key={benefit.title}
-                        initial={{ opacity: 0, y: 16 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, amount: 0.2 }}
-                        transition={{
-                          duration: 0.4,
-                          delay: index * 0.05,
-                          ease: "easeOut",
-                        }}
-                        className="rounded-[26px] border border-white/10 bg-white/[0.07] p-5 backdrop-blur"
-                      >
-                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#5B2A86] shadow-lg">
-                          <Icon
-                            aria-hidden="true"
-                            size={21}
-                          />
-                        </div>
-
-                        <h3 className="mt-4 text-lg font-black text-white">
-                          {benefit.title}
-                        </h3>
-
-                        <p className="mt-2 text-sm leading-6 text-[#E8DDF1]">
-                          {benefit.description}
-                        </p>
-                      </motion.article>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-9 rounded-[28px] border border-white/10 bg-white/[0.07] p-5 backdrop-blur">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#F6C84B] text-[#2C1735]">
-                      <MapPin
-                        aria-hidden="true"
-                        size={21}
-                      />
+                <div className="mt-9 space-y-4">
+                  <div className="flex items-start gap-4 rounded-[24px] border border-white/10 bg-white/[0.07] p-5">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#F6C84B] text-[#2D1736]">
+                      <MapPin aria-hidden="true" size={20} />
                     </div>
 
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-[#F6D86F]">
-                        Visit us
+                      <p className="text-sm font-black text-white">
+                        Kidzee Sector 12B, Dwarka
                       </p>
 
-                      <p className="mt-2 font-bold leading-7 text-white">
+                      <p className="mt-2 text-sm leading-6 text-white/70">
                         {site.address}
                       </p>
+                    </div>
+                  </div>
 
-                      <div className="mt-4 space-y-3 text-sm leading-6 text-[#E8DDF1]">
-                        <div className="flex items-start gap-2">
-                          <Clock3
-                            aria-hidden="true"
-                            size={16}
-                            className="mt-1 shrink-0"
-                          />
+                  <div className="flex items-start gap-4 rounded-[24px] border border-white/10 bg-white/[0.07] p-5">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-[#5B2A86]">
+                      <Clock3 aria-hidden="true" size={20} />
+                    </div>
 
-                          <p>
-                            <strong className="text-white">
-                              Preschool:
-                            </strong>{" "}
-                            Monday–Friday, 8:30 AM–1:00 PM
-                          </p>
-                        </div>
+                    <div>
+                      <p className="text-sm font-black text-white">
+                        Visits are scheduled in advance
+                      </p>
 
-                        <div className="flex items-start gap-2">
-                          <Clock3
-                            aria-hidden="true"
-                            size={16}
-                            className="mt-1 shrink-0"
-                          />
-
-                          <p>
-                            <strong className="text-white">
-                              Daycare:
-                            </strong>{" "}
-                            Monday–Saturday, 12:30 PM–7:00 PM
-                          </p>
-                        </div>
-
-                        <p className="pl-6">
-                          School visits are best scheduled in advance so our
-                          team can give you enough time and attention.
-                        </p>
-                      </div>
+                      <p className="mt-2 text-sm leading-6 text-white/70">
+                        Choose a preferred time in the form. Our team will
+                        confirm availability with you.
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                  <a
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <Button
                     href={`tel:${site.phone}`}
-                    className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-black text-[#2C1735] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#F6C84B] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#2C1735]"
+                    variant="yellow"
+                    size="md"
+                    leftIcon={<Phone size={17} />}
                   >
-                    <Phone
-                      aria-hidden="true"
-                      size={17}
-                    />
-
                     Call {site.phoneDisplay}
-                  </a>
+                  </Button>
 
-                  <a
-                    href={site.whatsapp}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-white/20 bg-white/[0.08] px-6 text-sm font-black text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/[0.14] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#2C1735]"
+                  <Button
+                    href={site.whatsappVisit}
+                    external
+                    variant="secondary"
+                    size="md"
+                    leftIcon={<MessageCircle size={17} />}
+                    className="border-white/25 bg-white/[0.06] text-white hover:bg-white/10"
                   >
-                    <MessageCircle
-                      aria-hidden="true"
-                      size={17}
-                    />
-
-                    Chat on WhatsApp
-                  </a>
+                    WhatsApp Us
+                  </Button>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.55, ease: "easeOut" }}
-              className="bg-white p-7 sm:p-10 lg:p-12"
-            >
-              <p className="text-sm font-black uppercase tracking-[0.2em] text-[#5B2A86]">
-                Plan your visit
+            <div className="bg-white p-7 sm:p-10 lg:p-12">
+              <p className="text-sm font-black uppercase tracking-[0.16em] text-[#5B2A86]">
+                Book a visit
               </p>
 
-              <h3 className="mt-4 text-3xl font-black leading-tight tracking-[-0.03em] text-[#2C1735] sm:text-4xl">
-                Tell us a little about your child
+              <h3 className="mt-4 text-3xl font-black leading-tight tracking-[-0.03em] text-[#2D1736] sm:text-4xl">
+                Share your visit details
               </h3>
 
-              <p className="mt-4 leading-7 text-[#5F5F6D]">
-                Complete the form and WhatsApp will open with your visit
-                details ready for you to review and send.
+              <p className="mt-4 max-w-xl leading-7 text-[#6F6474]">
+                After submitting, WhatsApp will open with your details ready
+                for review. The message is sent only when you tap send.
               </p>
 
               <form
@@ -423,10 +299,7 @@ export default function CTA() {
                     autoComplete="name"
                     value={formData.parentName}
                     onChange={(event) =>
-                      updateField(
-                        "parentName",
-                        event.target.value
-                      )
+                      updateField("parentName", event.target.value)
                     }
                     placeholder="Enter your name"
                     aria-invalid={Boolean(errors.parentName)}
@@ -466,13 +339,9 @@ export default function CTA() {
                     placeholder="10-digit mobile number"
                     aria-invalid={Boolean(errors.phone)}
                     aria-describedby={
-                      errors.phone
-                        ? "phone-error"
-                        : undefined
+                      errors.phone ? "phone-error" : undefined
                     }
-                    className={inputClasses(
-                      Boolean(errors.phone)
-                    )}
+                    className={inputClasses(Boolean(errors.phone))}
                   />
                 </FormField>
 
@@ -490,10 +359,7 @@ export default function CTA() {
                       inputMode="decimal"
                       value={formData.childAge}
                       onChange={(event) =>
-                        updateField(
-                          "childAge",
-                          event.target.value
-                        )
+                        updateField("childAge", event.target.value)
                       }
                       placeholder="For example, 3 years"
                       aria-invalid={Boolean(errors.childAge)}
@@ -510,7 +376,7 @@ export default function CTA() {
 
                   <FormField
                     id="preferredTime"
-                    label="Preferred visit time"
+                    label="Preferred time"
                     required
                     error={errors.preferredTime}
                   >
@@ -536,15 +402,10 @@ export default function CTA() {
                         Boolean(errors.preferredTime)
                       )}
                     >
-                      <option value="">
-                        Select a time
-                      </option>
+                      <option value="">Select a time</option>
 
                       {visitTimeOptions.map((time) => (
-                        <option
-                          key={time}
-                          value={time}
-                        >
+                        <option key={time} value={time}>
                           {time}
                         </option>
                       ))}
@@ -563,10 +424,7 @@ export default function CTA() {
                     name="programme"
                     value={formData.programme}
                     onChange={(event) =>
-                      updateField(
-                        "programme",
-                        event.target.value
-                      )
+                      updateField("programme", event.target.value)
                     }
                     aria-invalid={Boolean(errors.programme)}
                     aria-describedby={
@@ -578,9 +436,7 @@ export default function CTA() {
                       Boolean(errors.programme)
                     )}
                   >
-                    <option value="">
-                      Select a programme
-                    </option>
+                    <option value="">Select a programme</option>
 
                     {programmeOptions.map((programme) => (
                       <option
@@ -595,19 +451,15 @@ export default function CTA() {
 
                 <button
                   type="submit"
-                  className="inline-flex min-h-[56px] w-full items-center justify-center gap-2 rounded-full bg-[#5B2A86] px-6 text-sm font-black text-white shadow-[0_14px_35px_rgba(91,42,134,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#4A2070] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/60 focus-visible:ring-offset-2"
+                  className="inline-flex min-h-[56px] w-full items-center justify-center gap-2 rounded-full bg-[#5B2A86] px-6 text-sm font-black text-white shadow-[0_14px_35px_rgba(91,42,134,0.24)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#4A2070] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/50 focus-visible:ring-offset-2"
                 >
-                  Book My School Visit
-
-                  <Send
-                    aria-hidden="true"
-                    size={17}
-                  />
+                  Continue on WhatsApp
+                  <Send aria-hidden="true" size={17} />
                 </button>
 
                 <p className="text-center text-xs leading-5 text-[#77707C]">
-                  Submitting this form opens WhatsApp. Your message is sent
-                  only after you review and confirm it.
+                  Your information is used only to respond to your visit
+                  request.
                 </p>
 
                 {submitted && (
@@ -621,47 +473,16 @@ export default function CTA() {
                       className="mt-0.5 shrink-0"
                     />
 
-                    WhatsApp has opened with your visit details. Review the
-                    message and tap send to complete your request.
+                    <span>
+                      WhatsApp has opened. Review the prepared message and
+                      tap send to complete your request.
+                    </span>
                   </div>
                 )}
               </form>
-            </motion.div>
+            </div>
           </div>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="mt-8 flex flex-col items-center justify-between gap-5 rounded-[30px] border border-[#EADFF0] bg-white px-7 py-6 text-center shadow-[0_12px_35px_rgba(52,20,68,0.06)] sm:flex-row sm:text-left"
-        >
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#5B2A86]">
-              Not ready to visit yet?
-            </p>
-
-            <p className="mt-2 text-lg font-black text-[#2C1735]">
-              Ask about admissions, daycare or the 3-day trial on WhatsApp.
-            </p>
-          </div>
-
-          <Button
-            href={generalEnquiryLink}
-            external
-            variant="secondary"
-            className="shrink-0"
-            ariaLabel="Ask Kidzee Sector 12 Dwarka about admissions on WhatsApp"
-          >
-            Ask on WhatsApp
-
-            <ArrowRight
-              aria-hidden="true"
-              size={17}
-            />
-          </Button>
-        </motion.div>
       </Container>
     </section>
   );
@@ -691,10 +512,7 @@ function FormField({
         {label}
 
         {required && (
-          <span
-            aria-hidden="true"
-            className="ml-1 text-[#8A2D5E]"
-          >
+          <span aria-hidden="true" className="ml-1 text-red-700">
             *
           </span>
         )}
@@ -717,7 +535,7 @@ function FormField({
 function inputClasses(hasError: boolean) {
   return [
     "w-full rounded-2xl border bg-[#FFFDFA] px-4 py-3.5",
-    "text-base text-[#2C1735] outline-none",
+    "text-base text-[#2D1736] outline-none",
     "placeholder:text-[#9A929E]",
     "transition duration-200",
     "focus:ring-4 focus:ring-[#F6C84B]/30",

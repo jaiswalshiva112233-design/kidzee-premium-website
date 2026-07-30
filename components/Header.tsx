@@ -4,8 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, MessageCircle, Phone, X } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 
+import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
 import { site } from "@/lib/site";
 
@@ -17,11 +24,23 @@ const navItems = [
   { label: "Admissions", href: "/admissions" },
   { label: "Gallery", href: "/gallery" },
   { label: "Contact", href: "/contact" },
-];
+] as const;
+
+const focusableSelector = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
 
 export default function Header() {
   const pathname = usePathname();
   const menuId = useId();
+
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -54,17 +73,53 @@ export default function Header() {
 
     document.body.style.overflow = "hidden";
 
-    function handleEscape(event: KeyboardEvent) {
+    const menu = mobileMenuRef.current;
+    const firstFocusable = menu?.querySelector<HTMLElement>(focusableSelector);
+
+    window.requestAnimationFrame(() => {
+      firstFocusable?.focus();
+    });
+
+    function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setIsMenuOpen(false);
+        window.requestAnimationFrame(() => {
+          menuButtonRef.current?.focus();
+        });
+        return;
+      }
+
+      if (event.key !== "Tab" || !menu) {
+        return;
+      }
+
+      const focusableElements = Array.from(
+        menu.querySelectorAll<HTMLElement>(focusableSelector)
+      ).filter((element) => !element.hasAttribute("disabled"));
+
+      if (focusableElements.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const activeElement = document.activeElement;
+
+      if (event.shiftKey && activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
       }
     }
 
-    window.addEventListener("keydown", handleEscape);
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.body.style.overflow = "";
-      window.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isMenuOpen]);
 
@@ -74,6 +129,19 @@ export default function Header() {
     }
 
     return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
+  function closeMobileMenu() {
+    setIsMenuOpen(false);
+  }
+
+  function handleMobileMenuKeyDown(
+    event: ReactKeyboardEvent<HTMLDivElement>
+  ) {
+    if (event.key === "Escape") {
+      closeMobileMenu();
+      menuButtonRef.current?.focus();
+    }
   }
 
   return (
@@ -86,23 +154,23 @@ export default function Header() {
         }`}
       >
         <Container
-          className={`flex items-center justify-between gap-5 transition-[height] duration-300 ${
+          className={`flex items-center justify-between gap-4 transition-[height] duration-300 ${
             isScrolled ? "h-[72px]" : "h-[82px]"
           }`}
         >
           <Link
             href="/"
-            aria-label="Kidzee Sector 12 Dwarka home"
-            className="group flex shrink-0 items-center gap-3"
+            aria-label="Kidzee Sector 12 Dwarka homepage"
+            className="group flex shrink-0 items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45"
           >
             <Image
               src="/images/kidzee-logo.png"
-              alt="Kidzee Preschool and Daycare"
+              alt="Kidzee"
               width={146}
               height={72}
               priority
               className={`w-auto object-contain transition-all duration-300 ${
-                isScrolled ? "h-[48px]" : "h-[54px]"
+                isScrolled ? "h-[47px]" : "h-[53px]"
               }`}
             />
 
@@ -120,7 +188,7 @@ export default function Header() {
 
           <nav
             aria-label="Primary navigation"
-            className="hidden items-center rounded-full border border-[#5B2A86]/10 bg-white/75 p-1.5 shadow-[0_8px_30px_rgba(48,22,62,0.05)] backdrop-blur lg:flex"
+            className="hidden items-center rounded-full border border-[#5B2A86]/10 bg-white/80 p-1 shadow-[0_8px_30px_rgba(48,22,62,0.05)] backdrop-blur-xl xl:flex"
           >
             {navItems.map((item) => {
               const active = isActive(item.href);
@@ -130,10 +198,10 @@ export default function Header() {
                   key={item.href}
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={`rounded-full px-3.5 py-2 text-[13px] font-black transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45 ${
+                  className={`rounded-full px-3 py-2 text-[13px] font-black transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45 ${
                     active
                       ? "bg-[#5B2A86] text-white shadow-[0_8px_20px_rgba(91,42,134,0.18)]"
-                      : "text-[#4B3C50] hover:bg-[#5B2A86]/[0.07] hover:text-[#5B2A86]"
+                      : "text-[#4B3E50] hover:bg-[#5B2A86]/[0.07] hover:text-[#5B2A86]"
                   }`}
                 >
                   {item.label}
@@ -142,37 +210,31 @@ export default function Header() {
             })}
           </nav>
 
-          <div className="hidden items-center gap-2 lg:flex">
-            <a
+          <div className="hidden items-center gap-2 xl:flex">
+            <Button
               href={`tel:${site.phone}`}
+              variant="secondary"
+              size="sm"
+              leftIcon={<Phone size={16} strokeWidth={2.3} />}
               aria-label={`Call Kidzee Sector 12 Dwarka on ${site.phoneDisplay}`}
-              className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-[#5B2A86]/15 bg-white px-4 text-sm font-black text-[#5B2A86] shadow-[0_8px_24px_rgba(48,22,62,0.05)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#5B2A86]/25 hover:shadow-[0_12px_28px_rgba(48,22,62,0.1)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45"
             >
-              <Phone
-                aria-hidden="true"
-                size={17}
-                strokeWidth={2.2}
-              />
               Call
-            </a>
+            </Button>
 
-            <a
-              href={site.whatsapp}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Book a school visit with Kidzee Sector 12 Dwarka on WhatsApp"
-              className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full bg-[#5B2A86] px-5 text-sm font-black text-white shadow-[0_14px_32px_rgba(91,42,134,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#4F2376] hover:shadow-[0_18px_38px_rgba(91,42,134,0.28)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45"
+            <Button
+              href={site.whatsappVisit}
+              external
+              variant="primary"
+              size="sm"
+              leftIcon={<MessageCircle size={16} strokeWidth={2.3} />}
+              aria-label="Book a school visit through WhatsApp"
             >
-              <MessageCircle
-                aria-hidden="true"
-                size={17}
-                strokeWidth={2.2}
-              />
               Book a Visit
-            </a>
+            </Button>
           </div>
 
           <button
+            ref={menuButtonRef}
             type="button"
             aria-label={
               isMenuOpen
@@ -182,7 +244,7 @@ export default function Header() {
             aria-expanded={isMenuOpen}
             aria-controls={menuId}
             onClick={() => setIsMenuOpen((current) => !current)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#5B2A86]/15 bg-white text-[#5B2A86] shadow-[0_8px_24px_rgba(48,22,62,0.08)] transition-colors hover:bg-[#5B2A86]/[0.06] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45 lg:hidden"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#5B2A86]/15 bg-white text-[#5B2A86] shadow-[0_8px_24px_rgba(48,22,62,0.08)] transition-colors hover:bg-[#5B2A86]/[0.06] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45 xl:hidden"
           >
             {isMenuOpen ? (
               <X aria-hidden="true" size={22} />
@@ -196,8 +258,12 @@ export default function Header() {
       <button
         type="button"
         aria-label="Close navigation menu"
-        onClick={() => setIsMenuOpen(false)}
-        className={`fixed inset-0 z-40 bg-[#25132D]/35 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+        tabIndex={isMenuOpen ? 0 : -1}
+        onClick={() => {
+          closeMobileMenu();
+          menuButtonRef.current?.focus();
+        }}
+        className={`fixed inset-0 z-40 bg-[#25132D]/40 backdrop-blur-sm transition-opacity duration-300 xl:hidden ${
           isMenuOpen
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0"
@@ -205,21 +271,44 @@ export default function Header() {
       />
 
       <div
+        ref={mobileMenuRef}
         id={menuId}
         role="dialog"
         aria-modal="true"
         aria-label="Mobile navigation"
-        className={`fixed inset-x-3 top-[88px] z-50 max-h-[calc(100dvh-108px)] overflow-y-auto rounded-[28px] border border-white/80 bg-white shadow-[0_30px_80px_rgba(39,18,49,0.22)] transition-all duration-300 lg:hidden ${
+        aria-hidden={!isMenuOpen}
+        onKeyDown={handleMobileMenuKeyDown}
+        className={`fixed inset-x-3 top-[88px] z-50 max-h-[calc(100dvh-108px)] overflow-y-auto rounded-[28px] border border-white/80 bg-white shadow-[0_30px_80px_rgba(39,18,49,0.22)] transition-all duration-300 xl:hidden ${
           isMenuOpen
             ? "translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-3 opacity-0"
         }`}
       >
         <div className="p-3">
-          <nav
-            aria-label="Mobile navigation"
-            className="flex flex-col"
-          >
+          <div className="flex items-center justify-between px-3 pb-3 pt-1">
+            <div>
+              <p className="text-sm font-black text-[#2D1736]">
+                Kidzee Sector 12, Dwarka
+              </p>
+              <p className="mt-1 text-xs font-bold text-[#6F6474]">
+                Preschool and daycare
+              </p>
+            </div>
+
+            <button
+              type="button"
+              aria-label="Close navigation menu"
+              onClick={() => {
+                closeMobileMenu();
+                menuButtonRef.current?.focus();
+              }}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F3EAF8] text-[#5B2A86] transition-colors hover:bg-[#EADDF1] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45"
+            >
+              <X aria-hidden="true" size={20} />
+            </button>
+          </div>
+
+          <nav aria-label="Mobile navigation" className="flex flex-col">
             {navItems.map((item) => {
               const active = isActive(item.href);
 
@@ -228,6 +317,7 @@ export default function Header() {
                   key={item.href}
                   href={item.href}
                   aria-current={active ? "page" : undefined}
+                  onClick={closeMobileMenu}
                   className={`flex min-h-[50px] items-center rounded-2xl px-4 text-[15px] font-black transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45 ${
                     active
                       ? "bg-[#5B2A86] text-white"
@@ -241,25 +331,28 @@ export default function Header() {
           </nav>
 
           <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[#5B2A86]/10 pt-3">
-            <a
+            <Button
               href={`tel:${site.phone}`}
+              variant="secondary"
+              size="md"
+              fullWidth
+              leftIcon={<Phone size={17} />}
               aria-label={`Call Kidzee Sector 12 Dwarka on ${site.phoneDisplay}`}
-              className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-2xl border border-[#5B2A86]/15 bg-white px-4 text-sm font-black text-[#5B2A86] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45"
             >
-              <Phone aria-hidden="true" size={17} />
               Call
-            </a>
+            </Button>
 
-            <a
-              href={site.whatsapp}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Chat with Kidzee Sector 12 Dwarka on WhatsApp"
-              className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-2xl bg-[#5B2A86] px-4 text-sm font-black text-white shadow-[0_12px_28px_rgba(91,42,134,0.2)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45"
+            <Button
+              href={site.whatsappVisit}
+              external
+              variant="primary"
+              size="md"
+              fullWidth
+              leftIcon={<MessageCircle size={17} />}
+              aria-label="Book a school visit through WhatsApp"
             >
-              <MessageCircle aria-hidden="true" size={17} />
               WhatsApp
-            </a>
+            </Button>
           </div>
         </div>
       </div>

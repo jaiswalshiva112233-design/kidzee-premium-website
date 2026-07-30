@@ -1,56 +1,28 @@
 import Image from "next/image";
-import {
-  ArrowRight,
-  BookOpenCheck,
-  MapPin,
-  School,
-  UsersRound,
-} from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
 
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
-
-const highlights = [
-  {
-    icon: UsersRound,
-    title: "A centre where families are known",
-    description:
-      "Being a neighbourhood preschool allows our team to build familiar, consistent relationships with children and parents.",
-  },
-  {
-    icon: BookOpenCheck,
-    title: "Learning with a clear purpose",
-    description:
-      "Classroom experiences are planned to strengthen language, early concepts, participation and readiness for formal school.",
-  },
-  {
-    icon: School,
-    title: "Preschool and daycare together",
-    description:
-      "Families can choose preschool programmes from Playgroup to Senior KG, with daycare support available until 7 PM.",
-  },
-];
 
 export default function About() {
   return (
     <section
       id="about"
       aria-labelledby="about-heading"
-      className="relative isolate overflow-hidden bg-white py-20 sm:py-24 lg:py-28"
+      className="relative isolate overflow-hidden bg-white py-16 sm:py-20 lg:py-24"
     >
       <div
         aria-hidden="true"
-        className="absolute -left-40 top-24 -z-10 h-80 w-80 rounded-full bg-[#F2E8F8] blur-3xl"
+        className="pointer-events-none absolute -left-40 top-20 -z-10 h-80 w-80 rounded-full bg-[#F2E8F8] blur-3xl"
       />
 
       <div
         aria-hidden="true"
-        className="absolute -right-40 bottom-0 -z-10 h-96 w-96 rounded-full bg-[#FFF3C8] blur-3xl"
+        className="pointer-events-none absolute -right-40 bottom-0 -z-10 h-96 w-96 rounded-full bg-[#FFF3C8] blur-3xl"
       />
 
       <Container>
-        <div className="grid items-center gap-14 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16 xl:gap-20">
-          {/* School photographs */}
+        <div className="grid items-center gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16 xl:gap-20">
           <div className="relative mx-auto w-full max-w-[650px]">
             <div
               aria-hidden="true"
@@ -67,7 +39,7 @@ export default function About() {
                 <div className="relative aspect-[0.84/1]">
                   <Image
                     src="/images/about-main.jpg"
-                    alt="Children taking part in a classroom activity at Kidzee Sector 12 Dwarka"
+                    alt="Preschool classroom activity at Kidzee Sector 12 Dwarka"
                     fill
                     sizes="(max-width: 640px) 56vw, (max-width: 1024px) 52vw, 30vw"
                     className="object-cover"
@@ -85,7 +57,7 @@ export default function About() {
                   <div className="relative aspect-square">
                     <Image
                       src="/images/about-small-1.jpg"
-                      alt="Child participating in a creative activity at Kidzee Sector 12 Dwarka"
+                      alt="Creative preschool activity at Kidzee Sector 12 Dwarka"
                       fill
                       sizes="(max-width: 640px) 38vw, (max-width: 1024px) 40vw, 22vw"
                       className="object-cover"
@@ -115,82 +87,61 @@ export default function About() {
 
                 <div>
                   <p className="text-[11px] font-black uppercase tracking-[0.15em] text-[#5B2A86] sm:text-xs">
-                    In the heart of Sector 12B
+                    Sector 12B, Dwarka
                   </p>
 
                   <p className="mt-1 text-sm font-semibold leading-6 text-[#4F4B57]">
-                    A conveniently located preschool and daycare for families
-                    in and around Dwarka.
+                    Preschool and daycare located within the neighbourhood.
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* About the centre */}
           <div className="mx-auto max-w-2xl lg:mx-0">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#E5D6EE] bg-[#F8F3FC] px-4 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#5B2A86]">
-              <span
-                aria-hidden="true"
-                className="h-2 w-2 rounded-full bg-[#F6C84B]"
-              />
+            <p className="text-sm font-black uppercase tracking-[0.16em] text-[#5B2A86]">
               About our centre
-            </div>
+            </p>
 
             <h2
               id="about-heading"
-              className="mt-6 text-balance text-4xl font-black leading-[1.08] tracking-[-0.04em] text-[#2C1735] sm:text-5xl lg:text-[56px]"
+              className="mt-5 text-balance text-3xl font-black leading-tight tracking-[-0.035em] text-[#2D1736] sm:text-4xl lg:text-5xl"
             >
-              Kidzee’s learning approach, delivered with the attention of a{" "}
-              <span className="text-[#5B2A86]">
-                neighbourhood preschool
-              </span>
+              A local Kidzee centre for children in their early school years.
             </h2>
 
-            <p className="mt-6 text-base leading-8 text-[#5F5F6D] sm:text-lg">
-              Kidzee Sector 12, Dwarka serves families looking for an
-              established early-years programme without losing the personal
-              connection of a local centre.
+            <p className="mt-6 text-base leading-8 text-[#6F6474] sm:text-lg">
+              Kidzee Sector 12, Dwarka offers preschool programmes from
+              Playgroup to Senior KG, along with daycare support for families
+              who need a longer supervised day.
             </p>
 
-            <p className="mt-4 text-base leading-8 text-[#5F5F6D] sm:text-lg">
-              Our school day combines guided classroom learning with stories,
-              conversation, movement, creative work and play. The aim is not to
-              rush children through a syllabus, but to help them build the
-              habits and abilities they will use in their next classroom.
+            <p className="mt-4 text-base leading-8 text-[#6F6474] sm:text-lg">
+              Children take part in classroom activities, stories, conversation,
+              movement, creative work and play as part of a regular school
+              routine. Parents can visit the centre and speak with the team
+              before deciding which programme is suitable for their child.
             </p>
 
-            <div className="mt-9 grid gap-4">
-              {highlights.map((item) => {
-                const Icon = item.icon;
+            <div className="mt-8 rounded-[28px] border border-[#5B2A86]/10 bg-[#FAF7FC] p-6 sm:p-7">
+              <p className="text-lg font-black text-[#2D1736]">
+                Preschool and daycare in one centre
+              </p>
 
-                return (
-                  <article
-                    key={item.title}
-                    className="group flex gap-4 rounded-[24px] border border-[#EADFF0] bg-[#FFFDF9] p-5 transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-[#D8C4E3] hover:shadow-[0_16px_44px_rgba(52,20,68,0.09)]"
-                  >
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F2E8F8] text-[#5B2A86] transition-colors duration-300 group-hover:bg-[#5B2A86] group-hover:text-white">
-                      <Icon aria-hidden="true" size={21} />
-                    </div>
-
-                    <div>
-                      <h3 className="text-lg font-black text-[#32153F]">
-                        {item.title}
-                      </h3>
-
-                      <p className="mt-1 text-sm leading-6 text-[#5F5F6D] sm:text-base">
-                        {item.description}
-                      </p>
-                    </div>
-                  </article>
-                );
-              })}
+              <p className="mt-3 text-[15px] leading-7 text-[#6F6474]">
+                Families can enquire about preschool-only admission, daycare
+                or a combined preschool and daycare routine based on their
+                requirements.
+              </p>
             </div>
 
-            <div className="mt-9">
-              <Button href="/about" variant="secondary">
-                Learn more about our centre
-                <ArrowRight aria-hidden="true" size={18} />
+            <div className="mt-8">
+              <Button
+                href="/about"
+                variant="secondary"
+                rightIcon={<ArrowRight size={18} />}
+              >
+                About Kidzee Sector 12
               </Button>
             </div>
           </div>

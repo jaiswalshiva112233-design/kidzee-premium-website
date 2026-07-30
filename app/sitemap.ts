@@ -1,69 +1,84 @@
 import type { MetadataRoute } from "next";
-import { posts, programmes, site } from "@/lib/site";
+
+import { programmes, site } from "@/lib/site";
+
+const staticPages = [
+  {
+    path: "",
+    changeFrequency: "weekly",
+    priority: 1,
+  },
+  {
+    path: "/about",
+    changeFrequency: "monthly",
+    priority: 0.8,
+  },
+  {
+    path: "/programmes",
+    changeFrequency: "monthly",
+    priority: 0.9,
+  },
+  {
+    path: "/daycare",
+    changeFrequency: "monthly",
+    priority: 0.9,
+  },
+  {
+    path: "/admissions",
+    changeFrequency: "monthly",
+    priority: 0.9,
+  },
+  {
+    path: "/gallery",
+    changeFrequency: "monthly",
+    priority: 0.7,
+  },
+  {
+    path: "/contact",
+    changeFrequency: "monthly",
+    priority: 0.8,
+  },
+  {
+    path: "/blog",
+    changeFrequency: "weekly",
+    priority: 0.7,
+  },
+  {
+    path: "/privacy-policy",
+    changeFrequency: "yearly",
+    priority: 0.2,
+  },
+  {
+    path: "/terms",
+    changeFrequency: "yearly",
+    priority: 0.2,
+  },
+] satisfies Array<{
+  path: string;
+  changeFrequency: NonNullable<
+    MetadataRoute.Sitemap[number]["changeFrequency"]
+  >;
+  priority: number;
+}>;
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticRoutes: MetadataRoute.Sitemap = [
-    {
-      url: site.url,
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${site.url}/about`,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${site.url}/programmes`,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${site.url}/daycare`,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${site.url}/admissions`,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${site.url}/gallery`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${site.url}/contact`,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${site.url}/blog`,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    {
-      url: `${site.url}/privacy-policy`,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-  ];
+  const lastModified = new Date();
 
-  const programmeRoutes: MetadataRoute.Sitemap = programmes.map(
-    (programme) => ({
-      url: `${site.url}/programmes/${programme.slug}`,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    }),
-  );
-
-  const blogRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `${site.url}/blog/${post.slug}`,
-    lastModified: new Date(post.date),
-    changeFrequency: "monthly",
-    priority: 0.6,
+  const staticEntries: MetadataRoute.Sitemap = staticPages.map((page) => ({
+    url: `${site.url}${page.path}`,
+    lastModified,
+    changeFrequency: page.changeFrequency,
+    priority: page.priority,
   }));
 
-  return [...staticRoutes, ...programmeRoutes, ...blogRoutes];
+  const programmeEntries: MetadataRoute.Sitemap = programmes.map(
+    (programme) => ({
+      url: `${site.url}/programmes/${programme.slug}`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    })
+  );
+
+  return [...staticEntries, ...programmeEntries];
 }

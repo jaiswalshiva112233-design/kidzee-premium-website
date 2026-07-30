@@ -1,140 +1,127 @@
-"use client";
-
-import { motion } from "framer-motion";
 import {
-  Blocks,
-  Brain,
-  GraduationCap,
-  HandHeart,
+  BookOpenCheck,
+  Building2,
   MessageCircleMore,
+  ShieldCheck,
+  Star,
 } from "lucide-react";
+
+import Button from "@/components/ui/Button";
+import Container from "@/components/ui/Container";
+import { site } from "@/lib/site";
 
 const trustItems = [
   {
-    icon: Brain,
-    title: "Early-years expertise",
-    text: "Learning experiences designed around how young children naturally develop.",
+    icon: Building2,
+    title: "Part of the Kidzee network",
+    text: "Our centre follows the established Kidzee preschool framework while serving families in Sector 12B, Dwarka.",
   },
   {
-    icon: Blocks,
-    title: "Learning through play",
-    text: "Stories, movement, exploration and hands-on activities make learning meaningful.",
-  },
-  {
-    icon: GraduationCap,
-    title: "School readiness",
-    text: "Children gradually build communication, independence and classroom confidence.",
-  },
-  {
-    icon: HandHeart,
-    title: "Individual understanding",
-    text: "Each child is supported according to their personality, pace and interests.",
+    icon: BookOpenCheck,
+    title: "Focused on early-years learning",
+    text: "Classroom routines, activities and expectations are planned specifically for children between 2 and 6 years.",
   },
   {
     icon: MessageCircleMore,
-    title: "Parent partnership",
-    text: "Regular communication helps families stay connected with their child’s progress.",
+    title: "Clear parent communication",
+    text: "Parents receive practical updates and can speak directly with the centre team about their child’s routine and progress.",
   },
-];
+  {
+    icon: ShieldCheck,
+    title: "Everyday supervision",
+    text: "Children remain under staff supervision through classroom time, play, meals, daycare and authorised handover.",
+  },
+] as const;
 
 export default function TrustBar() {
   return (
     <section
-      className="relative overflow-hidden bg-[#fffaf2] py-16 sm:py-20"
       aria-labelledby="trust-heading"
+      className="relative overflow-hidden bg-[#FAF7FC] py-16 sm:py-20 lg:py-24"
     >
       <div
         aria-hidden="true"
-        className="absolute left-1/2 top-0 h-px w-[85%] -translate-x-1/2 bg-gradient-to-r from-transparent via-purple-200 to-transparent"
+        className="pointer-events-none absolute -left-36 top-10 h-80 w-80 rounded-full bg-[#EADDF1] blur-3xl"
       />
 
       <div
         aria-hidden="true"
-        className="absolute -left-28 bottom-0 h-64 w-64 rounded-full bg-purple-100/60 blur-3xl"
+        className="pointer-events-none absolute -right-36 bottom-6 h-80 w-80 rounded-full bg-[#F6C84B]/20 blur-3xl"
       />
 
-      <div
-        aria-hidden="true"
-        className="absolute -right-28 top-0 h-64 w-64 rounded-full bg-yellow-100/70 blur-3xl"
-      />
+      <Container className="relative">
+        <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-center lg:gap-16">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#5B2A86]/10 bg-white px-4 py-2 text-sm font-black text-[#5B2A86] shadow-[0_8px_24px_rgba(52,20,68,0.06)]">
+              <Star
+                aria-hidden="true"
+                size={16}
+                className="fill-[#F6C84B] text-[#D5A400]"
+              />
+              A centre parents can evaluate clearly
+            </div>
 
-      <div className="relative mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-8 xl:px-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.35 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mx-auto max-w-3xl text-center"
-        >
-          <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] text-[#702a96] shadow-sm">
-            <span
-              aria-hidden="true"
-              className="h-2 w-2 rounded-full bg-yellow-400"
-            />
+            <h2
+              id="trust-heading"
+              className="mt-6 max-w-xl text-balance text-3xl font-black leading-tight tracking-[-0.035em] text-[#2D1736] sm:text-4xl lg:text-5xl"
+            >
+              Trust is built through what parents can see and verify.
+            </h2>
 
-            The foundation of our approach
+            <p className="mt-5 max-w-xl text-base leading-8 text-[#6F6474] sm:text-lg">
+              We encourage families to visit the centre, meet the team, review
+              the daily routine and ask direct questions before making an
+              admission decision.
+            </p>
+
+            <div className="mt-7 rounded-[28px] border border-[#5B2A86]/10 bg-white p-6 shadow-[0_16px_46px_rgba(52,20,68,0.06)] sm:p-7">
+              <p className="text-lg font-black text-[#2D1736]">
+                See genuine parent feedback
+              </p>
+
+              <p className="mt-3 text-[15px] leading-7 text-[#6F6474]">
+                Read public Google reviews from families who have interacted
+                with our centre.
+              </p>
+
+              <Button
+                href={site.googleReviews}
+                external
+                variant="secondary"
+                size="sm"
+                className="mt-5"
+              >
+                Read Google Reviews
+              </Button>
+            </div>
           </div>
 
-          <h2
-            id="trust-heading"
-            className="mt-6 text-balance text-3xl font-extrabold leading-tight tracking-[-0.035em] text-[#281036] sm:text-4xl lg:text-[48px]"
-          >
-            Thoughtful early learning that supports the{" "}
-            <span className="text-[#702a96]">whole child</span>
-          </h2>
+          <div className="grid gap-5 sm:grid-cols-2">
+            {trustItems.map((item) => {
+              const Icon = item.icon;
 
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
-            Our daily experiences are planned to help children become curious,
-            expressive, independent and comfortable in a learning environment.
-          </p>
-        </motion.div>
-
-        <div className="mt-11 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {trustItems.map((item, index) => {
-            const Icon = item.icon;
-
-            return (
-              <motion.article
-                key={item.title}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{
-                  duration: 0.5,
-                  delay: index * 0.07,
-                  ease: "easeOut",
-                }}
-                whileHover={{ y: -6 }}
-                className="group relative overflow-hidden rounded-[28px] border border-purple-100 bg-white p-6 shadow-[0_14px_38px_rgba(62,25,83,0.07)] transition-shadow duration-300 hover:border-purple-200 hover:shadow-[0_22px_50px_rgba(62,25,83,0.13)]"
-              >
-                <div
-                  aria-hidden="true"
-                  className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-purple-50 transition-transform duration-500 group-hover:scale-150"
-                />
-
-                <div className="relative">
-                  <div className="flex h-13 w-13 items-center justify-center rounded-[18px] bg-[#702a96] text-white shadow-[0_10px_25px_rgba(112,42,150,0.22)] transition duration-300 group-hover:-rotate-3 group-hover:scale-105">
-                    <Icon size={23} strokeWidth={2.1} />
+              return (
+                <article
+                  key={item.title}
+                  className="group rounded-[28px] border border-[#5B2A86]/10 bg-white p-6 shadow-[0_14px_42px_rgba(52,20,68,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_58px_rgba(52,20,68,0.10)] sm:p-7"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F3EAF8] text-[#5B2A86] transition-colors duration-300 group-hover:bg-[#5B2A86] group-hover:text-white">
+                    <Icon aria-hidden="true" size={22} />
                   </div>
 
-                  <h3 className="mt-5 text-lg font-extrabold leading-6 text-[#32153f]">
+                  <h3 className="mt-5 text-xl font-black tracking-[-0.02em] text-[#2D1736]">
                     {item.title}
                   </h3>
 
-                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                  <p className="mt-3 text-[15px] leading-7 text-[#6F6474]">
                     {item.text}
                   </p>
-                </div>
-
-                <div
-                  aria-hidden="true"
-                  className="absolute bottom-0 left-0 h-1 w-0 rounded-full bg-yellow-300 transition-all duration-500 group-hover:w-full"
-                />
-              </motion.article>
-            );
-          })}
+                </article>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }
