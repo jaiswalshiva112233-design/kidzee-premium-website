@@ -1,2 +1,20 @@
-import Header from "./Header";import Footer from "./Footer";import FloatingWhatsApp from "./FloatingWhatsApp";
-export default function PageShell({children}:{children:React.ReactNode}){return <><Header/><main>{children}</main><Footer/><FloatingWhatsApp/></>}
+import type { ReactNode } from "react";
+
+import FloatingWhatsApp from "./FloatingWhatsApp";
+import Footer from "./Footer";
+import Header from "./Header";
+
+type PageShellProps = {
+  children: ReactNode;
+};
+
+export default function PageShell({ children }: PageShellProps) {
+  return (
+    <>
+      <Header />
+      {children}
+      <Footer />
+      <FloatingWhatsApp />
+    </>
+  );
+}
