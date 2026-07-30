@@ -1,0 +1,14 @@
+KIDZEE WEBSITE - START HERE
+
+1. Extract this ZIP file.
+2. Open the extracted 'kidzee-website-ready' folder in Visual Studio Code.
+3. Open Terminal in VS Code.
+4. If PowerShell blocks npm, select Command Prompt as the terminal profile.
+5. Run: npm install
+6. Run: npm run dev
+7. Open: http://localhost:3000
+
+The building photo is already included at:
+public/kidzee-building.jpeg
+
+The Hero component already uses that exact path.
