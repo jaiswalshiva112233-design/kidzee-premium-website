@@ -1,51 +1,68 @@
 "use client";
 
-import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import {
-  Blocks,
-  CheckCircle2,
-  Palette,
-  ShieldCheck,
+  BadgeCheck,
+  Brain,
+  ClipboardCheck,
+  Eye,
+  Focus,
+  HeartHandshake,
+  Lightbulb,
   Sparkles,
-  Sun,
-  ToyBrick,
 } from "lucide-react";
 
-const environmentFeatures = [
+const fiveMinds = [
   {
-    icon: Sun,
-    title: "Bright, welcoming classrooms",
+    number: "01",
+    icon: Focus,
+    title: "Focused Mind",
     description:
-      "Calm colours, natural light and familiar classroom layouts help children settle in and feel comfortable during the day.",
+      "Children gradually learn to listen, stay involved and complete age-appropriate activities with greater attention.",
+    outcome: "Attention and involvement",
+    accent: "bg-[#f1e7f7]",
+    iconColor: "text-[#702a96]",
   },
   {
-    icon: Blocks,
-    title: "Defined learning areas",
+    number: "02",
+    icon: Eye,
+    title: "Analytical Mind",
     description:
-      "Separate spaces for stories, early concepts, group work and hands-on activities make classroom routines easier to understand.",
+      "Observation, comparison and simple problem-solving help children understand ideas instead of only memorising them.",
+    outcome: "Observation and reasoning",
+    accent: "bg-[#fff3c9]",
+    iconColor: "text-[#8a5a00]",
   },
   {
-    icon: ToyBrick,
-    title: "Space to move and play",
+    number: "03",
+    icon: ClipboardCheck,
+    title: "Conscientious Mind",
     description:
-      "Indoor play is part of the daily experience, giving children regular opportunities to develop coordination and confidence.",
+      "Daily responsibilities and classroom routines encourage children to become more organised, dependable and independent.",
+    outcome: "Responsibility and habits",
+    accent: "bg-[#e7f6ef]",
+    iconColor: "text-[#21785a]",
   },
   {
-    icon: Palette,
-    title: "Room for creative expression",
+    number: "04",
+    icon: Lightbulb,
+    title: "Inventive Mind",
     description:
-      "Art, pretend play, music and sensory activities allow children to explore ideas in ways that feel natural and enjoyable.",
+      "Creative activities invite children to experiment, imagine possibilities and express their own ideas with confidence.",
+    outcome: "Creativity and original thinking",
+    accent: "bg-[#ffe9df]",
+    iconColor: "text-[#b34f2f]",
   },
-];
-
-const environmentPriorities = [
-  "Child-sized furniture suited to young learners",
-  "Learning materials kept within comfortable reach",
-  "Clearly organised classroom and activity areas",
-  "Comfortable spaces for active and quieter moments",
-  "Regular cleaning and classroom organisation",
-  "Supervised areas planned around children’s routines",
+  {
+    number: "05",
+    icon: HeartHandshake,
+    title: "Empathetic Mind",
+    description:
+      "Group experiences help children recognise emotions, consider others and build respectful relationships with classmates.",
+    outcome: "Kindness and cooperation",
+    accent: "bg-[#e8efff]",
+    iconColor: "text-[#365ca8]",
+  },
 ];
 
 const transition = {
@@ -53,58 +70,26 @@ const transition = {
   ease: [0.22, 1, 0.36, 1] as const,
 };
 
-export default function AboutEnvironment() {
+export default function AboutKidzee() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
     <section
-      className="relative isolate overflow-hidden bg-[#fffaf2] py-20 sm:py-24 lg:py-28"
-      aria-labelledby="about-environment-heading"
+      className="relative isolate overflow-hidden bg-white py-20 sm:py-24 lg:py-28"
+      aria-labelledby="about-kidzee-heading"
     >
       <div
         aria-hidden="true"
-        className="absolute -left-40 bottom-0 -z-10 h-96 w-96 rounded-full bg-purple-100/70 blur-3xl"
+        className="absolute -left-44 top-24 -z-10 h-[28rem] w-[28rem] rounded-full bg-purple-100/65 blur-3xl"
       />
 
       <div
         aria-hidden="true"
-        className="absolute -right-40 top-16 -z-10 h-[28rem] w-[28rem] rounded-full bg-yellow-100/80 blur-3xl"
+        className="absolute -right-44 bottom-10 -z-10 h-[30rem] w-[30rem] rounded-full bg-yellow-100/75 blur-3xl"
       />
 
-      <div className="relative mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-8 xl:px-10">
-        <motion.header
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 22 }}
-          whileInView={
-            shouldReduceMotion ? undefined : { opacity: 1, y: 0 }
-          }
-          viewport={{ once: true, amount: 0.25 }}
-          transition={transition}
-          className="mx-auto max-w-4xl text-center"
-        >
-          <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] text-[#702a96] shadow-sm">
-            <Sparkles size={16} aria-hidden="true" />
-            Our learning environment
-          </div>
-
-          <h2
-            id="about-environment-heading"
-            className="mt-6 text-balance text-4xl font-extrabold leading-tight tracking-[-0.04em] text-[#281036] sm:text-5xl lg:text-[58px]"
-          >
-            A preschool space children can{" "}
-            <span className="text-[#702a96]">
-              understand, enjoy and grow into
-            </span>
-          </h2>
-
-          <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-slate-600 sm:text-lg">
-            Young children feel more secure when their surroundings are
-            familiar and easy to navigate. At Kidzee Sector 12, Dwarka, each
-            classroom and activity area is arranged to support the natural
-            rhythm of a preschool day.
-          </p>
-        </motion.header>
-
-        <div className="mt-14 grid items-center gap-14 lg:grid-cols-[1.06fr_0.94fr] lg:gap-20">
+      <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-8 xl:px-10">
+        <div className="grid gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:items-start lg:gap-16">
           <motion.div
             initial={shouldReduceMotion ? false : { opacity: 0, x: -28 }}
             whileInView={
@@ -112,170 +97,157 @@ export default function AboutEnvironment() {
             }
             viewport={{ once: true, amount: 0.2 }}
             transition={transition}
-            className="relative mx-auto w-full max-w-[780px]"
+            className="lg:sticky lg:top-28"
           >
-            <div className="grid gap-5 sm:grid-cols-[1.15fr_0.85fr]">
-              <div className="relative overflow-hidden rounded-[34px] border-[7px] border-white bg-purple-50 shadow-[0_28px_75px_rgba(54,21,74,0.18)]">
-                <div className="relative min-h-[500px] sm:min-h-[650px]">
-                  <Image
-                    src="/images/about/environment-main.jpg"
-                    alt="Classroom at Kidzee Preschool Sector 12 Dwarka"
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 60vw, 35vw"
-                    className="object-cover"
-                  />
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#25112e]/60 via-transparent to-transparent" />
-                </div>
-
-                <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-                  <div className="rounded-[24px] border border-white/30 bg-white/95 p-5 shadow-lg backdrop-blur-md">
-                    <p className="text-xs font-extrabold uppercase tracking-[0.17em] text-[#702a96]">
-                      Easy to settle into
-                    </p>
-
-                    <p className="mt-2 text-xl font-extrabold leading-snug text-[#281036]">
-                      A clear and familiar layout helps children become
-                      comfortable with their daily routine.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid gap-5">
-                <figure className="relative min-h-[250px] overflow-hidden rounded-[30px] border-[7px] border-white bg-purple-50 shadow-[0_20px_55px_rgba(54,21,74,0.14)] sm:min-h-0">
-                  <Image
-                    src="/images/about/environment-play.jpg"
-                    alt="Indoor play area at Kidzee Sector 12 Dwarka"
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 40vw, 22vw"
-                    className="object-cover"
-                  />
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#25112e]/65 via-transparent to-transparent" />
-
-                  <figcaption className="absolute bottom-5 left-5 right-5 text-lg font-extrabold text-white">
-                    Indoor play and movement
-                  </figcaption>
-                </figure>
-
-                <figure className="relative min-h-[250px] overflow-hidden rounded-[30px] border-[7px] border-white bg-yellow-50 shadow-[0_20px_55px_rgba(54,21,74,0.14)] sm:min-h-0">
-                  <Image
-                    src="/images/about/environment-activity.jpg"
-                    alt="Creative classroom activity at Kidzee Dwarka"
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 40vw, 22vw"
-                    className="object-cover"
-                  />
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#25112e]/65 via-transparent to-transparent" />
-
-                  <figcaption className="absolute bottom-5 left-5 right-5 text-lg font-extrabold text-white">
-                    Creative classroom experiences
-                  </figcaption>
-                </figure>
-              </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-[#fffaf2] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] text-[#702a96] shadow-sm">
+              <Sparkles size={16} aria-hidden="true" />
+              The Kidzee approach
             </div>
 
-            <motion.div
-              animate={
-                shouldReduceMotion
-                  ? undefined
-                  : {
-                      y: [0, -7, 0],
-                    }
-              }
-              transition={
-                shouldReduceMotion
-                  ? undefined
-                  : {
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }
-              }
-              className="absolute -left-3 top-10 hidden rounded-[22px] border border-purple-100 bg-white px-5 py-4 shadow-[0_18px_45px_rgba(57,26,68,0.15)] sm:block"
-              aria-hidden="true"
+            <h2
+              id="about-kidzee-heading"
+              className="mt-6 text-balance text-4xl font-extrabold leading-tight tracking-[-0.04em] text-[#281036] sm:text-5xl lg:text-[58px]"
             >
-              <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#702a96]">
-                Made for young children
+              Developing five ways of{" "}
+              <span className="text-[#702a96]">
+                thinking, understanding and relating
+              </span>
+            </h2>
+
+            <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
+              Kidzee&apos;s PentaMind approach looks beyond a single measure of
+              progress. It gives children opportunities to concentrate, reason,
+              take responsibility, think creatively and understand the feelings
+              of others.
+            </p>
+
+            <p className="mt-5 max-w-2xl leading-7 text-slate-600">
+              At Kidzee Sector 12, Dwarka, these abilities are encouraged
+              through everyday classroom experiences, conversations, guided
+              activities and routines suited to each age group.
+            </p>
+
+            <div className="mt-8 overflow-hidden rounded-[32px] bg-[#2d1636] p-7 text-white shadow-[0_24px_65px_rgba(45,22,54,0.22)] sm:p-8">
+              <div className="flex h-14 w-14 items-center justify-center rounded-[19px] bg-yellow-300 text-[#281036]">
+                <Brain size={26} strokeWidth={2.2} aria-hidden="true" />
+              </div>
+
+              <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.17em] text-yellow-300">
+                One connected approach
               </p>
 
-              <p className="mt-1 text-lg font-extrabold text-[#281036]">
-                Comfortable from the first day
+              <h3 className="mt-3 text-2xl font-extrabold leading-tight text-white sm:text-3xl">
+                Development is stronger when these abilities grow together.
+              </h3>
+
+              <p className="mt-4 leading-7 text-purple-100">
+                A child may be concentrating during a story, reasoning during a
+                sorting activity, sharing materials with a friend and finding a
+                new way to complete a task—all within the same morning.
               </p>
-            </motion.div>
+
+              <div className="mt-6 flex items-start gap-3 rounded-[22px] border border-white/15 bg-white/10 p-4">
+                <BadgeCheck
+                  className="mt-0.5 shrink-0 text-yellow-300"
+                  size={21}
+                  aria-hidden="true"
+                />
+
+                <p className="text-sm font-semibold leading-6 text-purple-50">
+                  The aim is balanced development, not pressure to perform
+                  beyond a child&apos;s age or readiness.
+                </p>
+              </div>
+            </div>
           </motion.div>
 
-          <motion.div
-            initial={shouldReduceMotion ? false : { opacity: 0, x: 28 }}
-            whileInView={
-              shouldReduceMotion ? undefined : { opacity: 1, x: 0 }
-            }
-            viewport={{ once: true, amount: 0.2 }}
-            transition={transition}
-          >
-            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#702a96]">
-              Planned around the preschool day
-            </p>
+          <div>
+            <motion.div
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 22 }}
+              whileInView={
+                shouldReduceMotion ? undefined : { opacity: 1, y: 0 }
+              }
+              viewport={{ once: true, amount: 0.2 }}
+              transition={transition}
+              className="mb-7"
+            >
+              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#702a96]">
+                The PentaMind framework
+              </p>
 
-            <h3 className="mt-3 text-3xl font-extrabold leading-tight tracking-[-0.03em] text-[#281036] sm:text-4xl">
-              Different moments need different kinds of spaces
-            </h3>
+              <h3 className="mt-3 text-3xl font-extrabold leading-tight tracking-[-0.03em] text-[#281036] sm:text-4xl">
+                Five minds, each supporting a different part of development
+              </h3>
+            </motion.div>
 
-            <p className="mt-5 text-base leading-8 text-slate-600 sm:text-lg">
-              A preschool day moves between conversation, guided learning,
-              creative work, energetic play and quieter moments. The environment
-              should support each transition without making children feel
-              rushed or overwhelmed.
-            </p>
-
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              {environmentFeatures.map((item, index) => {
-                const Icon = item.icon;
+            <div className="grid gap-5">
+              {fiveMinds.map((mind, index) => {
+                const Icon = mind.icon;
 
                 return (
                   <motion.article
-                    key={item.title}
+                    key={mind.title}
                     initial={
-                      shouldReduceMotion ? false : { opacity: 0, y: 18 }
+                      shouldReduceMotion ? false : { opacity: 0, y: 22 }
                     }
                     whileInView={
                       shouldReduceMotion
                         ? undefined
                         : { opacity: 1, y: 0 }
                     }
-                    viewport={{ once: true, amount: 0.2 }}
+                    viewport={{ once: true, amount: 0.18 }}
                     transition={{
                       ...transition,
-                      duration: 0.5,
+                      duration: 0.55,
                       delay: shouldReduceMotion ? 0 : index * 0.05,
                     }}
                     whileHover={
-                      shouldReduceMotion ? undefined : { y: -4 }
+                      shouldReduceMotion
+                        ? undefined
+                        : {
+                            y: -5,
+                          }
                     }
-                    className="rounded-[26px] border border-purple-100 bg-white p-5 shadow-[0_12px_34px_rgba(62,25,83,0.06)] transition-[border-color,box-shadow] duration-300 hover:border-purple-200 hover:shadow-[0_18px_44px_rgba(62,25,83,0.1)]"
+                    className="group overflow-hidden rounded-[30px] border border-purple-100 bg-white p-5 shadow-[0_14px_40px_rgba(62,25,83,0.07)] transition-[border-color,box-shadow] duration-300 hover:border-purple-200 hover:shadow-[0_24px_60px_rgba(62,25,83,0.13)] sm:p-6"
                   >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-[17px] bg-purple-100 text-[#702a96]">
-                      <Icon
-                        size={22}
-                        strokeWidth={2.1}
-                        aria-hidden="true"
-                      />
+                    <div className="grid gap-5 sm:grid-cols-[auto_1fr] sm:items-start">
+                      <div
+                        className={`flex h-16 w-16 items-center justify-center rounded-[22px] ${mind.accent} ${mind.iconColor}`}
+                      >
+                        <Icon
+                          size={28}
+                          strokeWidth={2}
+                          aria-hidden="true"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <p className="text-xs font-extrabold uppercase tracking-[0.17em] text-[#8d6b97]">
+                              Mind {mind.number}
+                            </p>
+
+                            <h4 className="mt-1 text-2xl font-extrabold tracking-[-0.025em] text-[#281036]">
+                              {mind.title}
+                            </h4>
+                          </div>
+
+                          <span className="rounded-full border border-purple-100 bg-[#fffaf2] px-4 py-2 text-xs font-bold text-[#5b4063]">
+                            {mind.outcome}
+                          </span>
+                        </div>
+
+                        <p className="mt-4 max-w-3xl leading-7 text-slate-600">
+                          {mind.description}
+                        </p>
+                      </div>
                     </div>
-
-                    <h4 className="mt-4 text-lg font-extrabold leading-6 text-[#281036]">
-                      {item.title}
-                    </h4>
-
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      {item.description}
-                    </p>
                   </motion.article>
                 );
               })}
             </div>
-          </motion.div>
+          </div>
         </div>
 
         <motion.div
@@ -285,32 +257,29 @@ export default function AboutEnvironment() {
           }
           viewport={{ once: true, amount: 0.2 }}
           transition={transition}
-          className="mt-16 overflow-hidden rounded-[36px] border border-purple-100 bg-white p-7 shadow-[0_20px_55px_rgba(62,25,83,0.08)] sm:p-9 lg:p-10"
+          className="mt-16 overflow-hidden rounded-[36px] border border-purple-100 bg-[#fffaf2] p-7 shadow-[0_18px_50px_rgba(62,25,83,0.08)] sm:p-9 lg:p-10"
         >
-          <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
             <div>
-              <div className="flex h-14 w-14 items-center justify-center rounded-[19px] bg-[#702a96] text-white">
-                <ShieldCheck size={24} aria-hidden="true" />
-              </div>
-
-              <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.18em] text-[#702a96]">
-                What we pay attention to
+              <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#702a96]">
+                What this means for parents
               </p>
 
               <h3 className="mt-3 text-3xl font-extrabold leading-tight tracking-[-0.03em] text-[#281036]">
-                Small details that make the day easier for children
+                Progress can appear in many small, meaningful ways
               </h3>
-
-              <p className="mt-4 max-w-xl leading-7 text-slate-600">
-                Furniture, materials and classroom routines are organised so
-                that children gradually become more familiar, confident and
-                independent within the preschool environment.
-              </p>
             </div>
 
-            <ul className="grid gap-4 sm:grid-cols-2">
-              {environmentPriorities.map((item, index) => (
-                <motion.li
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                "Listening for longer during a group activity",
+                "Trying another method when the first one does not work",
+                "Taking care of personal and classroom belongings",
+                "Expressing an original idea through words, art or play",
+                "Recognising when a classmate needs patience or support",
+                "Participating more independently in the daily routine",
+              ].map((item, index) => (
+                <motion.div
                   key={item}
                   initial={
                     shouldReduceMotion ? false : { opacity: 0, y: 14 }
@@ -325,45 +294,24 @@ export default function AboutEnvironment() {
                     duration: 0.45,
                     delay: shouldReduceMotion ? 0 : index * 0.04,
                   }}
-                  className="flex items-start gap-3 rounded-[22px] border border-purple-100 bg-[#fffaf2] p-4"
+                  className="flex items-start gap-3 rounded-[22px] border border-purple-100 bg-white p-4"
                 >
-                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-yellow-300 text-[#4b245c]">
-                    <CheckCircle2
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-yellow-300 text-[#281036]">
+                    <BadgeCheck
                       size={16}
                       strokeWidth={2.7}
                       aria-hidden="true"
                     />
                   </span>
 
-                  <span className="text-sm font-semibold leading-6 text-[#3d2a43]">
+                  <p className="text-sm font-semibold leading-6 text-[#3d2a43]">
                     {item}
-                  </span>
-                </motion.li>
+                  </p>
+                </motion.div>
               ))}
-            </ul>
+            </div>
           </div>
         </motion.div>
-
-        <motion.aside
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
-          whileInView={
-            shouldReduceMotion ? undefined : { opacity: 1, y: 0 }
-          }
-          viewport={{ once: true, amount: 0.25 }}
-          transition={transition}
-          className="mt-8 rounded-[30px] bg-[#2d1636] p-7 text-center text-white shadow-[0_20px_55px_rgba(45,22,54,0.18)] sm:p-9"
-          aria-label="How children use the learning environment"
-        >
-          <p className="text-xs font-extrabold uppercase tracking-[0.17em] text-yellow-300">
-            Learning is active here
-          </p>
-
-          <p className="mx-auto mt-3 max-w-4xl text-balance text-xl font-extrabold leading-8 text-purple-50 sm:text-2xl">
-            Children may be listening to a story in one moment, building
-            something in the next and then moving into music, conversation or
-            guided play.
-          </p>
-        </motion.aside>
       </div>
     </section>
   );

@@ -2,18 +2,13 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import PageShell from "@/components/PageShell";
-import { CTA } from "@/components/HomeSections";
-import { programmes } from "@/lib/site";
 import {
   ArrowRight,
   BookOpen,
   Brain,
   CheckCircle2,
-  Clock3,
   HeartHandshake,
   MessageCircle,
-  Music2,
   Palette,
   Phone,
   ShieldCheck,
@@ -21,6 +16,13 @@ import {
   Speech,
   Users,
 } from "lucide-react";
+
+import PageShell from "@/components/PageShell";
+import {
+  createWhatsAppLink,
+  programmes,
+  site,
+} from "@/lib/site";
 
 type ProgrammePageProps = {
   params: Promise<{
@@ -30,7 +32,14 @@ type ProgrammePageProps = {
 
 type ProgrammeDetail = {
   heroIntro: string;
+  learningStyle: string;
+  classroomExperience: string;
+  readinessFocus: string;
   overview: string[];
+  learningNote: {
+    title: string;
+    description: string;
+  };
   developmentAreas: {
     icon: typeof Brain;
     title: string;
@@ -41,6 +50,12 @@ type ProgrammeDetail = {
     description: string;
   }[];
   parentExpectations: string[];
+  suitabilityIntro: string;
+  suitabilityPoints: string[];
+  suitabilityNote: string;
+  ctaEyebrow: string;
+  ctaTitle: string;
+  ctaDescription: string;
   faqs: {
     question: string;
     answer: string;
@@ -51,11 +66,25 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
   playgroup: {
     heroIntro:
       "A gentle introduction to preschool life where children learn to feel comfortable, communicate, explore and participate in a warm classroom environment.",
+
+    learningStyle: "Play, movement and sensory exploration",
+
+    classroomExperience: "Gentle routines with close teacher support",
+
+    readinessFocus: "Comfort, communication and independence",
+
     overview: [
       "The Playgroup programme is designed for children between 2 and 3 years of age who are beginning their first structured learning experience outside home.",
       "At this stage, the focus is not on formal academics. Children learn through movement, conversation, stories, songs, sensory exploration, play and simple classroom routines.",
       "Teachers support children as they become more comfortable with separation, learn to follow short instructions, communicate their needs and participate alongside other children.",
     ],
+
+    learningNote: {
+      title: "Learning begins through everyday experiences",
+      description:
+        "Playgroup children learn through touching, moving, listening, observing, repeating and interacting. Activities are kept short, engaging and suitable for their developing attention span.",
+    },
+
     developmentAreas: [
       {
         icon: Speech,
@@ -79,14 +108,15 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
         icon: Sparkles,
         title: "Independence",
         description:
-          "Simple routines help children become more comfortable with belongings, meals, transitions and personal tasks.",
+          "Simple routines help children become more comfortable with belongings, transitions and age-appropriate personal tasks.",
       },
     ],
+
     routine: [
       {
         title: "Warm welcome and settling",
         description:
-          "Children are greeted gently and given time to settle into the classroom environment.",
+          "Children are greeted gently and given time to become comfortable in the classroom.",
       },
       {
         title: "Circle time and conversation",
@@ -109,14 +139,39 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
           "Stories, music, drawing and simple art experiences encourage imagination and expression.",
       },
     ],
+
     parentExpectations: [
       "A gradual settling process",
       "Improved comfort away from home",
       "Better communication of everyday needs",
       "Growing participation in group routines",
       "Early friendship and sharing skills",
-      "More confidence in classroom transitions",
+      "More confidence during classroom transitions",
     ],
+
+    suitabilityIntro:
+      "Playgroup may be a suitable starting point when your child is ready to experience a gentle routine outside home without the pressure of formal academics.",
+
+    suitabilityPoints: [
+      "This will be your child’s first preschool experience",
+      "Your child is learning to spend short periods away from parents",
+      "Your child communicates needs through words, gestures or expressions",
+      "Your child enjoys music, movement, stories and sensory play",
+      "Your child is beginning to notice and interact with other children",
+      "You want a gradual introduction to classroom routines",
+    ],
+
+    suitabilityNote:
+      "A child does not need to be fully independent before joining Playgroup. Settling, communication and classroom comfort develop gradually with patient support.",
+
+    ctaEyebrow: "Beginning preschool",
+
+    ctaTitle:
+      "Help your child begin preschool with comfort and confidence.",
+
+    ctaDescription:
+      "Speak with our team about your child’s age, current routine and previous experience so we can guide you honestly about the Playgroup programme.",
+
     faqs: [
       {
         question: "What is the age group for Playgroup?",
@@ -126,17 +181,17 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
       {
         question: "What if my child has never attended preschool before?",
         answer:
-          "That is completely normal. The programme is designed as a gentle introduction to preschool life, and teachers support children through the settling process.",
+          "That is completely normal. Playgroup is designed as a gentle introduction to preschool life, and teachers support children through the settling process.",
       },
       {
         question: "Is formal writing taught in Playgroup?",
         answer:
-          "The programme focuses mainly on readiness, language, movement, sensory learning and early classroom habits rather than formal written work.",
+          "The programme focuses mainly on language, movement, sensory learning, coordination and early classroom habits rather than formal written work.",
       },
       {
-        question: "Is a trial available?",
+        question: "What if my child takes time to settle?",
         answer:
-          "Yes. A three-day trial is available so parents and children can experience the classroom environment before regular admission.",
+          "Children settle at different speeds. Teachers use familiar routines, play, reassurance and gradual participation to help each child become comfortable.",
       },
     ],
   },
@@ -144,11 +199,25 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
   nursery: {
     heroIntro:
       "A lively and structured programme that builds early literacy, numeracy, communication, independence and curiosity through purposeful play.",
+
+    learningStyle: "Purposeful play with guided concept learning",
+
+    classroomExperience: "Active participation and growing independence",
+
+    readinessFocus: "Early literacy, numeracy and communication",
+
     overview: [
       "The Nursery programme is designed for children between 3 and 4 years of age who are ready for more structured classroom participation.",
       "Children begin developing early literacy and numeracy foundations while continuing to learn through stories, games, movement, conversation and hands-on activities.",
       "The programme also supports independence, confidence, attention, social skills and the ability to express ideas in a group.",
     ],
+
+    learningNote: {
+      title: "Concepts are introduced through activity and conversation",
+      description:
+        "Nursery children begin working with sounds, numbers, patterns, vocabulary and pre-writing skills through practical experiences rather than long periods of desk-based work.",
+    },
+
     developmentAreas: [
       {
         icon: BookOpen,
@@ -175,6 +244,7 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
           "Children learn cooperation, turn-taking, classroom responsibility and respectful interaction.",
       },
     ],
+
     routine: [
       {
         title: "Welcome and conversation",
@@ -192,7 +262,7 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
           "Art, craft, music and role play give children opportunities to express ideas in different ways.",
       },
       {
-        title: "Movement and outdoor play",
+        title: "Movement and active play",
         description:
           "Physical activity supports coordination, confidence, balance and healthy energy release.",
       },
@@ -202,6 +272,7 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
           "Stories and classroom discussion help children build imagination, listening and understanding.",
       },
     ],
+
     parentExpectations: [
       "Stronger vocabulary and communication",
       "Improved classroom participation",
@@ -210,6 +281,30 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
       "Growing independence",
       "More confident social interaction",
     ],
+
+    suitabilityIntro:
+      "Nursery may be the right stage when your child is ready to participate in longer activities and begin exploring early language and number concepts.",
+
+    suitabilityPoints: [
+      "Your child is becoming comfortable in a group environment",
+      "Your child enjoys stories, rhymes and conversations",
+      "Your child can follow simple one-step or two-step instructions",
+      "Your child is curious about colours, shapes, numbers and letters",
+      "Your child is developing pencil grip and hand control",
+      "Your child is ready for more consistent classroom routines",
+    ],
+
+    suitabilityNote:
+      "Children entering Nursery do not need to know how to read or write. The programme builds the foundations needed for later learning in an age-appropriate way.",
+
+    ctaEyebrow: "The next learning step",
+
+    ctaTitle:
+      "Give your child a strong and joyful Nursery foundation.",
+
+    ctaDescription:
+      "Discuss your child’s previous classroom experience, communication and readiness so we can help you understand whether Nursery is the appropriate entry level.",
+
     faqs: [
       {
         question: "What is the age group for Nursery?",
@@ -219,17 +314,17 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
       {
         question: "Does Nursery include reading and writing?",
         answer:
-          "Nursery introduces early literacy, sound awareness, picture reading, vocabulary and pre-writing readiness in an age-appropriate way.",
+          "Nursery introduces sound awareness, picture reading, vocabulary, fine-motor work and pre-writing readiness in an age-appropriate way.",
       },
       {
         question: "How are numbers taught?",
         answer:
-          "Children learn counting, matching, sorting, patterns, comparison and number readiness through practical activities and classroom games.",
+          "Children explore counting, matching, sorting, patterns, comparison and number readiness through practical activities and classroom games.",
       },
       {
-        question: "Is a three-day trial available?",
+        question: "Does my child need to know letters before joining?",
         answer:
-          "Yes. Parents may book a three-day trial to help the child experience the teachers, classroom and routine.",
+          "No. Prior knowledge is not required. Teachers introduce early literacy concepts gradually through stories, sounds, pictures and activities.",
       },
     ],
   },
@@ -237,11 +332,25 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
   "junior-kg": {
     heroIntro:
       "A strong school-readiness programme that develops literacy, numeracy, communication, thinking skills and independent classroom habits.",
+
+    learningStyle: "Structured learning with meaningful activities",
+
+    classroomExperience: "Guided work with independent participation",
+
+    readinessFocus: "Reading, writing and mathematical foundations",
+
     overview: [
       "The Junior KG programme is designed for children between 4 and 5 years of age.",
       "At this stage, children move towards stronger academic readiness while continuing to learn through meaningful activities, conversation, stories, projects and play.",
       "The programme supports phonics, early reading, writing readiness, number concepts, general awareness, problem-solving, communication and confidence.",
     ],
+
+    learningNote: {
+      title: "Children begin connecting ideas across subjects",
+      description:
+        "Junior KG activities help children apply phonics, vocabulary, number understanding and reasoning in practical tasks rather than learning concepts only through repetition.",
+    },
+
     developmentAreas: [
       {
         icon: BookOpen,
@@ -268,6 +377,7 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
           "Presentations, storytelling and classroom discussion encourage children to organise and express ideas.",
       },
     ],
+
     routine: [
       {
         title: "Morning conversation",
@@ -287,14 +397,15 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
       {
         title: "Projects and creativity",
         description:
-          "Art, craft, themes and simple projects help children connect ideas across subjects.",
+          "Art, craft, themes and simple projects help children connect ideas across learning areas.",
       },
       {
         title: "Movement and enrichment",
         description:
-          "Dance, yoga, taekwondo and active play support physical confidence and overall development.",
+          "Movement, dance and active experiences support physical confidence and overall development.",
       },
     ],
+
     parentExpectations: [
       "Improved phonics and sound recognition",
       "Better pencil control and writing readiness",
@@ -303,6 +414,30 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
       "Greater confidence in speaking",
       "Improved attention and task completion",
     ],
+
+    suitabilityIntro:
+      "Junior KG may be suitable when your child is ready to work with early academic concepts while continuing to learn through activity, discussion and exploration.",
+
+    suitabilityPoints: [
+      "Your child shows interest in letters, sounds and words",
+      "Your child can participate in an activity for a longer period",
+      "Your child is beginning to draw, trace or attempt writing",
+      "Your child can count familiar objects and recognise basic quantities",
+      "Your child can communicate ideas in short conversations",
+      "Your child is developing independent classroom habits",
+    ],
+
+    suitabilityNote:
+      "Junior KG is not only about written work. Communication, reasoning, creativity, confidence and independent participation remain equally important.",
+
+    ctaEyebrow: "Building school readiness",
+
+    ctaTitle:
+      "Prepare your child for confident and independent learning.",
+
+    ctaDescription:
+      "Speak with our team about your child’s current literacy, numeracy, communication and classroom habits before selecting Junior KG.",
+
     faqs: [
       {
         question: "What is the age group for Junior KG?",
@@ -330,11 +465,25 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
   "senior-kg": {
     heroIntro:
       "A comprehensive school-readiness programme that strengthens reading, writing, numeracy, reasoning, communication and independent learning.",
+
+    learningStyle: "Structured preparation with active participation",
+
+    classroomExperience: "Independent work supported by teacher guidance",
+
+    readinessFocus: "Confident transition to primary school",
+
     overview: [
       "The Senior KG programme is designed for children between 5 and 6 years of age.",
       "Children build on the foundations developed in earlier years and prepare for a smooth transition into formal school.",
       "The programme focuses on reading, writing, number fluency, concept understanding, reasoning, communication, general awareness and responsible classroom behaviour.",
     ],
+
+    learningNote: {
+      title: "Knowledge is strengthened through understanding and application",
+      description:
+        "Senior KG children practise academic skills while also learning to explain ideas, solve simple problems, complete tasks responsibly and work with growing independence.",
+    },
+
     developmentAreas: [
       {
         icon: BookOpen,
@@ -361,6 +510,7 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
           "Independent work habits, attention, responsibility and classroom discipline prepare children for formal school.",
       },
     ],
+
     routine: [
       {
         title: "Language and reading",
@@ -388,6 +538,7 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
           "Children are encouraged to complete tasks, manage materials and participate responsibly.",
       },
     ],
+
     parentExpectations: [
       "Stronger reading confidence",
       "Improved sentence formation",
@@ -396,6 +547,30 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
       "Improved attention and responsibility",
       "A smoother transition to formal school",
     ],
+
+    suitabilityIntro:
+      "Senior KG may be suitable when your child is ready to strengthen academic foundations and practise the independence expected in primary school.",
+
+    suitabilityPoints: [
+      "Your child recognises familiar letters, sounds or simple words",
+      "Your child is beginning to write with greater control",
+      "Your child understands basic number concepts and sequences",
+      "Your child can listen, respond and complete guided tasks",
+      "Your child can communicate ideas with growing clarity",
+      "Your child is preparing to enter Grade 1 or primary school",
+    ],
+
+    suitabilityNote:
+      "The purpose of Senior KG is not to create unnecessary pressure. It helps children become academically prepared, emotionally confident and comfortable with formal-school routines.",
+
+    ctaEyebrow: "Preparing for primary school",
+
+    ctaTitle:
+      "Support a smooth and confident transition to Grade 1.",
+
+    ctaDescription:
+      "Discuss your child’s current reading, writing, number understanding and independence so we can guide you about Senior KG readiness.",
+
     faqs: [
       {
         question: "What is the age group for Senior KG?",
@@ -405,7 +580,7 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
       {
         question: "How does Senior KG prepare children for Grade 1?",
         answer:
-          "Children strengthen reading, writing, mathematics, general awareness, communication and independent classroom habits.",
+          "Children strengthen reading, writing, mathematics, communication, general awareness and independent classroom habits.",
       },
       {
         question: "Does the programme include homework?",
@@ -421,15 +596,33 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
   },
 };
 
-function getProgrammeDetail(slug: string, title: string): ProgrammeDetail {
+function getProgrammeDetail(
+  slug: string,
+  title: string,
+): ProgrammeDetail {
   return (
     programmeDetails[slug] ?? {
-      heroIntro: `An age-appropriate early learning programme designed to support children’s confidence, communication, curiosity and school readiness.`,
+      heroIntro:
+        "An age-appropriate early-learning programme designed to support confidence, communication, curiosity and school readiness.",
+
+      learningStyle: "Activity-led and age-appropriate learning",
+
+      classroomExperience: "Guided participation and exploration",
+
+      readinessFocus: "Balanced development and confidence",
+
       overview: [
         `The ${title} programme combines guided learning with play, movement, conversation and creative experiences.`,
         "Children learn through a balanced routine that supports academic foundations, communication, independence and social development.",
         "Teachers provide age-appropriate guidance while allowing children to explore ideas and participate actively.",
       ],
+
+      learningNote: {
+        title: "Learning is adapted to the child’s developmental stage",
+        description:
+          "Activities combine conversation, movement, creativity, practical experiences and guided learning so children remain actively involved.",
+      },
+
       developmentAreas: [
         {
           icon: BookOpen,
@@ -456,6 +649,7 @@ function getProgrammeDetail(slug: string, title: string): ProgrammeDetail {
             "Children learn to cooperate, participate, share and build positive relationships.",
         },
       ],
+
       routine: [
         {
           title: "Welcome and circle time",
@@ -478,6 +672,7 @@ function getProgrammeDetail(slug: string, title: string): ProgrammeDetail {
             "Active and free play support physical, social and emotional development.",
         },
       ],
+
       parentExpectations: [
         "Age-appropriate learning",
         "Better communication",
@@ -486,6 +681,29 @@ function getProgrammeDetail(slug: string, title: string): ProgrammeDetail {
         "Positive classroom habits",
         "Social interaction",
       ],
+
+      suitabilityIntro:
+        "A discussion with the admission team can help parents understand whether this programme matches the child’s age and current stage.",
+
+      suitabilityPoints: [
+        "The child falls within the recommended age group",
+        "The child is ready for an age-appropriate classroom routine",
+        "The child can participate in guided and independent activities",
+        "The child is developing communication and social confidence",
+        "The family wants balanced academic and overall development",
+        "The programme matches the child’s next learning stage",
+      ],
+
+      suitabilityNote:
+        "Age is an important starting point, but previous experience and individual development should also be considered.",
+
+      ctaEyebrow: `${title} guidance`,
+
+      ctaTitle: `Understand whether ${title} is the right next step.`,
+
+      ctaDescription:
+        "Speak with our team about your child’s age, previous experience and present learning stage before making a decision.",
+
       faqs: [
         {
           question: `Who is the ${title} programme for?`,
@@ -493,9 +711,9 @@ function getProgrammeDetail(slug: string, title: string): ProgrammeDetail {
             "The programme is designed for children within the age range shown on this page.",
         },
         {
-          question: "Is a trial available?",
+          question: "How is the correct programme selected?",
           answer:
-            "Yes. A three-day trial is available, subject to current seat and classroom availability.",
+            "The child’s age, previous classroom experience, communication, independence and current learning stage are considered.",
         },
       ],
     }
@@ -512,7 +730,10 @@ export async function generateMetadata({
   params,
 }: ProgrammePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const programme = programmes.find((item) => item.slug === slug);
+
+  const programme = programmes.find(
+    (item) => item.slug === slug,
+  );
 
   if (!programme) {
     return {};
@@ -520,7 +741,9 @@ export async function generateMetadata({
 
   return {
     title: `${programme.title} Programme in Sector 12 Dwarka`,
-    description: `${programme.intro} Learn about the ${programme.title} programme at Kidzee Sector 12, Dwarka, including learning goals, routine, age group and trial availability.`,
+
+    description: `${programme.intro} Learn about the ${programme.title} age group, learning goals, classroom routine and school-readiness focus at Kidzee Sector 12, Dwarka.`,
+
     keywords: [
       `${programme.title} in Dwarka`,
       `${programme.title} Sector 12 Dwarka`,
@@ -529,9 +752,11 @@ export async function generateMetadata({
       `Kidzee Sector 12 programme`,
       `${programme.age} preschool Dwarka`,
     ],
+
     alternates: {
       canonical: `/programmes/${programme.slug}`,
     },
+
     openGraph: {
       title: `${programme.title} at Kidzee Sector 12, Dwarka`,
       description: programme.intro,
@@ -546,6 +771,7 @@ export async function generateMetadata({
         },
       ],
     },
+
     twitter: {
       card: "summary_large_image",
       title: `${programme.title} at Kidzee Sector 12, Dwarka`,
@@ -559,15 +785,18 @@ export default async function ProgrammePage({
   params,
 }: ProgrammePageProps) {
   const { slug } = await params;
-  const programme = programmes.find((item) => item.slug === slug);
+
+  const programme = programmes.find(
+    (item) => item.slug === slug,
+  );
 
   if (!programme) {
     notFound();
   }
 
-  const detail = getProgrammeDetail(programme.slug, programme.title);
-  const programmeIndex = programmes.findIndex(
-    (item) => item.slug === programme.slug,
+  const detail = getProgrammeDetail(
+    programme.slug,
+    programme.title,
   );
 
   const relatedProgrammes = programmes.filter(
@@ -575,28 +804,62 @@ export default async function ProgrammePage({
   );
 
   const ratio =
-    programme.slug === "playgroup" || programme.slug === "nursery"
+    programme.slug === "playgroup" ||
+    programme.slug === "nursery"
       ? "1:8 teacher-child ratio"
       : "1:10 teacher-child ratio";
+
+  const programmeWhatsApp = createWhatsAppLink(
+    `Hello Kidzee Sector 12, Dwarka. I would like to enquire about the ${programme.title} programme for my child.`,
+  );
 
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Course",
     name: `${programme.title} Programme`,
     description: programme.intro,
+    url: `${site.url}/programmes/${programme.slug}`,
+
     provider: {
       "@type": "Preschool",
-      name: "Kidzee Preschool & Daycare, Sector 12 Dwarka",
+      name: site.name,
+      url: site.url,
+      telephone: site.phone,
+
       address: {
         "@type": "PostalAddress",
-        streetAddress: "Building No. 19, Block B, Sector 12B",
-        addressLocality: "Dwarka",
-        addressRegion: "Delhi",
-        addressCountry: "IN",
+        streetAddress:
+          "Building No. 19, Block B, Sector 12B",
+        addressLocality: site.locality,
+        addressRegion: site.region,
+        postalCode: site.postalCode,
+        addressCountry: site.country,
       },
-      telephone: "+91 96670 38673",
     },
   };
+
+  const quickInformation = [
+    {
+      icon: Users,
+      title: programme.age,
+      description: "Recommended age group",
+    },
+    {
+      icon: Sparkles,
+      title: detail.learningStyle,
+      description: "How children learn",
+    },
+    {
+      icon: HeartHandshake,
+      title: detail.classroomExperience,
+      description: "Classroom experience",
+    },
+    {
+      icon: ShieldCheck,
+      title: detail.readinessFocus,
+      description: "Development priority",
+    },
+  ];
 
   return (
     <PageShell>
@@ -609,41 +872,53 @@ export default async function ProgrammePage({
         />
 
         {/* Hero */}
-        <section className="relative bg-[linear-gradient(135deg,#faf7ff_0%,#ffffff_54%,#fff7d7_100%)] pb-16 pt-12 sm:pb-20 sm:pt-16 lg:pb-24 lg:pt-20">
-          <div className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-purple-200/35 blur-3xl" />
-          <div className="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-yellow-200/40 blur-3xl" />
+        <section className="relative overflow-hidden bg-[linear-gradient(135deg,#faf7ff_0%,#ffffff_54%,#fff7d7_100%)] pb-16 pt-12 sm:pb-20 sm:pt-16 lg:pb-24 lg:pt-20">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-purple-200/35 blur-3xl"
+          />
+
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-yellow-200/40 blur-3xl"
+          />
 
           <div className="container relative">
             <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
               <div>
-                <span className="eyebrow">{programme.age}</span>
+                <span className="eyebrow">
+                  {programme.age}
+                </span>
 
                 <h1 className="title mt-5">
-                  {programme.title} at Kidzee Sector 12, Dwarka
+                  {programme.title} at Kidzee Sector 12,
+                  Dwarka
                 </h1>
 
                 <p className="lead mt-6 max-w-2xl">
                   {detail.heroIntro}
                 </p>
 
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <a
-                    href={`https://wa.me/919667038673?text=Hello%20Kidzee%20Sector%2012%20Dwarka%2C%20I%20would%20like%20to%20enquire%20about%20the%20${encodeURIComponent(
-                      programme.title,
-                    )}%20programme.`}
+                    href={programmeWhatsApp}
                     target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-purple-700 px-7 py-3.5 text-sm font-black text-white shadow-lg shadow-purple-700/20 transition hover:-translate-y-0.5 hover:bg-purple-800"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-purple-700 px-7 py-3.5 text-sm font-black text-white shadow-lg shadow-purple-700/20 transition duration-300 hover:-translate-y-0.5 hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-purple-700/25"
                   >
-                    <MessageCircle size={18} />
+                    <MessageCircle
+                      size={18}
+                      aria-hidden="true"
+                    />
+
                     Enquire About {programme.title}
                   </a>
 
                   <a
-                    href="tel:+919667038673"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-purple-200 bg-white px-7 py-3.5 text-sm font-black text-purple-800 transition hover:border-purple-300 hover:bg-purple-50"
+                    href={`tel:${site.phone}`}
+                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-purple-200 bg-white px-7 py-3.5 text-sm font-black text-purple-800 transition duration-300 hover:-translate-y-0.5 hover:border-purple-300 hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-purple-700/20"
                   >
-                    <Phone size={18} />
+                    <Phone size={18} aria-hidden="true" />
                     Call the Centre
                   </a>
                 </div>
@@ -653,7 +928,7 @@ export default async function ProgrammePage({
                     `Age group: ${programme.age}`,
                     `Timing: ${programme.time}`,
                     ratio,
-                    "3-day trial available",
+                    detail.readinessFocus,
                   ].map((item) => (
                     <div
                       key={item}
@@ -661,6 +936,7 @@ export default async function ProgrammePage({
                     >
                       <CheckCircle2
                         size={18}
+                        aria-hidden="true"
                         className="shrink-0 text-purple-700"
                       />
 
@@ -673,8 +949,15 @@ export default async function ProgrammePage({
               </div>
 
               <div className="relative">
-                <div className="absolute -left-6 -top-6 h-24 w-24 rounded-[30px] bg-yellow-300/60" />
-                <div className="absolute -bottom-6 -right-6 h-32 w-32 rounded-full bg-purple-300/30" />
+                <div
+                  aria-hidden="true"
+                  className="absolute -left-6 -top-6 h-24 w-24 rounded-[30px] bg-yellow-300/60"
+                />
+
+                <div
+                  aria-hidden="true"
+                  className="absolute -bottom-6 -right-6 h-32 w-32 rounded-full bg-purple-300/30"
+                />
 
                 <div className="relative overflow-hidden rounded-[38px] border-8 border-white bg-white shadow-2xl shadow-purple-950/10">
                   <Image
@@ -683,6 +966,7 @@ export default async function ProgrammePage({
                     width={900}
                     height={760}
                     priority
+                    sizes="(max-width: 1024px) 100vw, 48vw"
                     className="h-[470px] w-full object-cover sm:h-[570px]"
                   />
 
@@ -692,8 +976,9 @@ export default async function ProgrammePage({
                     </p>
 
                     <p className="mt-1 text-sm leading-6 text-slate-600">
-                      Age-appropriate activities, classroom routines and
-                      personal guidance for each stage of development.
+                      Activities, expectations and classroom
+                      guidance matched to this stage of
+                      development.
                     </p>
                   </div>
                 </div>
@@ -702,44 +987,23 @@ export default async function ProgrammePage({
           </div>
         </section>
 
-        {/* Quick Information */}
+        {/* Programme Information */}
         <section className="relative z-10 -mt-3 bg-white pb-8 sm:-mt-5">
           <div className="container">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                {
-                  icon: Clock3,
-                  title: programme.time,
-                  description: "Regular programme timing",
-                },
-                {
-                  icon: Users,
-                  title: ratio,
-                  description: "Focused classroom attention",
-                },
-                {
-                  icon: ShieldCheck,
-                  title: "Safe environment",
-                  description: "Child-friendly supervised spaces",
-                },
-                {
-                  icon: Sparkles,
-                  title: "3-day trial",
-                  description: "Experience the classroom first",
-                },
-              ].map((item) => {
+              {quickInformation.map((item) => {
                 const Icon = item.icon;
 
                 return (
                   <article
-                    key={item.title}
+                    key={item.description}
                     className="rounded-[28px] border border-purple-100 bg-white p-6 shadow-lg shadow-purple-950/5"
                   >
                     <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-purple-700">
-                      <Icon size={23} />
+                      <Icon size={23} aria-hidden="true" />
                     </span>
 
-                    <h2 className="mt-5 text-lg font-black text-slate-950">
+                    <h2 className="mt-5 text-lg font-black leading-7 text-slate-950">
                       {item.title}
                     </h2>
 
@@ -758,10 +1022,13 @@ export default async function ProgrammePage({
           <div className="container">
             <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
               <div>
-                <span className="eyebrow">Programme overview</span>
+                <span className="eyebrow">
+                  Programme overview
+                </span>
 
                 <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                  Learning designed for this important stage.
+                  Learning designed for this important
+                  stage.
                 </h2>
 
                 <div className="mt-6 space-y-5">
@@ -777,13 +1044,11 @@ export default async function ProgrammePage({
 
                 <div className="mt-8 rounded-[28px] border border-yellow-200 bg-[#fff9e7] p-6">
                   <p className="text-sm font-black uppercase tracking-[0.14em] text-purple-800">
-                    Meals included
+                    {detail.learningNote.title}
                   </p>
 
                   <p className="mt-3 text-sm leading-7 text-slate-700 sm:text-base">
-                    Preschool meals are included in the monthly fee, helping
-                    children follow a comfortable and consistent morning
-                    routine.
+                    {detail.learningNote.description}
                   </p>
                 </div>
               </div>
@@ -798,7 +1063,11 @@ export default async function ProgrammePage({
                       className="rounded-[30px] border border-purple-100 bg-[#faf8ff] p-7 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-xl hover:shadow-purple-950/5"
                     >
                       <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 text-purple-700">
-                        <Icon size={26} strokeWidth={1.8} />
+                        <Icon
+                          size={26}
+                          strokeWidth={1.8}
+                          aria-hidden="true"
+                        />
                       </span>
 
                       <h3 className="mt-6 text-xl font-black text-slate-950">
@@ -820,15 +1089,18 @@ export default async function ProgrammePage({
         <section className="section bg-[#faf8ff]">
           <div className="container">
             <div className="mx-auto max-w-3xl text-center">
-              <span className="eyebrow">A balanced classroom day</span>
+              <span className="eyebrow">
+                A balanced classroom day
+              </span>
 
               <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
                 A predictable routine with room to explore.
               </h2>
 
               <p className="mt-5 text-base leading-8 text-slate-600 sm:text-lg">
-                The exact sequence may change according to the day’s theme, but
-                children experience a balanced mix of conversation, guided
+                The sequence can change according to the
+                day’s theme, but children experience a
+                balanced mix of conversation, guided
                 learning, creativity, movement and play.
               </p>
             </div>
@@ -840,7 +1112,10 @@ export default async function ProgrammePage({
                   className="relative grid gap-5 pb-8 last:pb-0 sm:grid-cols-[64px_1fr]"
                 >
                   {index !== detail.routine.length - 1 && (
-                    <span className="absolute left-7 top-14 hidden h-[calc(100%-1rem)] w-px bg-purple-200 sm:block" />
+                    <span
+                      aria-hidden="true"
+                      className="absolute left-7 top-14 hidden h-[calc(100%-1rem)] w-px bg-purple-200 sm:block"
+                    />
                   )}
 
                   <span className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-700 text-lg font-black text-white shadow-lg shadow-purple-700/15">
@@ -872,13 +1147,15 @@ export default async function ProgrammePage({
                 </span>
 
                 <h2 className="mt-6 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
-                  Progress that develops gradually through everyday practice.
+                  Progress develops gradually through
+                  everyday practice.
                 </h2>
 
                 <p className="mt-6 max-w-2xl text-base leading-8 text-purple-100 sm:text-lg">
-                  Every child develops at a different pace. Teachers focus on
-                  consistent participation, growing confidence and steady
-                  improvement rather than comparing one child with another.
+                  Every child develops at a different pace.
+                  Teachers focus on participation, confidence
+                  and steady improvement rather than
+                  comparing one child with another.
                 </p>
 
                 <div className="mt-8 grid gap-3 sm:grid-cols-2">
@@ -889,6 +1166,7 @@ export default async function ProgrammePage({
                     >
                       <CheckCircle2
                         size={19}
+                        aria-hidden="true"
                         className="shrink-0 text-yellow-300"
                       />
 
@@ -902,7 +1180,10 @@ export default async function ProgrammePage({
 
               <div className="rounded-[36px] border border-white/15 bg-white/10 p-7 backdrop-blur sm:p-9">
                 <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow-300 text-purple-950">
-                  <HeartHandshake size={28} />
+                  <HeartHandshake
+                    size={28}
+                    aria-hidden="true"
+                  />
                 </span>
 
                 <h3 className="mt-6 text-2xl font-black">
@@ -910,20 +1191,23 @@ export default async function ProgrammePage({
                 </h3>
 
                 <p className="mt-4 text-sm leading-7 text-purple-100 sm:text-base">
-                  Parents can share information about the child’s routine,
-                  interests, comfort needs and previous school experience. This
-                  helps teachers understand the child more personally.
+                  Parents can share information about their
+                  child’s routine, interests, comfort needs
+                  and previous school experience. This helps
+                  teachers understand the child more
+                  personally.
                 </p>
 
                 <div className="mt-7 rounded-[24px] border border-white/10 bg-white/10 p-5">
                   <p className="text-sm font-black text-yellow-300">
-                    Parent-teacher communication
+                    Supporting progress at home
                   </p>
 
                   <p className="mt-2 text-sm leading-7 text-purple-100">
-                    Regular interaction helps families understand classroom
-                    progress and support learning at home without unnecessary
-                    pressure.
+                    Simple conversation, reading, play and
+                    regular routines at home can reinforce
+                    classroom learning without placing
+                    unnecessary pressure on the child.
                   </p>
                 </div>
               </div>
@@ -931,78 +1215,86 @@ export default async function ProgrammePage({
           </div>
         </section>
 
-        {/* Trial Section */}
+        {/* Programme Suitability */}
         <section className="section bg-white">
           <div className="container">
-            <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-              <div className="relative overflow-hidden rounded-[36px]">
-                <Image
-                  src="/images/programmes/programme-trial.jpg"
-                  alt={`Three-day trial for the ${programme.title} programme at Kidzee Dwarka`}
-                  width={900}
-                  height={700}
-                  className="h-[430px] w-full object-cover sm:h-[520px]"
+            <div className="grid items-center gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:gap-16">
+              <div className="relative">
+                <div
+                  aria-hidden="true"
+                  className="absolute -left-5 -top-5 h-24 w-24 rounded-[28px] bg-yellow-200/70"
                 />
 
-                <div className="absolute inset-x-5 bottom-5 rounded-[24px] bg-white/90 p-5 shadow-xl backdrop-blur">
-                  <p className="text-sm font-black text-purple-800">
-                    Three-day preschool trial
-                  </p>
+                <div
+                  aria-hidden="true"
+                  className="absolute -bottom-6 -right-6 h-32 w-32 rounded-full bg-purple-200/45"
+                />
 
-                  <p className="mt-1 text-sm leading-6 text-slate-600">
-                    Let your child experience the classroom routine, teachers
-                    and environment before regular admission.
-                  </p>
+                <div className="relative overflow-hidden rounded-[36px] border-8 border-white shadow-2xl shadow-purple-950/10">
+                  <Image
+                    src={programme.image}
+                    alt={`Child participating in the ${programme.title} programme at Kidzee Sector 12 Dwarka`}
+                    width={900}
+                    height={760}
+                    sizes="(max-width: 1024px) 100vw, 45vw"
+                    className="h-[430px] w-full object-cover sm:h-[540px]"
+                  />
+
+                  <div className="absolute inset-x-5 bottom-5 rounded-[24px] border border-white/60 bg-white/90 p-5 shadow-xl backdrop-blur">
+                    <p className="text-sm font-black text-purple-800">
+                      Every child develops differently
+                    </p>
+
+                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                      Age provides a starting point, while
+                      readiness and previous experience help
+                      complete the picture.
+                    </p>
+                  </div>
                 </div>
               </div>
 
               <div>
-                <span className="eyebrow">Experience the programme first</span>
+                <span className="eyebrow">
+                  Choosing the right stage
+                </span>
 
                 <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                  A trial can make the admission decision easier.
+                  Is {programme.title} right for my child?
                 </h2>
 
                 <p className="mt-6 text-base leading-8 text-slate-600 sm:text-lg">
-                  A school brochure can explain the programme, but a trial lets
-                  you observe how your child responds to the teachers,
-                  classroom routine and environment.
+                  {detail.suitabilityIntro}
                 </p>
 
-                <ul className="mt-7 grid gap-4">
-                  {[
-                    "Three trial days",
-                    "Approximately two hours per day",
-                    "Experience the regular classroom environment",
-                    "Meet the teachers",
-                    "Observe your child’s comfort and participation",
-                  ].map((item) => (
-                    <li
+                <div className="mt-7 grid gap-3">
+                  {detail.suitabilityPoints.map((item) => (
+                    <div
                       key={item}
-                      className="flex items-center gap-3 rounded-2xl border border-purple-100 bg-[#faf8ff] px-5 py-4"
+                      className="flex items-start gap-3 rounded-[20px] border border-purple-100 bg-[#faf8ff] px-5 py-4"
                     >
                       <CheckCircle2
                         size={19}
-                        className="shrink-0 text-purple-700"
+                        aria-hidden="true"
+                        className="mt-0.5 shrink-0 text-purple-700"
                       />
-                      <span className="text-sm font-bold text-slate-700">
-                        {item}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
 
-                <a
-                  href={`https://wa.me/919667038673?text=Hello%20Kidzee%20Sector%2012%20Dwarka%2C%20I%20would%20like%20to%20book%20a%203-day%20trial%20for%20the%20${encodeURIComponent(
-                    programme.title,
-                  )}%20programme.`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-purple-700 px-7 py-3.5 text-sm font-black text-white transition hover:bg-purple-800"
-                >
-                  Book a 3-Day Trial
-                  <ArrowRight size={17} />
-                </a>
+                      <p className="text-sm font-bold leading-7 text-slate-700 sm:text-base">
+                        {item}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 rounded-[24px] border border-yellow-200 bg-yellow-50 p-5">
+                  <p className="text-sm font-black text-purple-950">
+                    A useful point for parents
+                  </p>
+
+                  <p className="mt-2 text-sm leading-7 text-slate-700">
+                    {detail.suitabilityNote}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -1012,10 +1304,12 @@ export default async function ProgrammePage({
         <section className="section bg-[#faf8ff]">
           <div className="container">
             <div className="mx-auto max-w-3xl text-center">
-              <span className="eyebrow">Explore all programmes</span>
+              <span className="eyebrow">
+                Explore other age groups
+              </span>
 
               <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl">
-                Find the programme that matches your child’s age.
+                Compare the next or previous learning stage.
               </h2>
             </div>
 
@@ -1028,9 +1322,10 @@ export default async function ProgrammePage({
                   <div className="overflow-hidden">
                     <Image
                       src={item.image}
-                      alt={`${item.title} programme at Kidzee Dwarka`}
+                      alt={`${item.title} programme at Kidzee Sector 12 Dwarka`}
                       width={700}
                       height={500}
+                      sizes="(max-width: 768px) 100vw, 33vw"
                       className="h-56 w-full object-cover transition duration-700 group-hover:scale-[1.04]"
                     />
                   </div>
@@ -1050,10 +1345,13 @@ export default async function ProgrammePage({
 
                     <Link
                       href={`/programmes/${item.slug}`}
-                      className="mt-5 inline-flex items-center gap-2 text-sm font-black text-purple-700 transition hover:text-purple-900"
+                      className="mt-5 inline-flex items-center gap-2 text-sm font-black text-purple-700 transition hover:text-purple-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700/30"
                     >
                       Explore {item.title}
-                      <ArrowRight size={16} />
+                      <ArrowRight
+                        size={16}
+                        aria-hidden="true"
+                      />
                     </Link>
                   </div>
                 </article>
@@ -1063,10 +1361,10 @@ export default async function ProgrammePage({
             <div className="mt-8 text-center">
               <Link
                 href="/programmes"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-purple-200 bg-white px-7 py-3.5 text-sm font-black text-purple-800 transition hover:bg-purple-50"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-purple-200 bg-white px-7 py-3.5 text-sm font-black text-purple-800 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-purple-700/20"
               >
-                View All Programmes
-                <ArrowRight size={17} />
+                Compare All Programmes
+                <ArrowRight size={17} aria-hidden="true" />
               </Link>
             </div>
           </div>
@@ -1076,7 +1374,9 @@ export default async function ProgrammePage({
         <section className="section bg-white">
           <div className="container">
             <div className="mx-auto max-w-3xl text-center">
-              <span className="eyebrow">{programme.title} questions</span>
+              <span className="eyebrow">
+                {programme.title} questions
+              </span>
 
               <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
                 Helpful information for parents.
@@ -1094,7 +1394,10 @@ export default async function ProgrammePage({
                       {faq.question}
                     </h3>
 
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-purple-100 text-xl font-black text-purple-800 transition group-open:rotate-45">
+                    <span
+                      aria-hidden="true"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-purple-100 text-xl font-black text-purple-800 transition group-open:rotate-45"
+                    >
                       +
                     </span>
                   </summary>
@@ -1108,53 +1411,52 @@ export default async function ProgrammePage({
           </div>
         </section>
 
-        {/* Final Programme CTA */}
+        {/* Programme-Specific CTA */}
         <section className="section bg-[#faf8ff]">
           <div className="container">
-            <div className="overflow-hidden rounded-[40px] bg-[linear-gradient(135deg,#5b2a86_0%,#3b145f_100%)] px-7 py-10 text-white sm:px-10 sm:py-12 lg:px-14">
-              <div className="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
+            <div className="overflow-hidden rounded-[40px] bg-[linear-gradient(135deg,#5b2a86_0%,#3b145f_100%)] px-7 py-10 text-white shadow-[0_28px_80px_rgba(45,23,54,0.18)] sm:px-10 sm:py-12 lg:px-14">
+              <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
                 <div>
                   <span className="text-xs font-black uppercase tracking-[0.18em] text-yellow-300">
-                    {programme.title} admissions
+                    {detail.ctaEyebrow}
                   </span>
 
                   <h2 className="mt-4 max-w-3xl text-3xl font-black leading-tight sm:text-4xl">
-                    Visit the centre and understand the programme personally.
+                    {detail.ctaTitle}
                   </h2>
 
                   <p className="mt-4 max-w-2xl text-base leading-8 text-purple-100">
-                    Meet the teachers, explore the classroom and discuss your
-                    child’s age, readiness and current seat availability.
+                    {detail.ctaDescription}
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-                  <Link
-                    href="/contact"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-yellow-300 px-7 py-3.5 text-sm font-black text-purple-950 transition hover:bg-yellow-200"
+                <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap lg:flex-col lg:flex-nowrap">
+                  <a
+                    href={programmeWhatsApp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-yellow-300 px-7 py-3.5 text-sm font-black text-purple-950 transition duration-300 hover:-translate-y-0.5 hover:bg-yellow-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-300/35 sm:w-auto"
                   >
-                    Book a School Visit
-                    <ArrowRight size={17} />
-                  </Link>
+                    <MessageCircle
+                      size={17}
+                      aria-hidden="true"
+                    />
+
+                    Ask About {programme.title}
+                  </a>
 
                   <a
-                    href={`https://wa.me/919667038673?text=Hello%20Kidzee%20Sector%2012%20Dwarka%2C%20please%20share%20the%20admission%20details%20for%20the%20${encodeURIComponent(
-                      programme.title,
-                    )}%20programme.`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-black text-white transition hover:bg-white/15"
+                    href={`tel:${site.phone}`}
+                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-black text-white transition duration-300 hover:-translate-y-0.5 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/20 sm:w-auto"
                   >
-                    <MessageCircle size={17} />
-                    Ask on WhatsApp
+                    <Phone size={17} aria-hidden="true" />
+                    Call Admission Team
                   </a>
                 </div>
               </div>
             </div>
           </div>
         </section>
-
-        <CTA />
       </main>
     </PageShell>
   );

@@ -13,9 +13,8 @@ import { programmes } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Preschool Programmes in Sector 12 Dwarka",
-  description:
-    "Explore Playgroup, Nursery, Junior KG and Senior KG programmes at Kidzee Sector 12, Dwarka. Discover age-appropriate learning, focused teacher-child ratios, meals, daycare and a three-day trial.",
-  keywords: [
+description:
+  "Explore Playgroup, Nursery, Junior KG and Senior KG programmes at Kidzee Sector 12, Dwarka. Learn about age groups, curriculum, learning approach and school readiness for children aged 2 to 6 years.",  keywords: [
     "preschool programmes in Dwarka",
     "Playgroup in Sector 12 Dwarka",
     "Nursery in Sector 12 Dwarka",

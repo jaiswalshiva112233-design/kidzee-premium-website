@@ -1,36 +1,35 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
-import PageShell from "@/components/PageShell";
-import { CTA } from "@/components/HomeSections";
 import {
   ArrowRight,
+  BedDouble,
   BookOpenCheck,
-  BusFront,
   CheckCircle2,
   Clock3,
   HeartHandshake,
-  Home,
   MessageCircle,
   MoonStar,
-  Music2,
   Palette,
   Phone,
   ShieldCheck,
   Sparkles,
-  Utensils,
+  UserRoundCheck,
 } from "lucide-react";
+
+import PageShell from "@/components/PageShell";
+import Button from "@/components/ui/Button";
+import Container from "@/components/ui/Container";
+import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Daycare in Sector 12 Dwarka",
   description:
-    "Explore caring daycare in Sector 12B, Dwarka from 12:30 PM to 7:00 PM, with rest, indoor play, guided activities, homework support, meal options and transport.",
+    "Daycare at Kidzee Sector 12B, Dwarka from 12:30 PM to 7:00 PM, with time for lunch, rest, play, creative activities and homework support.",
   keywords: [
     "daycare in Sector 12 Dwarka",
     "daycare in Dwarka",
     "daycare Sector 12B Dwarka",
     "after school daycare Dwarka",
-    "preschool daycare Dwarka",
     "daycare till 7 PM Dwarka",
     "Kidzee daycare Dwarka",
     "homework support daycare Dwarka",
@@ -39,10 +38,12 @@ export const metadata: Metadata = {
     canonical: "/daycare",
   },
   openGraph: {
-    title: "Daycare in Sector 12 Dwarka",
+    title: "Daycare in Sector 12 Dwarka | Kidzee",
     description:
-      "A comfortable and engaging daycare routine at Kidzee Sector 12, Dwarka, with care available until 7:00 PM.",
+      "A comfortable afternoon routine with rest, play, activities and homework support at Kidzee Sector 12B, Dwarka.",
     url: "/daycare",
+    siteName: site.shortName,
+    locale: "en_IN",
     type: "website",
     images: [
       {
@@ -55,278 +56,233 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Daycare in Sector 12 Dwarka",
+    title: "Daycare in Sector 12 Dwarka | Kidzee",
     description:
-      "Daycare care, rest, play and guided activities until 7:00 PM at Kidzee Sector 12, Dwarka.",
+      "Daycare until 7:00 PM with rest, activities, play and homework support.",
     images: ["/images/daycare/daycare-main.jpg"],
   },
 };
 
-const daycareHighlights = [
+const quickFacts = [
   {
     icon: Clock3,
-    title: "Care until 7:00 PM",
+    title: "Open until 7:00 PM",
     description:
-      "A dependable afternoon and evening routine for working families.",
+      "Families can discuss the hours they need according to their child's school and home routine.",
   },
   {
-    icon: HeartHandshake,
-    title: "Personal attention",
+    icon: MoonStar,
+    title: "A quieter time after lunch",
     description:
-      "Children are supported through meals, rest, activities and transitions.",
+      "Younger children can sleep, while those who stay awake are given something calm to do.",
   },
   {
     icon: Sparkles,
-    title: "Engaging activities",
+    title: "Something different each afternoon",
     description:
-      "Age-appropriate play and guided experiences help children stay active.",
+      "Stories, art, music, games and free play keep the day interesting without making it tiring.",
   },
   {
-    icon: ShieldCheck,
-    title: "Supervised environment",
+    icon: UserRoundCheck,
+    title: "Homework support",
     description:
-      "Children remain in a familiar, child-friendly and closely monitored space.",
+      "School-going children can complete age-appropriate homework before they go home.",
   },
-];
+] as const;
 
-const dailyRoutine = [
+const routine = [
   {
-    time: "12:30 PM",
-    title: "Arrival and settling",
+    time: "12:30 PM onwards",
+    title: "Arrival and settling in",
     description:
-      "Children transition into daycare, keep their belongings and settle into the afternoon routine.",
-    icon: Home,
+      "Children put away their belongings, wash their hands and settle into the afternoon without being rushed.",
+    icon: HeartHandshake,
   },
   {
     time: "Early afternoon",
-    title: "Lunch and refreshment",
+    title: "Lunch together",
     description:
-      "Children receive time to eat comfortably, wash up and prepare for the next part of the day.",
-    icon: Utensils,
+      "Children have enough time to eat comfortably and talk to their friends before moving on to the quieter part of the day.",
+    icon: MoonStar,
   },
   {
     time: "After lunch",
-    title: "Rest and quiet time",
+    title: "Sleep or quiet time",
     description:
-      "A calm period allows younger children to rest and others to recharge through quiet activities.",
-    icon: MoonStar,
+      "Younger children may sleep. Children who do not nap can look at books, draw or sit with another quiet activity.",
+    icon: BedDouble,
   },
   {
     time: "Later afternoon",
-    title: "Play and enrichment",
+    title: "Play and activities",
     description:
-      "Children participate in indoor play, storytelling, creative work, movement and guided activities.",
+      "Depending on the day, children may paint, listen to stories, dance, build with blocks, solve puzzles or spend time in supervised play.",
     icon: Palette,
   },
   {
-    time: "Before dispersal",
-    title: "Homework and evening routine",
+    time: "Before going home",
+    title: "Homework and winding down",
     description:
-      "School-going children may receive age-appropriate homework support before pickup or transport.",
+      "School-going children can work on their homework while younger children move into lighter activities before pickup.",
     icon: BookOpenCheck,
   },
-];
+] as const;
 
-const careFeatures = [
+const parentQuestions = [
   {
-    icon: Clock3,
-    title: "Flexible care plans",
-    description:
-      "Families may enquire about hourly daycare as well as the six-hour daycare plan.",
+    question: "Will my child spend the whole afternoon in one room?",
+    answer:
+      "No. The pace changes through the day. There is time for lunch, rest, creative activities, stories, games and play instead of one long classroom session.",
   },
   {
-    icon: Utensils,
-    title: "Meal options",
-    description:
-      "Lunch and evening snack options can be added according to the child’s daycare plan.",
+    question: "What happens if my child does not sleep?",
+    answer:
+      "A child does not have to sleep. Those who stay awake can look at books, draw or join a quiet activity while the younger children rest.",
   },
   {
-    icon: MoonStar,
-    title: "Calm rest routine",
-    description:
-      "Children receive time to relax in a supervised environment after preschool or school.",
+    question: "Can you help with homework?",
+    answer:
+      "Yes. School-going children can work on age-appropriate homework during the afternoon. Parents can also tell the teacher if something specific needs attention.",
   },
   {
-    icon: Palette,
-    title: "Creative experiences",
-    description:
-      "Art, craft, storytelling and hands-on activities keep children meaningfully engaged.",
+    question: "Can my child come after attending another school?",
+    answer:
+      "Yes, subject to the child's age, school timing and current availability. We first understand the daily schedule so the transition does not feel rushed.",
   },
-  {
-    icon: Music2,
-    title: "Movement and enrichment",
-    description:
-      "Activities may include dance, taekwondo and personality-development sessions.",
-  },
-  {
-    icon: BookOpenCheck,
-    title: "Homework support",
-    description:
-      "School-going children can receive assistance with age-appropriate homework and revision.",
-  },
-  {
-    icon: BusFront,
-    title: "Transport support",
-    description:
-      "Pickup and drop transport is available on selected routes, subject to confirmation.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Safe transitions",
-    description:
-      "Arrival, meals, rest, play and dispersal are handled through a structured daily routine.",
-  },
-];
-
-const plans = [
-  {
-    name: "Hourly Daycare",
-    price: "₹1,000",
-    suffix: "per hour, per month",
-    description:
-      "Suitable for families who need a shorter, fixed daycare duration during the month.",
-    features: [
-      "Choose the required number of hours",
-      "Supervised care and play",
-      "Suitable for regular short-duration care",
-      "Meal options available separately",
-    ],
-  },
-  {
-    name: "Six-Hour Daycare",
-    price: "₹6,000",
-    suffix: "per month",
-    description:
-      "Designed for families who need extended care during the afternoon and evening.",
-    featured: true,
-    features: [
-      "Daycare from 12:30 PM to 7:00 PM",
-      "Rest, play and guided activities",
-      "Homework support where applicable",
-      "Meal options available separately",
-    ],
-  },
-];
-
-const mealOptions = [
-  {
-    title: "Lunch",
-    price: "₹1,200 per month",
-  },
-  {
-    title: "Evening snack",
-    price: "₹1,000 per month",
-  },
-  {
-    title: "Lunch and evening snack",
-    price: "₹2,000 per month",
-  },
-];
+] as const;
 
 const faqs = [
   {
     question: "What are the daycare timings?",
     answer:
-      "Daycare is available from 12:30 PM until 7:00 PM. Parents can discuss their required duration with the centre team.",
+      "Daycare is available from 12:30 PM to 7:00 PM, Monday to Friday. Please speak with the centre team about the hours your family needs.",
   },
   {
-    question: "Can parents choose daycare for only a few hours?",
+    question: "Can my child join daycare after another school?",
     answer:
-      "Yes. An hourly daycare plan is available for families who need a shorter fixed duration. The applicable monthly fee depends on the number of hours selected.",
-  },
-  {
-    question: "Is a full daycare plan available?",
-    answer:
-      "Yes. The six-hour daycare plan covers care from 12:30 PM until 7:00 PM.",
-  },
-  {
-    question: "Are meals included in the daycare fee?",
-    answer:
-      "Daycare meals are optional and charged separately. Families may choose lunch, an evening snack or both.",
-  },
-  {
-    question: "What activities are included in daycare?",
-    answer:
-      "The routine may include indoor play, art and craft, storytelling, dance, taekwondo, personality development and other age-appropriate guided activities.",
+      "Yes. We will need to know the child's age, school timing and expected arrival time before confirming the routine.",
   },
   {
     question: "Is homework support available?",
     answer:
-      "Yes. Age-appropriate homework support is available for school-going children as part of the daycare routine.",
+      "Yes. School-going children can receive help with age-appropriate homework during their daycare hours.",
   },
   {
-    question: "Is daycare available for children attending another school?",
+    question: "Can my child sleep during daycare?",
     answer:
-      "Families with school-going children may enquire about after-school daycare, subject to the child’s age, routine and current availability.",
+      "Yes. Younger children can sleep after lunch. Children who do not nap are given a quiet alternative.",
   },
   {
-    question: "Is transport available for daycare children?",
+    question: "What should my child bring?",
     answer:
-      "Pickup and drop transport is available on selected routes. Final availability depends on the child’s location and the current transport route.",
+      "This depends on the child's age and length of stay. The centre team will tell you whether to send an extra set of clothes, a water bottle or any other personal item.",
   },
-];
+  {
+    question: "How can I check availability?",
+    answer:
+      "Call or WhatsApp the centre with your child's age, school timing and expected daycare hours. The team will check the current availability.",
+  },
+] as const;
+
+const daycareSchema = {
+  "@context": "https://schema.org",
+  "@type": "ChildCare",
+  name: `${site.shortName} Daycare`,
+  url: `${site.url}/daycare`,
+  telephone: site.phone,
+  image: `${site.url}/images/daycare/daycare-main.jpg`,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Building No. 19, Block B, Sector 12B",
+    addressLocality: "Dwarka",
+    addressRegion: "Delhi",
+    postalCode: site.postalCode,
+    addressCountry: site.country,
+  },
+  openingHoursSpecification: {
+    "@type": "OpeningHoursSpecification",
+    dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    opens: site.daycareHours.opens,
+    closes: site.daycareHours.closes,
+  },
+};
 
 export default function DaycarePage() {
   return (
     <PageShell>
       <main className="overflow-hidden">
-        {/* Hero */}
-        <section className="relative bg-[linear-gradient(135deg,#faf7ff_0%,#ffffff_52%,#fff7d7_100%)] pb-16 pt-12 sm:pb-20 sm:pt-16 lg:pb-24 lg:pt-20">
-          <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-purple-200/35 blur-3xl" />
-          <div className="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-yellow-200/40 blur-3xl" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(daycareSchema),
+          }}
+        />
 
-          <div className="container relative">
-            <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+        {/* HERO */}
+        <section className="relative isolate overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(91,42,134,0.13),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(246,200,75,0.18),transparent_30%),#FFFFFF] py-14 sm:py-20 lg:py-24">
+          <div className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-[#EADDF1]/70 blur-3xl" />
+          <div className="pointer-events-none absolute -right-28 bottom-0 h-80 w-80 rounded-full bg-[#F6C84B]/20 blur-3xl" />
+
+          <Container className="relative">
+            <div className="grid items-center gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16">
               <div>
-                <span className="eyebrow">Daycare from 12:30 PM to 7:00 PM</span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-[#E3D5EA] bg-white/90 px-4 py-2 text-sm font-extrabold text-[#5B2A86] shadow-[0_8px_24px_rgba(40,16,52,0.06)]">
+                  <Clock3 aria-hidden="true" size={16} />
+                  Daycare from 12:30 PM to 7:00 PM
+                </span>
 
-                <h1 className="title mt-5 max-w-4xl">
-                  Daycare that keeps children comfortable, active and cared
-                  for.
+                <h1 className="mt-6 max-w-3xl text-[2.65rem] font-black leading-[1.04] tracking-[-0.045em] text-[#281034] sm:text-5xl lg:text-[4rem]">
+                  A comfortable afternoon until it is time to go home.
                 </h1>
 
-                <p className="lead mt-6 max-w-2xl">
-                  A dependable daycare routine for working families, with time
-                  for food, rest, indoor play, guided activities, homework
-                  support and personal attention.
+                <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5F5963] sm:text-xl sm:leading-9">
+                  After preschool or school, children have time to eat, rest,
+                  play, finish homework and enjoy the rest of the day without
+                  being hurried from one thing to another.
                 </p>
 
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <a
-                    href="https://wa.me/919667038673?text=Hello%20Kidzee%20Sector%2012%20Dwarka%2C%20I%20would%20like%20to%20enquire%20about%20daycare%20for%20my%20child."
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-purple-700 px-7 py-3.5 text-sm font-black text-white shadow-lg shadow-purple-700/20 transition hover:-translate-y-0.5 hover:bg-purple-800"
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                  <Button
+                    href={site.whatsappDaycare}
+                    external
+                    variant="primary"
+                    size="lg"
+                    leftIcon={<MessageCircle aria-hidden="true" size={19} />}
+                    rightIcon={<ArrowRight aria-hidden="true" size={19} />}
+                    ariaLabel="Ask Kidzee Sector 12 Dwarka about daycare availability"
                   >
-                    <MessageCircle size={18} />
-                    Enquire About Daycare
-                  </a>
+                    Ask About Daycare
+                  </Button>
 
-                  <a
-                    href="tel:+919667038673"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-purple-200 bg-white px-7 py-3.5 text-sm font-black text-purple-800 transition hover:border-purple-300 hover:bg-purple-50"
+                  <Button
+                    href={`tel:${site.phone}`}
+                    variant="secondary"
+                    size="lg"
+                    leftIcon={<Phone aria-hidden="true" size={19} />}
+                    ariaLabel={`Call ${site.shortName}`}
                   >
-                    <Phone size={18} />
-                    Call +91 96670 38673
-                  </a>
+                    {site.phoneDisplay}
+                  </Button>
                 </div>
 
                 <div className="mt-9 grid max-w-2xl gap-3 sm:grid-cols-2">
                   {[
-                    "Hourly and six-hour plans",
-                    "Daycare available until 7 PM",
-                    "Meal options available",
-                    "Transport on selected routes",
+                    "Daycare available until 7:00 PM",
+                    "Sleep or quiet time after lunch",
+                    "Homework help for school-going children",
+                    "Activities suited to the child's age",
                   ].map((item) => (
                     <div
                       key={item}
-                      className="flex items-center gap-3 rounded-2xl border border-purple-100 bg-white/90 px-4 py-3 shadow-sm"
+                      className="flex items-center gap-3 rounded-2xl border border-[#E9E0ED] bg-white/90 px-4 py-3 shadow-[0_8px_22px_rgba(40,16,52,0.05)]"
                     >
                       <CheckCircle2
+                        aria-hidden="true"
                         size={18}
-                        className="shrink-0 text-purple-700"
+                        className="shrink-0 text-[#5B2A86]"
                       />
-                      <span className="text-sm font-bold text-slate-700">
+
+                      <span className="text-sm font-bold leading-6 text-[#4F4852]">
                         {item}
                       </span>
                     </div>
@@ -335,566 +291,324 @@ export default function DaycarePage() {
               </div>
 
               <div className="relative">
-                <div className="absolute -left-6 -top-6 h-24 w-24 rounded-[30px] bg-yellow-300/60" />
-                <div className="absolute -bottom-6 -right-6 h-32 w-32 rounded-full bg-purple-300/30" />
+                <div className="absolute -left-6 -top-6 h-24 w-24 rounded-[30px] bg-[#F6C84B]/55" />
+                <div className="absolute -bottom-7 -right-7 h-36 w-36 rounded-full bg-[#DCCBE5]/60" />
 
-                <div className="relative overflow-hidden rounded-[38px] border-8 border-white bg-white shadow-2xl shadow-purple-950/10">
+                <div className="group relative min-h-[500px] overflow-hidden rounded-[38px] border-[8px] border-white bg-white shadow-[0_28px_80px_rgba(40,16,52,0.15)] sm:min-h-[590px]">
                   <Image
                     src="/images/daycare/daycare-main.jpg"
-                    alt="Children enjoying daycare at Kidzee Sector 12 Dwarka"
-                    width={900}
-                    height={760}
+                    alt="Child taking part in a daycare activity at Kidzee Sector 12 Dwarka"
+                    fill
                     priority
-                    className="h-[460px] w-full object-cover sm:h-[560px]"
+                    sizes="(max-width: 1024px) 92vw, 46vw"
+                    className="object-cover transition duration-700 ease-out group-hover:scale-[1.025]"
                   />
 
-                  <div className="absolute bottom-5 left-5 right-5 rounded-[24px] border border-white/50 bg-white/90 p-5 shadow-xl backdrop-blur">
-                    <p className="text-sm font-black text-purple-800">
-                      A familiar routine after school
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#281034]/82 via-transparent to-transparent" />
+
+                  <div className="absolute inset-x-5 bottom-5 rounded-[26px] border border-white/15 bg-[#281034]/82 p-5 text-white backdrop-blur-md sm:p-6">
+                    <p className="text-sm font-black uppercase tracking-[0.13em] text-[#F6C84B]">
+                      A routine that does not feel rushed
                     </p>
 
-                    <p className="mt-1 text-sm leading-6 text-slate-600">
-                      Children receive time to eat, rest, play, learn and settle
-                      comfortably before going home.
+                    <p className="mt-2 text-base leading-7 text-white/90">
+                      Teachers can adjust the pace when a child is tired, wants
+                      a little quiet time or needs help settling into the
+                      afternoon.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          </Container>
         </section>
 
-        {/* Highlights */}
-        <section className="relative z-10 -mt-3 bg-white pb-8 sm:-mt-5">
-          <div className="container">
+        {/* QUICK FACTS */}
+        <section className="bg-white pb-10 sm:pb-14">
+          <Container>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {daycareHighlights.map((item) => {
-                const Icon = item.icon;
-
-                return (
-                  <article
-                    key={item.title}
-                    className="rounded-[28px] border border-purple-100 bg-white p-6 shadow-lg shadow-purple-950/5"
-                  >
-                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-purple-700">
-                      <Icon size={23} />
-                    </span>
-
-                    <h2 className="mt-5 text-lg font-black text-slate-950">
-                      {item.title}
-                    </h2>
-
-                    <p className="mt-2 text-sm leading-7 text-slate-600">
-                      {item.description}
-                    </p>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Daycare Approach */}
-        <section className="section bg-white">
-          <div className="container">
-            <div className="grid items-center gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
-              <div>
-                <span className="eyebrow">More than after-school supervision</span>
-
-                <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                  A balanced routine that respects each child’s energy and
-                  comfort.
-                </h2>
-
-                <p className="mt-6 text-base leading-8 text-slate-600 sm:text-lg">
-                  After preschool or formal school, children need more than a
-                  place to wait. They need time to eat without rushing, relax,
-                  move, play and reconnect with a predictable routine.
-                </p>
-
-                <p className="mt-5 text-base leading-8 text-slate-600 sm:text-lg">
-                  Our daycare schedule is planned to balance active and quiet
-                  periods. Younger children can rest, while older children can
-                  participate in guided activities and receive homework support
-                  where required.
-                </p>
-
-                <div className="mt-8 rounded-[28px] border border-yellow-200 bg-[#fff9e7] p-6">
-                  <p className="text-sm font-black uppercase tracking-[0.14em] text-purple-800">
-                    Designed for working families
-                  </p>
-
-                  <p className="mt-3 text-sm leading-7 text-slate-700 sm:text-base">
-                    Parents can discuss the child’s school timing, pickup
-                    requirement, meal preferences and required number of daycare
-                    hours with the centre team.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid gap-5 sm:grid-cols-2">
-                <Image
-                  src="/images/daycare/daycare-rest.jpg"
-                  alt="Calm rest area for daycare children at Kidzee Dwarka"
-                  width={700}
-                  height={760}
-                  className="h-[350px] w-full rounded-[32px] object-cover sm:h-[470px]"
-                />
-
-                <div className="grid gap-5">
-                  <Image
-                    src="/images/daycare/daycare-activity.jpg"
-                    alt="Children participating in a daycare activity"
-                    width={700}
-                    height={500}
-                    className="h-[225px] w-full rounded-[32px] object-cover"
-                  />
-
-                  <Image
-                    src="/images/daycare/daycare-play.jpg"
-                    alt="Indoor play during daycare at Kidzee Sector 12 Dwarka"
-                    width={700}
-                    height={500}
-                    className="h-[225px] w-full rounded-[32px] object-cover"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Daily Routine */}
-        <section className="section bg-[#faf8ff]">
-          <div className="container">
-            <div className="mx-auto max-w-3xl text-center">
-              <span className="eyebrow">A balanced daily rhythm</span>
-
-              <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                A predictable flow from arrival to dispersal.
-              </h2>
-
-              <p className="mt-5 text-base leading-8 text-slate-600 sm:text-lg">
-                The exact routine may vary by age and school timing, but each
-                child moves through a familiar sequence of care, rest and
-                engagement.
-              </p>
-            </div>
-
-            <div className="mx-auto mt-12 max-w-5xl">
-              {dailyRoutine.map((item, index) => {
-                const Icon = item.icon;
-
-                return (
-                  <div
-                    key={item.title}
-                    className="relative grid gap-5 pb-10 last:pb-0 sm:grid-cols-[120px_56px_1fr]"
-                  >
-                    {index !== dailyRoutine.length - 1 && (
-                      <span className="absolute left-[147px] top-14 hidden h-[calc(100%-2rem)] w-px bg-purple-200 sm:block" />
-                    )}
-
-                    <div className="pt-3 text-sm font-black text-purple-700 sm:text-right">
-                      {item.time}
-                    </div>
-
-                    <span className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-700 text-white shadow-lg shadow-purple-700/15">
-                      <Icon size={24} />
-                    </span>
-
-                    <article className="rounded-[28px] border border-purple-100 bg-white p-6 shadow-sm">
-                      <h3 className="text-xl font-black text-slate-950">
-                        {item.title}
-                      </h3>
-
-                      <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
-                        {item.description}
-                      </p>
-                    </article>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Care Features */}
-        <section className="section bg-white">
-          <div className="container">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-3xl">
-                <span className="eyebrow">What families can expect</span>
-
-                <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                  Care that supports the whole afternoon.
-                </h2>
-
-                <p className="mt-5 text-base leading-8 text-slate-600 sm:text-lg">
-                  Each part of the daycare experience is planned to make
-                  children feel secure while keeping the routine useful and
-                  enjoyable.
-                </p>
-              </div>
-
-              <a
-                href="https://wa.me/919667038673?text=Hello%20Kidzee%20Sector%2012%20Dwarka%2C%20please%20share%20the%20daycare%20plans%20and%20availability."
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex w-fit items-center gap-2 text-sm font-black text-purple-700 transition hover:text-purple-900"
-              >
-                Ask about availability
-                <ArrowRight size={17} />
-              </a>
-            </div>
-
-            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {careFeatures.map((feature) => {
-                const Icon = feature.icon;
-
-                return (
-                  <article
-                    key={feature.title}
-                    className="group rounded-[30px] border border-purple-100 bg-[#fcfbff] p-7 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-xl hover:shadow-purple-950/5"
-                  >
-                    <span className="flex h-13 w-13 items-center justify-center rounded-2xl bg-purple-100 p-3 text-purple-700 transition group-hover:bg-purple-700 group-hover:text-white">
-                      <Icon size={25} strokeWidth={1.8} />
-                    </span>
-
-                    <h3 className="mt-6 text-xl font-black text-slate-950">
-                      {feature.title}
-                    </h3>
-
-                    <p className="mt-3 text-sm leading-7 text-slate-600">
-                      {feature.description}
-                    </p>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Plans and Pricing */}
-        <section className="section bg-purple-950 text-white">
-          <div className="container">
-            <div className="mx-auto max-w-3xl text-center">
-              <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-yellow-300">
-                Daycare plans
-              </span>
-
-              <h2 className="mt-6 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
-                Choose a plan according to your family’s routine.
-              </h2>
-
-              <p className="mt-5 text-base leading-8 text-purple-100 sm:text-lg">
-                Speak with the centre team to confirm availability, suitable
-                timings and any additional meal or transport requirements.
-              </p>
-            </div>
-
-            <div className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-2">
-              {plans.map((plan) => (
+              {quickFacts.map(({ icon: Icon, title, description }) => (
                 <article
-                  key={plan.name}
-                  className={`relative rounded-[34px] border p-7 sm:p-9 ${
-                    plan.featured
-                      ? "border-yellow-300 bg-white text-slate-950"
-                      : "border-white/15 bg-white/10 text-white"
-                  }`}
+                  key={title}
+                  className="rounded-[28px] border border-[#E9E0ED] bg-white p-6 shadow-[0_18px_50px_rgba(40,16,52,0.07)]"
                 >
-                  {plan.featured && (
-                    <span className="absolute -top-4 left-7 rounded-full bg-yellow-300 px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-purple-950">
-                      Extended care
-                    </span>
-                  )}
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F3EAF8] text-[#5B2A86]">
+                    <Icon aria-hidden="true" size={22} />
+                  </span>
 
-                  <h3
-                    className={`text-2xl font-black ${
-                      plan.featured ? "text-slate-950" : "text-white"
-                    }`}
-                  >
-                    {plan.name}
-                  </h3>
+                  <h2 className="mt-5 text-lg font-black tracking-[-0.02em] text-[#281034]">
+                    {title}
+                  </h2>
 
-                  <div className="mt-6">
-                    <span
-                      className={`text-4xl font-black ${
-                        plan.featured ? "text-purple-800" : "text-yellow-300"
-                      }`}
-                    >
-                      {plan.price}
-                    </span>
-
-                    <span
-                      className={`ml-2 text-sm ${
-                        plan.featured
-                          ? "text-slate-500"
-                          : "text-purple-200"
-                      }`}
-                    >
-                      {plan.suffix}
-                    </span>
-                  </div>
-
-                  <p
-                    className={`mt-5 text-sm leading-7 sm:text-base ${
-                      plan.featured ? "text-slate-600" : "text-purple-100"
-                    }`}
-                  >
-                    {plan.description}
+                  <p className="mt-2 text-sm leading-7 text-[#6C646F]">
+                    {description}
                   </p>
-
-                  <ul className="mt-7 grid gap-4">
-                    {plan.features.map((feature) => (
-                      <li
-                        key={feature}
-                        className={`flex items-start gap-3 text-sm leading-7 ${
-                          plan.featured ? "text-slate-700" : "text-purple-100"
-                        }`}
-                      >
-                        <CheckCircle2
-                          size={19}
-                          className={`mt-1 shrink-0 ${
-                            plan.featured
-                              ? "text-purple-700"
-                              : "text-yellow-300"
-                          }`}
-                        />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <a
-                    href={`https://wa.me/919667038673?text=Hello%20Kidzee%20Sector%2012%20Dwarka%2C%20I%20would%20like%20to%20enquire%20about%20the%20${encodeURIComponent(
-                      plan.name,
-                    )}.`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-full px-6 py-3.5 text-sm font-black transition ${
-                      plan.featured
-                        ? "bg-purple-700 text-white hover:bg-purple-800"
-                        : "bg-yellow-300 text-purple-950 hover:bg-yellow-200"
-                    }`}
-                  >
-                    Enquire About This Plan
-                  </a>
                 </article>
               ))}
             </div>
+          </Container>
+        </section>
 
-            <div className="mx-auto mt-10 max-w-5xl rounded-[32px] border border-white/15 bg-white/10 p-7 sm:p-9">
-              <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
-                <div>
-                  <span className="text-xs font-black uppercase tracking-[0.16em] text-yellow-300">
-                    Optional daycare meals
-                  </span>
+        {/* DAILY ROUTINE */}
+        <section className="relative overflow-hidden bg-[#F8F4FC] py-16 sm:py-20 lg:py-24">
+          <Container>
+            <div className="grid items-start gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:gap-16">
+              <div className="lg:sticky lg:top-28">
+                <span className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#5B2A86]">
+                  What the afternoon looks like
+                </span>
 
-                  <h3 className="mt-4 text-2xl font-black text-white">
-                    Add meals according to your child’s schedule.
-                  </h3>
+                <h2 className="mt-5 text-3xl font-black leading-tight tracking-[-0.035em] text-[#281034] sm:text-4xl lg:text-[2.75rem]">
+                  A familiar flow, with room for each child&apos;s own routine.
+                </h2>
 
-                  <p className="mt-3 text-sm leading-7 text-purple-100">
-                    Meal plans are charged separately from the daycare fee.
-                  </p>
-                </div>
+                <p className="mt-6 text-base leading-8 text-[#5F5963] sm:text-[1.05rem]">
+                  Not every child arrives or leaves at the same time. The day is
+                  therefore planned in parts, making it easier for children to
+                  join in without feeling that they have missed something.
+                </p>
 
-                <div className="grid gap-4 sm:grid-cols-3">
-                  {mealOptions.map((meal) => (
-                    <div
-                      key={meal.title}
-                      className="rounded-[24px] border border-white/10 bg-white/10 p-5"
+                <p className="mt-4 text-base leading-8 text-[#5F5963] sm:text-[1.05rem]">
+                  A shorter stay may include lunch, rest and play. Children who
+                  remain until evening also have time for activities, homework
+                  and a calmer end to the day.
+                </p>
+              </div>
+
+              <div className="rounded-[34px] border border-[#E3D5EA] bg-white p-5 shadow-[0_22px_65px_rgba(40,16,52,0.08)] sm:p-8">
+                <div className="relative space-y-2">
+                  <div className="absolute bottom-8 left-[23px] top-8 w-px bg-[#DCCBE5]" />
+
+                  {routine.map(({ time, title, description, icon: Icon }) => (
+                    <article
+                      key={`${time}-${title}`}
+                      className="group relative flex gap-4 rounded-[24px] p-3 transition duration-300 hover:bg-[#FAF7FC] sm:gap-5 sm:p-4"
                     >
-                      <Utensils size={22} className="text-yellow-300" />
+                      <span className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-4 border-white bg-[#F3EAF8] text-[#5B2A86] shadow-[0_8px_22px_rgba(40,16,52,0.08)] transition duration-300 group-hover:bg-[#5B2A86] group-hover:text-white">
+                        <Icon aria-hidden="true" size={19} />
+                      </span>
 
-                      <p className="mt-4 text-sm font-black text-white">
-                        {meal.title}
+                      <div className="pb-3">
+                        <p className="text-sm font-black text-[#5B2A86]">
+                          {time}
+                        </p>
+
+                        <h3 className="mt-1 text-xl font-black tracking-[-0.02em] text-[#281034]">
+                          {title}
+                        </h3>
+
+                        <p className="mt-2 text-sm leading-7 text-[#6C646F] sm:text-base">
+                          {description}
+                        </p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Container>
+        </section>
+
+        {/* PARENT QUESTIONS */}
+        <section className="bg-white py-16 sm:py-20 lg:py-24">
+          <Container>
+            <div className="mx-auto max-w-3xl text-center">
+              <span className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#5B2A86]">
+                Before your child joins
+              </span>
+
+              <h2 className="mt-5 text-3xl font-black leading-tight tracking-[-0.035em] text-[#281034] sm:text-4xl lg:text-[2.75rem]">
+                The things parents usually want to know first.
+              </h2>
+
+              <p className="mt-5 text-base leading-8 text-[#5F5963] sm:text-lg">
+                A short conversation about your child&apos;s habits, school
+                timing and usual afternoon helps us understand what will work
+                best.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-5 lg:grid-cols-2">
+              {parentQuestions.map((item, index) => (
+                <article
+                  key={item.question}
+                  className="rounded-[30px] border border-[#E9E0ED] bg-white p-6 shadow-[0_18px_50px_rgba(40,16,52,0.06)] sm:p-8"
+                >
+                  <div className="flex items-start gap-4">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FFF4CC] text-sm font-black text-[#281034]">
+                      {index + 1}
+                    </span>
+
+                    <div>
+                      <h3 className="text-xl font-black leading-snug tracking-[-0.02em] text-[#281034]">
+                        {item.question}
+                      </h3>
+
+                      <p className="mt-3 text-base leading-8 text-[#645D67]">
+                        {item.answer}
                       </p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </Container>
+        </section>
 
-                      <p className="mt-2 text-sm font-semibold text-purple-200">
-                        {meal.price}
+        {/* PICKUP SECTION */}
+        <section className="relative overflow-hidden bg-[#281034] py-16 sm:py-20 lg:py-24">
+          <div className="pointer-events-none absolute -right-20 top-0 h-80 w-80 rounded-full bg-[#F6C84B]/10 blur-3xl" />
+          <div className="pointer-events-none absolute -left-28 bottom-0 h-80 w-80 rounded-full bg-[#8A54B2]/20 blur-3xl" />
+
+          <Container className="relative">
+            <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-center lg:gap-16">
+              <div>
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-extrabold text-[#F6C84B]">
+                  <ShieldCheck aria-hidden="true" size={16} />
+                  Evening pickup
+                </span>
+
+             <h2
+  className="mt-6 text-3xl font-black leading-tight tracking-[-0.035em] sm:text-4xl lg:text-[2.75rem]"
+  style={{ color: "#FFFFFF" }}
+>
+  Let us know when you expect to reach the centre.
+</h2>
+
+                <p
+  className="mt-6 max-w-2xl text-base leading-8 sm:text-lg"
+  style={{ color: "rgba(255, 255, 255, 0.9)" }}
+>
+  Tell us the time you normally collect your child. When work or
+  traffic changes the plan, a quick call or message helps the
+  teacher know when to expect you.
+</p>
+
+<p
+  className="mt-4 max-w-2xl text-base leading-8 sm:text-lg"
+  style={{ color: "rgba(255, 255, 255, 0.9)" }}
+>
+  Your child will be handed over only to the people you have
+  approved. Please inform us beforehand when someone else will
+  be coming.
+</p>
+              </div>
+
+              <div className="rounded-[32px] border border-white/20 bg-white/10 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.16)] backdrop-blur-sm sm:p-8">
+                <h3 className="text-xl font-black text-white">
+                  Please share these details
+                </h3>
+
+                <div className="mt-6 space-y-4">
+                  {[
+                    "Your child's usual arrival time",
+                    "The pickup time you normally expect",
+                    "Whether your child usually sleeps after lunch",
+                    "The names of adults allowed to collect your child",
+                  ].map((item) => (
+                    <div key={item} className="flex items-start gap-3">
+                      <CheckCircle2
+                        aria-hidden="true"
+                        size={19}
+                        className="mt-0.5 shrink-0 text-[#F6C84B]"
+                      />
+
+                      <p className="text-sm leading-7 text-white/85 sm:text-base">
+                        {item}
                       </p>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-
-            <p className="mx-auto mt-7 max-w-3xl text-center text-xs leading-6 text-purple-200">
-              Fees and plan availability should be confirmed directly with the
-              centre before enrolment. Transport charges may vary according to
-              the route.
-            </p>
-          </div>
-        </section>
-
-        {/* Safety and Parent Communication */}
-        <section className="section bg-white">
-          <div className="container">
-            <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-              <div className="rounded-[36px] bg-[#fff9e7] p-7 sm:p-9">
-                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow-300 text-purple-950">
-                  <ShieldCheck size={28} />
-                </span>
-
-                <h2 className="mt-6 text-3xl font-black leading-tight text-slate-950 sm:text-4xl">
-                  A routine built around care and clear supervision.
-                </h2>
-
-                <p className="mt-5 text-base leading-8 text-slate-600">
-                  Daycare children move through several transitions during the
-                  afternoon. Arrival, meals, rest, activities and dispersal are
-                  handled through a consistent routine.
-                </p>
-
-                <ul className="mt-7 grid gap-4">
-                  {[
-                    "Supervised indoor environment",
-                    "Structured arrival and dispersal routine",
-                    "Age-appropriate care and activities",
-                    "Support during meals and rest",
-                    "Clear communication with parents",
-                  ].map((item) => (
-                    <li
-                      key={item}
-                      className="flex items-center gap-3 rounded-2xl bg-white px-5 py-4 shadow-sm"
-                    >
-                      <CheckCircle2
-                        size={19}
-                        className="shrink-0 text-purple-700"
-                      />
-                      <span className="text-sm font-bold text-slate-700">
-                        {item}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <span className="eyebrow">Parent partnership</span>
-
-                <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                  Daycare works best when families and caregivers stay
-                  connected.
-                </h2>
-
-                <p className="mt-6 text-base leading-8 text-slate-600 sm:text-lg">
-                  Parents can share information about the child’s routine,
-                  meals, allergies, school schedule, homework needs, authorised
-                  pickup and any specific care instructions.
-                </p>
-
-                <p className="mt-5 text-base leading-8 text-slate-600 sm:text-lg">
-                  This helps the daycare team provide a more consistent
-                  experience and respond appropriately to the child’s daily
-                  needs.
-                </p>
-
-                <div className="mt-8 rounded-[28px] border border-purple-100 bg-[#faf8ff] p-6">
-                  <p className="font-black text-slate-950">
-                    Planning preschool with daycare?
-                  </p>
-
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
-                    Families combining preschool and daycare can discuss a
-                    routine that allows the child to move smoothly from the
-                    morning programme into afternoon care.
-                  </p>
-
-                  <Link
-                    href="/admissions"
-                    className="mt-5 inline-flex items-center gap-2 text-sm font-black text-purple-700 transition hover:text-purple-900"
-                  >
-                    View admission process
-                    <ArrowRight size={17} />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
+          </Container>
         </section>
 
         {/* FAQ */}
-        <section className="section bg-[#faf8ff]">
-          <div className="container">
-            <div className="mx-auto max-w-3xl text-center">
-              <span className="eyebrow">Daycare questions</span>
+        <section className="bg-[#F8F4FC] py-16 sm:py-20 lg:py-24">
+          <Container size="narrow">
+            <div className="text-center">
+              <span className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#5B2A86]">
+                Daycare questions
+              </span>
 
-              <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                Useful information for parents considering daycare.
+              <h2 className="mt-5 text-3xl font-black leading-tight tracking-[-0.035em] text-[#281034] sm:text-4xl">
+                A few more details before you call.
               </h2>
             </div>
 
-            <div className="mx-auto mt-12 max-w-4xl space-y-4">
+            <div className="mt-10 space-y-4">
               {faqs.map((faq) => (
                 <details
                   key={faq.question}
-                  className="group rounded-[24px] border border-purple-100 bg-white p-6 shadow-sm open:shadow-md"
+                  className="group rounded-[26px] border border-[#E3D5EA] bg-white p-5 shadow-[0_12px_34px_rgba(40,16,52,0.05)] open:shadow-[0_18px_46px_rgba(40,16,52,0.08)] sm:p-6"
                 >
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-5">
-                    <h3 className="text-left text-base font-black text-slate-950 sm:text-lg">
-                      {faq.question}
-                    </h3>
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-left text-base font-black text-[#281034] marker:hidden sm:text-lg">
+                    {faq.question}
 
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-purple-100 text-xl font-black text-purple-800 transition group-open:rotate-45">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F3EAF8] text-xl text-[#5B2A86] transition duration-200 group-open:rotate-45">
                       +
                     </span>
                   </summary>
 
-                  <p className="mt-4 border-t border-purple-100 pt-4 text-sm leading-7 text-slate-600 sm:text-base">
+                  <p className="mt-4 pr-10 text-sm leading-7 text-[#645D67] sm:text-base sm:leading-8">
                     {faq.answer}
                   </p>
                 </details>
               ))}
             </div>
-          </div>
+          </Container>
         </section>
 
-        {/* Final Daycare CTA */}
-        <section className="section bg-white">
-          <div className="container">
-            <div className="overflow-hidden rounded-[40px] bg-[linear-gradient(135deg,#5b2a86_0%,#3b145f_100%)] px-7 py-10 text-white sm:px-10 sm:py-12 lg:px-14">
-              <div className="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
-                <div>
-                  <span className="text-xs font-black uppercase tracking-[0.18em] text-yellow-300">
-                    Daycare admissions
-                  </span>
+        {/* FINAL CTA */}
+        <section className="bg-white py-16 sm:py-20 lg:py-24">
+          <Container>
+            <div className="relative overflow-hidden rounded-[36px] bg-[#5B2A86] px-6 py-10 shadow-[0_28px_80px_rgba(91,42,134,0.24)] sm:px-10 sm:py-12 lg:px-14">
+              <div className="pointer-events-none absolute -right-16 -top-20 h-72 w-72 rounded-full bg-[#F6C84B]/15 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
 
-                  <h2 className="mt-4 max-w-3xl text-3xl font-black leading-tight sm:text-4xl">
-                    Discuss the right daycare routine for your child.
+              <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_auto]">
+                <div className="max-w-3xl">
+                  <p className="text-sm font-black uppercase tracking-[0.14em] text-[#F6C84B]">
+                    Tell us about your routine
+                  </p>
+
+                  <h2 className="mt-3 text-3xl font-black leading-tight tracking-[-0.035em] text-white sm:text-4xl">
+                    Share your child&apos;s age and the hours you need.
                   </h2>
 
-                  <p className="mt-4 max-w-2xl text-base leading-8 text-purple-100">
-                    Share your child’s age, school timing, required daycare
-                    hours, meal preference and transport location with our team.
+                  <p className="mt-4 text-base leading-8 text-white/85 sm:text-lg">
+                    We will explain how the afternoon works and check whether a
+                    suitable daycare place is currently available.
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+                <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row lg:flex-col xl:flex-row">
                   <a
-                    href="https://wa.me/919667038673?text=Hello%20Kidzee%20Sector%2012%20Dwarka%2C%20I%20would%20like%20to%20check%20daycare%20availability%20for%20my%20child."
+                    href={site.whatsappDaycare}
                     target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-yellow-300 px-7 py-3.5 text-sm font-black text-purple-950 transition hover:bg-yellow-200"
+                    rel="noopener noreferrer"
+                    aria-label="WhatsApp Kidzee Sector 12 Dwarka about daycare"
+                    className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-[#F6C84B] px-7 py-3.5 text-base font-black text-[#281034] shadow-[0_16px_35px_rgba(246,200,75,0.25)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#FFD85E] sm:w-auto"
                   >
-                    Check Daycare Availability
-                    <ArrowRight size={17} />
+                    <MessageCircle aria-hidden="true" size={19} />
+                    WhatsApp the Centre
+                    <ArrowRight aria-hidden="true" size={19} />
                   </a>
 
                   <a
-                    href="tel:+919667038673"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-black text-white transition hover:bg-white/15"
+                    href={`tel:${site.phone}`}
+                    aria-label={`Call ${site.shortName}`}
+                    className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full border-2 border-white bg-white px-7 py-3.5 text-base font-black text-[#281034] shadow-[0_16px_35px_rgba(40,16,52,0.18)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#FFF8DE] sm:w-auto"
                   >
-                    <Phone size={17} />
+                    <Phone aria-hidden="true" size={19} />
                     Call the Centre
                   </a>
                 </div>
               </div>
             </div>
-          </div>
+          </Container>
         </section>
-
-        <CTA />
       </main>
     </PageShell>
   );

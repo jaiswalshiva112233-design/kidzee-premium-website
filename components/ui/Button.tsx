@@ -29,7 +29,6 @@ type LinkButtonProps = CommonProps & {
   href: string;
   external?: boolean;
   disabled?: boolean;
-  type?: never;
 } & Omit<
     AnchorHTMLAttributes<HTMLAnchorElement>,
     "href" | "className" | "children" | "aria-label"
@@ -122,27 +121,24 @@ export default function Button(props: ButtonProps) {
     </>
   );
 
-  if ("href" in props && props.href) {
+  if (typeof props.href === "string" && props.href.length > 0) {
     const {
       href,
       external = false,
       disabled = false,
-      onClick,
       target,
       rel,
+      onClick,
       className: _className,
       children: _children,
-      ariaLabel: _ariaLabel,
-      leftIcon: _leftIcon,
-      rightIcon: _rightIcon,
-      fullWidth: _fullWidth,
       variant: _variant,
       size: _size,
-      ...linkProps
+      fullWidth: _fullWidth,
+      leftIcon: _leftIcon,
+      rightIcon: _rightIcon,
+      ariaLabel: _ariaLabel,
+      ...anchorProps
     } = props;
-
-    const resolvedTarget = external ? "_blank" : target;
-    const resolvedRel = external ? "noopener noreferrer" : rel;
 
     if (disabled) {
       return (
@@ -159,13 +155,13 @@ export default function Button(props: ButtonProps) {
       );
     }
 
-    const isNextLink =
+    const isInternalLink =
       href.startsWith("/") || href.startsWith("#");
 
-    if (isNextLink && !external) {
+    if (isInternalLink && !external) {
       return (
         <Link
-          {...linkProps}
+          {...anchorProps}
           href={href}
           aria-label={ariaLabel}
           className={classes}
@@ -178,12 +174,12 @@ export default function Button(props: ButtonProps) {
 
     return (
       <a
-        {...linkProps}
+        {...anchorProps}
         href={href}
         aria-label={ariaLabel}
         className={classes}
-        target={resolvedTarget}
-        rel={resolvedRel}
+        target={external ? "_blank" : target}
+        rel={external ? "noopener noreferrer" : rel}
         onClick={onClick}
       >
         {content}
@@ -196,14 +192,19 @@ export default function Button(props: ButtonProps) {
     disabled,
     className: _className,
     children: _children,
-    ariaLabel: _ariaLabel,
-    leftIcon: _leftIcon,
-    rightIcon: _rightIcon,
-    fullWidth: _fullWidth,
     variant: _variant,
     size: _size,
+    fullWidth: _fullWidth,
+    leftIcon: _leftIcon,
+    rightIcon: _rightIcon,
+    ariaLabel: _ariaLabel,
+    href: _href,
+    external: _external,
     ...buttonProps
-  } = props as NativeButtonProps;
+  } = props as NativeButtonProps & {
+    href?: unknown;
+    external?: unknown;
+  };
 
   return (
     <button

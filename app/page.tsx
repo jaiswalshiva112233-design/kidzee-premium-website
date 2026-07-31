@@ -8,6 +8,7 @@ import FAQ from "@/components/FAQ";
 import Facilities from "@/components/Facilities";
 import Gallery from "@/components/Gallery";
 import Hero from "@/components/Hero";
+import Location from "@/components/Location";
 import PageShell from "@/components/PageShell";
 import Programs from "@/components/Programs";
 import Reviews from "@/components/Reviews";
@@ -77,6 +78,8 @@ export default function HomePage() {
         <AdmissionProcess />
 
         <FAQ />
+
+        <Location />
 
         <CTA />
       </main>

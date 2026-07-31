@@ -99,10 +99,16 @@ export const programmes = [
     age: "2–3 years",
     minimumAge: 2,
     maximumAge: 3,
-    time: site.preschoolHours.display,
+    // Playgroup
+time: "9:30 AM–12:30 PM",
     image: "/images/programmes/playgroup.jpg",
     intro:
-      "For children beginning preschool and learning to follow a simple classroom routine through stories, conversation, movement and play.",
+      "A gentle introduction to preschool where children become comfortable with routines, teachers and learning alongside others.",
+    highlights: [
+      "Comfort with the first school experience",
+      "Language through stories, songs and conversation",
+      "Sensory play, movement and social interaction",
+    ],
   },
   {
     slug: "nursery",
@@ -111,10 +117,16 @@ export const programmes = [
     age: "3–4 years",
     minimumAge: 3,
     maximumAge: 4,
-    time: site.preschoolHours.display,
+    // Nursery
+time: "9:30 AM–12:30 PM",
     image: "/images/programmes/nursery.jpg",
     intro:
-      "Introduces early phonics, number concepts, creative activities and independent classroom habits through age-appropriate practice.",
+      "Children build communication, curiosity and independent classroom habits while beginning early literacy and number work.",
+    highlights: [
+      "Early phonics and vocabulary development",
+      "Number awareness and simple concepts",
+      "Creativity, confidence and classroom participation",
+    ],
   },
   {
     slug: "junior-kg",
@@ -123,10 +135,16 @@ export const programmes = [
     age: "4–5 years",
     minimumAge: 4,
     maximumAge: 5,
-    time: site.preschoolHours.display,
+    // Junior KG
+time: "9:30 AM–1:00 PM",
     image: "/images/programmes/junior-kg.jpg",
     intro:
-      "Builds reading, writing, number understanding and confident classroom participation with more structured learning.",
+      "A more structured stage that develops reading readiness, writing practice, number understanding and independent thinking.",
+    highlights: [
+      "Reading and writing readiness",
+      "Number concepts and logical thinking",
+      "Independent work and confident expression",
+    ],
   },
   {
     slug: "senior-kg",
@@ -135,10 +153,16 @@ export const programmes = [
     age: "5–6 years",
     minimumAge: 5,
     maximumAge: 6,
-    time: site.preschoolHours.display,
+    // Senior KG
+time: "9:30 AM–1:00 PM",
     image: "/images/programmes/senior-kg.jpg",
     intro:
-      "Prepares children for primary school through stronger literacy, numeracy, communication and independent work habits.",
+      "Children strengthen essential academic and classroom skills as they prepare for a confident transition to primary school.",
+    highlights: [
+      "Stronger literacy and numeracy foundations",
+      "Problem-solving and communication skills",
+      "Primary-school readiness and independence",
+    ],
   },
 ] as const;
 

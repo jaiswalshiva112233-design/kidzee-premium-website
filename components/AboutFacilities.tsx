@@ -5,294 +5,670 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
-  Baby,
-  Blocks,
   Camera,
   CheckCircle2,
-  CookingPot,
-  DoorOpen,
-  Palette,
   ShieldCheck,
   Sparkles,
+  Blocks,
+  Palette,
+  Baby,
+  CookingPot,
   Sun,
 } from "lucide-react";
 
-const facilities = [
+const campusShowcase = [
   {
-    title: "Bright Classrooms",
+    title: "Bright & Inspiring Classrooms",
+    subtitle: "Where curiosity begins every morning",
     description:
-      "Comfortable, organised classrooms support focused learning, discussion, storytelling and age-appropriate activities.",
+      "Every classroom is thoughtfully arranged to encourage confidence, conversation, creativity and joyful participation through age-appropriate learning experiences.",
     image: "/images/about/facilities-classroom.jpg",
     icon: Sun,
-    className: "sm:col-span-2 lg:col-span-2",
-    imageHeight: "min-h-[390px] sm:min-h-[450px]",
+    badge: "Learning Spaces",
   },
+
   {
-    title: "Indoor Play Area",
+    title: "Indoor Play Zone",
+    subtitle: "Movement that builds confidence",
     description:
-      "A supervised space for movement, active play, coordination and joyful interaction with friends.",
+      "Children enjoy supervised physical play that strengthens balance, coordination, teamwork and social interaction in a safe environment.",
     image: "/images/about/facilities-indoor-play.jpg",
     icon: Blocks,
-    className: "",
-    imageHeight: "min-h-[360px] sm:min-h-[420px]",
+    badge: "Active Play",
   },
+
   {
-    title: "Creative Activities",
+    title: "Creative Exploration",
+    subtitle: "Imagination comes alive",
     description:
-      "Children explore art, craft, stories, music, pretend play and hands-on experiences.",
+      "Art, storytelling, music, pretend play and hands-on activities encourage children to express themselves naturally every day.",
     image: "/images/about/facilities-activity.jpg",
     icon: Palette,
-    className: "",
-    imageHeight: "min-h-[360px] sm:min-h-[420px]",
+    badge: "Creative Corner",
   },
+
   {
-    title: "Daycare Spaces",
+    title: "Comfortable Daycare",
+    subtitle: "A caring extension of home",
     description:
-      "Comfortable areas support meals, rest, play, homework guidance and supervised care after preschool.",
+      "Our daycare spaces support meals, supervised routines, quiet rest, guided homework and meaningful play throughout the day.",
     image: "/images/about/facilities-daycare.jpg",
     icon: Baby,
-    className: "sm:col-span-2 lg:col-span-2",
-    imageHeight: "min-h-[390px] sm:min-h-[450px]",
+    badge: "Daycare",
   },
 ];
 
-const supportFacilities = [
+const highlights = [
   {
     icon: ShieldCheck,
-    title: "Child-focused safety",
-    description:
-      "Supervised routines, secure entry practices and organised spaces support a reassuring school experience.",
+    title: "Secure Environment",
+    text:
+      "Thoughtfully supervised spaces help children explore confidently throughout the day.",
   },
+
   {
     icon: Camera,
-    title: "CCTV-covered campus",
-    description:
-      "CCTV surveillance across the premises strengthens supervision and day-to-day campus monitoring.",
+    title: "CCTV Coverage",
+    text:
+      "Campus-wide surveillance strengthens everyday supervision and parent confidence.",
   },
+
   {
     icon: CookingPot,
-    title: "Meals and hygiene",
-    description:
-      "Meal routines, classroom cleanliness and hygiene practices are managed as part of everyday care.",
+    title: "Healthy Daily Routine",
+    text:
+      "Meal times, hygiene practices and organised classroom routines are part of every child's day.",
   },
+
   {
-    icon: DoorOpen,
-    title: "Comfortable facilities",
-    description:
-      "Child-friendly washrooms, learning areas and activity spaces are arranged for convenient daily use.",
+    icon: CheckCircle2,
+    title: "Purposeful Spaces",
+    text:
+      "Learning, creativity, active play and relaxation each have dedicated environments.",
   },
 ];
 
-const facilityPriorities = [
-  "Age-appropriate furniture and learning materials",
-  "Separate spaces for learning, play and rest",
-  "Supervised indoor and ground-floor play areas",
-  "Child-friendly classroom and washroom arrangements",
-  "Daily cleaning and organised hygiene routines",
-  "Preschool and daycare support under one roof",
+const priorities = [
+  "Age-appropriate classrooms",
+  "Indoor & outdoor play opportunities",
+  "Dedicated daycare environment",
+  "Creative learning experiences",
+  "Healthy routines & hygiene",
+  "Comfortable daily transitions",
 ];
 
 export default function AboutFacilities() {
   return (
     <section
-      className="relative overflow-hidden bg-[#fffaf2] py-20 sm:py-24 lg:py-28"
-      aria-labelledby="about-facilities-heading"
+      className="relative overflow-hidden bg-gradient-to-b from-[#fffdf8] via-[#fff8ef] to-[#fffaf6] py-24 lg:py-32"
+      aria-labelledby="facilities-heading"
     >
+      {/* Decorative Background */}
+
       <div
-        aria-hidden="true"
-        className="absolute -left-36 top-24 h-80 w-80 rounded-full bg-purple-100/65 blur-3xl"
+        aria-hidden
+        className="absolute -left-48 top-24 h-[420px] w-[420px] rounded-full bg-purple-100/60 blur-[130px]"
       />
 
       <div
-        aria-hidden="true"
-        className="absolute -right-36 bottom-0 h-96 w-96 rounded-full bg-yellow-100/75 blur-3xl"
+        aria-hidden
+        className="absolute right-[-120px] top-1/3 h-[360px] w-[360px] rounded-full bg-yellow-100 blur-[120px]"
       />
 
-      <div className="relative mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-8 xl:px-10">
+      <div className="relative mx-auto max-w-[1500px] px-5 sm:px-8 xl:px-10">
+
+        {/* Heading */}
+
         <motion.div
-          initial={{ opacity: 0, y: 22 }}
+          initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          viewport={{ once: true }}
+          transition={{ duration: .7 }}
           className="mx-auto max-w-4xl text-center"
         >
-          <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] text-[#702a96] shadow-sm">
-            <Sparkles size={16} aria-hidden="true" />
-            Our facilities
+
+          <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white px-5 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#702a96] shadow-sm">
+
+            <Sparkles size={15} />
+
+            Discover Our Campus
+
           </div>
 
           <h2
-            id="about-facilities-heading"
-            className="mt-6 text-balance text-4xl font-extrabold leading-tight tracking-[-0.04em] text-[#281036] sm:text-5xl lg:text-[58px]"
+            id="facilities-heading"
+            className="mt-7 text-4xl font-extrabold leading-tight tracking-[-0.04em] text-[#281036] sm:text-5xl lg:text-[62px]"
           >
-            Practical, child-friendly spaces for{" "}
-            <span className="text-[#702a96]">
-              learning, play and everyday care
+            Spaces thoughtfully created for
+            <span className="block text-[#702a96]">
+              learning, play and growing together
             </span>
           </h2>
 
-          <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-slate-600 sm:text-lg">
-            Our preschool and daycare environment brings together classrooms,
-            play areas, activity spaces and daily-care facilities so children
-            can move comfortably through each part of their routine.
+          <p className="mx-auto mt-7 max-w-3xl text-lg leading-8 text-slate-600">
+            Every part of our preschool has been designed around how young
+            children naturally learn, explore and interact. From bright
+            classrooms to engaging play spaces and caring daycare
+            environments, each area supports a safe, joyful and meaningful
+            day at Kidzee Sector 12, Dwarka.
           </p>
+
         </motion.div>
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {facilities.map((facility, index) => {
-            const Icon = facility.icon;
+        {/* =======================================================
+            Editorial Hero Image
+        ======================================================= */}
 
-            return (
-              <motion.article
-                key={facility.title}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.15 }}
-                transition={{
-                  duration: 0.55,
-                  delay: index * 0.06,
-                  ease: "easeOut",
-                }}
-                whileHover={{ y: -6 }}
-                className={`group relative overflow-hidden rounded-[34px] border-[7px] border-white bg-purple-50 shadow-[0_22px_60px_rgba(54,21,74,0.14)] ${facility.className}`}
-              >
-                <div className={`relative ${facility.imageHeight}`}>
-                  <Image
-                    src={facility.image}
-                    alt={`${facility.title} at Kidzee Preschool and Daycare, Sector 12 Dwarka`}
-                    fill
-                    sizes={
-                      facility.className
-                        ? "(max-width: 1024px) 100vw, 50vw"
-                        : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    }
-                    className="object-cover transition duration-700 group-hover:scale-105"
-                  />
+        <motion.div
+          initial={{ opacity:0, y:30 }}
+          whileInView={{ opacity:1, y:0 }}
+          viewport={{ once:true }}
+          transition={{ duration:.75 }}
+          className="relative mt-20"
+        >
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#25112e]/85 via-[#25112e]/10 to-transparent" />
+          <div className="overflow-hidden rounded-[42px] border-[10px] border-white shadow-[0_35px_90px_rgba(42,18,56,.16)]">
+
+            <div className="relative aspect-[16/8]">
+
+              <Image
+                src={campusShowcase[0].image}
+                alt="Bright classrooms at Kidzee Preschool and Daycare Sector 12 Dwarka"
+                fill
+                priority
+                className="object-cover transition duration-700 hover:scale-[1.03]"
+              />
+
+              <div className="absolute inset-0 bg-gradient-to-t from-[#23112d]/85 via-[#23112d]/15 to-transparent" />
+
+            </div>
+
+          </div>
+
+          {/* Floating Story Card */}
+
+          <motion.div
+            initial={{ opacity:0, y:20 }}
+            whileInView={{ opacity:1, y:0 }}
+            viewport={{ once:true }}
+            transition={{ delay:.25 }}
+            className="relative mx-auto -mt-16 max-w-xl rounded-[34px] border border-white/60 bg-white/90 p-8 shadow-[0_25px_60px_rgba(35,18,46,.15)] backdrop-blur-xl"
+          >
+
+            <div className="inline-flex items-center gap-2 rounded-full bg-purple-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#702a96]">
+
+              <Sun size={15}/>
+
+              Bright Learning Spaces
+
+            </div>
+
+            <h3 className="mt-5 text-3xl font-extrabold text-[#281036]">
+              A place where children feel excited to learn every day.
+            </h3>
+
+            <p className="mt-4 leading-8 text-slate-600">
+              Spacious classrooms, engaging learning materials and a welcoming
+              atmosphere encourage children to explore with confidence while
+              enjoying every moment of their preschool journey.
+            </p>
+
+          </motion.div>
+                  {/* =======================================================
+            Editorial Campus Layout
+        ======================================================= */}
+
+        <div className="mt-24 grid gap-8 lg:grid-cols-12">
+
+          {/* Indoor Play */}
+
+          <motion.article
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: .6 }}
+            whileHover={{ y: -6 }}
+            className="group lg:col-span-7"
+          >
+
+            <div className="overflow-hidden rounded-[36px] border-[8px] border-white bg-white shadow-[0_30px_80px_rgba(45,22,54,.12)]">
+
+              <div className="relative aspect-[16/10] overflow-hidden">
+
+                <Image
+                  src={campusShowcase[1].image}
+                  alt={campusShowcase[1].title}
+                  fill
+                  className="object-cover transition duration-700 group-hover:scale-105"
+                />
+
+                <div className="absolute inset-0 bg-gradient-to-t from-[#24112d]/80 via-transparent to-transparent"/>
+
+                <div className="absolute left-7 top-7 rounded-full bg-white/90 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#702a96] backdrop-blur">
+
+                  {campusShowcase[1].badge}
+
                 </div>
 
-                <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[17px] bg-yellow-300 text-[#281036] shadow-lg">
-                      <Icon size={22} strokeWidth={2.1} aria-hidden="true" />
-                    </div>
+              </div>
 
-                    <div>
-                      <h3 className="text-xl font-extrabold text-white sm:text-2xl">
-                        {facility.title}
-                      </h3>
+              <div className="p-8">
 
-                      <p className="mt-2 max-w-xl text-sm leading-6 text-purple-50 sm:text-base">
-                        {facility.description}
-                      </p>
-                    </div>
+                <div className="flex items-center gap-4">
+
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 text-[#702a96]">
+
+                    <Blocks size={24}/>
+
                   </div>
-                </div>
-              </motion.article>
-            );
-          })}
-        </div>
 
-        <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {supportFacilities.map((item, index) => {
-            const Icon = item.icon;
+                  <div>
 
-            return (
-              <motion.article
-                key={item.title}
-                initial={{ opacity: 0, y: 22 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.18 }}
-                transition={{
-                  duration: 0.5,
-                  delay: index * 0.05,
-                  ease: "easeOut",
-                }}
-                whileHover={{ y: -5 }}
-                className="group rounded-[30px] border border-purple-100 bg-white p-6 shadow-[0_14px_38px_rgba(62,25,83,0.07)] transition duration-300 hover:border-purple-200 hover:shadow-[0_24px_55px_rgba(62,25,83,0.12)] sm:p-7"
-              >
-                <div className="flex h-14 w-14 items-center justify-center rounded-[19px] bg-purple-100 text-[#702a96] transition duration-300 group-hover:-rotate-3 group-hover:bg-[#702a96] group-hover:text-white">
-                  <Icon size={23} strokeWidth={2.1} aria-hidden="true" />
+                    <h3 className="text-3xl font-extrabold text-[#281036]">
+
+                      {campusShowcase[1].title}
+
+                    </h3>
+
+                    <p className="mt-1 text-[#702a96] font-semibold">
+
+                      {campusShowcase[1].subtitle}
+
+                    </p>
+
+                  </div>
+
                 </div>
 
-                <h3 className="mt-5 text-xl font-extrabold leading-7 text-[#281036]">
-                  {item.title}
+                <p className="mt-6 leading-8 text-slate-600">
+
+                  {campusShowcase[1].description}
+
+                </p>
+
+              </div>
+
+            </div>
+
+          </motion.article>
+
+          {/* Creative Learning */}
+
+          <motion.article
+            initial={{ opacity:0, y:25 }}
+            whileInView={{ opacity:1, y:0 }}
+            viewport={{ once:true }}
+            transition={{ delay:.1 }}
+            whileHover={{ y:-6 }}
+            className="group lg:col-span-5"
+          >
+
+            <div className="overflow-hidden rounded-[36px] border-[8px] border-white bg-white shadow-[0_28px_70px_rgba(45,22,54,.11)]">
+
+              <div className="relative aspect-[4/5]">
+
+                <Image
+                  src={campusShowcase[2].image}
+                  alt={campusShowcase[2].title}
+                  fill
+                  className="object-cover transition duration-700 group-hover:scale-105"
+                />
+
+                <div className="absolute inset-0 bg-gradient-to-t from-[#24112d]/80 via-transparent to-transparent"/>
+
+              </div>
+
+              <div className="p-8">
+
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow-200 text-[#281036]">
+
+                  <Palette size={24}/>
+
+                </div>
+
+                <h3 className="mt-6 text-3xl font-extrabold text-[#281036]">
+
+                  {campusShowcase[2].title}
+
                 </h3>
 
-                <p className="mt-3 text-sm leading-7 text-slate-600">
-                  {item.description}
+                <p className="mt-2 font-semibold text-[#702a96]">
+
+                  {campusShowcase[2].subtitle}
+
                 </p>
-              </motion.article>
-            );
-          })}
+
+                <p className="mt-6 leading-8 text-slate-600">
+
+                  {campusShowcase[2].description}
+
+                </p>
+
+              </div>
+
+            </div>
+
+          </motion.article>
+
         </div>
+
+        {/* =======================================================
+            Full Width Daycare Story
+        ======================================================= */}
+
+        <motion.div
+          initial={{ opacity:0, y:30 }}
+          whileInView={{ opacity:1, y:0 }}
+          viewport={{ once:true }}
+          transition={{ duration:.7 }}
+          className="mt-10"
+        >
+
+          <div className="grid overflow-hidden rounded-[42px] border-[8px] border-white bg-white shadow-[0_35px_90px_rgba(45,22,54,.14)] lg:grid-cols-2">
+
+            <div className="relative min-h-[420px]">
+
+              <Image
+                src={campusShowcase[3].image}
+                alt={campusShowcase[3].title}
+                fill
+                className="object-cover"
+              />
+
+            </div>
+
+            <div className="flex flex-col justify-center p-10 lg:p-14">
+
+              <div className="inline-flex w-fit items-center gap-2 rounded-full bg-purple-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#702a96]">
+
+                <Baby size={15}/>
+
+                Caring Beyond Preschool
+
+              </div>
+
+              <h3 className="mt-6 text-4xl font-extrabold leading-tight text-[#281036]">
+
+                Comfortable spaces where children continue to feel safe, happy and cared for.
+
+              </h3>
+
+              <p className="mt-6 leading-8 text-slate-600">
+
+                Our daycare environment has been planned to support children's routines through supervised play, meals, quiet time and meaningful engagement in a calm, caring atmosphere.
+
+              </p>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+
+                {priorities.map((item) => (
+
+                  <div
+                    key={item}
+                    className="flex items-start gap-3"
+                  >
+
+                    <div className="mt-1 flex h-7 w-7 items-center justify-center rounded-full bg-yellow-300 text-[#281036]">
+
+                      <CheckCircle2 size={15}/>
+
+                    </div>
+
+                    <span className="font-medium leading-7 text-slate-700">
+
+                      {item}
+
+                    </span>
+
+                  </div>
+
+                ))}
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </motion.div>
+                </motion.div>
+
+        {/* =======================================================
+            Why Parents Appreciate Our Campus
+        ======================================================= */}
+
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.65, ease: "easeOut" }}
+          className="relative mt-24 overflow-hidden rounded-[42px] bg-[#f1e8f8] px-6 py-12 sm:px-9 sm:py-14 lg:px-12 lg:py-16"
+        >
+          <div
+            aria-hidden="true"
+            className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-white/70 blur-3xl"
+          />
+
+          <div
+            aria-hidden="true"
+            className="absolute -bottom-28 right-0 h-80 w-80 rounded-full bg-yellow-100/80 blur-3xl"
+          />
+
+          <div className="relative grid gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:items-center">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white/80 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.17em] text-[#702a96] shadow-sm backdrop-blur">
+                <ShieldCheck size={16} aria-hidden="true" />
+                Everyday reassurance
+              </div>
+
+              <h3 className="mt-6 text-3xl font-extrabold leading-tight tracking-[-0.035em] text-[#281036] sm:text-4xl lg:text-[46px]">
+                Details that help children feel comfortable—and parents feel
+                reassured
+              </h3>
+
+              <p className="mt-5 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">
+                A preschool environment is about more than attractive rooms.
+                Parents notice how thoughtfully each space supports
+                supervision, cleanliness, movement, learning and everyday
+                comfort.
+              </p>
+
+              <div className="mt-8 flex items-center gap-4">
+                <div className="flex -space-x-3">
+                  {[Sun, Blocks, Palette, Baby].map((Icon, index) => (
+                    <div
+                      key={index}
+                      className="flex h-11 w-11 items-center justify-center rounded-full border-4 border-[#f1e8f8] bg-white text-[#702a96] shadow-sm"
+                    >
+                      <Icon size={17} strokeWidth={2.2} aria-hidden="true" />
+                    </div>
+                  ))}
+                </div>
+
+                <p className="max-w-[230px] text-sm font-semibold leading-6 text-[#4d315b]">
+                  Learning, movement, creativity and care thoughtfully brought
+                  together.
+                </p>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div
+                aria-hidden="true"
+                className="absolute left-7 top-8 hidden h-[calc(100%-4rem)] w-px bg-gradient-to-b from-purple-300 via-purple-200 to-transparent sm:block"
+              />
+
+              <div className="space-y-4">
+                {highlights.map((item, index) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <motion.article
+                      key={item.title}
+                      initial={{ opacity: 0, x: 18 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, amount: 0.25 }}
+                      transition={{
+                        duration: 0.5,
+                        delay: index * 0.07,
+                        ease: "easeOut",
+                      }}
+                      className={`group relative flex gap-5 rounded-[28px] border border-white/80 bg-white/75 p-5 shadow-[0_16px_45px_rgba(63,27,82,0.08)] backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-[0_24px_55px_rgba(63,27,82,0.13)] sm:p-6 ${
+                        index % 2 === 1 ? "sm:ml-10" : ""
+                      }`}
+                    >
+                      <div className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-[5px] border-[#f1e8f8] bg-[#702a96] text-white shadow-md transition duration-300 group-hover:scale-105 group-hover:bg-[#281036]">
+                        <Icon
+                          size={21}
+                          strokeWidth={2.1}
+                          aria-hidden="true"
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-extrabold tracking-[0.18em] text-purple-400">
+                            0{index + 1}
+                          </span>
+
+                          <div className="h-px flex-1 bg-purple-100" />
+                        </div>
+
+                        <h4 className="mt-2 text-xl font-extrabold text-[#281036] sm:text-2xl">
+                          {item.title}
+                        </h4>
+
+                        <p className="mt-2 text-sm leading-7 text-slate-600 sm:text-base">
+                          {item.text}
+                        </p>
+                      </div>
+                    </motion.article>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* =======================================================
+            Campus Experience Statement
+        ======================================================= */}
 
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mt-16 overflow-hidden rounded-[38px] bg-[#2d1636] p-7 text-white shadow-[0_28px_75px_rgba(45,22,54,0.22)] sm:p-9 lg:p-10"
+          transition={{ duration: 0.65, ease: "easeOut" }}
+          className="mt-20 grid gap-8 border-y border-purple-100 py-12 sm:py-14 lg:grid-cols-[1fr_auto_1fr] lg:items-center"
         >
-          <div className="grid gap-9 lg:grid-cols-[0.76fr_1.24fr] lg:items-center">
-            <div>
-              <div className="flex h-14 w-14 items-center justify-center rounded-[19px] bg-yellow-300 text-[#281036]">
-                <Blocks size={24} aria-hidden="true" />
-              </div>
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.19em] text-[#702a96]">
+              A thoughtful preschool environment
+            </p>
 
-              <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.18em] text-yellow-300">
-                Designed around the daily routine
-              </p>
+            <h3 className="mt-4 max-w-xl text-3xl font-extrabold leading-tight tracking-[-0.035em] text-[#281036] sm:text-4xl">
+              Each space has a clear purpose in your child&apos;s day.
+            </h3>
+          </div>
 
-              <h3 className="mt-3 text-3xl font-extrabold leading-tight tracking-[-0.03em] sm:text-4xl">
-                Facilities that support how young children actually learn
-              </h3>
+          <div
+            aria-hidden="true"
+            className="hidden h-28 w-px bg-gradient-to-b from-transparent via-purple-200 to-transparent lg:block"
+          />
 
-              <p className="mt-4 max-w-xl leading-8 text-purple-100">
-                Children need opportunities to sit, move, create, communicate,
-                play and rest. Our facilities support these different needs
-                without separating care from learning.
-              </p>
+          <div className="lg:max-w-xl">
+            <p className="text-base leading-8 text-slate-600 sm:text-lg">
+              Children transition naturally between focused learning, active
+              play, creative exploration, meals and rest. Our campus supports
+              these moments in a way that feels organised without making the
+              day feel rigid.
+            </p>
 
-              <Link
-                href="/gallery"
-                className="mt-8 inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-extrabold text-[#64278f] transition duration-300 hover:-translate-y-0.5 hover:bg-yellow-300 hover:text-[#281036]"
-              >
-                Explore Our Gallery
-                <ArrowRight size={17} aria-hidden="true" />
-              </Link>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              {facilityPriorities.map((item, index) => (
-                <motion.div
-                  key={item}
-                  initial={{ opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{
-                    duration: 0.4,
-                    delay: index * 0.04,
-                  }}
-                  className="flex items-start gap-3 rounded-[22px] border border-white/10 bg-white/[0.07] p-4 backdrop-blur"
-                >
-                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-yellow-300 text-[#281036]">
-                    <CheckCircle2
-                      size={16}
-                      strokeWidth={2.7}
-                      aria-hidden="true"
-                    />
-                  </div>
-
-                  <p className="text-sm font-semibold leading-6 text-purple-50">
-                    {item}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
+            <Link
+              href="/gallery"
+              className="mt-6 inline-flex items-center gap-2 text-base font-extrabold text-[#702a96] transition duration-300 hover:gap-3 hover:text-[#281036]"
+            >
+              View real moments from our centre
+              <ArrowRight size={19} aria-hidden="true" />
+            </Link>
           </div>
         </motion.div>
+                {/* =======================================================
+            Premium Gallery CTA
+        ======================================================= */}
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="mt-24 overflow-hidden rounded-[42px] bg-[#281036] shadow-[0_35px_90px_rgba(40,16,54,0.28)]"
+        >
+          <div className="relative px-8 py-14 sm:px-12 sm:py-16 lg:px-16 lg:py-20">
+
+            <div
+              aria-hidden="true"
+              className="absolute -left-20 top-0 h-72 w-72 rounded-full bg-purple-500/20 blur-3xl"
+            />
+
+            <div
+              aria-hidden="true"
+              className="absolute right-0 bottom-0 h-80 w-80 rounded-full bg-yellow-300/10 blur-3xl"
+            />
+
+            <div className="relative mx-auto max-w-5xl text-center">
+
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-yellow-300 backdrop-blur">
+
+                <Camera size={16} />
+
+                Explore Our Preschool
+
+              </div>
+
+              <h3 className="mt-7 text-4xl font-extrabold leading-tight tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
+
+                See our learning spaces through
+                <span className="block text-yellow-300">
+                  real moments from everyday school life.
+                </span>
+
+              </h3>
+
+              <p className="mx-auto mt-7 max-w-3xl text-lg leading-9 text-purple-100">
+
+                Every classroom, play area and activity space has been created
+                to help children feel secure, inspired and excited to learn.
+                Browse our gallery to experience the environment that families
+                see when they visit Kidzee Sector 12, Dwarka.
+
+              </p>
+
+              <div className="mt-10 flex flex-col justify-center gap-5 sm:flex-row">
+
+                <Link
+                  href="/gallery"
+                  className="inline-flex h-14 items-center justify-center gap-3 rounded-full bg-yellow-300 px-8 text-base font-bold text-[#281036] shadow-lg transition duration-300 hover:-translate-y-1 hover:bg-white"
+                >
+                  Explore Our Gallery
+                  <ArrowRight size={19} />
+                </Link>
+
+                <Link
+                  href="/contact"
+                  className="inline-flex h-14 items-center justify-center gap-3 rounded-full border border-white/20 bg-white/10 px-8 text-base font-bold text-white backdrop-blur transition duration-300 hover:bg-white hover:text-[#281036]"
+                >
+                  Book a School Visit
+                </Link>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </motion.div>
+
       </div>
     </section>
   );

@@ -10,6 +10,7 @@ import {
   MessageCircleMore,
   Sparkles,
 } from "lucide-react";
+import { site } from "@/lib/site";
 
 const faqs = [
   {
@@ -173,7 +174,7 @@ export default function ProgrammeFAQ() {
 
             <div className="flex flex-col gap-3">
               <a
-                href={`https://wa.me/919667038673?text=${programmeMessage}`}
+                href={site.whatsappProgrammes}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-yellow-300 px-7 text-base font-extrabold text-[#281036] transition duration-300 hover:-translate-y-0.5 hover:bg-yellow-200"
