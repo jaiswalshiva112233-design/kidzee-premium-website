@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -9,10 +11,12 @@ import {
   Phone,
   Star,
 } from "lucide-react";
+import { FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa6";
 
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
-import { programmes, site } from "@/lib/site";
+import { useSiteContact } from "@/components/SiteContactProvider";
+import { programmes } from "@/lib/site";
 
 const quickLinks = [
   { href: "/about", label: "About" },
@@ -21,6 +25,7 @@ const quickLinks = [
   { href: "/admissions", label: "Admissions" },
   { href: "/gallery", label: "Gallery" },
   { href: "/contact", label: "Contact" },
+  { href: "/careers", label: "Careers" },
 ] as const;
 
 const legalLinks = [
@@ -40,68 +45,10 @@ const footerLinkClass =
 const socialLinkClass =
   "group inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white shadow-[0_10px_28px_rgba(0,0,0,0.14)] transition duration-200 hover:-translate-y-0.5 hover:border-[#F6C84B]/50 hover:bg-[#5B2A86] hover:shadow-[0_14px_34px_rgba(0,0,0,0.2)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45";
 
-function InstagramIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      width="20"
-      height="20"
-      fill="none"
-      className="transition-transform duration-200 group-hover:scale-105"
-    >
-      <rect
-        x="3"
-        y="3"
-        width="18"
-        height="18"
-        rx="5"
-        stroke="currentColor"
-        strokeWidth="1.9"
-      />
-
-      <circle
-        cx="12"
-        cy="12"
-        r="4"
-        stroke="currentColor"
-        strokeWidth="1.9"
-      />
-
-      <circle cx="17.4" cy="6.7" r="1.1" fill="currentColor" />
-    </svg>
-  );
-}
-
-function WhatsAppIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      width="20"
-      height="20"
-      fill="none"
-      className="transition-transform duration-200 group-hover:scale-105"
-    >
-      <path
-        d="M20.5 11.7a8.45 8.45 0 0 1-12.56 7.37L3.5 20.5l1.45-4.3A8.47 8.47 0 1 1 20.5 11.7Z"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      <path
-        d="M8.4 7.65c.2-.46.42-.47.73-.48h.62c.2 0 .4.07.52.4l.78 1.88c.1.25.06.45-.08.65l-.62.82c-.14.18-.14.35-.02.55.62 1.06 1.52 1.92 2.62 2.48.2.1.38.08.53-.1l.78-.95c.17-.2.37-.24.62-.14l1.8.85c.28.13.43.28.45.5.02.22-.08 1.32-.63 1.83-.54.5-1.24.75-2.08.62-1.05-.16-2.26-.56-3.74-1.65-1.16-.85-2.25-1.99-3.02-3.22-.63-1-.93-1.91-.83-2.7.07-.57.33-.98.56-1.38Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
 export default function Footer() {
+  const site = useSiteContact();
   return (
-    <footer className="relative overflow-hidden bg-[#281034] text-white">
+    <footer className="relative overflow-hidden bg-[#281034] pb-[84px] text-white md:pb-0">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -left-28 top-16 h-72 w-72 rounded-full bg-[#5B2A86]/30 blur-3xl"
@@ -167,7 +114,27 @@ export default function Footer() {
                   aria-label="Visit Kidzee Sector 12 Dwarka on Instagram"
                   className={socialLinkClass}
                 >
-                  <InstagramIcon />
+                  <FaInstagram
+                    aria-hidden="true"
+                    size={20}
+                    className="transition-transform duration-200 group-hover:scale-105"
+                  />
+                </a>
+              )}
+
+              {site.facebook && (
+                <a
+                  href={site.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Visit Kidzee Sector 12 Dwarka on Facebook"
+                  className={socialLinkClass}
+                >
+                  <FaFacebookF
+                    aria-hidden="true"
+                    size={19}
+                    className="transition-transform duration-200 group-hover:scale-105"
+                  />
                 </a>
               )}
 
@@ -178,7 +145,11 @@ export default function Footer() {
                 aria-label="Contact Kidzee Sector 12 Dwarka on WhatsApp"
                 className={socialLinkClass}
               >
-                <WhatsAppIcon />
+                <FaWhatsapp
+                  aria-hidden="true"
+                  size={21}
+                  className="transition-transform duration-200 group-hover:scale-105"
+                />
               </a>
 
               <a
@@ -311,18 +282,10 @@ export default function Footer() {
                 <div className="space-y-2 leading-7">
                   <p className="!text-white/75">
                     <span className="font-semibold text-white">
-                      Playgroup &amp; Nursery:
+                      Preschool:
                     </span>
                     <br />
-                    9:30 AM – 12:30 PM
-                  </p>
-
-                  <p className="!text-white/75">
-                    <span className="font-semibold text-white">
-                      Junior KG &amp; Senior KG:
-                    </span>
-                    <br />
-                    9:30 AM – 1:00 PM
+                    {site.preschoolHours.display}
                   </p>
 
                   <p className="!text-white/75">
@@ -330,15 +293,7 @@ export default function Footer() {
                       Daycare:
                     </span>
                     <br />
-                    12:30 PM – 7:00 PM
-                  </p>
-
-                  <p className="!text-white/75">
-                    <span className="font-semibold text-white">
-                      Office Hours:
-                    </span>
-                    <br />
-                    8:30 AM – 5:00 PM
+                    {site.daycareHours.display}
                   </p>
                 </div>
               </div>
@@ -346,8 +301,7 @@ export default function Footer() {
 
             <div className="mt-7 flex flex-wrap gap-3">
               <Button
-                href={site.whatsappVisit}
-                external
+                href="/admissions?enquiry=SCHOOL_VISIT#admission-enquiry"
                 variant="yellow"
                 size="sm"
                 leftIcon={<MessageCircle size={17} />}

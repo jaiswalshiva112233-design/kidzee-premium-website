@@ -1,178 +1,190 @@
 import Image from "next/image";
 import {
   ArrowRight,
-  CheckCircle2,
+  BookOpen,
+  CalendarCheck2,
   Clock3,
-  MessageCircle,
-  Sparkles,
 } from "lucide-react";
 
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
-import { programmes, site } from "@/lib/site";
+import { getWebsiteMedia } from "@/lib/sanity/media";
+import { programmes } from "@/lib/site";
 
-const programmeTimings: Record<string, string> = {
-  playgroup: "9:30 AM–12:30 PM",
-  nursery: "9:30 AM–12:30 PM",
-  "junior-kg": "9:30 AM–1:00 PM",
-  "senior-kg": "9:30 AM–1:00 PM",
+const stageLabels: Record<string, string> = {
+  playgroup: "A gentle first step",
+  nursery: "Building everyday foundations",
+  "junior-kg": "Growing skills and independence",
+  "senior-kg": "Preparing confidently for primary school",
 };
 
-export default function Programs() {
+export default async function Programs() {
+  const [
+    playgroupMedia,
+    nurseryMedia,
+    juniorKgMedia,
+    seniorKgMedia,
+  ] = await Promise.all([
+    getWebsiteMedia("home.programmes.playgroup"),
+    getWebsiteMedia("home.programmes.nursery"),
+    getWebsiteMedia("home.programmes.juniorKg"),
+    getWebsiteMedia("home.programmes.seniorKg"),
+  ]);
+
+  const programmeMedia = {
+    playgroup: playgroupMedia,
+    nursery: nurseryMedia,
+    "junior-kg": juniorKgMedia,
+    "senior-kg": seniorKgMedia,
+  };
+
   return (
     <section
       id="programmes"
       aria-labelledby="programmes-heading"
-      className="relative overflow-hidden bg-white py-14 sm:py-16 lg:py-20"
+      className="relative overflow-hidden bg-[#F8F4FC] py-14 sm:py-16 lg:py-20"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-40 top-20 h-80 w-80 rounded-full bg-[#EADDF1]/65 blur-3xl"
+        className="pointer-events-none absolute -left-40 top-20 h-80 w-80 rounded-full bg-[#EADDF1]/80 blur-3xl"
       />
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-40 bottom-20 h-80 w-80 rounded-full bg-[#F6C84B]/15 blur-3xl"
+        className="pointer-events-none absolute -right-40 bottom-16 h-80 w-80 rounded-full bg-[#F6C84B]/18 blur-3xl"
       />
 
       <Container className="relative">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#5B2A86]/10 bg-[#FAF7FC] px-4 py-2 text-[13px] font-black text-[#5B2A86]">
-            <Sparkles
-              aria-hidden="true"
-              size={15}
-              className="text-[#D5A400]"
-            />
-            Preschool programmes
+        <div className="grid gap-6 lg:grid-cols-[0.72fr_1.28fr] lg:items-end lg:gap-12">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#DDD0E4] bg-white px-4 py-2 text-[13px] font-black text-[#5B2A86]">
+              <BookOpen aria-hidden="true" size={16} />
+              Preschool programmes
+            </div>
+
+            <h2
+              id="programmes-heading"
+              className="mt-5 text-balance text-3xl font-black leading-[1.08] tracking-[-0.04em] text-[#2D1736] sm:text-4xl lg:text-[46px]"
+            >
+              The right classroom for each stage.
+            </h2>
           </div>
 
-          <h2
-            id="programmes-heading"
-            className="mt-5 text-balance text-3xl font-black leading-[1.08] tracking-[-0.04em] text-[#2D1736] sm:text-4xl lg:text-[46px]"
-          >
-            Learning that grows with your child at every stage.
-          </h2>
-
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-[#6F6474] sm:text-lg">
-            From a gentle first introduction to school through preparation for
-            primary classes, each programme is planned around the needs of its
-            age group.
+          <p className="max-w-2xl text-base leading-8 text-[#6F6474] sm:text-lg lg:justify-self-end">
+            Children do not all need the same school day. Our programmes
+            progress from a gentle introduction to stronger
+            communication, early concepts, independence and
+            primary-school readiness.
           </p>
         </div>
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:mt-12 lg:grid-cols-4">
-          {programmes.map((programme) => (
-            <article
-              key={programme.slug}
-              className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-[#5B2A86]/10 bg-white shadow-[0_16px_48px_rgba(52,20,68,0.07)] transition duration-300 hover:-translate-y-1 hover:border-[#5B2A86]/20 hover:shadow-[0_24px_65px_rgba(52,20,68,0.12)]"
-            >
-              <div className="relative aspect-[4/3] overflow-hidden bg-[#F3EAF8]">
-                <Image
-                  src={programme.image}
-                  alt={`${programme.title} classroom activities at Kidzee Sector 12 Dwarka`}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                />
+        <div className="mt-10 grid grid-flow-col auto-cols-[84%] gap-5 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-4 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-4">
+          {programmes.map((programme) => {
+            const media =
+              programmeMedia[
+                programme.slug as keyof typeof programmeMedia
+              ];
 
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 bg-gradient-to-t from-[#281034]/40 via-transparent to-transparent"
-                />
+            const imageSource =
+              media?.imageUrl ?? programme.image;
 
-                <span className="absolute bottom-4 left-4 rounded-full border border-white/70 bg-white/95 px-3.5 py-2 text-xs font-black text-[#5B2A86] shadow-lg backdrop-blur-sm">
-                  {programme.age}
-                </span>
-              </div>
+            const imageAlt =
+              media?.altText ||
+              programme.title +
+                " learning activities at Kidzee Sector 12 Dwarka";
 
-              <div className="flex flex-1 flex-col p-6">
-                <h3 className="text-2xl font-black tracking-[-0.025em] text-[#2D1736]">
-                  {programme.title}
-                </h3>
-
-                <div className="mt-3 flex items-center gap-2 text-sm font-bold text-[#746779]">
-                  <Clock3
-                    aria-hidden="true"
-                    size={16}
-                    className="shrink-0 text-[#5B2A86]"
+            return (
+              <article
+                key={programme.slug}
+                className="group flex h-full snap-start flex-col overflow-hidden rounded-[28px] border border-[#E4D8EA] bg-white shadow-[0_16px_48px_rgba(52,20,68,0.07)] transition duration-300 hover:-translate-y-1 hover:border-[#CCB6D8] hover:shadow-[0_24px_65px_rgba(52,20,68,0.12)]"
+              >
+                <div className="relative aspect-[4/3] overflow-hidden bg-[#EDE3F3]">
+                  <Image
+                    src={imageSource}
+                    alt={imageAlt}
+                    fill
+                    unoptimized={imageSource.startsWith("http")}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1279px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.035]"
                   />
 
-                  {programmeTimings[programme.slug] ?? programme.time}
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 bg-gradient-to-t from-[#281034]/58 via-transparent to-transparent"
+                  />
+
+                  <span className="absolute bottom-4 left-4 rounded-full border border-white/70 bg-white/95 px-3.5 py-2 text-xs font-black text-[#5B2A86] shadow-lg backdrop-blur-sm">
+                    {programme.age}
+                  </span>
                 </div>
 
-                <p className="mt-4 text-[15px] leading-7 text-[#6F6474]">
-                  {programme.intro}
-                </p>
+                <div className="flex flex-1 flex-col p-5 sm:p-6">
+                  <p className="text-xs font-black uppercase tracking-[0.12em] text-[#8B7196]">
+                    {stageLabels[programme.slug]}
+                  </p>
 
-                <div className="mt-5 space-y-3 border-t border-[#5B2A86]/8 pt-5">
-                  {programme.highlights.map((highlight) => (
-                    <div
-                      key={highlight}
-                      className="flex items-start gap-2.5"
+                  <h3 className="mt-2 text-2xl font-black tracking-[-0.025em] text-[#2D1736]">
+                    {programme.title}
+                  </h3>
+
+                  <div className="mt-3 flex items-center gap-2 text-sm font-bold text-[#66586C]">
+                    <Clock3
+                      aria-hidden="true"
+                      size={16}
+                      className="shrink-0 text-[#5B2A86]"
+                    />
+
+                    {programme.time}
+                  </div>
+
+                  <p className="mt-4 text-[15px] leading-7 text-[#6F6474]">
+                    {programme.intro}
+                  </p>
+
+                  <div className="mt-auto pt-5">
+                    <Button
+                      href={"/programmes/" + programme.slug}
+                      variant="ghost"
+                      size="sm"
+                      className="w-fit !px-0 hover:!bg-transparent"
+                      rightIcon={<ArrowRight size={17} />}
+                      ariaLabel={
+                        "Read about the " +
+                        programme.title +
+                        " programme"
+                      }
                     >
-                      <CheckCircle2
-                        aria-hidden="true"
-                        size={17}
-                        className="mt-1 shrink-0 text-[#5B2A86]"
-                      />
-
-                      <span className="text-[13px] font-semibold leading-6 text-[#554A59]">
-                        {highlight}
-                      </span>
-                    </div>
-                  ))}
+                      Programme details
+                    </Button>
+                  </div>
                 </div>
-
-                <div className="mt-auto pt-5">
-                  <Button
-                    href={`/programmes/${programme.slug}`}
-                    variant="ghost"
-                    size="sm"
-                    className="w-fit !px-0 hover:!bg-transparent"
-                    rightIcon={<ArrowRight size={17} />}
-                    aria-label={`Explore the ${programme.title} programme`}
-                  >
-                    Explore programme
-                  </Button>
-                </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-6 rounded-[30px] border border-[#5B2A86]/8 bg-[#F7F0FA] px-6 py-8 text-center sm:px-8 lg:mt-12 lg:flex-row lg:px-10 lg:py-9 lg:text-left">
-          <div className="max-w-2xl">
-            <h3 className="text-2xl font-black tracking-[-0.025em] text-[#2D1736] sm:text-3xl">
-              Not sure which programme is right for your child?
+        <div className="mt-8 flex flex-col items-start justify-between gap-5 rounded-[26px] border border-[#DED0E5] bg-white px-5 py-6 shadow-[0_12px_36px_rgba(40,16,52,0.05)] sm:flex-row sm:items-center sm:px-7">
+          <div>
+            <h3 className="text-xl font-black text-[#281034]">
+              Unsure which programme fits your child?
             </h3>
 
-            <p className="mt-3 leading-7 text-[#6F6474]">
-              Tell us your child&apos;s age and previous school experience. Our
-              team will explain the suitable programme, classroom routine and
-              current availability.
+            <p className="mt-1.5 max-w-2xl text-sm leading-6 text-[#6F6474]">
+              Share your child&apos;s age and we will explain the
+              suitable class, routine and current availability.
             </p>
           </div>
 
-          <div className="flex w-full shrink-0 flex-col gap-3 sm:w-auto sm:flex-row">
-            <Button
-              href={site.whatsappProgrammes}
-              external
-              variant="primary"
-              size="md"
-              leftIcon={<MessageCircle size={18} />}
-            >
-              Ask on WhatsApp
-            </Button>
-
-            <Button
-              href="/programmes"
-              variant="secondary"
-              size="md"
-              rightIcon={<ArrowRight size={18} />}
-            >
-              View All Programmes
-            </Button>
-          </div>
+          <Button
+            href="/admissions?enquiry=ADMISSION#admission-enquiry"
+            variant="primary"
+            size="md"
+            leftIcon={<CalendarCheck2 size={18} />}
+            className="w-full sm:w-auto"
+            ariaLabel="Ask Kidzee Sector 12 Dwarka which preschool programme is right for your child"
+          >
+            Find the Right Programme
+          </Button>
         </div>
       </Container>
     </section>

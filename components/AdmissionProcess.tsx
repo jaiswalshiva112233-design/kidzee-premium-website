@@ -7,7 +7,7 @@ import {
 
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
-import { site } from "@/lib/site";
+
 
 const steps = [
   {
@@ -136,8 +136,7 @@ export default function AdmissionProcess() {
 
             <div className="mt-7">
               <Button
-                href={site.whatsappTrial}
-                external
+                href="/admissions?enquiry=TRIAL#admission-enquiry"
                 variant="yellow"
                 size="md"
               >
@@ -189,8 +188,7 @@ export default function AdmissionProcess() {
           </div>
 
           <Button
-            href={site.whatsappAdmission}
-            external
+            href="/admissions?enquiry=ADMISSION#admission-enquiry"
             size="md"
             className="shrink-0"
           >

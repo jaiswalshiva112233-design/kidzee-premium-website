@@ -1,58 +1,89 @@
-import { ArrowRight, ChevronDown } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronDown,
+  HelpCircle,
+} from "lucide-react";
 
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
 
-interface FAQItem {
-  question: string;
-  answer: string;
-}
 
-const faqs: FAQItem[] = [
+const faqs = [
   {
-    question: "Which preschool programmes are available?",
+    question:
+      "What age groups do you accept at Kidzee Sector 12 Dwarka?",
     answer:
-      "We offer Playgroup for children aged 2–3 years, Nursery for 3–4 years, Junior KG for 4–5 years and Senior KG for 5–6 years.",
-  },
-  {
-    question: "Can my child attend a trial before admission?",
-    answer:
-      "Parents can enquire about a 3-day trial of up to two hours per day. Availability and timings must be confirmed with the centre in advance.",
+      "Our preschool programmes are designed for children aged 2 to 6 years: Playgroup for 2 to 3 years, Nursery for 3 to 4 years, Junior KG for 4 to 5 years and Senior KG for 5 to 6 years.",
   },
   {
     question: "What are the preschool and daycare timings?",
     answer:
-      "Preschool generally runs from 8:30 AM to 1:00 PM, Monday to Friday. Daycare is available from 12:30 PM to 7:00 PM. Programme-specific timings should be confirmed with the centre.",
+      "Playgroup and Nursery run from 9:30 AM to 12:30 PM. Junior KG and Senior KG run from 9:30 AM to 1:00 PM. Daycare is available from 12:30 PM to 7:00 PM, Monday to Friday.",
   },
   {
-    question: "Are meals provided at the centre?",
+    question: "Can my child try preschool before admission?",
     answer:
-      "Breakfast is included for preschool children. Daycare meal options include lunch, an evening snack or both, depending on the plan selected.",
+      "A three-day preschool trial of up to two hours per day may be available. Please contact the centre in advance because trial timing and availability must be confirmed.",
   },
   {
-    question: "Is transport available?",
+    question: "Is food included during preschool?",
     answer:
-      "Pick-up and drop transport may be available for nearby areas. Routes depend on distance, feasibility and current seat availability.",
+      "Yes. A freshly cooked vegetarian breakfast is included during preschool. The menu uses seasonal vegetables, is prepared without refined oil and may change according to the season and ingredient availability.",
   },
   {
-    question: "What teacher-child ratios are followed?",
+    question: "Are daycare meals included?",
     answer:
-      "The planned teacher-child ratio is 1:8 for Playgroup and Nursery, and 1:10 for Junior KG and Senior KG.",
+      "No. Daycare begins after preschool, and its meals are separate chargeable choices. Families may select lunch, the evening snack or both according to the child's daycare schedule.",
   },
   {
-    question: "Can parents visit before taking admission?",
+    question: "Can we use daycare only on selected days?",
     answer:
-      "Yes. Parents can schedule a visit to see the classrooms and play areas, meet the school team and discuss their child’s requirements.",
+      "Families can ask about regular, selected-day or occasional daycare. Availability depends on the required day, timing, the child's age and the centre's current capacity.",
   },
-];
+  {
+    question:
+      "Can parents visit the preschool before deciding?",
+    answer:
+      "Yes. Parents are encouraged to book a school visit, meet the centre team, see the classrooms and indoor play areas, and discuss their child's programme, routine and settling-in needs.",
+  },
+  {
+    question:
+      "How can I get current fees and seat availability?",
+    answer:
+      "Contact the admissions team for the current programme fee, daycare options and seat availability. Sharing your child's age helps the team guide you to the appropriate programme.",
+  },
+] as const;
+
+const faqStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: faq.answer,
+    },
+  })),
+};
 
 export default function FAQ() {
   return (
     <section
       id="faq"
       aria-labelledby="faq-heading"
-      className="relative overflow-hidden bg-[#FFF9F1] py-16 sm:py-20 lg:py-24"
+      className="relative overflow-hidden bg-[#FFF9EE] py-14 sm:py-16 lg:py-20"
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqStructuredData).replace(
+            /</g,
+            "\\u003c",
+          ),
+        }}
+      />
+
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -left-36 top-16 h-80 w-80 rounded-full bg-[#F2E8F8] blur-3xl"
@@ -60,55 +91,61 @@ export default function FAQ() {
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-36 bottom-0 h-80 w-80 rounded-full bg-[#F6C84B]/20 blur-3xl"
+        className="pointer-events-none absolute -right-36 bottom-0 h-80 w-80 rounded-full bg-[#F6C84B]/18 blur-3xl"
       />
 
       <Container className="relative">
-        <div className="grid items-start gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-16">
+        <div className="grid items-start gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:gap-16">
           <div className="lg:sticky lg:top-28">
-            <p className="text-sm font-black uppercase tracking-[0.16em] text-[#5B2A86]">
-              Frequently asked questions
-            </p>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#E8D9CD] bg-white px-4 py-2 text-[13px] font-black text-[#5B2A86]">
+              <HelpCircle aria-hidden="true" size={16} />
+              Quick answers for parents
+            </div>
 
             <h2
               id="faq-heading"
-              className="mt-5 text-balance text-3xl font-black leading-tight tracking-[-0.035em] text-[#2D1736] sm:text-4xl lg:text-5xl"
+              className="mt-5 text-balance text-3xl font-black leading-tight tracking-[-0.035em] text-[#2D1736] sm:text-4xl lg:text-[46px]"
             >
-              Helpful information for parents considering the centre.
+              The practical questions families ask first.
             </h2>
 
             <p className="mt-5 max-w-xl text-base leading-8 text-[#6F6474] sm:text-lg">
-              Find quick answers about programmes, timings, meals, transport,
-              trial classes and school visits.
+              Clear information about ages, timings, meals, daycare,
+              trial days and visiting the centre before admission.
             </p>
 
             <div className="mt-8">
               <Button
-                href="/admissions"
-                variant="secondary"
+                href="/admissions?enquiry=FEES#admission-enquiry"
+                variant="primary"
+                size="md"
                 rightIcon={<ArrowRight size={18} />}
+                ariaLabel="Ask Kidzee Sector 12 Dwarka about current fees and availability"
               >
-                View Admission Information
+                Get Fees & Availability
               </Button>
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {faqs.map((faq, index) => (
               <details
                 key={faq.question}
                 open={index === 0}
-                className="group overflow-hidden rounded-[24px] border border-[#5B2A86]/10 bg-white shadow-[0_12px_35px_rgba(52,20,68,0.05)]"
+                className="group overflow-hidden rounded-[22px] border border-[#E8DDD4] bg-white shadow-[0_10px_32px_rgba(52,20,68,0.045)]"
               >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-5 px-5 py-5 text-left text-base font-black leading-7 text-[#2D1736] marker:hidden focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-[#F6C84B]/40 sm:px-6 sm:py-6 sm:text-lg">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-5 px-5 py-5 text-left text-base font-black leading-7 text-[#2D1736] marker:hidden focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-[#F6C84B]/45 sm:px-6 sm:text-lg">
                   <span>{faq.question}</span>
 
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F2E8F8] text-[#5B2A86] transition-transform duration-200 group-open:rotate-180 group-open:bg-[#5B2A86] group-open:text-white">
-                    <ChevronDown aria-hidden="true" size={19} />
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F2E8F8] text-[#5B2A86] transition-transform duration-200 group-open:rotate-180 group-open:bg-[#5B2A86] group-open:text-white">
+                    <ChevronDown
+                      aria-hidden="true"
+                      size={18}
+                    />
                   </span>
                 </summary>
 
-                <p className="border-t border-[#F0E8F4] px-5 pb-6 pt-5 leading-7 text-[#6F6474] sm:px-6">
+                <p className="border-t border-[#F0E8E1] px-5 pb-6 pt-4 leading-7 text-[#6F6474] sm:px-6">
                   {faq.answer}
                 </p>
               </details>

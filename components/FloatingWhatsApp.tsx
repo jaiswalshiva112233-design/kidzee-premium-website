@@ -1,10 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MessageCircle, Phone } from "lucide-react";
-import { site } from "@/lib/site";
+import { Phone } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa6";
+import { useSiteContact } from "@/components/SiteContactProvider";
 
 export default function FloatingWhatsApp() {
+  const site = useSiteContact();
   return (
     <>
       {/* Desktop Floating WhatsApp */}
@@ -19,12 +21,9 @@ export default function FloatingWhatsApp() {
           duration: 0.35,
           ease: "easeOut",
         }}
-        className="group fixed bottom-6 right-6 z-[60] hidden h-16 w-16 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_18px_45px_rgba(37,211,102,0.35)] transition-all duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-[0_22px_55px_rgba(37,211,102,0.45)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/40 md:flex"
+        className="group fixed bottom-6 right-6 z-[60] hidden h-[52px] w-[52px] items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_18px_45px_rgba(37,211,102,0.35)] transition-all duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-[0_22px_55px_rgba(37,211,102,0.45)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/40 md:flex"
       >
-        <MessageCircle
-          size={30}
-          strokeWidth={2.2}
-        />
+        <FaWhatsapp aria-hidden="true" size={28} />
 
         <span className="pointer-events-none absolute right-[74px] whitespace-nowrap rounded-full bg-[#2C1735] px-4 py-2 text-sm font-bold text-white opacity-0 shadow-lg transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100">
           Chat with us
@@ -32,7 +31,7 @@ export default function FloatingWhatsApp() {
       </motion.a>
 
       {/* Mobile Bottom Bar */}
-      <div className="fixed inset-x-0 bottom-0 z-[60] border-t border-[#E8DDF1] bg-white/95 px-3 py-3 backdrop-blur-md shadow-[0_-8px_30px_rgba(52,20,68,0.08)] md:hidden">
+      <div className="mobile-contact-bar fixed inset-x-0 bottom-0 z-[60] border-t border-[#E8DDF1] bg-white/95 px-3 py-3 backdrop-blur-md shadow-[0_-8px_30px_rgba(52,20,68,0.08)] transition duration-200 md:hidden">
         <div className="grid grid-cols-2 gap-3">
           <a
             href={`tel:${site.phone}`}
@@ -50,7 +49,7 @@ export default function FloatingWhatsApp() {
             aria-label="Chat with Kidzee Sector 12 Dwarka on WhatsApp"
             className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-[#25D366] text-sm font-bold text-white shadow-lg transition-all duration-200 hover:brightness-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#25D366]/40"
           >
-            <MessageCircle size={18} />
+            <FaWhatsapp aria-hidden="true" size={19} />
             WhatsApp
           </a>
         </div>

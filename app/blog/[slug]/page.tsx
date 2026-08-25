@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageShell from "@/components/PageShell";
-import { CTA } from "@/components/HomeSections";
+import { getPublishedBlogArticleBySlug, getPublishedBlogArticles } from "@/lib/sanity/blog";
 import { posts } from "@/lib/site";
 
 type PageProps = {
@@ -24,17 +25,23 @@ type ArticleContent = {
   conclusion: string;
 };
 
-export function generateStaticParams() {
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
+export async function generateStaticParams() {
+  const managedArticles = await getPublishedBlogArticles();
+  const slugs = new Set([
+    ...posts.map((post) => post.slug),
+    ...managedArticles.map((article) => article.slug),
+  ]);
+
+  return Array.from(slugs).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = posts.find((item) => item.slug === slug);
+  const managedArticle = await getPublishedBlogArticleBySlug(slug);
+  const builtInPost = posts.find((item) => item.slug === slug);
+  const post = managedArticle ?? builtInPost;
 
   if (!post) {
     return {
@@ -46,32 +53,48 @@ export async function generateMetadata({
     };
   }
 
+  const title =
+    managedArticle?.seoTitle || post.title;
+  const description =
+    managedArticle?.seoDescription || post.excerpt;
+  const coverImage =
+    managedArticle?.coverImageUrl ||
+    "/images/hero/about-main.jpg";
+  const coverAlt =
+    managedArticle?.coverImageAlt || post.title;
+
   return {
-    title: post.title,
-    description: post.excerpt,
+    title,
+    description,
     alternates: {
       canonical: `/blog/${post.slug}`,
     },
     openGraph: {
-      title: post.title,
-      description: post.excerpt,
+      title,
+      description,
       type: "article",
       url: `/blog/${post.slug}`,
       siteName: "Kidzee Sector 12, Dwarka",
+      publishedTime: managedArticle?.publishedAt,
+      modifiedTime: managedArticle?.updatedAt,
+      authors: [
+        managedArticle?.author ||
+          "Kidzee Sector 12, Dwarka",
+      ],
       images: [
         {
-          url: "/images/blog-parent-guide.jpg",
+          url: coverImage,
           width: 1200,
           height: 630,
-          alt: post.title,
+          alt: coverAlt,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: post.title,
-      description: post.excerpt,
-      images: ["/images/blog-parent-guide.jpg"],
+      title,
+      description,
+      images: [coverImage],
     },
   };
 }
@@ -487,18 +510,64 @@ function estimateReadingTime(article: ArticleContent) {
 export default async function PostPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const post = posts.find((item) => item.slug === slug);
-  const article = content[slug];
+  const [managedArticle, managedArticles] = await Promise.all([
+      getPublishedBlogArticleBySlug(slug),
+      getPublishedBlogArticles(),
+    ]);
+
+  const builtInPost = posts.find((item) => item.slug === slug);
+  const post = managedArticle
+    ? {
+        slug: managedArticle.slug,
+        title: managedArticle.title,
+        excerpt: managedArticle.excerpt,
+        date: managedArticle.publishedAt,
+        author: managedArticle.author,
+      }
+    : builtInPost
+      ? {
+          ...builtInPost,
+          author: "Kidzee Sector 12, Dwarka",
+        }
+      : null;
+
+  const article: ArticleContent | undefined = managedArticle
+    ? {
+        category: managedArticle.category,
+        intro: managedArticle.intro,
+        sections: managedArticle.sections.map((section) => ({
+          heading: section.heading,
+          paragraphs: section.paragraphs,
+          tips: section.bullets,
+        })),
+        conclusion: managedArticle.conclusion,
+      }
+    : content[slug];
 
   if (!post || !article) {
     notFound();
   }
 
   const readingTime = estimateReadingTime(article);
-
-  const relatedPosts = posts
+  const managedSlugs = new Set(
+    managedArticles.map((item) => item.slug),
+  );
+  const allPosts = [
+    ...managedArticles.map((item) => ({
+      slug: item.slug,
+      title: item.title,
+      excerpt: item.excerpt,
+    })),
+    ...posts.filter((item) => !managedSlugs.has(item.slug)),
+  ];
+  const relatedPosts = allPosts
     .filter((item) => item.slug !== slug)
     .slice(0, 3);
+  const coverImage =
+    managedArticle?.coverImageUrl ||
+    "/images/hero/about-main.jpg";
+  const coverImageAlt =
+    managedArticle?.coverImageAlt || post.title;
 
   const articleSchema = {
     "@context": "https://schema.org",
@@ -511,13 +580,15 @@ export default async function PostPage({ params }: PageProps) {
     },
     author: {
       "@type": "Organization",
-      name: "Kidzee Sector 12, Dwarka",
+      name: post.author,
     },
     publisher: {
       "@type": "Organization",
       name: "Kidzee Sector 12, Dwarka",
     },
-    image: "/images/blog-parent-guide.jpg",
+    image: coverImage,
+    datePublished: post.date,
+    dateModified: managedArticle?.updatedAt || post.date,
   };
 
   return (
@@ -531,7 +602,7 @@ export default async function PostPage({ params }: PageProps) {
         />
 
         {/* Article Hero */}
-        <section className="relative overflow-hidden bg-[linear-gradient(135deg,#faf7ff_0%,#ffffff_55%,#fff8dc_100%)] pb-16 pt-12 sm:pb-20 sm:pt-16 lg:pb-24 lg:pt-20">
+        <section className="relative overflow-hidden bg-[linear-gradient(135deg,#faf7ff_0%,#ffffff_55%,#fff8dc_100%)] pb-16 pt-[104px] sm:pb-20 sm:pt-28 lg:pb-24 lg:pt-32">
           <div className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-purple-200/35 blur-3xl" />
           <div className="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-yellow-200/40 blur-3xl" />
 
@@ -562,7 +633,7 @@ export default async function PostPage({ params }: PageProps) {
               </p>
 
               <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-slate-600">
-                <span className="font-bold">Kidzee Sector 12, Dwarka</span>
+                <span className="font-bold">{post.author}</span>
                 <span
                   className="hidden h-1.5 w-1.5 rounded-full bg-purple-300 sm:block"
                   aria-hidden="true"
@@ -578,6 +649,19 @@ export default async function PostPage({ params }: PageProps) {
           <div className="container">
             <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-16">
               <article className="min-w-0">
+                {managedArticle?.coverImageUrl ? (
+                  <div className="relative mb-10 aspect-[1.91/1] overflow-hidden rounded-[30px] bg-purple-50 shadow-lg shadow-purple-950/10">
+                    <Image
+                      src={managedArticle.coverImageUrl}
+                      alt={coverImageAlt}
+                      fill
+                      priority
+                      sizes="(min-width: 1024px) 820px, 100vw"
+                      className="object-cover"
+                    />
+                  </div>
+                ) : null}
+
                 <div className="rounded-[30px] border border-purple-100 bg-[#fbf9ff] p-6 sm:p-8">
                   {article.intro.map((paragraph) => (
                     <p
@@ -671,14 +755,12 @@ export default async function PostPage({ params }: PageProps) {
                       Explore Admissions
                     </Link>
 
-                    <a
-                      href="https://wa.me/919667038673?text=Hello%20Kidzee%20Sector%2012%20Dwarka%2C%20I%20would%20like%20to%20book%20a%20school%20visit."
-                      target="_blank"
-                      rel="noreferrer"
+                    <Link
+                      href="/admissions?enquiry=SCHOOL_VISIT#admission-enquiry"
                       className="inline-flex min-h-12 items-center justify-center rounded-full border border-purple-200 bg-white px-6 py-3 text-sm font-black text-purple-800 transition hover:bg-purple-50"
                     >
                       Book a School Visit
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </article>
@@ -724,14 +806,12 @@ export default async function PostPage({ params }: PageProps) {
                       daily routine before regular admission.
                     </p>
 
-                    <a
-                      href="https://wa.me/919667038673?text=Hello%20Kidzee%20Sector%2012%20Dwarka%2C%20I%20would%20like%20to%20book%20a%203-day%20trial%20class."
-                      target="_blank"
-                      rel="noreferrer"
+                    <Link
+                      href="/admissions?enquiry=TRIAL#admission-enquiry"
                       className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-yellow-300 px-5 py-3 text-sm font-black text-purple-950 transition hover:bg-yellow-200"
                     >
-                      Enquire on WhatsApp
-                    </a>
+                      Request a Trial
+                    </Link>
                   </div>
                 </div>
               </aside>
@@ -797,7 +877,6 @@ export default async function PostPage({ params }: PageProps) {
           </section>
         )}
 
-        <CTA />
       </main>
     </PageShell>
   );

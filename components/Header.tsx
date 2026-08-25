@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, MessageCircle, Phone, X } from "lucide-react";
+import { CalendarCheck2, Menu, Phone, X } from "lucide-react";
 import {
   useEffect,
   useId,
@@ -14,7 +14,7 @@ import {
 
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
-import { site } from "@/lib/site";
+import { useSiteContact } from "@/components/SiteContactProvider";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -36,6 +36,7 @@ const focusableSelector = [
 ].join(",");
 
 export default function Header() {
+  const site = useSiteContact();
   const pathname = usePathname();
   const menuId = useId();
 
@@ -62,16 +63,24 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    setIsMenuOpen(false);
+    const frame = window.requestAnimationFrame(() => {
+      setIsMenuOpen(false);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
   }, [pathname]);
 
   useEffect(() => {
     if (!isMenuOpen) {
       document.body.style.overflow = "";
+      delete document.body.dataset.mobileMenuOpen;
       return;
     }
 
     document.body.style.overflow = "hidden";
+    document.body.dataset.mobileMenuOpen = "true";
 
     const menu = mobileMenuRef.current;
     const firstFocusable = menu?.querySelector<HTMLElement>(focusableSelector);
@@ -83,9 +92,11 @@ export default function Header() {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setIsMenuOpen(false);
+
         window.requestAnimationFrame(() => {
           menuButtonRef.current?.focus();
         });
+
         return;
       }
 
@@ -94,7 +105,7 @@ export default function Header() {
       }
 
       const focusableElements = Array.from(
-        menu.querySelectorAll<HTMLElement>(focusableSelector)
+        menu.querySelectorAll<HTMLElement>(focusableSelector),
       ).filter((element) => !element.hasAttribute("disabled"));
 
       if (focusableElements.length === 0) {
@@ -119,6 +130,7 @@ export default function Header() {
 
     return () => {
       document.body.style.overflow = "";
+      delete document.body.dataset.mobileMenuOpen;
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isMenuOpen]);
@@ -136,7 +148,7 @@ export default function Header() {
   }
 
   function handleMobileMenuKeyDown(
-    event: ReactKeyboardEvent<HTMLDivElement>
+    event: ReactKeyboardEvent<HTMLDivElement>,
   ) {
     if (event.key === "Escape") {
       closeMobileMenu();
@@ -161,6 +173,7 @@ export default function Header() {
           <Link
             href="/"
             aria-label="Kidzee Sector 12 Dwarka homepage"
+            onClick={closeMobileMenu}
             className="group flex shrink-0 items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45"
           >
             <Image
@@ -169,6 +182,7 @@ export default function Header() {
               width={146}
               height={72}
               priority
+              loading="eager"
               className={`w-auto object-contain transition-all duration-300 ${
                 isScrolled ? "h-[47px]" : "h-[53px]"
               }`}
@@ -222,12 +236,11 @@ export default function Header() {
             </Button>
 
             <Button
-              href={site.whatsappVisit}
-              external
+              href="/admissions?enquiry=SCHOOL_VISIT#admission-enquiry"
               variant="primary"
               size="sm"
-              leftIcon={<MessageCircle size={16} strokeWidth={2.3} />}
-              aria-label="Book a school visit through WhatsApp"
+              leftIcon={<CalendarCheck2 size={16} strokeWidth={2.3} />}
+              aria-label="Book a school visit at Kidzee Sector 12 Dwarka"
             >
               Book a Visit
             </Button>
@@ -255,107 +268,89 @@ export default function Header() {
         </Container>
       </header>
 
-      <button
-        type="button"
-        aria-label="Close navigation menu"
-        tabIndex={isMenuOpen ? 0 : -1}
-        onClick={() => {
-          closeMobileMenu();
-          menuButtonRef.current?.focus();
-        }}
-        className={`fixed inset-0 z-40 bg-[#25132D]/40 backdrop-blur-sm transition-opacity duration-300 xl:hidden ${
-          isMenuOpen
-            ? "pointer-events-auto opacity-100"
-            : "pointer-events-none opacity-0"
-        }`}
-      />
+      {isMenuOpen ? (
+        <>
+          <button
+            type="button"
+            aria-label="Close navigation menu"
+            onClick={() => {
+              closeMobileMenu();
+              menuButtonRef.current?.focus();
+            }}
+            className="fixed inset-0 z-40 bg-[#25132D]/40 backdrop-blur-sm xl:hidden"
+          />
 
-      <div
-        ref={mobileMenuRef}
-        id={menuId}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Mobile navigation"
-        aria-hidden={!isMenuOpen}
-        onKeyDown={handleMobileMenuKeyDown}
-        className={`fixed inset-x-3 top-[88px] z-50 max-h-[calc(100dvh-108px)] overflow-y-auto rounded-[28px] border border-white/80 bg-white shadow-[0_30px_80px_rgba(39,18,49,0.22)] transition-all duration-300 xl:hidden ${
-          isMenuOpen
-            ? "translate-y-0 opacity-100"
-            : "pointer-events-none -translate-y-3 opacity-0"
-        }`}
-      >
-        <div className="p-3">
-          <div className="flex items-center justify-between px-3 pb-3 pt-1">
-            <div>
-              <p className="text-sm font-black text-[#2D1736]">
-                Kidzee Sector 12, Dwarka
-              </p>
-              <p className="mt-1 text-xs font-bold text-[#6F6474]">
-                Preschool and daycare
-              </p>
-            </div>
+          <div
+            ref={mobileMenuRef}
+            id={menuId}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile navigation"
+            onKeyDown={handleMobileMenuKeyDown}
+            className="fixed inset-x-3 top-[88px] z-50 max-h-[calc(100dvh-108px)] overflow-y-auto rounded-[28px] border border-white/80 bg-white shadow-[0_30px_80px_rgba(39,18,49,0.22)] xl:hidden"
+          >
+            <div className="p-3">
+              <div className="px-3 pb-3 pt-1">
+                <div>
+                  <p className="text-sm font-black text-[#2D1736]">
+                    Kidzee Sector 12, Dwarka
+                  </p>
 
-            <button
-              type="button"
-              aria-label="Close navigation menu"
-              onClick={() => {
-                closeMobileMenu();
-                menuButtonRef.current?.focus();
-              }}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F3EAF8] text-[#5B2A86] transition-colors hover:bg-[#EADDF1] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45"
-            >
-              <X aria-hidden="true" size={20} />
-            </button>
-          </div>
+                  <p className="mt-1 text-xs font-bold text-[#6F6474]">
+                    Preschool and daycare
+                  </p>
+                </div>
+              </div>
 
-          <nav aria-label="Mobile navigation" className="flex flex-col">
-            {navItems.map((item) => {
-              const active = isActive(item.href);
+              <nav aria-label="Mobile navigation" className="flex flex-col">
+                {navItems.map((item) => {
+                  const active = isActive(item.href);
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  onClick={closeMobileMenu}
-                  className={`flex min-h-[50px] items-center rounded-2xl px-4 text-[15px] font-black transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45 ${
-                    active
-                      ? "bg-[#5B2A86] text-white"
-                      : "text-[#3F3145] hover:bg-[#5B2A86]/[0.06] hover:text-[#5B2A86]"
-                  }`}
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      onClick={closeMobileMenu}
+                      className={`flex min-h-[50px] items-center rounded-2xl px-4 text-[15px] font-black transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45 ${
+                        active
+                          ? "bg-[#5B2A86] text-white"
+                          : "text-[#3F3145] hover:bg-[#5B2A86]/[0.06] hover:text-[#5B2A86]"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[#5B2A86]/10 pt-3">
+                <Button
+                  href={`tel:${site.phone}`}
+                  variant="secondary"
+                  size="md"
+                  fullWidth
+                  leftIcon={<Phone size={17} />}
+                  aria-label={`Call Kidzee Sector 12 Dwarka on ${site.phoneDisplay}`}
                 >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
+                  Call
+                </Button>
 
-          <div className="mt-3 grid grid-cols-2 gap-2 border-t border-[#5B2A86]/10 pt-3">
-            <Button
-              href={`tel:${site.phone}`}
-              variant="secondary"
-              size="md"
-              fullWidth
-              leftIcon={<Phone size={17} />}
-              aria-label={`Call Kidzee Sector 12 Dwarka on ${site.phoneDisplay}`}
-            >
-              Call
-            </Button>
-
-            <Button
-              href={site.whatsappVisit}
-              external
-              variant="primary"
-              size="md"
-              fullWidth
-              leftIcon={<MessageCircle size={17} />}
-              aria-label="Book a school visit through WhatsApp"
-            >
-              WhatsApp
-            </Button>
+                <Button
+                  href="/admissions?enquiry=SCHOOL_VISIT#admission-enquiry"
+                  variant="primary"
+                  size="md"
+                  fullWidth
+                  leftIcon={<CalendarCheck2 size={17} />}
+                  aria-label="Book a school visit at Kidzee Sector 12 Dwarka"
+                >
+                  Book a Visit
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      ) : null}
     </>
   );
 }

@@ -1,24 +1,29 @@
+import { getWebsiteContactSettings } from "@/lib/sanity/contactSettings";
+import { buildSiteContact } from "@/lib/siteContact";
 import {
   Clock3,
   MapPin,
-  MessageCircle,
   Navigation,
   Phone,
 } from "lucide-react";
 
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
-import { site } from "@/lib/site";
 
-export default function Location() {
-  const mapEmbedUrl =
-    "https://www.google.com/maps?q=Kidzee%20Sector%2012%20Dwarka%20Building%20No.%2019%20Block%20B%20Sector%2012B%20Dwarka%20Delhi&output=embed";
 
+export default async function Location() {
+  const site = buildSiteContact(
+    await getWebsiteContactSettings(),
+  );
+  const timings = [
+    { label: "Preschool", value: site.preschoolHours.display },
+    { label: "Daycare", value: site.daycareHours.display },
+  ];
   return (
     <section
       id="location"
       aria-labelledby="location-heading"
-      className="relative overflow-hidden bg-white py-16 sm:py-20 lg:py-24"
+      className="relative overflow-hidden bg-white py-14 sm:py-16 lg:py-20"
     >
       <div
         aria-hidden="true"
@@ -31,119 +36,105 @@ export default function Location() {
       />
 
       <Container className="relative">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#5B2A86]/10 bg-[#FAF7FC] px-4 py-2 text-[13px] font-black text-[#5B2A86]">
-            <MapPin aria-hidden="true" size={15} />
-            Visit our preschool
+        <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-end lg:gap-12">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#E4D8EA] bg-[#F8F4FC] px-4 py-2 text-[13px] font-black text-[#5B2A86]">
+              <MapPin aria-hidden="true" size={16} />
+              Visit our centre
+            </div>
+
+            <h2
+              id="location-heading"
+              className="mt-5 text-balance text-3xl font-black leading-[1.08] tracking-[-0.04em] text-[#2D1736] sm:text-4xl lg:text-[46px]"
+            >
+              Kidzee Preschool in Sector 12B, Dwarka.
+            </h2>
           </div>
 
-          <h2
-            id="location-heading"
-            className="mt-5 text-balance text-3xl font-black leading-[1.08] tracking-[-0.04em] text-[#2D1736] sm:text-4xl lg:text-[46px]"
-          >
-            Conveniently located in Sector 12B, Dwarka.
-          </h2>
-
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-[#6F6474] sm:text-lg">
-            Visit the centre, meet our teachers and explore the classrooms,
-            learning spaces and daycare facilities before admission.
+          <p className="max-w-2xl text-base leading-8 text-[#6F6474] sm:text-lg lg:justify-self-end">
+            Plan a visit to see the classrooms and indoor play spaces,
+            meet the centre team and discuss the right preschool or
+            daycare routine for your child.
           </p>
         </div>
 
-        <div className="mt-10 grid overflow-hidden rounded-[34px] border border-[#5B2A86]/10 bg-white shadow-[0_24px_70px_rgba(52,20,68,0.1)] lg:mt-12 lg:grid-cols-[0.85fr_1.15fr]">
-          <div className="flex flex-col justify-center bg-[#2D1736] p-7 text-white sm:p-9 lg:p-11">
-            <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-white/10 text-[#F6C84B]">
-              <MapPin aria-hidden="true" size={25} />
-            </div>
+        <div className="mt-10 grid overflow-hidden rounded-[34px] border border-[#E4D8EA] bg-white shadow-[0_24px_70px_rgba(52,20,68,0.1)] lg:grid-cols-[0.82fr_1.18fr]">
+          <div className="bg-[#281034] p-6 text-white sm:p-8 lg:p-10">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#F6C84B]">
+              <MapPin aria-hidden="true" size={23} />
+            </span>
 
-            <p className="mt-6 text-sm font-black uppercase tracking-[0.12em] text-[#F6C84B]">
-              Kidzee Sector 12, Dwarka
+            <p className="mt-6 text-xs font-black uppercase tracking-[0.14em] text-[#F6C84B]">
+              Complete address
             </p>
 
-            <h3 className="mt-2 text-2xl font-black leading-tight text-white sm:text-3xl">
-              Preschool and daycare close to your home.
-            </h3>
-
-            <address className="mt-5 not-italic text-base leading-7 text-white/75">
-              {site.addressShort}
+            <address className="mt-2 not-italic text-xl font-black leading-8 text-white">
+              {site.address}
             </address>
 
-            <div className="mt-7 space-y-5 border-t border-white/10 pt-7">
-              <div className="flex items-start gap-3">
+            <div className="mt-7 border-t border-white/12 pt-7">
+              <div className="flex items-center gap-2.5">
                 <Clock3
                   aria-hidden="true"
                   size={19}
-                  className="mt-1 shrink-0 text-[#F6C84B]"
+                  className="text-[#F6C84B]"
                 />
 
-                <div className="space-y-2 text-sm leading-6 text-white/75">
-                  <p>
-                    <span className="font-bold text-white">
-                      Playgroup &amp; Nursery:
-                    </span>
-                    <br />
-                    9:30 AM – 12:30 PM
-                  </p>
-
-                  <p>
-                    <span className="font-bold text-white">
-                      Junior KG &amp; Senior KG:
-                    </span>
-                    <br />
-                    9:30 AM – 1:00 PM
-                  </p>
-
-                  <p>
-                    <span className="font-bold text-white">Daycare:</span>
-                    <br />
-                    12:30 PM – 7:00 PM
-                  </p>
-
-                  <p>
-                    <span className="font-bold text-white">Office Hours:</span>
-                    <br />
-                    8:30 AM – 5:00 PM
-                  </p>
-                </div>
+                <h3 className="font-black text-white">
+                  Monday to Friday timings
+                </h3>
               </div>
+
+              <dl className="mt-4 space-y-3">
+                {timings.map((timing) => (
+                  <div
+                    key={timing.label}
+                    className="flex flex-col justify-between gap-1 rounded-2xl bg-white/[0.07] px-4 py-3 sm:flex-row sm:items-center sm:gap-4"
+                  >
+                    <dt className="text-sm font-bold text-white/70">
+                      {timing.label}
+                    </dt>
+
+                    <dd className="text-sm font-black text-white">
+                      {timing.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             </div>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Button
                 href={site.map}
                 external
                 variant="yellow"
                 size="md"
-                leftIcon={<Navigation aria-hidden="true" size={18} />}
+                leftIcon={<Navigation size={18} />}
+                className="w-full sm:w-auto"
+                ariaLabel="Get directions to Kidzee Sector 12 Dwarka"
               >
                 Get Directions
               </Button>
 
-              <a
-                href={`tel:${site.phone}`}
-                aria-label={`Call Kidzee Sector 12 Dwarka on ${site.phoneDisplay}`}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-bold text-white transition duration-200 hover:-translate-y-0.5 hover:border-[#F6C84B]/70 hover:bg-white/15 hover:text-[#F6C84B] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/40"
+              <Button
+                href={"tel:" + site.phone}
+                variant="secondary"
+                size="md"
+                leftIcon={<Phone size={18} />}
+                className="w-full border-white/20 bg-white/10 text-white hover:border-white/30 hover:bg-white/15 hover:text-white sm:w-auto"
+                ariaLabel={
+                  "Call admissions at " + site.phoneDisplay
+                }
               >
-                <Phone aria-hidden="true" size={18} />
-                Call Now
-              </a>
+                Call Admissions
+              </Button>
             </div>
-
-            <a
-              href={site.whatsappVisit}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-flex w-fit items-center gap-2 rounded-md text-sm font-bold text-white/75 transition-colors hover:text-[#F6C84B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F6C84B]"
-            >
-              <MessageCircle aria-hidden="true" size={17} />
-              Book a school visit on WhatsApp
-            </a>
           </div>
 
-          <div className="relative min-h-[430px] bg-[#F3EAF8] lg:min-h-[590px]">
+          <div className="relative min-h-[430px] bg-[#F3EAF8] lg:min-h-[600px]">
             <iframe
-              title="Kidzee Preschool and Daycare Sector 12B Dwarka location"
-              src={mapEmbedUrl}
+              title="Map showing Kidzee Preschool and Daycare Sector 12B Dwarka"
+              src={site.mapEmbed}
               className="absolute inset-0 h-full w-full border-0"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"

@@ -1,89 +1,57 @@
 import type { Metadata } from "next";
 
-import AboutCTA from "@/components/AboutCTA";
 import AboutEnvironment from "@/components/AboutEnvironment";
-import AboutFacilities from "@/components/AboutFacilities";
 import AboutHero from "@/components/AboutHero";
 import AboutKidzee from "@/components/AboutKidzee";
 import AboutSafety from "@/components/AboutSafety";
-import AboutWelcome from "@/components/AboutWelcome";
 import PageShell from "@/components/PageShell";
+import Team from "@/components/Team";
+import { getWebsiteContentSettings } from "@/lib/sanity/contentSettings";
+import { getWebsiteMediaBySlotKeys } from "@/lib/sanity/media";
+import { buildWebsitePageMetadata } from "@/lib/sanity/seo";
+import { getPublishedWebsiteTeamMembers } from "@/lib/sanity/team";
+import { site } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "About Kidzee Preschool in Sector 12 Dwarka",
-  description:
-    "Learn about Kidzee Preschool & Daycare in Sector 12B, Dwarka, our learning approach, classroom environment, facilities, safety practices and partnership with parents.",
-  keywords: [
-    "Kidzee Sector 12 Dwarka",
-    "Kidzee Sector 12B Dwarka",
-    "preschool in Dwarka",
-    "preschool in Sector 12 Dwarka",
-    "best preschool in Dwarka",
-    "daycare in Dwarka",
-    "daycare in Sector 12 Dwarka",
-    "play school in Dwarka",
-    "nursery school in Dwarka",
-    "early childhood education Dwarka",
-    "preschool admission Dwarka",
-  ],
-  alternates: {
-    canonical: "/about",
-  },
-  openGraph: {
-    title: "About Kidzee Preschool & Daycare, Sector 12 Dwarka",
+export async function generateMetadata(): Promise<Metadata> {
+  return buildWebsitePageMetadata({
+    pageKey: "about",
+    path: "/about",
+    title: "About Our Preschool",
     description:
-      "Discover the child-friendly learning environment, facilities, safety practices and early-learning approach at Kidzee Sector 12, Dwarka.",
-    url: "/about",
-    siteName: "Kidzee Preschool & Daycare Sector 12 Dwarka",
-    type: "website",
-    locale: "en_IN",
-    images: [
-      {
-        url: "/images/about/about-hero.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Kidzee Preschool and Daycare Sector 12 Dwarka",
-      },
+      "Meet Kidzee Preschool & Daycare in Sector 12B, Dwarka. Explore our Péntemind learning approach, real centre environment and everyday care practices.",
+    keywords: [
+      "Kidzee Sector 12 Dwarka",
+      "Kidzee Sector 12B Dwarka",
+      "preschool in Dwarka",
+      "preschool in Sector 12 Dwarka",
+      "daycare in Sector 12 Dwarka",
+      "play school in Dwarka",
+      "nursery school in Dwarka",
+      "early childhood education Dwarka",
     ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "About Kidzee Preschool & Daycare, Sector 12 Dwarka",
-    description:
-      "Explore our learning approach, classrooms, facilities, safety practices and daycare environment in Sector 12B, Dwarka.",
-    images: ["/images/about/about-hero.jpg"],
-  },
-};
+    socialImage: "/images/hero/about-main.jpg",
+    socialImageAlt:
+      "Kidzee Preschool and Daycare in Sector 12B Dwarka",
+  });
+}
 
 const aboutPageSchema = {
   "@context": "https://schema.org",
   "@type": "AboutPage",
+  "@id": `${site.url}/about#webpage`,
   name: "About Kidzee Preschool & Daycare Sector 12 Dwarka",
   description:
-    "Information about Kidzee Preschool & Daycare in Sector 12B, Dwarka, including its learning approach, classrooms, facilities, safety practices, preschool programmes and daycare services.",
-  url: "https://kidzeepreschooldwarka.com/about",
+    "Information about Kidzee Preschool & Daycare in Sector 12B, Dwarka, including its Péntemind learning approach, centre environment and everyday care practices.",
+  url: `${site.url}/about`,
   primaryImageOfPage: {
     "@type": "ImageObject",
-    url: "https://kidzeepreschooldwarka.com/images/about/about-hero.jpg",
+    url: `${site.url}/images/hero/about-main.jpg`,
   },
   isPartOf: {
-    "@type": "WebSite",
-    name: "Kidzee Preschool & Daycare Sector 12 Dwarka",
-    url: "https://kidzeepreschooldwarka.com",
+    "@id": `${site.url}/#website`,
   },
   about: {
-    "@type": ["Preschool", "EducationalOrganization"],
-    name: "Kidzee Preschool & Daycare Sector 12 Dwarka",
-    url: "https://kidzeepreschooldwarka.com",
-    telephone: "+91-96670-38673",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Building No. 19, Block B, Sector 12B",
-      addressLocality: "Dwarka",
-      addressRegion: "Delhi",
-      postalCode: "110075",
-      addressCountry: "IN",
-    },
+    "@id": `${site.url}/#preschool`,
   },
 };
 
@@ -95,104 +63,96 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       position: 1,
       name: "Home",
-      item: "https://kidzeepreschooldwarka.com",
+      item: site.url,
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "About Us",
-      item: "https://kidzeepreschooldwarka.com/about",
+      item: `${site.url}/about`,
     },
   ],
 };
 
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: [
-    {
-      "@type": "Question",
-      name: "Where is Kidzee Sector 12, Dwarka located?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Kidzee Preschool and Daycare is located at Building No. 19, Block B, Sector 12B, Dwarka, Delhi 110075.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Which preschool programmes are available?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "The centre offers Playgroup for children aged 2 to 3 years, Nursery for 3 to 4 years, Junior KG for 4 to 5 years and Senior KG for 5 to 6 years.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What is the teacher-child ratio?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "The teacher-child ratio is 1:8 for Playgroup and Nursery, and 1:10 for Junior KG and Senior KG.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Does Kidzee Sector 12 Dwarka provide daycare?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Yes. Daycare is available after preschool hours and continues until 7:00 PM.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Are meals included in the preschool fee?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Yes. Preschool meals are included in the monthly preschool fee.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Are trial classes available before admission?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Yes. A three-day trial programme is available so children can experience the classroom, teachers and daily routine before regular admission.",
-      },
-    },
-  ],
-};
+const aboutMediaSlotKeys = [
+  "about.hero.main",
+  "about.environment.main",
+  "about.environment.play",
+  "about.environment.activity",
+  "about.safety.main",
+];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const [media, teamMembers, contentSettings] = await Promise.all([
+    getWebsiteMediaBySlotKeys(aboutMediaSlotKeys),
+    getPublishedWebsiteTeamMembers(),
+    getWebsiteContentSettings(),
+  ]);
+  const structuredData = JSON.stringify([
+    aboutPageSchema,
+    breadcrumbSchema,
+    ...teamMembers.map((member) => ({
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name: member.name,
+      jobTitle: member.role,
+      description: member.introduction,
+      image: member.imageUrl,
+      worksFor: {
+        "@id": `${site.url}/#preschool`,
+      },
+    })),
+  ]).replace(/</g, "\\u003c");
+
   return (
     <PageShell>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(aboutPageSchema),
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbSchema),
-        }}
-      />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(faqSchema),
+          __html: structuredData,
         }}
       />
 
       <main className="overflow-hidden">
-        <AboutHero />
-        <AboutWelcome />
+        <AboutHero
+          imageUrl={media["about.hero.main"]?.imageUrl ?? undefined}
+          imageAlt={media["about.hero.main"]?.altText || undefined}
+          heading={contentSettings.aboutHeroHeading}
+          headingHighlight={contentSettings.aboutHeroHighlight}
+          introduction={contentSettings.aboutHeroIntro}
+          primaryCtaLabel={contentSettings.primaryCtaLabel}
+          secondaryCtaLabel={contentSettings.secondaryCtaLabel}
+        />
+
         <AboutKidzee />
-        <AboutEnvironment />
-        <AboutSafety />
-        <AboutFacilities />
-        <AboutCTA />
+
+        <Team members={teamMembers} />
+
+        <AboutEnvironment
+          mainImageUrl={
+            media["about.environment.main"]?.imageUrl ?? undefined
+          }
+          mainImageAlt={
+            media["about.environment.main"]?.altText || undefined
+          }
+          playImageUrl={
+            media["about.environment.play"]?.imageUrl ?? undefined
+          }
+          playImageAlt={
+            media["about.environment.play"]?.altText || undefined
+          }
+          activityImageUrl={
+            media["about.environment.activity"]?.imageUrl ?? undefined
+          }
+          activityImageAlt={
+            media["about.environment.activity"]?.altText || undefined
+          }
+        />
+
+        <AboutSafety
+          imageUrl={media["about.safety.main"]?.imageUrl ?? undefined}
+          imageAlt={media["about.safety.main"]?.altText || undefined}
+        />
       </main>
     </PageShell>
   );

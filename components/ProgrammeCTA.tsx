@@ -1,5 +1,6 @@
 "use client";
 
+import { useSiteContact } from "@/components/SiteContactProvider";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -8,7 +9,6 @@ import {
   CalendarCheck2,
   CheckCircle2,
   GraduationCap,
-  MessageCircleMore,
   Phone,
   Sparkles,
 } from "lucide-react";
@@ -42,9 +42,7 @@ const programmeGroups = [
 ];
 
 export default function ProgrammeCTA() {
-  const whatsappMessage = encodeURIComponent(
-    "Hello, I need help choosing the right preschool programme for my child at Kidzee Sector 12, Dwarka."
-  );
+  const site = useSiteContact();
 
   return (
     <section
@@ -113,7 +111,7 @@ export default function ProgrammeCTA() {
 
               <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
-                  href="/contact"
+                  href="/admissions?enquiry=ADMISSION#admission-enquiry"
                   className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-[#64278F] px-7 py-3.5 text-base font-extrabold text-white shadow-[0_14px_32px_rgba(100,39,143,0.22)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#522071] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#702A96]/25"
                 >
                   <CalendarCheck2 size={19} aria-hidden="true" />
@@ -121,23 +119,14 @@ export default function ProgrammeCTA() {
                   <ArrowRight size={18} aria-hidden="true" />
                 </Link>
 
-                <a
-                  href={`https://wa.me/919667038673?text=${whatsappMessage}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-13 items-center justify-center gap-2 rounded-full border border-[#702A96]/20 bg-white px-7 py-3.5 text-base font-extrabold text-[#64278F] transition duration-300 hover:-translate-y-0.5 hover:border-[#702A96]/35 hover:bg-[#FAF7FC] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#702A96]/20"
-                >
-                  <MessageCircleMore size={19} aria-hidden="true" />
-                  Ask on WhatsApp
-                </a>
               </div>
 
               <a
-                href="tel:+919667038673"
+                href={`tel:${site.phone}`}
                 className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[#6F6474] transition-colors hover:text-[#702A96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#702A96]/30"
               >
                 <Phone size={17} aria-hidden="true" />
-                Speak with the admission team: +91 96670 38673
+                Speak with the admission team: {site.phoneDisplay}
               </a>
             </div>
 

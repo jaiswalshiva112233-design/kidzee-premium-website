@@ -46,7 +46,15 @@ const everydayPriorities = [
   "Preparing children gradually for formal schooling",
 ];
 
-export default function AboutWelcome() {
+type AboutWelcomeProps = {
+  imageUrl?: string;
+  imageAlt?: string;
+};
+
+export default function AboutWelcome({
+  imageUrl = "/images/hero/hero-teacher-class.jpg",
+  imageAlt = "Teacher engaging with children at Kidzee Sector 12, Dwarka",
+}: AboutWelcomeProps) {
   return (
     <section
       className="relative overflow-hidden bg-white py-20 sm:py-24 lg:py-28"
@@ -84,8 +92,9 @@ export default function AboutWelcome() {
             <div className="relative overflow-hidden rounded-[38px] border-[8px] border-white bg-purple-50 shadow-[0_30px_85px_rgba(54,21,74,0.2)] sm:rounded-[46px]">
               <div className="relative min-h-[500px] sm:min-h-[640px]">
                 <Image
-                  src="/images/about/welcome.jpg"
-                  alt="Teacher engaging with children at Kidzee Sector 12, Dwarka"
+                  src={imageUrl}
+                  alt={imageAlt}
+                  unoptimized={imageUrl.startsWith("http")}
                   fill
                   sizes="(max-width: 1024px) 100vw, 46vw"
                   className="object-cover"
@@ -232,3 +241,6 @@ export default function AboutWelcome() {
     </section>
   );
 }
+
+
+

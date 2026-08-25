@@ -1,87 +1,59 @@
 import type { Metadata } from "next";
 
-import About from "@/components/About";
-import AdmissionProcess from "@/components/AdmissionProcess";
-import CTA from "@/components/CTA";
 import Daycare from "@/components/Daycare";
 import FAQ from "@/components/FAQ";
-import Facilities from "@/components/Facilities";
 import Gallery from "@/components/Gallery";
 import Hero from "@/components/Hero";
+import HomeTeamPreview from "@/components/HomeTeamPreview";
 import Location from "@/components/Location";
 import PageShell from "@/components/PageShell";
 import Programs from "@/components/Programs";
 import Reviews from "@/components/Reviews";
 import TrustBar from "@/components/TrustBar";
 import WhyChooseUs from "@/components/WhyChooseUs";
+import { buildWebsitePageMetadata } from "@/lib/sanity/seo";
+import { getFeaturedWebsiteTeamMembers } from "@/lib/sanity/team";
 
-import { site } from "@/lib/site";
-
-export const metadata: Metadata = {
-  title: "Preschool & Daycare in Sector 12 Dwarka",
-  description:
-    "Kidzee Preschool & Daycare in Sector 12B, Dwarka offers Playgroup, Nursery, Junior KG, Senior KG and daycare until 7 PM for children aged 2 to 6 years.",
-
-  alternates: {
-    canonical: "/",
-  },
-
-  openGraph: {
+export async function generateMetadata(): Promise<Metadata> {
+  return buildWebsitePageMetadata({
+    pageKey: "home",
+    path: "/",
     title: "Kidzee Preschool & Daycare in Sector 12 Dwarka",
     description:
-      "Explore preschool programmes, daycare, facilities and admission support at Kidzee Sector 12B, Dwarka.",
-    url: "/",
-    siteName: site.shortName,
-    type: "website",
-    locale: "en_IN",
-    images: [
-      {
-        url: "/images/hero-main.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Kidzee Preschool and Daycare in Sector 12B Dwarka",
-      },
+      "Explore Playgroup, Nursery, Junior KG, Senior KG and daycare until 7 PM at Kidzee Preschool in Sector 12B, Dwarka. Book a school visit.",
+    keywords: [
+      "preschool in Dwarka",
+      "preschool in Sector 12 Dwarka",
+      "Kidzee Sector 12 Dwarka",
+      "play school in Dwarka",
+      "nursery school in Dwarka",
+      "daycare in Dwarka",
+      "daycare in Sector 12 Dwarka",
+      "preschool admissions in Dwarka",
     ],
-  },
+    socialImage: "/images/hero/hero-main.jpg",
+    socialImageAlt:
+      "Children learning with their teacher at Kidzee Preschool Sector 12 Dwarka",
+  });
+}
 
-  twitter: {
-    card: "summary_large_image",
-    title: "Kidzee Preschool & Daycare in Sector 12 Dwarka",
-    description:
-      "Preschool programmes and daycare for children aged 2 to 6 years in Sector 12B, Dwarka.",
-    images: ["/images/hero-main.jpg"],
-  },
-};
+export default async function HomePage() {
+  const featuredTeamMembers =
+    await getFeaturedWebsiteTeamMembers(9);
 
-export default function HomePage() {
   return (
     <PageShell>
       <main className="overflow-hidden">
         <Hero />
-
         <TrustBar />
-
-        <About />
-
         <Programs />
-
-        <Daycare />
-
         <WhyChooseUs />
-
-        <Facilities />
-
+        <HomeTeamPreview members={featuredTeamMembers} />
+        <Daycare />
         <Gallery />
-
         <Reviews />
-
-        <AdmissionProcess />
-
         <FAQ />
-
         <Location />
-
-        <CTA />
       </main>
     </PageShell>
   );

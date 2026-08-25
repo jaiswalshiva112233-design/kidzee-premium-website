@@ -22,7 +22,7 @@ const campusShowcase = [
     subtitle: "Where curiosity begins every morning",
     description:
       "Every classroom is thoughtfully arranged to encourage confidence, conversation, creativity and joyful participation through age-appropriate learning experiences.",
-    image: "/images/about/facilities-classroom.jpg",
+    image: "/images/facilities/classroom-2.jpg",
     icon: Sun,
     badge: "Learning Spaces",
   },
@@ -32,7 +32,7 @@ const campusShowcase = [
     subtitle: "Movement that builds confidence",
     description:
       "Children enjoy supervised physical play that strengthens balance, coordination, teamwork and social interaction in a safe environment.",
-    image: "/images/about/facilities-indoor-play.jpg",
+    image: "/images/facilities/ground-floor-play.jpg",
     icon: Blocks,
     badge: "Active Play",
   },
@@ -42,7 +42,7 @@ const campusShowcase = [
     subtitle: "Imagination comes alive",
     description:
       "Art, storytelling, music, pretend play and hands-on activities encourage children to express themselves naturally every day.",
-    image: "/images/about/facilities-activity.jpg",
+    image: "/images/gallery/gallery-3.jpg",
     icon: Palette,
     badge: "Creative Corner",
   },
@@ -52,7 +52,7 @@ const campusShowcase = [
     subtitle: "A caring extension of home",
     description:
       "Our daycare spaces support meals, supervised routines, quiet rest, guided homework and meaningful play throughout the day.",
-    image: "/images/about/facilities-daycare.jpg",
+    image: "/images/daycare/daycare-main.jpg",
     icon: Baby,
     badge: "Daycare",
   },
@@ -97,7 +97,56 @@ const priorities = [
   "Comfortable daily transitions",
 ];
 
-export default function AboutFacilities() {
+type AboutFacilitiesProps = {
+  classroomImageUrl?: string;
+  classroomImageAlt?: string;
+  indoorPlayImageUrl?: string;
+  indoorPlayImageAlt?: string;
+  activityImageUrl?: string;
+  activityImageAlt?: string;
+  daycareImageUrl?: string;
+  daycareImageAlt?: string;
+};
+
+export default function AboutFacilities({
+  classroomImageUrl,
+  classroomImageAlt = "Bright classrooms at Kidzee Preschool and Daycare Sector 12 Dwarka",
+  indoorPlayImageUrl,
+  indoorPlayImageAlt = "Indoor Play Zone",
+  activityImageUrl,
+  activityImageAlt = "Creative Exploration",
+  daycareImageUrl,
+  daycareImageAlt = "Comfortable Daycare",
+}: AboutFacilitiesProps) {
+  const imageOverrides = [
+    {
+      imageUrl: classroomImageUrl,
+      imageAlt: classroomImageAlt,
+    },
+    {
+      imageUrl: indoorPlayImageUrl,
+      imageAlt: indoorPlayImageAlt,
+    },
+    {
+      imageUrl: activityImageUrl,
+      imageAlt: activityImageAlt,
+    },
+    {
+      imageUrl: daycareImageUrl,
+      imageAlt: daycareImageAlt,
+    },
+  ];
+
+  const resolvedCampusShowcase = campusShowcase.map(
+    (item, index) => ({
+      ...item,
+      image:
+        imageOverrides[index]?.imageUrl ?? item.image,
+      imageAlt:
+        imageOverrides[index]?.imageAlt ?? item.title,
+    }),
+  );
+
   return (
     <section
       className="relative overflow-hidden bg-gradient-to-b from-[#fffdf8] via-[#fff8ef] to-[#fffaf6] py-24 lg:py-32"
@@ -172,8 +221,9 @@ export default function AboutFacilities() {
             <div className="relative aspect-[16/8]">
 
               <Image
-                src={campusShowcase[0].image}
-                alt="Bright classrooms at Kidzee Preschool and Daycare Sector 12 Dwarka"
+                src={resolvedCampusShowcase[0].image}
+                alt={resolvedCampusShowcase[0].imageAlt}
+                unoptimized={resolvedCampusShowcase[0].image.startsWith("http")}
                 fill
                 priority
                 className="object-cover transition duration-700 hover:scale-[1.03]"
@@ -236,8 +286,9 @@ export default function AboutFacilities() {
               <div className="relative aspect-[16/10] overflow-hidden">
 
                 <Image
-                  src={campusShowcase[1].image}
-                  alt={campusShowcase[1].title}
+                  src={resolvedCampusShowcase[1].image}
+                  alt={resolvedCampusShowcase[1].imageAlt}
+                  unoptimized={resolvedCampusShowcase[1].image.startsWith("http")}
                   fill
                   className="object-cover transition duration-700 group-hover:scale-105"
                 />
@@ -246,7 +297,7 @@ export default function AboutFacilities() {
 
                 <div className="absolute left-7 top-7 rounded-full bg-white/90 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-[#702a96] backdrop-blur">
 
-                  {campusShowcase[1].badge}
+                  {resolvedCampusShowcase[1].badge}
 
                 </div>
 
@@ -266,13 +317,13 @@ export default function AboutFacilities() {
 
                     <h3 className="text-3xl font-extrabold text-[#281036]">
 
-                      {campusShowcase[1].title}
+                      {resolvedCampusShowcase[1].title}
 
                     </h3>
 
                     <p className="mt-1 text-[#702a96] font-semibold">
 
-                      {campusShowcase[1].subtitle}
+                      {resolvedCampusShowcase[1].subtitle}
 
                     </p>
 
@@ -282,7 +333,7 @@ export default function AboutFacilities() {
 
                 <p className="mt-6 leading-8 text-slate-600">
 
-                  {campusShowcase[1].description}
+                  {resolvedCampusShowcase[1].description}
 
                 </p>
 
@@ -308,8 +359,9 @@ export default function AboutFacilities() {
               <div className="relative aspect-[4/5]">
 
                 <Image
-                  src={campusShowcase[2].image}
-                  alt={campusShowcase[2].title}
+                  src={resolvedCampusShowcase[2].image}
+                  alt={resolvedCampusShowcase[2].imageAlt}
+                  unoptimized={resolvedCampusShowcase[2].image.startsWith("http")}
                   fill
                   className="object-cover transition duration-700 group-hover:scale-105"
                 />
@@ -328,19 +380,19 @@ export default function AboutFacilities() {
 
                 <h3 className="mt-6 text-3xl font-extrabold text-[#281036]">
 
-                  {campusShowcase[2].title}
+                  {resolvedCampusShowcase[2].title}
 
                 </h3>
 
                 <p className="mt-2 font-semibold text-[#702a96]">
 
-                  {campusShowcase[2].subtitle}
+                  {resolvedCampusShowcase[2].subtitle}
 
                 </p>
 
                 <p className="mt-6 leading-8 text-slate-600">
 
-                  {campusShowcase[2].description}
+                  {resolvedCampusShowcase[2].description}
 
                 </p>
 
@@ -369,8 +421,9 @@ export default function AboutFacilities() {
             <div className="relative min-h-[420px]">
 
               <Image
-                src={campusShowcase[3].image}
-                alt={campusShowcase[3].title}
+                src={resolvedCampusShowcase[3].image}
+                alt={resolvedCampusShowcase[3].imageAlt}
+                  unoptimized={resolvedCampusShowcase[3].image.startsWith("http")}
                 fill
                 className="object-cover"
               />
@@ -395,7 +448,7 @@ export default function AboutFacilities() {
 
               <p className="mt-6 leading-8 text-slate-600">
 
-                Our daycare environment has been planned to support children's routines through supervised play, meals, quiet time and meaningful engagement in a calm, caring atmosphere.
+                Our daycare environment has been planned to support children&apos;s routines through supervised play, meals, quiet time and meaningful engagement in a calm, caring atmosphere.
 
               </p>
 
@@ -673,3 +726,5 @@ export default function AboutFacilities() {
     </section>
   );
 }
+
+

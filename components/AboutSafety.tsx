@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
@@ -54,16 +55,19 @@ const transition = {
   ease: [0.22, 1, 0.36, 1] as const,
 };
 
-export default function AboutSafety() {
+type AboutSafetyProps = {
+  imageUrl?: string;
+  imageAlt?: string;
+};
+
+export default function AboutSafety({
+  imageUrl = "/images/gallery/gallery-teacher-children.jpg",
+  imageAlt = "Teacher supporting children at Kidzee Preschool Sector 12 Dwarka",
+}: AboutSafetyProps) {
   const shouldReduceMotion = useReducedMotion();
-
-  const whatsappMessage = encodeURIComponent(
-    "Hello, I would like to visit Kidzee Sector 12, Dwarka and know more about the preschool."
-  );
-
   return (
     <section
-      className="relative isolate overflow-hidden bg-white py-20 sm:py-24 lg:py-28"
+      className="relative isolate overflow-hidden bg-white py-14 sm:py-16 lg:py-20"
       aria-labelledby="about-safety-heading"
     >
       <div
@@ -93,10 +97,10 @@ export default function AboutSafety() {
 
             <h2
               id="about-safety-heading"
-              className="mt-6 text-balance text-4xl font-extrabold leading-tight tracking-[-0.04em] text-[#281036] sm:text-5xl lg:text-[58px]"
+              className="mt-6 text-balance text-3xl font-extrabold leading-[1.08] tracking-[-0.04em] text-[#281036] sm:text-4xl lg:text-[48px]"
             >
-              Children settle better when they feel{" "}
-              <span className="text-[#702a96]">safe and well supported</span>
+              Everyday care that helps children feel{" "}
+              <span className="text-[#702a96]">safe and supported</span>
             </h2>
 
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
@@ -106,11 +110,6 @@ export default function AboutSafety() {
               how to respond when a child needs comfort or help.
             </p>
 
-            <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-              At Kidzee Sector 12, Dwarka, these practices are part of the
-              everyday school routine rather than something followed only when
-              parents are visiting.
-            </p>
 
             <ul className="mt-8 space-y-4">
               {safetyPoints.map((item) => (
@@ -130,16 +129,14 @@ export default function AboutSafety() {
               ))}
             </ul>
 
-            <a
-              href={`https://wa.me/919667038673?text=${whatsappMessage}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Book a visit to Kidzee Sector 12 Dwarka on WhatsApp"
+            <Link
+              href="/admissions?enquiry=SCHOOL_VISIT#admission-enquiry"
+              aria-label="Book a school visit at Kidzee Sector 12 Dwarka"
               className="mt-10 inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-[#64278f] px-7 text-base font-bold text-white shadow-[0_14px_32px_rgba(100,39,143,0.24)] transition-[transform,background-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:bg-[#532173] hover:shadow-[0_18px_38px_rgba(100,39,143,0.3)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-purple-200"
             >
-              Visit the Preschool
+              Book a School Visit
               <ArrowRight size={18} aria-hidden="true" />
-            </a>
+            </Link>
           </motion.div>
 
           <motion.div
@@ -157,10 +154,11 @@ export default function AboutSafety() {
             />
 
             <div className="relative overflow-hidden rounded-[40px] border-[8px] border-white bg-white shadow-[0_30px_80px_rgba(55,22,70,0.18)]">
-              <div className="relative min-h-[500px] sm:min-h-[600px]">
+              <div className="relative aspect-[4/3] min-h-0 sm:aspect-auto sm:min-h-[600px]">
                 <Image
-                  src="/images/about/safety.jpg"
-                  alt="Teacher supporting children at Kidzee Preschool Sector 12 Dwarka"
+                  src={imageUrl}
+                  alt={imageAlt}
+                  unoptimized={imageUrl.startsWith("http")}
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -194,7 +192,7 @@ export default function AboutSafety() {
           </motion.div>
         </div>
 
-        <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid grid-flow-col auto-cols-[84%] gap-5 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-4 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-4">
           {safetyCards.map((item, index) => {
             const Icon = item.icon;
 
@@ -212,7 +210,7 @@ export default function AboutSafety() {
                   delay: shouldReduceMotion ? 0 : index * 0.05,
                 }}
                 whileHover={shouldReduceMotion ? undefined : { y: -6 }}
-                className="group rounded-[30px] border border-purple-100 bg-[#fffdf9] p-6 shadow-[0_14px_38px_rgba(62,25,83,0.07)] transition-[border-color,box-shadow] duration-300 hover:border-purple-200 hover:shadow-[0_24px_55px_rgba(62,25,83,0.13)]"
+                className="group snap-start rounded-[30px] border border-purple-100 bg-[#fffdf9] p-6 shadow-[0_14px_38px_rgba(62,25,83,0.07)] transition-[border-color,box-shadow] duration-300 hover:border-purple-200 hover:shadow-[0_24px_55px_rgba(62,25,83,0.13)]"
               >
                 <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#702a96] text-white transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105">
                   <Icon size={23} aria-hidden="true" />
@@ -253,3 +251,6 @@ export default function AboutSafety() {
     </section>
   );
 }
+
+
+

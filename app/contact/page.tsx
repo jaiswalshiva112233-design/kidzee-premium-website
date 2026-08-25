@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
-import ContactForm from "@/components/ContactForm";
-import { CTA } from "@/components/HomeSections";
+import EnquiryForm from "@/components/EnquiryForm";
 import {
   ArrowRight,
   BusFront,
@@ -11,44 +10,34 @@ import {
   Clock3,
   Mail,
   MapPin,
-  MessageCircle,
   Phone,
   School,
   ShieldCheck,
 } from "lucide-react";
-import { site } from "@/lib/site";
+import { getWebsiteContactSettings } from "@/lib/sanity/contactSettings";
+import { buildWebsitePageMetadata } from "@/lib/sanity/seo";
+import { buildSiteContact } from "@/lib/siteContact";
 
-export const metadata: Metadata = {
-  title: "Contact Kidzee Preschool in Sector 12 Dwarka",
-  description:
-    "Contact Kidzee Preschool & Daycare at Building No. 19, Block B, Sector 12B, Dwarka. Call or WhatsApp +91 96670 38673 to book a school visit or 3-day trial.",
-  keywords: [
-    "contact Kidzee Sector 12 Dwarka",
-    "Kidzee Dwarka phone number",
-    "preschool visit Sector 12 Dwarka",
-    "preschool enquiry Dwarka",
-    "daycare enquiry Dwarka",
-    "Kidzee Sector 12B address",
-  ],
-  alternates: {
-    canonical: "/contact",
-  },
-  openGraph: {
-    title: "Contact Kidzee Sector 12, Dwarka",
+export async function generateMetadata(): Promise<Metadata> {
+  return buildWebsitePageMetadata({
+    pageKey: "contact",
+    path: "/contact",
+    title: "Contact & School Visits",
     description:
-      "Speak with our team about preschool admissions, daycare, transport, school visits and three-day trial classes.",
-    url: "/contact",
-    type: "website",
-    images: [
-      {
-        url: "/images/contact-main.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Contact Kidzee Preschool and Daycare Sector 12 Dwarka",
-      },
+      "Contact Kidzee Preschool & Daycare at Building No. 19, Block B, Sector 12B, Dwarka. Call or WhatsApp +91 96670 38673 to book a school visit or three-day trial.",
+    keywords: [
+      "contact Kidzee Sector 12 Dwarka",
+      "Kidzee Dwarka phone number",
+      "preschool visit Sector 12 Dwarka",
+      "preschool enquiry Dwarka",
+      "daycare enquiry Dwarka",
+      "Kidzee Sector 12B address",
     ],
-  },
-};
+    socialImage: "/images/hero/hero-building.jpg",
+    socialImageAlt:
+      "Contact Kidzee Preschool and Daycare Sector 12 Dwarka",
+  });
+}
 
 const enquiryTopics = [
   {
@@ -119,12 +108,16 @@ const faqs = [
   },
 ];
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const site = buildSiteContact(
+    await getWebsiteContactSettings(),
+  );
+
   return (
     <PageShell>
       <main className="overflow-hidden">
         {/* Hero */}
-        <section className="relative bg-[linear-gradient(135deg,#faf7ff_0%,#ffffff_52%,#fff7d7_100%)] pb-16 pt-12 sm:pb-20 sm:pt-16 lg:pb-24 lg:pt-20">
+        <section className="relative bg-[linear-gradient(135deg,#faf7ff_0%,#ffffff_52%,#fff7d7_100%)] pb-16 pt-[104px] sm:pb-20 sm:pt-28 lg:pb-24 lg:pt-32">
           <div className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-purple-200/35 blur-3xl" />
           <div className="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-yellow-200/40 blur-3xl" />
 
@@ -143,13 +136,11 @@ export default function ContactPage() {
 
               <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 <a
-                  href={`https://wa.me/91${site.phone.replace(/\D/g, "").slice(-10)}?text=Hello%20Kidzee%20Sector%2012%20Dwarka%2C%20I%20would%20like%20to%20book%20a%20school%20visit.`}
-                  target="_blank"
-                  rel="noreferrer"
+                  href="#contact-enquiry"
                   className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-purple-700 px-7 py-3.5 text-sm font-black text-white shadow-lg shadow-purple-700/20 transition hover:-translate-y-0.5 hover:bg-purple-800"
                 >
-                  <MessageCircle size={18} />
-                  Enquire on WhatsApp
+                  <CalendarDays size={18} />
+                  Send Visit Enquiry
                 </a>
 
                 <a
@@ -316,7 +307,10 @@ export default function ContactPage() {
                 </a>
               </div>
 
-              <div className="rounded-[36px] border border-purple-100 bg-[linear-gradient(145deg,#ffffff_0%,#faf7ff_100%)] p-5 shadow-xl shadow-purple-950/5 sm:p-8">
+              <div
+                id="contact-enquiry"
+                className="scroll-mt-28 rounded-[36px] border border-purple-100 bg-[linear-gradient(145deg,#ffffff_0%,#faf7ff_100%)] p-5 shadow-xl shadow-purple-950/5 sm:p-8"
+              >
                 <div className="mb-7">
                   <span className="eyebrow">Send an enquiry</span>
 
@@ -331,14 +325,14 @@ export default function ContactPage() {
                   </p>
                 </div>
 
-                <ContactForm />
+                <EnquiryForm />
               </div>
             </div>
           </div>
         </section>
 
         {/* Enquiry Topics */}
-        <section className="section bg-[#faf8ff]">
+        <section className="hidden">
           <div className="container">
             <div className="mx-auto max-w-3xl text-center">
               <span className="eyebrow">How we can help</span>
@@ -381,7 +375,7 @@ export default function ContactPage() {
         </section>
 
         {/* Visit Section */}
-        <section className="section bg-purple-950 text-white">
+        <section className="hidden">
           <div className="container">
             <div className="grid items-center gap-12 lg:grid-cols-[1fr_0.95fr] lg:gap-16">
               <div>
@@ -418,12 +412,10 @@ export default function ContactPage() {
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <a
-                    href={`https://wa.me/91${site.phone.replace(/\D/g, "").slice(-10)}?text=Hello%20Kidzee%20Sector%2012%20Dwarka%2C%20I%20would%20like%20to%20schedule%20a%20school%20visit.`}
-                    target="_blank"
-                    rel="noreferrer"
+                    href="#contact-enquiry"
                     className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-yellow-300 px-7 py-3.5 text-sm font-black text-purple-950 transition hover:-translate-y-0.5 hover:bg-yellow-200"
                   >
-                    Schedule on WhatsApp
+                    Schedule a Visit
                     <ArrowRight size={17} />
                   </a>
 
@@ -551,7 +543,6 @@ export default function ContactPage() {
           </div>
         </section>
 
-        <CTA />
       </main>
     </PageShell>
   );

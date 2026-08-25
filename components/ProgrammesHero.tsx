@@ -2,265 +2,167 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import {
   ArrowRight,
-  Baby,
-  BookOpenCheck,
   CalendarCheck2,
   CheckCircle2,
-  GraduationCap,
+  ChevronRight,
   Sparkles,
 } from "lucide-react";
 
-const programmeHighlights = [
-  {
-    icon: Baby,
-    title: "Playgroup",
-    age: "2–3 years",
-  },
-  {
-    icon: BookOpenCheck,
-    title: "Nursery",
-    age: "3–4 years",
-  },
-  {
-    icon: GraduationCap,
-    title: "Junior KG",
-    age: "4–5 years",
-  },
-  {
-    icon: GraduationCap,
-    title: "Senior KG",
-    age: "5–6 years",
-  },
+const highlights = [
+  "Playgroup to Senior KG",
+  "Age-appropriate learning for 2 to 6 years",
+  "Fresh preschool meals included",
 ];
 
-const programmeBenefits = [
-  "Age-appropriate learning goals",
-  "Play-based and activity-led teaching",
-  "Language, numeracy and school-readiness skills",
-  "Confidence, independence and social development",
-];
+type ProgrammesHeroProps = {
+  imageUrl?: string;
+  imageAlt?: string;
+  heading?: string;
+  headingHighlight?: string;
+  introduction?: string;
+};
 
-export default function ProgrammesHero() {
-  const visitMessage = encodeURIComponent(
-    "Hello, I would like to know which preschool programme is suitable for my child at Kidzee Sector 12, Dwarka."
-  );
+function optimiseSanityImageUrl(source: string) {
+  try {
+    const url = new URL(source);
+
+    if (url.hostname !== "cdn.sanity.io") {
+      return source;
+    }
+
+    url.searchParams.set("auto", "format");
+    url.searchParams.set("fit", "max");
+    url.searchParams.set("w", "1600");
+    url.searchParams.set("q", "82");
+
+    return url.toString();
+  } catch {
+    return source;
+  }
+}
+
+export default function ProgrammesHero({
+  imageUrl = "/images/programmes/playgroup.jpg",
+  imageAlt = "Children learning together at Kidzee Sector 12 Dwarka",
+  heading = "Preschool programmes that",
+  headingHighlight = "grow with your child",
+  introduction = "From Playgroup to Senior KG, every stage combines guided play, conversation, movement and hands-on learning—helping children build skills without losing the joy of childhood.",
+}: ProgrammesHeroProps) {
+  const heroImage = optimiseSanityImageUrl(imageUrl);
 
   return (
     <section
-      className="relative overflow-hidden bg-[linear-gradient(135deg,#f7f1ff_0%,#ffffff_50%,#fff6cf_100%)] pb-20 pt-12 sm:pb-24 sm:pt-16 lg:pb-28 lg:pt-20"
       aria-labelledby="programmes-hero-heading"
+      className="relative isolate overflow-hidden bg-[linear-gradient(135deg,#F8F2FC_0%,#FFFFFF_54%,#FFF8D8_100%)] pb-14 pt-[104px] sm:pb-16 sm:pt-28 lg:pb-20 lg:pt-32"
     >
       <div
         aria-hidden="true"
-        className="absolute -left-36 top-20 h-96 w-96 rounded-full bg-purple-200/45 blur-3xl"
-      />
+        className="pointer-events-none absolute inset-0 -z-10"
+      >
+        <div className="absolute -left-36 top-24 h-80 w-80 rounded-full bg-[#DCC7EC]/40 blur-3xl" />
+        <div className="absolute -right-36 bottom-0 h-96 w-96 rounded-full bg-[#F6C84B]/25 blur-3xl" />
+      </div>
 
-      <div
-        aria-hidden="true"
-        className="absolute -right-32 bottom-0 h-96 w-96 rounded-full bg-yellow-200/55 blur-3xl"
-      />
-
-      <div
-        aria-hidden="true"
-        className="absolute left-[46%] top-12 h-48 w-48 rounded-full bg-pink-100/50 blur-3xl"
-      />
-
-      <div className="relative mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-8 xl:px-10">
-        <div className="grid items-center gap-14 lg:grid-cols-[1.04fr_0.96fr] lg:gap-18 xl:gap-24">
-          <motion.div
-            initial={{ opacity: 0, x: -28 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
+      <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-8 xl:px-10">
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-7 flex flex-wrap items-center gap-2 text-sm font-semibold text-[#746A79]"
+        >
+          <Link
+            href="/"
+            className="transition-colors hover:text-[#5B2A86] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5B2A86] focus-visible:ring-offset-4"
           >
-            <nav
-              aria-label="Breadcrumb"
-              className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-500"
-            >
-              <Link
-                href="/"
-                className="transition hover:text-[#702a96]"
-              >
-                Home
-              </Link>
+            Home
+          </Link>
+          <ChevronRight aria-hidden="true" size={15} />
+          <span className="text-[#5B2A86]" aria-current="page">
+            Programmes
+          </span>
+        </nav>
 
-              <span aria-hidden="true">/</span>
-
-              <span className="text-[#702a96]">Programmes</span>
-            </nav>
-
-            <div className="mt-7 inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white/85 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] text-[#702a96] shadow-sm backdrop-blur">
-              <Sparkles size={16} aria-hidden="true" />
+        <div className="grid items-center gap-10 lg:grid-cols-[0.94fr_1.06fr] lg:gap-14 xl:gap-18">
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#E3D5EA] bg-white/90 px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#5B2A86] shadow-sm">
+              <Sparkles aria-hidden="true" size={16} />
               Preschool programmes in Dwarka
             </div>
 
             <h1
               id="programmes-hero-heading"
-              className="mt-6 max-w-4xl text-balance text-4xl font-extrabold leading-tight tracking-[-0.045em] text-[#281036] sm:text-5xl lg:text-[62px]"
+              className="mt-5 max-w-[720px] text-balance text-[2.5rem] font-black leading-[1.04] tracking-[-0.05em] text-[#281034] sm:mt-6 sm:text-5xl lg:text-[3.6rem] xl:text-[3.9rem]"
             >
-              The right learning experience for{" "}
-              <span className="text-[#702a96]">
-                every stage of early childhood
-              </span>
+              {heading}{" "}
+              <span className="text-[#5B2A86]">{headingHighlight}</span>
             </h1>
 
-            <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-              From a child’s first preschool experience to confident school
-              readiness, our programmes support development through guided
-              play, meaningful activities, conversation, movement and
-              age-appropriate classroom learning.
+            <p className="mt-5 max-w-2xl text-base font-semibold leading-8 text-[#675E6B] sm:text-lg">
+              {introduction}
             </p>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              {programmeBenefits.map((benefit) => (
-                <div
-                  key={benefit}
-                  className="flex items-start gap-3 rounded-[20px] border border-purple-100 bg-white/80 p-4 shadow-sm backdrop-blur"
+            <ul className="mt-6 grid gap-2.5 sm:grid-cols-2">
+              {highlights.map((item) => (
+                <li
+                  key={item}
+                  className="flex items-start gap-2.5 rounded-2xl border border-[#E8DEEC] bg-white/85 px-4 py-3 text-sm font-bold leading-6 text-[#493E4E]"
                 >
-                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-yellow-300 text-[#281036]">
-                    <CheckCircle2
-                      size={16}
-                      strokeWidth={2.7}
-                      aria-hidden="true"
-                    />
-                  </div>
-
-                  <p className="text-sm font-semibold leading-6 text-slate-700">
-                    {benefit}
-                  </p>
-                </div>
+                  <CheckCircle2
+                    aria-hidden="true"
+                    size={18}
+                    className="mt-0.5 shrink-0 text-[#5B2A86]"
+                  />
+                  {item}
+                </li>
               ))}
-            </div>
+            </ul>
 
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <a
-                href={`https://wa.me/919667038673?text=${visitMessage}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-[#64278f] px-7 text-base font-extrabold text-white shadow-[0_16px_36px_rgba(100,39,143,0.22)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#522071]"
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <Link
+                href="#programme-options"
+                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-[#5B2A86] px-7 text-base font-black text-white shadow-[0_14px_32px_rgba(91,42,134,0.24)] transition hover:-translate-y-0.5 hover:bg-[#47206A]"
               >
-                <CalendarCheck2 size={19} aria-hidden="true" />
-                Find the Right Programme
-              </a>
+                Explore Programmes
+                <ArrowRight aria-hidden="true" size={18} />
+              </Link>
 
               <Link
-                href="/contact"
-                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-purple-200 bg-white px-7 text-base font-extrabold text-[#64278f] transition duration-300 hover:-translate-y-0.5 hover:border-purple-300 hover:bg-purple-50"
+                href="/admissions?enquiry=ADMISSION#admission-enquiry"
+                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-[#DCCFE3] bg-white px-7 text-base font-black text-[#5B2A86] shadow-sm transition hover:-translate-y-0.5 hover:border-[#5B2A86] hover:bg-[#F8F4FC]"
               >
-                Book a School Visit
-                <ArrowRight size={18} aria-hidden="true" />
+                <CalendarCheck2 aria-hidden="true" size={18} />
+                Get Admission Guidance
               </Link>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 28 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.08, ease: "easeOut" }}
-            className="relative mx-auto w-full max-w-[680px]"
-          >
+          <figure className="relative mx-auto w-full max-w-[730px]">
             <div
               aria-hidden="true"
-              className="absolute -inset-5 rotate-2 rounded-[46px] bg-purple-100/80"
+              className="absolute -inset-4 rotate-2 rounded-[42px] bg-[#EADDF1]/80"
             />
-
-            <div
-              aria-hidden="true"
-              className="absolute -right-5 -top-5 h-28 w-28 rounded-[34px] bg-yellow-300/75"
-            />
-
-            <div className="relative overflow-hidden rounded-[42px] border-[8px] border-white bg-white shadow-[0_32px_85px_rgba(64,27,78,0.18)]">
-              <div className="relative min-h-[580px] sm:min-h-[680px]">
+            <div className="relative overflow-hidden rounded-[32px] border-[7px] border-white bg-[#EEE7F1] shadow-[0_30px_82px_rgba(40,16,52,0.18)] sm:rounded-[38px] sm:border-[9px]">
+              <div className="relative aspect-[5/4] w-full sm:aspect-[16/10] lg:aspect-[4/3]">
                 <Image
-                  src="/images/programmes/programmes-hero.jpg"
-                  alt="Children participating in preschool learning activities at Kidzee Sector 12 Dwarka"
+                  src={heroImage}
+                  alt={imageAlt}
                   fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 48vw"
-                  className="object-cover"
+                  preload
+                  unoptimized={
+                    heroImage.startsWith("http") &&
+                    !heroImage.includes("cdn.sanity.io")
+                  }
+                  sizes="(max-width: 640px) 92vw, (max-width: 1024px) 88vw, 52vw"
+                  className="object-cover object-center"
                 />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-[#281036]/72 via-transparent to-transparent" />
-              </div>
-
-              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
-                <div className="rounded-[28px] border border-white/20 bg-white/92 p-5 shadow-xl backdrop-blur-md sm:p-6">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.17em] text-[#702a96]">
-                    Learning that grows with your child
-                  </p>
-
-                  <p className="mt-2 text-xl font-extrabold leading-snug text-[#281036] sm:text-2xl">
-                    Each programme builds on the skills, confidence and
-                    independence developed in the previous stage.
-                  </p>
-                </div>
               </div>
             </div>
 
-            <motion.div
-              animate={{ y: [0, -7, 0] }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="absolute -left-4 top-12 hidden rounded-[22px] border border-purple-100 bg-white px-5 py-4 shadow-[0_18px_45px_rgba(57,26,68,0.15)] sm:block"
-            >
-              <p className="text-xs font-extrabold uppercase tracking-[0.15em] text-[#702a96]">
-                Ages 2–6 years
-              </p>
-
-              <p className="mt-1 text-lg font-extrabold text-[#281036]">
-                Four learning stages
-              </p>
-            </motion.div>
-          </motion.div>
+            <figcaption className="relative mx-auto mt-4 w-fit rounded-full border border-[#E5DAEA] bg-white/95 px-4 py-2 text-center text-xs font-black text-[#5B2A86] shadow-sm sm:text-sm">
+              Learning together at our Sector 12B centre
+            </figcaption>
+          </figure>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, delay: 0.18, ease: "easeOut" }}
-          className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-        >
-          {programmeHighlights.map((programme, index) => {
-            const Icon = programme.icon;
-
-            return (
-              <Link
-                key={programme.title}
-                href={
-                  index === 0
-                    ? "/programmes/playgroup"
-                    : index === 1
-                      ? "/programmes/nursery"
-                      : index === 2
-                        ? "/programmes/junior-kg"
-                        : "/programmes/senior-kg"
-                }
-                className="group rounded-[28px] border border-purple-100 bg-white/90 p-5 shadow-[0_14px_38px_rgba(62,25,83,0.07)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-purple-200 hover:shadow-[0_22px_48px_rgba(62,25,83,0.12)]"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-[18px] bg-purple-100 text-[#702a96] transition duration-300 group-hover:bg-[#702a96] group-hover:text-white">
-                    <Icon size={22} strokeWidth={2.1} aria-hidden="true" />
-                  </div>
-
-                  <div>
-                    <p className="text-lg font-extrabold text-[#281036]">
-                      {programme.title}
-                    </p>
-
-                    <p className="mt-1 text-sm font-bold text-[#702a96]">
-                      {programme.age}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </motion.div>
       </div>
     </section>
   );

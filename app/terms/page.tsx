@@ -11,7 +11,9 @@ import {
 
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
-import { site } from "@/lib/site";
+import PageShell from "@/components/PageShell";
+import { getWebsiteContactSettings } from "@/lib/sanity/contactSettings";
+import { buildSiteContact } from "@/lib/siteContact";
 
 export const metadata: Metadata = {
   title: "Terms of Use",
@@ -100,9 +102,11 @@ const sections = [
   },
 ] as const;
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const site = buildSiteContact(await getWebsiteContactSettings());
   return (
-    <main>
+    <PageShell>
+      <main>
       <section className="relative overflow-hidden bg-[#FAF7FC] pb-16 pt-32 sm:pb-20 sm:pt-36 lg:pb-24">
         <div
           aria-hidden="true"
@@ -249,6 +253,7 @@ export default function TermsPage() {
           </div>
         </Container>
       </section>
-    </main>
+      </main>
+    </PageShell>
   );
 }

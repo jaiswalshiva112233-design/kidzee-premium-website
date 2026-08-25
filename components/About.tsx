@@ -1,83 +1,110 @@
 import Image from "next/image";
-import { ArrowRight, Heart, MapPin, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Brain,
+  Eye,
+  Heart,
+  Lightbulb,
+  Search,
+  Sparkles,
+} from "lucide-react";
 
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
+import { getWebsiteMedia } from "@/lib/sanity/media";
+import { pentemindLearningMinds } from "@/lib/site";
 
-const centreHighlights = [
-  "A warm start to school life",
-  "Learning through play and conversation",
-  "Care that respects every child’s pace",
+const mindIcons = [
+  Heart,
+  Sparkles,
+  Eye,
+  Search,
+  Lightbulb,
 ] as const;
 
-export default function About() {
+export default async function About() {
+  const [mainMedia, classroomMedia, activityMedia] =
+    await Promise.all([
+      getWebsiteMedia("home.about.main"),
+      getWebsiteMedia("home.about.smallOne"),
+      getWebsiteMedia("home.about.smallTwo"),
+    ]);
+
+  const mainImage =
+    mainMedia?.imageUrl ?? "/images/home/about/about-main.jpg";
+
+  const classroomImage =
+    classroomMedia?.imageUrl ??
+    "/images/home/about/about-classroom1.jpg";
+
+  const activityImage =
+    activityMedia?.imageUrl ??
+    "/images/home/about/about-classroom2.jpg";
+
   return (
     <section
       id="about"
       aria-labelledby="about-heading"
-      className="relative isolate overflow-hidden bg-white py-14 sm:py-16 lg:py-20"
+      className="relative overflow-hidden bg-white py-16 sm:py-20 lg:py-24"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-44 top-16 -z-10 h-80 w-80 rounded-full bg-[#F2E8F8]/90 blur-3xl"
+        className="pointer-events-none absolute -left-44 top-20 h-80 w-80 rounded-full bg-[#F2E8F8]/80 blur-3xl"
       />
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-44 bottom-0 -z-10 h-96 w-96 rounded-full bg-[#FFF3C8]/80 blur-3xl"
+        className="pointer-events-none absolute -right-44 top-96 h-80 w-80 rounded-full bg-[#FFF3C8]/70 blur-3xl"
       />
 
-      <Container>
+      <Container className="relative">
         <div className="grid items-center gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:gap-14 xl:gap-20">
           <div className="relative mx-auto w-full max-w-[650px]">
-            <div
-              aria-hidden="true"
-              className="absolute -left-4 top-10 h-24 w-24 rounded-[26px] bg-[#F6C84B]/75 sm:-left-7 sm:h-28 sm:w-28"
-            />
-
-            <div
-              aria-hidden="true"
-              className="absolute -right-4 bottom-20 h-28 w-28 rounded-full bg-[#E5D6EE] sm:-right-7 sm:h-36 sm:w-36"
-            />
-
-            <div className="relative grid grid-cols-[1.08fr_0.92fr] gap-3 sm:gap-5">
-              <figure className="relative mt-9 overflow-hidden rounded-[28px] bg-[#F8F3FC] shadow-[0_24px_64px_rgba(52,20,68,0.14)] sm:rounded-[36px]">
-                <div className="relative aspect-[0.84/1]">
+            <div className="grid grid-cols-[1.18fr_0.82fr] gap-3 sm:gap-4">
+              <figure className="relative overflow-hidden rounded-[30px] border border-white bg-[#F8F3FC] shadow-[0_24px_64px_rgba(52,20,68,0.14)] sm:rounded-[36px]">
+                <div className="relative aspect-[0.88/1]">
                   <Image
-                    src="/images/about-main.jpg"
-                    alt="Children taking part in a classroom activity at Kidzee Sector 12 Dwarka"
+                    src={mainImage}
+                    alt={
+                      mainMedia?.altText ||
+                      "Children learning with their teacher at Kidzee Sector 12 Dwarka"
+                    }
                     fill
-                    sizes="(max-width: 640px) 56vw, (max-width: 1024px) 52vw, 30vw"
+                    unoptimized={mainImage.startsWith("http")}
+                    sizes="(max-width: 640px) 58vw, (max-width: 1024px) 54vw, 31vw"
                     className="object-cover"
-                  />
-
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"
                   />
                 </div>
               </figure>
 
-              <div className="space-y-3 sm:space-y-5">
-                <figure className="relative overflow-hidden rounded-[24px] bg-[#FFF9E8] shadow-[0_18px_46px_rgba(52,20,68,0.1)] sm:rounded-[30px]">
-                  <div className="relative aspect-square">
+              <div className="grid gap-3 sm:gap-4">
+                <figure className="relative overflow-hidden rounded-[24px] border border-white bg-[#FFF9E8] shadow-[0_18px_46px_rgba(52,20,68,0.1)] sm:rounded-[30px]">
+                  <div className="relative h-full min-h-[180px]">
                     <Image
-                      src="/images/about-small-1.jpg"
-                      alt="Creative activity for preschool children at Kidzee Sector 12 Dwarka"
+                      src={classroomImage}
+                      alt={
+                        classroomMedia?.altText ||
+                        "Purpose-built preschool classroom in Sector 12 Dwarka"
+                      }
                       fill
-                      sizes="(max-width: 640px) 38vw, (max-width: 1024px) 40vw, 22vw"
+                      unoptimized={classroomImage.startsWith("http")}
+                      sizes="(max-width: 640px) 36vw, (max-width: 1024px) 38vw, 21vw"
                       className="object-cover"
                     />
                   </div>
                 </figure>
 
-                <figure className="relative overflow-hidden rounded-[24px] bg-[#F8F3FC] shadow-[0_18px_46px_rgba(52,20,68,0.1)] sm:rounded-[30px]">
-                  <div className="relative aspect-[1/1.08]">
+                <figure className="relative overflow-hidden rounded-[24px] border border-white bg-[#F8F3FC] shadow-[0_18px_46px_rgba(52,20,68,0.1)] sm:rounded-[30px]">
+                  <div className="relative h-full min-h-[180px]">
                     <Image
-                      src="/images/about-small-2.jpg"
-                      alt="Preschool children learning and playing together"
+                      src={activityImage}
+                      alt={
+                        activityMedia?.altText ||
+                        "Children taking part in a guided preschool activity"
+                      }
                       fill
-                      sizes="(max-width: 640px) 38vw, (max-width: 1024px) 40vw, 22vw"
+                      unoptimized={activityImage.startsWith("http")}
+                      sizes="(max-width: 640px) 36vw, (max-width: 1024px) 38vw, 21vw"
                       className="object-cover"
                     />
                   </div>
@@ -85,70 +112,48 @@ export default function About() {
               </div>
             </div>
 
-            <div className="absolute bottom-3 left-3 right-3 rounded-[22px] border border-white/80 bg-white/95 px-4 py-4 shadow-[0_18px_46px_rgba(52,20,68,0.16)] backdrop-blur-md sm:bottom-5 sm:left-8 sm:right-auto sm:max-w-[335px] sm:px-5">
+            <div className="absolute -bottom-5 left-4 right-4 rounded-[22px] border border-white/90 bg-white/95 p-4 shadow-[0_18px_46px_rgba(52,20,68,0.16)] backdrop-blur sm:left-8 sm:right-auto sm:max-w-[360px] sm:p-5">
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F2E8F8] text-[#5B2A86]">
-                  <MapPin aria-hidden="true" size={18} />
-                </div>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FFF4CC] text-[#5B2A86]">
+                  <Heart
+                    aria-hidden="true"
+                    size={18}
+                    className="fill-[#F6C84B]"
+                  />
+                </span>
 
-                <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.15em] text-[#5B2A86] sm:text-xs">
-                    Sector 12B, Dwarka
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold leading-6 text-[#4F4B57]">
-                    A neighbourhood preschool and daycare for local families.
-                  </p>
-                </div>
+                <p className="text-sm font-bold leading-6 text-[#493B4F]">
+                  A neighbourhood centre where children are known,
+                  supported and encouraged at their own pace.
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="mx-auto max-w-2xl lg:mx-0">
+          <div className="mx-auto max-w-2xl pt-5 lg:mx-0 lg:pt-0">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#5B2A86]/10 bg-[#FAF7FC] px-4 py-2 text-[13px] font-black text-[#5B2A86]">
-              <Heart
-                aria-hidden="true"
-                size={15}
-                className="fill-[#F6C84B] text-[#D5A400]"
-              />
-              About our centre
+              <Brain aria-hidden="true" size={16} />
+              Kidzee learning, delivered with local care
             </div>
 
             <h2
               id="about-heading"
               className="mt-5 text-balance text-3xl font-black leading-[1.08] tracking-[-0.04em] text-[#2D1736] sm:text-4xl lg:text-[46px]"
             >
-              A place where children feel comfortable being curious.
+              Confidence first. Learning follows.
             </h2>
 
             <p className="mt-5 text-base leading-8 text-[#6F6474] sm:text-lg">
-              Starting preschool is a big step for a young child. At Kidzee
-              Sector 12, Dwarka, we aim to make that transition feel warm,
-              familiar and encouraging from the beginning.
+              Starting preschool changes a child&apos;s little world. At
+              Kidzee Sector 12, Dwarka, familiar routines, caring adults
+              and purposeful play help that first step feel comfortable.
             </p>
 
             <p className="mt-4 text-base leading-8 text-[#6F6474] sm:text-lg">
-              Through stories, conversation, movement, creative activities and
-              purposeful play, children gradually learn to express themselves,
-              follow routines and participate confidently with others.
+              Children learn through stories, conversation, movement,
+              art, exploration and time with one another—not by being
+              hurried through a checklist.
             </p>
-
-            <div className="mt-7 space-y-3">
-              {centreHighlights.map((item) => (
-                <div
-                  key={item}
-                  className="flex items-center gap-3 rounded-2xl border border-[#5B2A86]/8 bg-[#FAF7FC] px-4 py-3.5"
-                >
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[#5B2A86] shadow-[0_6px_18px_rgba(52,20,68,0.07)]">
-                    <Sparkles aria-hidden="true" size={16} />
-                  </span>
-
-                  <span className="text-sm font-bold leading-6 text-[#493B4F] sm:text-[15px]">
-                    {item}
-                  </span>
-                </div>
-              ))}
-            </div>
 
             <div className="mt-8">
               <Button
@@ -156,8 +161,58 @@ export default function About() {
                 variant="secondary"
                 rightIcon={<ArrowRight size={18} />}
               >
-                Discover Our Centre
+                Meet Our Centre
               </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-20 rounded-[32px] border border-[#E6D8EC] bg-[#F8F4FC] p-5 sm:p-7 lg:mt-24 lg:p-9">
+          <div className="grid gap-8 lg:grid-cols-[0.64fr_1.36fr] lg:items-center">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.16em] text-[#5B2A86]">
+                The Péntemind approach
+              </p>
+
+              <h3 className="mt-3 text-balance text-3xl font-black leading-tight tracking-[-0.035em] text-[#281034]">
+                Five ways of thinking, growing together.
+              </h3>
+
+              <p className="mt-4 max-w-xl leading-7 text-[#6F6474]">
+                Kidzee&apos;s Péntemind curriculum looks beyond
+                memorising answers. It supports emotional, attentive,
+                thoughtful, analytical and imaginative development
+                through everyday learning experiences.
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+              {pentemindLearningMinds.map((mind, index) => {
+                const Icon = mindIcons[index];
+
+                return (
+                  <article
+                    key={mind.name}
+                    className="rounded-[22px] border border-[#E6D8EC] bg-white p-4 shadow-[0_10px_28px_rgba(40,16,52,0.05)]"
+                  >
+                    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#F3EAF8] text-[#5B2A86]">
+                      <Icon
+                        aria-hidden="true"
+                        size={19}
+                        strokeWidth={2.2}
+                      />
+                    </span>
+
+                    <h4 className="mt-4 text-[0.94rem] font-black leading-5 text-[#281034]">
+                      {mind.name}
+                    </h4>
+
+                    <p className="mt-1.5 text-xs font-bold leading-5 text-[#786B7D]">
+                      {mind.focus}
+                    </p>
+                  </article>
+                );
+              })}
             </div>
           </div>
         </div>

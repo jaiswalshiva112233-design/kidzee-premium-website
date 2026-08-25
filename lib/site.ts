@@ -9,7 +9,7 @@ export const site = {
   shortName: "Kidzee Sector 12, Dwarka",
   legalLocationName: "Sector 12B, Dwarka",
 
-  url: "https://kidzeepreschooldwarka.com",
+  url: "https://kidzeedwarka.com",
 
   phone: "+919667038673",
   phoneDisplay: "+91 96670 38673",
@@ -37,27 +37,39 @@ export const site = {
   whatsappBase: `https://wa.me/${phoneNumber}`,
 
   whatsapp: createWhatsAppLink(
-    "Hello Kidzee Sector 12, Dwarka. I would like to know more about preschool and daycare."
+    "Hello Kidzee Sector 12, Dwarka. I would like to know more about your preschool and daycare programmes.",
   ),
 
   whatsappAdmission: createWhatsAppLink(
-    "Hello Kidzee Sector 12, Dwarka. I would like to enquire about admission for my child."
+    "Hello Kidzee Sector 12, Dwarka. I would like to enquire about admission for my child.",
   ),
 
   whatsappVisit: createWhatsAppLink(
-    "Hello Kidzee Sector 12, Dwarka. I would like to book a school visit."
+    "Hello Kidzee Sector 12, Dwarka. I would like to book a school visit.",
   ),
 
   whatsappTrial: createWhatsAppLink(
-    "Hello Kidzee Sector 12, Dwarka. I would like to know about the 3-day preschool trial."
+    "Hello Kidzee Sector 12, Dwarka. I would like to know about the three-day preschool trial.",
   ),
 
   whatsappProgrammes: createWhatsAppLink(
-    "Hello Kidzee Sector 12, Dwarka. Please help me choose the right preschool programme for my child."
+    "Hello Kidzee Sector 12, Dwarka. Please help me choose the right preschool programme for my child.",
   ),
 
   whatsappDaycare: createWhatsAppLink(
-    "Hello Kidzee Sector 12, Dwarka. I would like to know more about daycare timings, meals, activities and availability."
+    "Hello Kidzee Sector 12, Dwarka. I would like to check daycare timings, meals and availability for my child.",
+  ),
+
+  whatsappFees: createWhatsAppLink(
+    "Hello Kidzee Sector 12, Dwarka. Please share the current fees and availability for my child.",
+  ),
+
+  whatsappCallback: createWhatsAppLink(
+    "Hello Kidzee Sector 12, Dwarka. Please arrange a callback regarding preschool admission.",
+  ),
+
+  whatsappMeals: createWhatsAppLink(
+    "Hello Kidzee Sector 12, Dwarka. I would like to know more about the preschool meal plan.",
   ),
 
   instagram: "https://www.instagram.com/kidz.eedwarka" as string,
@@ -81,13 +93,19 @@ export const site = {
   trial: {
     days: 3,
     hoursPerDay: 2,
-    display: "3-day trial available",
+    display: "Three-day preschool trial available",
   },
 
   ageRange: {
     minimum: 2,
     maximum: 6,
     display: "2–6 years",
+  },
+
+  admissions: {
+    academicYear: "2026–27",
+    primaryAction: "Book a School Visit",
+    secondaryAction: "Call Admissions",
   },
 } as const;
 
@@ -99,13 +117,12 @@ export const programmes = [
     age: "2–3 years",
     minimumAge: 2,
     maximumAge: 3,
-    // Playgroup
-time: "9:30 AM–12:30 PM",
+    time: "9:30 AM–12:30 PM",
     image: "/images/programmes/playgroup.jpg",
     intro:
-      "A gentle introduction to preschool where children become comfortable with routines, teachers and learning alongside others.",
+      "A warm first-school experience where children become comfortable with routines, teachers, classmates and learning through play.",
     highlights: [
-      "Comfort with the first school experience",
+      "A gentle transition into preschool",
       "Language through stories, songs and conversation",
       "Sensory play, movement and social interaction",
     ],
@@ -117,14 +134,13 @@ time: "9:30 AM–12:30 PM",
     age: "3–4 years",
     minimumAge: 3,
     maximumAge: 4,
-    // Nursery
-time: "9:30 AM–12:30 PM",
+    time: "9:30 AM–12:30 PM",
     image: "/images/programmes/nursery.jpg",
     intro:
-      "Children build communication, curiosity and independent classroom habits while beginning early literacy and number work.",
+      "A playful, purposeful programme that develops communication, curiosity, independence and early literacy and number readiness.",
     highlights: [
       "Early phonics and vocabulary development",
-      "Number awareness and simple concepts",
+      "Number awareness and concept-building",
       "Creativity, confidence and classroom participation",
     ],
   },
@@ -135,11 +151,10 @@ time: "9:30 AM–12:30 PM",
     age: "4–5 years",
     minimumAge: 4,
     maximumAge: 5,
-    // Junior KG
-time: "9:30 AM–1:00 PM",
+    time: "9:30 AM–1:00 PM",
     image: "/images/programmes/junior-kg.jpg",
     intro:
-      "A more structured stage that develops reading readiness, writing practice, number understanding and independent thinking.",
+      "A structured but engaging stage that strengthens reading readiness, writing practice, number understanding and independent thinking.",
     highlights: [
       "Reading and writing readiness",
       "Number concepts and logical thinking",
@@ -153,11 +168,10 @@ time: "9:30 AM–1:00 PM",
     age: "5–6 years",
     minimumAge: 5,
     maximumAge: 6,
-    // Senior KG
-time: "9:30 AM–1:00 PM",
+    time: "9:30 AM–1:00 PM",
     image: "/images/programmes/senior-kg.jpg",
     intro:
-      "Children strengthen essential academic and classroom skills as they prepare for a confident transition to primary school.",
+      "A school-readiness programme that builds stronger academic foundations, communication, independence and confidence for primary school.",
     highlights: [
       "Stronger literacy and numeracy foundations",
       "Problem-solving and communication skills",
@@ -165,6 +179,115 @@ time: "9:30 AM–1:00 PM",
     ],
   },
 ] as const;
+
+export const pentemindLearningMinds = [
+  {
+    name: "Empathetic Mind",
+    focus: "Emotional balance",
+    description:
+      "Encourages children to understand their own feelings while becoming considerate of other people.",
+  },
+  {
+    name: "Conscientious Mind",
+    focus: "Knowledge acquisition",
+    description:
+      "Supports thoughtful choices, responsibility and careful participation in everyday learning.",
+  },
+  {
+    name: "Focused Mind",
+    focus: "Knowledge retention",
+    description:
+      "Helps children practise attention, persistence and the confidence to keep trying.",
+  },
+  {
+    name: "Analytical Mind",
+    focus: "Knowledge application",
+    description:
+      "Builds observation, reasoning and age-appropriate problem-solving through guided experiences.",
+  },
+  {
+    name: "Inventive Mind",
+    focus: "Knowledge development",
+    description:
+      "Makes room for imagination, original ideas, exploration and creative expression.",
+  },
+] as const;
+
+export const pentemindOfferings = [
+  {
+    name: "Artsy",
+    description:
+      "Creative expression and an age-appropriate appreciation of art.",
+  },
+  {
+    name: "Mental Might",
+    description: "Emotional wellbeing, inclusion and awareness of others.",
+  },
+  {
+    name: "Showstopper",
+    description:
+      "Confidence and expression through planned dramatic experiences.",
+  },
+  {
+    name: "Tell-a-Tale",
+    description: "Listening, imagination and early storytelling experiences.",
+  },
+  {
+    name: "Whirl & Twirl",
+    description: "Movement, coordination and expression through dance.",
+  },
+  {
+    name: "Personality Development",
+    description: "Self-esteem, communication and growing independence.",
+  },
+  {
+    name: "Critical Thinking",
+    description:
+      "Systematic thinking, reasoning and age-appropriate problem-solving.",
+  },
+  {
+    name: "Eco-Conscious",
+    description: "Everyday awareness of nature and responsible choices.",
+  },
+] as const;
+
+export const preschoolMealPlan = {
+  title: "Weekly Preschool Meal Plan",
+  meal: "Breakfast",
+  includedInPreschoolProgramme: true,
+  description:
+    "Freshly cooked, 100% vegetarian preschool meals prepared without refined oil.",
+  highlights: [
+    "Freshly cooked",
+    "100% vegetarian",
+    "No refined oil",
+    "Seasonal vegetables",
+  ],
+  days: [
+    {
+      day: "Monday",
+      menu: "Dal and rice",
+    },
+    {
+      day: "Tuesday",
+      menu: "Seasonal green vegetable and chapati",
+    },
+    {
+      day: "Wednesday",
+      menu: "Vegetable pulao and curd",
+    },
+    {
+      day: "Thursday",
+      menu: "Mixed vegetable paratha and curd",
+    },
+    {
+      day: "Friday",
+      menu: "Aloo sabzi and chapati",
+    },
+  ],
+  note:
+    "The menu changes with the season and may be adjusted according to seasonal vegetable availability and the centre schedule.",
+} as const;
 
 export const posts = [
   {

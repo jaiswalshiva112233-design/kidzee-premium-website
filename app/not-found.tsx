@@ -3,9 +3,11 @@ import { ArrowLeft, Home, MessageCircle } from "lucide-react";
 
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
-import { site } from "@/lib/site";
+import { getWebsiteContactSettings } from "@/lib/sanity/contactSettings";
+import { buildSiteContact } from "@/lib/siteContact";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const site = buildSiteContact(await getWebsiteContactSettings());
   return (
     <main className="relative flex min-h-[calc(100vh-82px)] items-center overflow-hidden bg-[#FAF7FC] py-20 sm:py-24">
       <div

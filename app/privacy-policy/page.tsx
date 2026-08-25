@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
-import { site } from "@/lib/site";
+import { getWebsiteContactSettings } from "@/lib/sanity/contactSettings";
+import { buildSiteContact } from "@/lib/siteContact";
 import {
   ArrowRight,
   CheckCircle2,
@@ -75,12 +76,13 @@ const sections = [
   },
 ];
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const site = buildSiteContact(await getWebsiteContactSettings());
   return (
     <PageShell>
       <main className="overflow-hidden">
         {/* Hero */}
-        <section className="relative bg-[linear-gradient(135deg,#faf7ff_0%,#ffffff_54%,#fff7d7_100%)] pb-16 pt-12 sm:pb-20 sm:pt-16 lg:pb-24 lg:pt-20">
+        <section className="relative bg-[linear-gradient(135deg,#faf7ff_0%,#ffffff_54%,#fff7d7_100%)] pb-16 pt-[104px] sm:pb-20 sm:pt-28 lg:pb-24 lg:pt-32">
           <div className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-purple-200/35 blur-3xl" />
           <div className="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-yellow-200/40 blur-3xl" />
 
@@ -620,11 +622,7 @@ export default function PrivacyPage() {
                   </a>
 
                   <a
-                    href={`https://wa.me/91${site.phone
-                      .replace(/\D/g, "")
-                      .slice(
-                        -10,
-                      )}?text=Hello%20Kidzee%20Sector%2012%20Dwarka%2C%20I%20have%20a%20question%20about%20information%20submitted%20through%20your%20website.`}
+                    href={`${site.whatsappBase}?text=${encodeURIComponent("Hello Kidzee Sector 12 Dwarka, I have a question about information submitted through your website.")}`}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-black text-white transition hover:bg-white/15"

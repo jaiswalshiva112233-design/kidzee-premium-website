@@ -1,33 +1,43 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import PageShell from "@/components/PageShell";
-import { CTA } from "@/components/HomeSections";
 import {
   ArrowRight,
+  CalendarDays,
   Camera,
   CheckCircle2,
+  Film,
+  FolderOpen,
   Heart,
-  ImageIcon,
-  MessageCircle,
-  Palette,
-  PartyPopper,
-  School,
+  Images,
+  Play,
+  ShieldCheck,
   Sparkles,
-  Users,
 } from "lucide-react";
 
+import PageShell from "@/components/PageShell";
+import Container from "@/components/ui/Container";
+import {
+  formatGalleryDate,
+  getGalleryCategoryLabel,
+  getPublishedGalleryAlbums,
+  type PublicGalleryAlbum,
+} from "@/lib/sanity/gallery";
+import { site } from "@/lib/site";
+
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
-  title: "Preschool Gallery in Sector 12 Dwarka",
+  title: "Preschool Gallery",
   description:
-    "Explore real classroom activities, celebrations, creative learning and play moments from Kidzee Preschool & Daycare, Sector 12, Dwarka.",
+    "Explore real classroom activities, celebrations, creative learning, parent stories and play moments from Kidzee Preschool & Daycare, Sector 12 Dwarka.",
   keywords: [
     "Kidzee Sector 12 Dwarka gallery",
     "preschool activities Dwarka",
     "preschool classroom photos Dwarka",
     "Kidzee Dwarka photos",
-    "preschool play area Sector 12 Dwarka",
     "preschool celebrations Dwarka",
+    "parent reviews Kidzee Dwarka",
   ],
   alternates: {
     canonical: "/gallery",
@@ -35,15 +45,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Gallery | Kidzee Sector 12, Dwarka",
     description:
-      "See real learning activities, celebrations, classroom experiences and joyful play moments from our preschool and daycare.",
+      "See real learning, play, celebration and parent-story moments from our preschool and daycare centre.",
     url: "/gallery",
     type: "website",
     images: [
       {
-        url: "/images/gallery/gallery-main.jpg",
+        url: "/images/gallery/gallery-featured.jpg",
         width: 1200,
         height: 630,
-        alt: "Children participating in activities at Kidzee Sector 12 Dwarka",
+        alt: "Learning and play moments at Kidzee Sector 12 Dwarka",
       },
     ],
   },
@@ -51,558 +61,490 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Gallery | Kidzee Sector 12, Dwarka",
     description:
-      "Explore everyday learning, play and celebration moments from Kidzee Sector 12, Dwarka.",
-    images: ["/images/gallery/gallery-main.jpg"],
+      "Explore everyday learning, play, celebration and parent-story moments from Kidzee Sector 12 Dwarka.",
+    images: ["/images/gallery/gallery-featured.jpg"],
   },
 };
 
-const galleryImages = [
+const fallbackMoments = [
   {
     src: "/images/gallery/gallery-1.jpg",
     alt: "Children participating in a classroom activity at Kidzee Sector 12 Dwarka",
-    category: "Classroom Learning",
+    label: "Classroom learning",
     title: "Learning through participation",
-    size: "large",
   },
   {
     src: "/images/gallery/gallery-2.jpg",
     alt: "Creative art and craft activity at Kidzee Preschool Dwarka",
-    category: "Creative Activities",
+    label: "Creative expression",
     title: "Ideas taking shape",
-    size: "standard",
   },
   {
     src: "/images/gallery/gallery-3.jpg",
-    alt: "Children enjoying indoor play at Kidzee Sector 12 Dwarka",
-    category: "Play and Movement",
+    alt: "Children enjoying guided indoor play at Kidzee Sector 12 Dwarka",
+    label: "Play & movement",
     title: "Active, joyful play",
-    size: "standard",
   },
   {
     src: "/images/gallery/gallery-4.jpg",
     alt: "Preschool celebration at Kidzee Sector 12 Dwarka",
-    category: "Celebrations",
+    label: "Celebrations",
     title: "Special days together",
-    size: "tall",
   },
   {
     src: "/images/gallery/gallery-5.jpg",
     alt: "Teacher guiding children during an early learning activity",
-    category: "Teacher Interaction",
+    label: "Teacher interaction",
     title: "Guided with patience",
-    size: "standard",
   },
   {
     src: "/images/gallery/gallery-6.jpg",
-    alt: "Children enjoying group activity at Kidzee Preschool Dwarka",
-    category: "Group Experiences",
-    title: "Growing together",
-    size: "large",
-  },
-  {
-    src: "/images/gallery/gallery-7.jpg",
-    alt: "Storytelling session at Kidzee Sector 12 Dwarka",
-    category: "Storytelling",
-    title: "Stories that spark imagination",
-    size: "standard",
-  },
-  {
-    src: "/images/gallery/gallery-8.jpg",
-    alt: "Outdoor play activity at Kidzee Sector 12 Dwarka",
-    category: "Outdoor Play",
-    title: "Room to move and explore",
-    size: "tall",
-  },
-  {
-    src: "/images/gallery/gallery-9.jpg",
-    alt: "Children displaying their creative work at Kidzee Dwarka",
-    category: "Children’s Work",
-    title: "Proud little creators",
-    size: "standard",
-  },
-  {
-    src: "/images/gallery/gallery-10.jpg",
-    alt: "Dance and movement activity at Kidzee Sector 12 Dwarka",
-    category: "Dance and Movement",
-    title: "Confidence through movement",
-    size: "large",
-  },
-  {
-    src: "/images/gallery/gallery-11.jpg",
-    alt: "Parent participation event at Kidzee Preschool Dwarka",
-    category: "Parent Partnership",
-    title: "Families joining the journey",
-    size: "standard",
-  },
-  {
-    src: "/images/gallery/gallery-12.jpg",
     alt: "Daycare children enjoying a guided activity at Kidzee Dwarka",
-    category: "Daycare Moments",
+    label: "Daycare moments",
     title: "Comfortable afternoons",
-    size: "standard",
   },
-];
+] as const;
 
-const galleryCategories = [
-  {
-    icon: School,
-    title: "Classroom learning",
-    description:
-      "Hands-on activities, conversations, stories and guided early-learning experiences.",
-  },
-  {
-    icon: Palette,
-    title: "Creative expression",
-    description:
-      "Art, craft, music and opportunities for children to explore their own ideas.",
-  },
-  {
-    icon: Sparkles,
-    title: "Play and movement",
-    description:
-      "Indoor and outdoor experiences that support confidence, coordination and enjoyment.",
-  },
-  {
-    icon: PartyPopper,
-    title: "Celebrations",
-    description:
-      "Festivals, special days and shared experiences that bring the school community together.",
-  },
-];
+function AlbumCard({
+  album,
+  index,
+}: {
+  album: PublicGalleryAlbum;
+  index: number;
+}) {
+  const formattedDate = formatGalleryDate(album.eventDate);
+  const fallbackImage = fallbackMoments[index % fallbackMoments.length];
+  const isParentStory = album.category === "PARENT_STORIES";
 
-const galleryValues = [
-  "Real moments from our centre",
-  "Natural classroom interactions",
-  "Learning, play and celebrations",
-  "Preschool and daycare experiences",
-];
+  return (
+    <Link
+      href={`/gallery/${album.slug}`}
+      className="group w-[84vw] max-w-[340px] shrink-0 snap-start overflow-hidden rounded-[30px] border border-[#E5DAEA] bg-white shadow-[0_18px_54px_rgba(40,16,52,0.08)] transition duration-300 hover:-translate-y-1.5 hover:border-[#D5C4DE] hover:shadow-[0_28px_72px_rgba(40,16,52,0.14)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#5B2A86]/15 md:w-auto md:max-w-none"
+    >
+      <div className="relative aspect-[4/3] overflow-hidden bg-[#EEE7F1]">
+        {album.cover?.imageUrl ? (
+          <Image
+            src={album.cover.imageUrl}
+            alt={
+              album.cover.altText ||
+              album.cover.caption ||
+              `${album.title} at Kidzee Sector 12 Dwarka`
+            }
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            className="object-cover transition duration-700 group-hover:scale-[1.04]"
+          />
+        ) : (
+          <Image
+            src={fallbackImage.src}
+            alt={fallbackImage.alt}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            className="object-cover opacity-75 transition duration-700 group-hover:scale-[1.04]"
+          />
+        )}
 
-function getImageHeight(size: string) {
-  if (size === "large") {
-    return "h-[360px] sm:h-[420px] lg:h-[500px]";
-  }
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-gradient-to-t from-[#281034]/88 via-[#281034]/10 to-transparent"
+        />
 
-  if (size === "tall") {
-    return "h-[400px] sm:h-[500px] lg:h-[560px]";
-  }
+        <div className="absolute left-4 top-4 flex flex-wrap gap-2">
+          <span className="rounded-full border border-white/60 bg-white/92 px-3 py-2 text-[0.65rem] font-black uppercase tracking-[0.1em] text-[#5B2A86] shadow-lg backdrop-blur">
+            {getGalleryCategoryLabel(album.category)}
+          </span>
 
-  return "h-[300px] sm:h-[350px] lg:h-[390px]";
+          {album.featured ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#F6C84B] px-3 py-2 text-[0.65rem] font-black uppercase tracking-[0.08em] text-[#2D1736] shadow-lg">
+              <Sparkles aria-hidden="true" size={12} /> Featured
+            </span>
+          ) : null}
+        </div>
+
+        {isParentStory || album.videoCount > 0 ? (
+          <span className="absolute right-4 top-4 flex h-12 w-12 items-center justify-center rounded-full border border-white/50 bg-[#281034]/78 text-white shadow-lg backdrop-blur">
+            <Play aria-hidden="true" size={20} fill="currentColor" />
+          </span>
+        ) : null}
+
+        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+          <h3 className="text-2xl font-black leading-tight text-white">
+            {album.title}
+          </h3>
+
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-bold text-white/82">
+            {formattedDate ? (
+              <span className="inline-flex items-center gap-1.5">
+                <CalendarDays aria-hidden="true" size={14} />
+                {formattedDate}
+              </span>
+            ) : null}
+
+            {album.photoCount > 0 ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Images aria-hidden="true" size={14} />
+                {album.photoCount} {album.photoCount === 1 ? "photo" : "photos"}
+              </span>
+            ) : null}
+
+            {album.videoCount > 0 ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Film aria-hidden="true" size={14} />
+                {album.videoCount} {album.videoCount === 1 ? "video" : "videos"}
+              </span>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      <div className="p-5 sm:p-6">
+        <p className="line-clamp-2 min-h-12 text-sm font-semibold leading-6 text-[#6F6474]">
+          {album.description ||
+            (isParentStory
+              ? "A family shares their experience with our centre, teachers and everyday care."
+              : "A collection of real moments from learning, play and centre life.")}
+        </p>
+
+        <div className="mt-5 flex items-center justify-between gap-3 border-t border-[#EEE7F1] pt-4">
+          <span className="text-sm font-black text-[#5B2A86]">
+            {isParentStory ? "Watch parent stories" : "Open this album"}
+          </span>
+
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F2E8F7] text-[#5B2A86] transition group-hover:bg-[#5B2A86] group-hover:text-white">
+            <ArrowRight aria-hidden="true" size={17} />
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
 }
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
+  const albums = await getPublishedGalleryAlbums();
+  const parentStories = albums.filter(
+    (album) => album.category === "PARENT_STORIES",
+  );
+  const centreAlbums = albums.filter(
+    (album) => album.category !== "PARENT_STORIES",
+  );
+  const totalPhotos = albums.reduce(
+    (total, album) => total + album.photoCount,
+    0,
+  );
+  const totalVideos = albums.reduce(
+    (total, album) => total + album.videoCount,
+    0,
+  );
+  const galleryStats = [
+    { label: "Albums", value: albums.length },
+    ...(totalPhotos > 0
+      ? [{ label: "Photos", value: totalPhotos }]
+      : []),
+    ...(totalVideos > 0
+      ? [{ label: "Short videos", value: totalVideos }]
+      : []),
+    ...(parentStories.length > 0
+      ? [{ label: "Parent stories", value: parentStories.length }]
+      : []),
+  ];
+
+  const collectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Life at Kidzee Sector 12 Dwarka",
+    description:
+      "Published preschool and daycare event albums, learning moments and parent stories from Kidzee Sector 12 Dwarka.",
+    url: `${site.url}/gallery`,
+    isPartOf: {
+      "@type": "WebSite",
+      name: site.name,
+      url: site.url,
+    },
+    hasPart: albums.map((album) => ({
+      "@type": "ImageGallery",
+      name: album.title,
+      url: `${site.url}/gallery/${album.slug}`,
+      description: album.description || undefined,
+      image: album.cover?.imageUrl || undefined,
+    })),
+  };
+
   return (
     <PageShell>
-      <main className="overflow-hidden">
-        {/* Hero */}
-        <section className="relative bg-[linear-gradient(135deg,#faf7ff_0%,#ffffff_54%,#fff7d7_100%)] pb-16 pt-12 sm:pb-20 sm:pt-16 lg:pb-24 lg:pt-20">
-          <div className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-purple-200/35 blur-3xl" />
-          <div className="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-yellow-200/40 blur-3xl" />
+      <main className="overflow-hidden bg-white">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(collectionSchema).replace(/</g, "\\u003c"),
+          }}
+        />
 
-          <div className="container relative">
+        <section className="relative overflow-hidden bg-[linear-gradient(135deg,#F8F2FC_0%,#FFFFFF_52%,#FFF7D8_100%)] pb-16 pt-[104px] sm:pb-20 sm:pt-28 lg:pb-24 lg:pt-32">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -left-32 top-12 h-80 w-80 rounded-full bg-[#DCC6E8]/40 blur-3xl"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-28 bottom-0 h-80 w-80 rounded-full bg-[#F6C84B]/25 blur-3xl"
+          />
+
+          <Container className="relative">
             <div className="mx-auto max-w-4xl text-center">
-              <span className="eyebrow">Inside our preschool</span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#E1D3E7] bg-white/90 px-4 py-2 text-xs font-black uppercase tracking-[0.11em] text-[#5B2A86] shadow-sm">
+                <Camera aria-hidden="true" size={15} />
+                Life at our centre
+              </span>
 
-              <h1 className="title mt-5">
-                Everyday moments that make early childhood memorable.
+              <h1 className="mt-6 text-balance text-4xl font-black leading-[1.05] tracking-[-0.045em] text-[#281034] sm:text-5xl lg:text-[64px]">
+                A closer look at everyday life at our centre.
               </h1>
 
-              <p className="lead mx-auto mt-6 max-w-3xl">
-                Explore real learning activities, classroom experiences,
-                celebrations, creative work and joyful play from Kidzee Sector
-                12, Dwarka.
+              <p className="mx-auto mt-6 max-w-3xl text-base font-semibold leading-8 text-[#6F6474] sm:text-lg">
+                Browse classroom moments, celebrations, creative work and
+                parent stories from our Sector 12B centre.
               </p>
 
               <div className="mt-8 flex flex-wrap justify-center gap-3">
-                {galleryValues.map((item) => (
+                {[
+                  "Real centre moments",
+                  "Organised event albums",
+                  "Videos play when selected",
+                ].map((item) => (
                   <span
                     key={item}
-                    className="inline-flex items-center gap-2 rounded-full border border-purple-100 bg-white/90 px-4 py-2 text-xs font-bold text-slate-700 shadow-sm"
+                    className="inline-flex items-center gap-2 rounded-full border border-[#E6DCEB] bg-white px-4 py-2.5 text-xs font-black text-[#55495A] shadow-sm"
                   >
                     <CheckCircle2
+                      aria-hidden="true"
                       size={15}
-                      className="text-purple-700"
+                      className="text-[#5B2A86]"
                     />
                     {item}
                   </span>
                 ))}
               </div>
             </div>
-          </div>
+
+            {albums.length > 0 ? (
+              <div className="mx-auto mt-10 flex max-w-3xl flex-wrap justify-center gap-3">
+                {galleryStats.map(({ label, value }) => (
+                  <div
+                    key={label}
+                    className="min-w-[135px] flex-1 rounded-[20px] border border-white/70 bg-white/80 px-3 py-4 text-center shadow-[0_12px_32px_rgba(40,16,52,0.07)] backdrop-blur sm:max-w-[180px]"
+                  >
+                    <p className="text-2xl font-black text-[#281034]">
+                      {value}
+                    </p>
+                    <p className="mt-1 text-[0.68rem] font-black uppercase tracking-[0.08em] text-[#7D7281]">
+                      {label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </Container>
         </section>
 
-        {/* Featured Gallery Introduction */}
-        <section className="section bg-white">
-          <div className="container">
-            <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-              <div>
-                <span className="eyebrow">Life at Kidzee Dwarka</span>
+        {centreAlbums.length > 0 ? (
+          <section className="bg-[#FBF9FC] py-16 sm:py-20 lg:py-24">
+            <Container>
+              <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+                <div className="max-w-3xl">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[#7A459C]">
+                    Event albums
+                  </p>
+                  <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-[#281034] sm:text-4xl lg:text-5xl">
+                    Open the moments that matter to you.
+                  </h2>
+                  <p className="mt-4 text-base font-semibold leading-8 text-[#6F6474]">
+                    Each celebration or activity has its own album, instead of
+                    placing every photograph on one endless page.
+                  </p>
+                </div>
 
-                <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                  A closer look at how children learn, play and grow.
+                <div className="inline-flex items-center gap-2 self-start rounded-2xl border border-[#E0D3E6] bg-white px-4 py-3 text-sm font-black text-[#5B2A86] lg:self-auto">
+                  <FolderOpen aria-hidden="true" size={18} />
+                  {centreAlbums.length} organised {centreAlbums.length === 1 ? "album" : "albums"}
+                </div>
+              </div>
+
+              <div className="-mx-5 mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mx-6 sm:px-6 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 xl:grid-cols-3">
+                {centreAlbums.map((album, index) => (
+                  <AlbumCard key={album._id} album={album} index={index} />
+                ))}
+              </div>
+            </Container>
+          </section>
+        ) : null}
+
+        {parentStories.length > 0 ? (
+          <section className="relative overflow-hidden bg-[#281034] py-16 text-white sm:py-20 lg:py-24">
+            <div
+              aria-hidden="true"
+              className="absolute -left-32 top-0 h-80 w-80 rounded-full bg-[#8A4AA8]/35 blur-3xl"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute -right-32 bottom-0 h-80 w-80 rounded-full bg-[#F6C84B]/18 blur-3xl"
+            />
+
+            <Container className="relative">
+              <div className="max-w-3xl">
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-[#F6C84B]">
+                  <Heart aria-hidden="true" size={15} fill="currentColor" />
+                  Parent Stories
+                </span>
+
+                <h2 className="mt-5 text-3xl font-black tracking-[-0.04em] sm:text-4xl lg:text-5xl">
+                  Hear from families who know our centre.
                 </h2>
 
-                <p className="mt-6 text-base leading-8 text-slate-600 sm:text-lg">
-                  A preschool is best understood through its everyday
-                  atmosphere. Our gallery shows children participating in real
-                  classroom activities, interacting with teachers, exploring
-                  materials and enjoying time with their friends.
+                <p className="mt-4 max-w-2xl text-base font-semibold leading-8 text-white/70">
+                  Watch genuine experiences shared by our families. Every video
+                  stays paused until you choose to play it.
                 </p>
-
-                <p className="mt-5 text-base leading-8 text-slate-600 sm:text-lg">
-                  These moments reflect the balance of guided learning,
-                  creativity, movement, celebration and care that children
-                  experience at our Sector 12B centre.
-                </p>
-
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <Link
-                    href="/contact"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-purple-700 px-7 py-3.5 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-purple-800"
-                  >
-                    Plan a School Visit
-                    <ArrowRight size={17} />
-                  </Link>
-
-                  <a
-                    href="https://wa.me/919667038673?text=Hello%20Kidzee%20Sector%2012%20Dwarka%2C%20I%20would%20like%20to%20visit%20the%20preschool."
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-purple-200 bg-white px-7 py-3.5 text-sm font-black text-purple-800 transition hover:bg-purple-50"
-                  >
-                    <MessageCircle size={17} />
-                    Enquire on WhatsApp
-                  </a>
-                </div>
               </div>
 
-              <div className="relative">
-                <div className="absolute -left-6 -top-6 h-24 w-24 rounded-[30px] bg-yellow-300/60" />
-                <div className="absolute -bottom-6 -right-6 h-32 w-32 rounded-full bg-purple-300/30" />
-
-                <div className="relative overflow-hidden rounded-[38px] border-8 border-white bg-white shadow-2xl shadow-purple-950/10">
-                  <Image
-                    src="/images/gallery/gallery-main.jpg"
-                    alt="Children learning and playing at Kidzee Sector 12 Dwarka"
-                    width={1000}
-                    height={800}
-                    priority
-                    className="h-[470px] w-full object-cover sm:h-[570px]"
+              <div className="-mx-5 mt-9 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mx-6 sm:px-6 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 xl:grid-cols-3">
+                {parentStories.map((album, index) => (
+                  <AlbumCard
+                    key={album._id}
+                    album={album}
+                    index={index + centreAlbums.length}
                   />
-
-                  <div className="absolute bottom-5 left-5 right-5 rounded-[24px] border border-white/60 bg-white/90 p-5 shadow-xl backdrop-blur">
-                    <div className="flex items-start gap-4">
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-yellow-300 text-purple-950">
-                        <Camera size={21} />
-                      </span>
-
-                      <div>
-                        <p className="text-sm font-black text-purple-800">
-                          Real experiences, not staged moments
-                        </p>
-
-                        <p className="mt-1 text-sm leading-6 text-slate-600">
-                          Photographs from classroom learning, play, events and
-                          everyday centre life.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
-            </div>
-          </div>
-        </section>
+            </Container>
+          </section>
+        ) : null}
 
-        {/* Gallery Categories */}
-        <section className="section bg-[#faf8ff]">
-          <div className="container">
-            <div className="mx-auto max-w-3xl text-center">
-              <span className="eyebrow">What you will see</span>
+        {albums.length === 0 ? (
+          <section className="bg-[#FBF9FC] py-16 sm:py-20 lg:py-24">
+            <Container>
+              <div className="mx-auto max-w-3xl text-center">
+                <span className="inline-flex items-center gap-2 rounded-full border border-[#E2D4E8] bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.12em] text-[#5B2A86]">
+                  <Images aria-hidden="true" size={15} />
+                  A glimpse inside
+                </span>
 
-              <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                Different parts of a child’s day, captured naturally.
-              </h2>
+                <h2 className="mt-5 text-3xl font-black tracking-[-0.04em] text-[#281034] sm:text-4xl lg:text-5xl">
+                  Everyday learning, play and belonging.
+                </h2>
 
-              <p className="mt-5 text-base leading-8 text-slate-600 sm:text-lg">
-                Our gallery includes more than special events. It also reflects
-                the small everyday experiences through which children build
-                confidence and understanding.
-              </p>
-            </div>
+                <p className="mt-4 text-base font-semibold leading-8 text-[#6F6474]">
+                  New event albums and parent stories will appear here after
+                  they are reviewed and published by the centre.
+                </p>
+              </div>
 
-            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {galleryCategories.map((category) => {
-                const Icon = category.icon;
+              <div className="-mx-5 mt-9 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:-mx-6 sm:px-6 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-3">
+                {fallbackMoments.map((item) => (
+                  <article
+                    key={item.src}
+                    className="group relative aspect-[4/3] w-[84vw] max-w-[340px] shrink-0 snap-start overflow-hidden rounded-[28px] border-[4px] border-white bg-white shadow-[0_18px_52px_rgba(40,16,52,0.09)] md:w-auto md:max-w-none"
+                  >
+                    <Image
+                      src={item.src}
+                      alt={item.alt}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover transition duration-700 group-hover:scale-[1.035]"
+                    />
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-0 bg-gradient-to-t from-[#281034]/85 via-transparent to-transparent"
+                    />
+                    <div className="absolute inset-x-0 bottom-0 p-5">
+                      <p className="text-[0.65rem] font-black uppercase tracking-[0.1em] text-[#F6C84B]">
+                        {item.label}
+                      </p>
+                      <h3 className="mt-2 text-xl font-black text-white">
+                        {item.title}
+                      </h3>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </Container>
+          </section>
+        ) : null}
+
+        <section className="bg-white py-14 sm:py-16">
+          <Container>
+            <div className="grid gap-4 md:grid-cols-3">
+              {[
+                {
+                  icon: FolderOpen,
+                  title: "Organised by event",
+                  text: "Every celebration and activity stays easy to find.",
+                },
+                {
+                  icon: Play,
+                  title: "Quiet by default",
+                  text: "Short videos play only after a visitor chooses them.",
+                },
+                {
+                  icon: ShieldCheck,
+                  title: "Permission first",
+                  text: "Only centre-approved children’s media is published.",
+                },
+              ].map((item) => {
+                const Icon = item.icon;
 
                 return (
-                  <article
-                    key={category.title}
-                    className="rounded-[30px] border border-purple-100 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-950/5"
+                  <div
+                    key={item.title}
+                    className="flex items-start gap-3 rounded-[22px] border border-[#E5DBE9] bg-[#FCFAFD] p-4"
                   >
-                    <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 text-purple-700">
-                      <Icon size={26} strokeWidth={1.8} />
-                    </span>
-
-                    <h3 className="mt-6 text-xl font-black text-slate-950">
-                      {category.title}
-                    </h3>
-
-                    <p className="mt-3 text-sm leading-7 text-slate-600">
-                      {category.description}
-                    </p>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Main Gallery Grid */}
-        <section className="section bg-white">
-          <div className="container">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-3xl">
-                <span className="eyebrow">Photo gallery</span>
-
-                <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                  Learning and happiness in everyday moments.
-                </h2>
-
-                <p className="mt-5 text-base leading-8 text-slate-600 sm:text-lg">
-                  Browse photographs from classroom activities, creative
-                  experiences, play sessions, celebrations and daycare.
-                </p>
-              </div>
-
-              <div className="inline-flex w-fit items-center gap-2 rounded-full bg-purple-50 px-4 py-2 text-sm font-black text-purple-800">
-                <ImageIcon size={17} />
-                {galleryImages.length} centre moments
-              </div>
-            </div>
-
-            <div className="mt-12 columns-1 gap-5 sm:columns-2 lg:columns-3">
-              {galleryImages.map((image, index) => (
-                <article
-                  key={image.src}
-                  className="group relative mb-5 break-inside-avoid overflow-hidden rounded-[30px] bg-slate-100"
-                >
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    width={900}
-                    height={1100}
-                    className={`${getImageHeight(
-                      image.size,
-                    )} w-full object-cover transition duration-700 group-hover:scale-[1.04]`}
-                  />
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/5 to-transparent opacity-90" />
-
-                  <div className="absolute left-0 right-0 top-0 flex items-start justify-between p-5">
-                    <span className="rounded-full border border-white/30 bg-white/90 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.13em] text-purple-800 backdrop-blur">
-                      {image.category}
-                    </span>
-
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-slate-950/20 text-xs font-black text-white backdrop-blur">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                  </div>
-
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="text-xl font-black text-white">
-                      {image.title}
-                    </h3>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Why Photos Matter */}
-        <section className="section bg-purple-950 text-white">
-          <div className="container">
-            <div className="grid items-center gap-12 lg:grid-cols-[1fr_0.9fr] lg:gap-16">
-              <div>
-                <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-yellow-300">
-                  Beyond photographs
-                </span>
-
-                <h2 className="mt-6 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
-                  Every picture represents a learning experience.
-                </h2>
-
-                <p className="mt-6 max-w-2xl text-base leading-8 text-purple-100 sm:text-lg">
-                  Children may appear to be simply painting, building, dancing
-                  or playing, but these moments also support communication,
-                  coordination, imagination, patience and social confidence.
-                </p>
-
-                <p className="mt-5 max-w-2xl text-base leading-8 text-purple-100 sm:text-lg">
-                  Teachers observe and guide these experiences so children can
-                  explore freely while still receiving age-appropriate support.
-                </p>
-
-                <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                  {[
-                    "Language and communication",
-                    "Creative thinking",
-                    "Physical coordination",
-                    "Friendship and cooperation",
-                    "Confidence and independence",
-                    "Curiosity and exploration",
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 px-4 py-4"
-                    >
-                      <CheckCircle2
-                        size={19}
-                        className="shrink-0 text-yellow-300"
-                      />
-
-                      <span className="text-sm font-bold text-white">
-                        {item}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-[36px] border border-white/15 bg-white/10 p-7 backdrop-blur sm:p-9">
-                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow-300 text-purple-950">
-                  <Heart size={28} />
-                </span>
-
-                <h3 className="mt-6 text-2xl font-black">
-                  Respectful use of children’s photographs
-                </h3>
-
-                <p className="mt-4 text-sm leading-7 text-purple-100 sm:text-base">
-                  Photographs on the website should be selected carefully and
-                  used only with appropriate parent consent. Images should
-                  reflect children naturally and respectfully.
-                </p>
-
-                <div className="mt-7 rounded-[24px] border border-white/10 bg-white/10 p-5">
-                  <p className="text-sm font-black text-yellow-300">
-                    Use genuine school photographs
-                  </p>
-
-                  <p className="mt-2 text-sm leading-7 text-purple-100">
-                    Replace every gallery placeholder with real centre
-                    photographs. Do not use AI-generated children or altered
-                    faces.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Instagram Section */}
-        <section className="section bg-white">
-          <div className="container">
-            <div className="overflow-hidden rounded-[40px] border border-purple-100 bg-[linear-gradient(135deg,#faf7ff_0%,#ffffff_50%,#fff9e7_100%)] px-7 py-10 sm:px-10 sm:py-12 lg:px-14">
-              <div className="grid items-center gap-10 lg:grid-cols-[1fr_auto]">
-                <div>
-                  <span className="eyebrow">More centre moments</span>
-
-                  <h2 className="mt-5 max-w-3xl text-3xl font-black leading-tight text-slate-950 sm:text-4xl">
-                    Follow our latest activities and celebrations.
-                  </h2>
-
-                  <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600">
-                    Visit our Instagram page for recent classroom activities,
-                    event highlights, parent moments and everyday updates from
-                    Kidzee Sector 12, Dwarka.
-                  </p>
-                </div>
-
-                <a
-                  href="https://www.instagram.com/kidz.eedwarka"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-purple-700 px-7 py-3.5 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-purple-800"
-                >
-                  View Instagram
-                  <ArrowRight size={17} />
-                </a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Visit CTA */}
-        <section className="section bg-[#faf8ff]">
-          <div className="container">
-            <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-              <div className="order-2 lg:order-1">
-                <span className="eyebrow">See the centre personally</span>
-
-                <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                  Photographs are helpful. A school visit shows you much more.
-                </h2>
-
-                <p className="mt-6 text-base leading-8 text-slate-600 sm:text-lg">
-                  Visit the centre to experience the classroom atmosphere,
-                  explore the learning and play spaces, meet the team and
-                  understand the daily routine.
-                </p>
-
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <Link
-                    href="/contact"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-purple-700 px-7 py-3.5 text-sm font-black text-white transition hover:bg-purple-800"
-                  >
-                    Book a School Visit
-                    <ArrowRight size={17} />
-                  </Link>
-
-                  <Link
-                    href="/admissions"
-                    className="inline-flex min-h-12 items-center justify-center rounded-full border border-purple-200 bg-white px-7 py-3.5 text-sm font-black text-purple-800 transition hover:bg-purple-50"
-                  >
-                    Explore Admissions
-                  </Link>
-                </div>
-              </div>
-
-              <div className="order-1 grid grid-cols-2 gap-4 lg:order-2">
-                <Image
-                  src="/images/gallery/gallery-13.jpg"
-                  alt="Preschool classroom at Kidzee Sector 12 Dwarka"
-                  width={700}
-                  height={900}
-                  className="h-[410px] w-full rounded-[30px] object-cover"
-                />
-
-                <div className="grid gap-4 pt-10">
-                  <Image
-                    src="/images/gallery/gallery-14.jpg"
-                    alt="Children enjoying a preschool activity in Dwarka"
-                    width={700}
-                    height={500}
-                    className="h-[190px] w-full rounded-[30px] object-cover"
-                  />
-
-                  <div className="flex h-[190px] flex-col justify-between rounded-[30px] bg-yellow-300 p-6 text-purple-950">
-                    <Users size={29} />
-
+                    <Icon
+                      aria-hidden="true"
+                      size={20}
+                      className="mt-0.5 shrink-0 text-[#5B2A86]"
+                    />
                     <div>
-                      <p className="text-3xl font-black">3-Day</p>
-                      <p className="mt-1 text-sm font-black">
-                        Preschool trial available
+                      <p className="font-black text-[#281034]">
+                        {item.title}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold leading-6 text-[#6F6474]">
+                        {item.text}
                       </p>
                     </div>
                   </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
-          </div>
+          </Container>
         </section>
 
-        <CTA />
+        <section className="bg-[#FBF9FC] pb-14 sm:pb-18">
+          <Container>
+            <div className="overflow-hidden rounded-[30px] bg-[#281034] px-6 py-8 text-white shadow-[0_24px_70px_rgba(40,16,52,0.18)] sm:px-9 sm:py-10 lg:flex lg:items-center lg:justify-between lg:gap-10 lg:px-12">
+              <div className="max-w-2xl">
+                <p className="text-xs font-black uppercase tracking-[0.13em] text-[#F6C84B]">
+                  Come and see for yourself
+                </p>
+                <h2 className="mt-3 text-2xl font-black tracking-[-0.035em] sm:text-3xl">
+                  The best way to understand our centre is to visit it.
+                </h2>
+                <p className="mt-3 text-sm font-semibold leading-7 text-white/72 sm:text-base">
+                  See the classrooms, meet the team and understand your
+                  child&apos;s possible daily routine in person.
+                </p>
+              </div>
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row lg:mt-0 lg:shrink-0">
+                <Link href="/admissions#admission-enquiry" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#F6C84B] px-6 py-3 text-sm font-black text-[#281034] transition hover:bg-[#FFE07A] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/30">
+                  Book a centre visit
+                  <ArrowRight aria-hidden="true" size={17} />
+                </Link>
+                <Link href="/contact" className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/25 bg-white/10 px-6 py-3 text-sm font-black text-white transition hover:bg-white/16 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/20">
+                  Contact the centre
+                </Link>
+              </div>
+            </div>
+          </Container>
+        </section>
       </main>
     </PageShell>
   );

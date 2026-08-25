@@ -3,12 +3,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ArrowRight,
   BookOpen,
   Brain,
+  CalendarCheck2,
   CheckCircle2,
   HeartHandshake,
-  MessageCircle,
   Palette,
   Phone,
   ShieldCheck,
@@ -18,11 +17,14 @@ import {
 } from "lucide-react";
 
 import PageShell from "@/components/PageShell";
+import { getWebsiteMediaBySlotKeys } from "@/lib/sanity/media";
+import { getWebsiteContactSettings } from "@/lib/sanity/contactSettings";
+import { getProgrammeRatioSettings } from "@/lib/sanity/programmeSettings";
 import {
-  createWhatsAppLink,
   programmes,
   site,
 } from "@/lib/site";
+import { buildSiteContact } from "@/lib/siteContact";
 
 type ProgrammePageProps = {
   params: Promise<{
@@ -454,11 +456,6 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
         answer:
           "Yes. Children are introduced to phonics, sound recognition, vocabulary and early word-building in an age-appropriate sequence.",
       },
-      {
-        question: "What is the teacher-child ratio?",
-        answer:
-          "The Junior KG programme follows a teacher-child ratio of approximately 1:10.",
-      },
     ],
   },
 
@@ -586,11 +583,6 @@ const programmeDetails: Record<string, ProgrammeDetail> = {
         question: "Does the programme include homework?",
         answer:
           "Children may receive age-appropriate revision or practice work to reinforce classroom learning and build responsibility.",
-      },
-      {
-        question: "What is the teacher-child ratio?",
-        answer:
-          "The Senior KG programme follows a teacher-child ratio of approximately 1:10.",
       },
     ],
   },
@@ -726,6 +718,54 @@ export function generateStaticParams() {
   }));
 }
 
+const programmePageCopy: Record<
+  string,
+  {
+    description: string;
+    overviewHeading: string;
+    routineHeading: string;
+    progressHeading: string;
+    faqHeading: string;
+  }
+> = {
+  playgroup: {
+    description:
+      "Explore Playgroup for ages 2 to 3 at Kidzee Sector 12, Dwarka: a gentle start with play, language, movement, routines and caring guidance.",
+    overviewHeading: "A gentle first step into group learning.",
+    routineHeading: "Familiar routines help children settle.",
+    progressHeading: "Small signs of confidence grow day by day.",
+    faqHeading: "What Playgroup parents often ask.",
+  },
+  nursery: {
+    description:
+      "Explore Nursery for ages 3 to 4 at Kidzee Sector 12, Dwarka, with purposeful play, early concepts, communication and growing independence.",
+    overviewHeading: "Curiosity becomes purposeful early learning.",
+    routineHeading: "An active day balances guidance and play.",
+    progressHeading: "Communication and independence grow with practice.",
+    faqHeading: "What Nursery parents often ask.",
+  },
+  "junior-kg": {
+    description:
+      "Explore Junior KG for ages 4 to 5 at Kidzee Sector 12, Dwarka, with literacy, numeracy, reasoning, creativity and confident expression.",
+    overviewHeading:
+      "Stronger foundations for reading, writing and reasoning.",
+    routineHeading: "A purposeful day keeps learning active.",
+    progressHeading: "Confidence grows as children connect ideas.",
+    faqHeading: "What Junior KG parents often ask.",
+  },
+  "senior-kg": {
+    description:
+      "Explore Senior KG for ages 5 to 6 at Kidzee Sector 12, Dwarka, with comprehension, mathematical thinking, independence and school readiness.",
+    overviewHeading:
+      "School readiness built with understanding, not pressure.",
+    routineHeading:
+      "A structured day prepares children for primary school.",
+    progressHeading:
+      "Independence and academic confidence grow together.",
+    faqHeading: "What Senior KG parents often ask.",
+  },
+};
+
 export async function generateMetadata({
   params,
 }: ProgrammePageProps): Promise<Metadata> {
@@ -740,9 +780,10 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${programme.title} Programme in Sector 12 Dwarka`,
+    title: `${programme.title} Programme`,
 
-    description: `${programme.intro} Learn about the ${programme.title} age group, learning goals, classroom routine and school-readiness focus at Kidzee Sector 12, Dwarka.`,
+    description:
+      programmePageCopy[programme.slug]?.description ?? programme.intro,
 
     keywords: [
       `${programme.title} in Dwarka`,
@@ -786,7 +827,26 @@ export default async function ProgrammePage({
 }: ProgrammePageProps) {
   const { slug } = await params;
 
-  const programme = programmes.find(
+  const [media, ratioSettings, contactSettings] = await Promise.all([
+    getWebsiteMediaBySlotKeys([
+      "programmes.cards.playgroup",
+      "programmes.cards.nursery",
+      "programmes.cards.junior-kg",
+      "programmes.cards.senior-kg",
+    ]),
+    getProgrammeRatioSettings(),
+    getWebsiteContactSettings(),
+  ]);
+  const contact = buildSiteContact(contactSettings);
+
+  const resolvedProgrammes = programmes.map((item) => ({
+    ...item,
+    image:
+      media[`programmes.cards.${item.slug}`]?.imageUrl ??
+      item.image,
+  }));
+
+  const programme = resolvedProgrammes.find(
     (item) => item.slug === slug,
   );
 
@@ -799,19 +859,17 @@ export default async function ProgrammePage({
     programme.title,
   );
 
-  const relatedProgrammes = programmes.filter(
-    (item) => item.slug !== programme.slug,
-  );
+  const pageCopy = programmePageCopy[programme.slug];
 
   const ratio =
     programme.slug === "playgroup" ||
     programme.slug === "nursery"
-      ? "1:8 teacher-child ratio"
-      : "1:10 teacher-child ratio";
+      ? `1:${ratioSettings.youngGroupChildrenPerTeacher} teacher-child ratio`
+      : `1:${ratioSettings.kindergartenChildrenPerTeacher} teacher-child ratio`;
 
-  const programmeWhatsApp = createWhatsAppLink(
-    `Hello Kidzee Sector 12, Dwarka. I would like to enquire about the ${programme.title} programme for my child.`,
-  );
+  const programmeEnquiryPath = `/admissions?programme=${programme.slug
+    .toUpperCase()
+    .replace("-", "_")}&enquiry=ADMISSION#admission-enquiry`;
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -824,12 +882,11 @@ export default async function ProgrammePage({
       "@type": "Preschool",
       name: site.name,
       url: site.url,
-      telephone: site.phone,
+      telephone: contact.phone,
 
       address: {
         "@type": "PostalAddress",
-        streetAddress:
-          "Building No. 19, Block B, Sector 12B",
+        streetAddress: contact.address,
         addressLocality: site.locality,
         addressRegion: site.region,
         postalCode: site.postalCode,
@@ -837,29 +894,6 @@ export default async function ProgrammePage({
       },
     },
   };
-
-  const quickInformation = [
-    {
-      icon: Users,
-      title: programme.age,
-      description: "Recommended age group",
-    },
-    {
-      icon: Sparkles,
-      title: detail.learningStyle,
-      description: "How children learn",
-    },
-    {
-      icon: HeartHandshake,
-      title: detail.classroomExperience,
-      description: "Classroom experience",
-    },
-    {
-      icon: ShieldCheck,
-      title: detail.readinessFocus,
-      description: "Development priority",
-    },
-  ];
 
   return (
     <PageShell>
@@ -872,7 +906,7 @@ export default async function ProgrammePage({
         />
 
         {/* Hero */}
-        <section className="relative overflow-hidden bg-[linear-gradient(135deg,#faf7ff_0%,#ffffff_54%,#fff7d7_100%)] pb-16 pt-12 sm:pb-20 sm:pt-16 lg:pb-24 lg:pt-20">
+        <section className="relative overflow-hidden bg-[linear-gradient(135deg,#faf7ff_0%,#ffffff_54%,#fff7d7_100%)] pb-16 pt-[104px] sm:pb-20 sm:pt-28 lg:pb-24 lg:pt-32">
           <div
             aria-hidden="true"
             className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-purple-200/35 blur-3xl"
@@ -900,22 +934,20 @@ export default async function ProgrammePage({
                 </p>
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                  <a
-                    href={programmeWhatsApp}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href={programmeEnquiryPath}
                     className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-purple-700 px-7 py-3.5 text-sm font-black text-white shadow-lg shadow-purple-700/20 transition duration-300 hover:-translate-y-0.5 hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-purple-700/25"
                   >
-                    <MessageCircle
+                    <CalendarCheck2
                       size={18}
                       aria-hidden="true"
                     />
 
                     Enquire About {programme.title}
-                  </a>
+                  </Link>
 
                   <a
-                    href={`tel:${site.phone}`}
+                    href={`tel:${contact.phone}`}
                     className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-purple-200 bg-white px-7 py-3.5 text-sm font-black text-purple-800 transition duration-300 hover:-translate-y-0.5 hover:border-purple-300 hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-purple-700/20"
                   >
                     <Phone size={18} aria-hidden="true" />
@@ -962,6 +994,7 @@ export default async function ProgrammePage({
                 <div className="relative overflow-hidden rounded-[38px] border-8 border-white bg-white shadow-2xl shadow-purple-950/10">
                   <Image
                     src={programme.image}
+                    unoptimized={programme.image.startsWith("http")}
                     alt={`${programme.title} classroom activity at Kidzee Sector 12 Dwarka`}
                     width={900}
                     height={760}
@@ -987,36 +1020,6 @@ export default async function ProgrammePage({
           </div>
         </section>
 
-        {/* Programme Information */}
-        <section className="relative z-10 -mt-3 bg-white pb-8 sm:-mt-5">
-          <div className="container">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {quickInformation.map((item) => {
-                const Icon = item.icon;
-
-                return (
-                  <article
-                    key={item.description}
-                    className="rounded-[28px] border border-purple-100 bg-white p-6 shadow-lg shadow-purple-950/5"
-                  >
-                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-purple-700">
-                      <Icon size={23} aria-hidden="true" />
-                    </span>
-
-                    <h2 className="mt-5 text-lg font-black leading-7 text-slate-950">
-                      {item.title}
-                    </h2>
-
-                    <p className="mt-2 text-sm leading-7 text-slate-600">
-                      {item.description}
-                    </p>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
         {/* Programme Overview */}
         <section className="section bg-white">
           <div className="container">
@@ -1026,9 +1029,9 @@ export default async function ProgrammePage({
                   Programme overview
                 </span>
 
-                <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                  Learning designed for this important
-                  stage.
+                <h2 className="mt-5 text-3xl font-black leading-[1.08] tracking-[-0.035em] text-slate-950 sm:text-4xl lg:text-[48px]">
+                  {pageCopy?.overviewHeading ??
+                    "Learning designed for this stage."}
                 </h2>
 
                 <div className="mt-6 space-y-5">
@@ -1093,8 +1096,9 @@ export default async function ProgrammePage({
                 A balanced classroom day
               </span>
 
-              <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                A predictable routine with room to explore.
+              <h2 className="mt-5 text-3xl font-black leading-[1.08] tracking-[-0.035em] text-slate-950 sm:text-4xl lg:text-[48px]">
+                {pageCopy?.routineHeading ??
+                  "A balanced routine with room to explore."}
               </h2>
 
               <p className="mt-5 text-base leading-8 text-slate-600 sm:text-lg">
@@ -1146,9 +1150,9 @@ export default async function ProgrammePage({
                   What parents may notice
                 </span>
 
-                <h2 className="mt-6 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
-                  Progress develops gradually through
-                  everyday practice.
+                <h2 className="mt-6 text-3xl font-black leading-[1.08] tracking-[-0.035em] sm:text-4xl lg:text-[48px]">
+                  {pageCopy?.progressHeading ??
+                    "Progress develops through everyday practice."}
                 </h2>
 
                 <p className="mt-6 max-w-2xl text-base leading-8 text-purple-100 sm:text-lg">
@@ -1233,6 +1237,7 @@ export default async function ProgrammePage({
                 <div className="relative overflow-hidden rounded-[36px] border-8 border-white shadow-2xl shadow-purple-950/10">
                   <Image
                     src={programme.image}
+                    unoptimized={programme.image.startsWith("http")}
                     alt={`Child participating in the ${programme.title} programme at Kidzee Sector 12 Dwarka`}
                     width={900}
                     height={760}
@@ -1300,76 +1305,6 @@ export default async function ProgrammePage({
           </div>
         </section>
 
-        {/* Related Programmes */}
-        <section className="section bg-[#faf8ff]">
-          <div className="container">
-            <div className="mx-auto max-w-3xl text-center">
-              <span className="eyebrow">
-                Explore other age groups
-              </span>
-
-              <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl">
-                Compare the next or previous learning stage.
-              </h2>
-            </div>
-
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
-              {relatedProgrammes.map((item) => (
-                <article
-                  key={item.slug}
-                  className="group overflow-hidden rounded-[30px] border border-purple-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-950/5"
-                >
-                  <div className="overflow-hidden">
-                    <Image
-                      src={item.image}
-                      alt={`${item.title} programme at Kidzee Sector 12 Dwarka`}
-                      width={700}
-                      height={500}
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      className="h-56 w-full object-cover transition duration-700 group-hover:scale-[1.04]"
-                    />
-                  </div>
-
-                  <div className="p-6">
-                    <span className="text-xs font-black uppercase tracking-[0.14em] text-purple-700">
-                      {item.age}
-                    </span>
-
-                    <h3 className="mt-3 text-2xl font-black text-slate-950">
-                      {item.title}
-                    </h3>
-
-                    <p className="mt-3 line-clamp-3 text-sm leading-7 text-slate-600">
-                      {item.intro}
-                    </p>
-
-                    <Link
-                      href={`/programmes/${item.slug}`}
-                      className="mt-5 inline-flex items-center gap-2 text-sm font-black text-purple-700 transition hover:text-purple-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700/30"
-                    >
-                      Explore {item.title}
-                      <ArrowRight
-                        size={16}
-                        aria-hidden="true"
-                      />
-                    </Link>
-                  </div>
-                </article>
-              ))}
-            </div>
-
-            <div className="mt-8 text-center">
-              <Link
-                href="/programmes"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-purple-200 bg-white px-7 py-3.5 text-sm font-black text-purple-800 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-purple-700/20"
-              >
-                Compare All Programmes
-                <ArrowRight size={17} aria-hidden="true" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
         {/* FAQ */}
         <section className="section bg-white">
           <div className="container">
@@ -1378,8 +1313,8 @@ export default async function ProgrammePage({
                 {programme.title} questions
               </span>
 
-              <h2 className="mt-5 text-3xl font-black leading-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                Helpful information for parents.
+              <h2 className="mt-5 text-3xl font-black leading-[1.08] tracking-[-0.035em] text-slate-950 sm:text-4xl lg:text-[48px]">
+                {pageCopy?.faqHeading ?? "What parents often ask."}
               </h2>
             </div>
 
@@ -1431,22 +1366,20 @@ export default async function ProgrammePage({
                 </div>
 
                 <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap lg:flex-col lg:flex-nowrap">
-                  <a
-                    href={programmeWhatsApp}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href={programmeEnquiryPath}
                     className="inline-flex min-h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-yellow-300 px-7 py-3.5 text-sm font-black text-purple-950 transition duration-300 hover:-translate-y-0.5 hover:bg-yellow-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-300/35 sm:w-auto"
                   >
-                    <MessageCircle
+                    <CalendarCheck2
                       size={17}
                       aria-hidden="true"
                     />
 
-                    Ask About {programme.title}
-                  </a>
+                    Send {programme.title} Enquiry
+                  </Link>
 
                   <a
-                    href={`tel:${site.phone}`}
+                    href={`tel:${contact.phone}`}
                     className="inline-flex min-h-12 w-full items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white/20 bg-white/10 px-7 py-3.5 text-sm font-black text-white transition duration-300 hover:-translate-y-0.5 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/20 sm:w-auto"
                   >
                     <Phone size={17} aria-hidden="true" />

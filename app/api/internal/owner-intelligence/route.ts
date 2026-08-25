@@ -1,0 +1,9 @@
+import { timingSafeEqual } from "node:crypto";
+import { NextResponse } from "next/server";
+import { saveOwnerIntelligenceSnapshot } from "@/lib/admin/owner-intelligence";
+import { runSystemHealthChecks } from "@/lib/admin/system-health";
+import { prisma } from "@/lib/prisma";
+
+export const runtime = "nodejs";
+function authorised(request: Request) { const secret = process.env.OWNER_INTELLIGENCE_CRON_SECRET?.trim() ?? ""; const supplied = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? ""; return secret.length >= 32 && supplied.length === secret.length && timingSafeEqual(Buffer.from(secret), Buffer.from(supplied)); }
+export async function POST(request: Request) { if (!authorised(request)) return NextResponse.json({ success: false }, { status: 401 }); const started = Date.now(); try { await prisma.scheduledJobHeartbeat.upsert({ where: { jobName: "owner-intelligence-snapshot" }, create: { jobName: "owner-intelligence-snapshot", status: "WARNING", lastStartedAt: new Date() }, update: { status: "WARNING", lastStartedAt: new Date() } }); const [snapshot, health] = await Promise.all([saveOwnerIntelligenceSnapshot(), runSystemHealthChecks()]); await prisma.scheduledJobHeartbeat.update({ where: { jobName: "owner-intelligence-snapshot" }, data: { status: health.some((item) => item.status === "CRITICAL") ? "WARNING" : "HEALTHY", lastSucceededAt: new Date(), lastError: null, durationMs: Date.now() - started } }); return NextResponse.json({ success: true, generatedAt: snapshot.generatedAt }); } catch { await prisma.scheduledJobHeartbeat.upsert({ where: { jobName: "owner-intelligence-snapshot" }, create: { jobName: "owner-intelligence-snapshot", status: "CRITICAL", lastFailedAt: new Date(), lastError: "Snapshot generation failed." }, update: { status: "CRITICAL", lastFailedAt: new Date(), lastError: "Snapshot generation failed.", durationMs: Date.now() - started } }); return NextResponse.json({ success: false }, { status: 500 }); } }

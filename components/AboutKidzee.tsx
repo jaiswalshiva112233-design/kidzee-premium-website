@@ -19,7 +19,7 @@ const fiveMinds = [
     title: "Focused Mind",
     description:
       "Children gradually learn to listen, stay involved and complete age-appropriate activities with greater attention.",
-    outcome: "Attention and involvement",
+    outcome: "Knowledge retention",
     accent: "bg-[#f1e7f7]",
     iconColor: "text-[#702a96]",
   },
@@ -29,7 +29,7 @@ const fiveMinds = [
     title: "Analytical Mind",
     description:
       "Observation, comparison and simple problem-solving help children understand ideas instead of only memorising them.",
-    outcome: "Observation and reasoning",
+    outcome: "Knowledge application",
     accent: "bg-[#fff3c9]",
     iconColor: "text-[#8a5a00]",
   },
@@ -39,7 +39,7 @@ const fiveMinds = [
     title: "Conscientious Mind",
     description:
       "Daily responsibilities and classroom routines encourage children to become more organised, dependable and independent.",
-    outcome: "Responsibility and habits",
+    outcome: "Knowledge acquisition",
     accent: "bg-[#e7f6ef]",
     iconColor: "text-[#21785a]",
   },
@@ -49,7 +49,7 @@ const fiveMinds = [
     title: "Inventive Mind",
     description:
       "Creative activities invite children to experiment, imagine possibilities and express their own ideas with confidence.",
-    outcome: "Creativity and original thinking",
+    outcome: "Knowledge development",
     accent: "bg-[#ffe9df]",
     iconColor: "text-[#b34f2f]",
   },
@@ -59,7 +59,7 @@ const fiveMinds = [
     title: "Empathetic Mind",
     description:
       "Group experiences help children recognise emotions, consider others and build respectful relationships with classmates.",
-    outcome: "Kindness and cooperation",
+    outcome: "Emotional balance",
     accent: "bg-[#e8efff]",
     iconColor: "text-[#365ca8]",
   },
@@ -75,7 +75,7 @@ export default function AboutKidzee() {
 
   return (
     <section
-      className="relative isolate overflow-hidden bg-white py-20 sm:py-24 lg:py-28"
+      className="relative isolate overflow-hidden bg-white py-14 sm:py-16 lg:py-20"
       aria-labelledby="about-kidzee-heading"
     >
       <div
@@ -101,24 +101,24 @@ export default function AboutKidzee() {
           >
             <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-[#fffaf2] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] text-[#702a96] shadow-sm">
               <Sparkles size={16} aria-hidden="true" />
-              The Kidzee approach
+              The P&eacute;ntemind approach
             </div>
 
             <h2
               id="about-kidzee-heading"
-              className="mt-6 text-balance text-4xl font-extrabold leading-tight tracking-[-0.04em] text-[#281036] sm:text-5xl lg:text-[58px]"
+              className="mt-6 text-balance text-3xl font-extrabold leading-[1.08] tracking-[-0.04em] text-[#281036] sm:text-4xl lg:text-[48px]"
             >
-              Developing five ways of{" "}
+              How P&eacute;ntemind develops{" "}
               <span className="text-[#702a96]">
-                thinking, understanding and relating
+                five connected learning minds
               </span>
             </h2>
 
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-              Kidzee&apos;s PentaMind approach looks beyond a single measure of
-              progress. It gives children opportunities to concentrate, reason,
-              take responsibility, think creatively and understand the feelings
-              of others.
+              Kidzee&apos;s P&eacute;ntemind pedagogy nurtures five learning minds
+              together: Focused, Analytical, Conscientious, Inventive and
+              Empathetic. Children practise these abilities through guided
+              discovery, conversation, play and everyday classroom routines.
             </p>
 
             <p className="mt-5 max-w-2xl leading-7 text-slate-600">
@@ -161,7 +161,7 @@ export default function AboutKidzee() {
             </div>
           </motion.div>
 
-          <div>
+          <div className="min-w-0">
             <motion.div
               initial={shouldReduceMotion ? false : { opacity: 0, y: 22 }}
               whileInView={
@@ -172,7 +172,7 @@ export default function AboutKidzee() {
               className="mb-7"
             >
               <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#702a96]">
-                The PentaMind framework
+                The P&eacute;ntemind framework
               </p>
 
               <h3 className="mt-3 text-3xl font-extrabold leading-tight tracking-[-0.03em] text-[#281036] sm:text-4xl">
@@ -180,7 +180,7 @@ export default function AboutKidzee() {
               </h3>
             </motion.div>
 
-            <div className="grid gap-5">
+            <div className="grid grid-flow-col auto-cols-[86%] gap-5 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-4 sm:auto-cols-[72%] lg:grid-flow-row lg:auto-cols-auto lg:overflow-visible lg:pb-0">
               {fiveMinds.map((mind, index) => {
                 const Icon = mind.icon;
 
@@ -208,7 +208,7 @@ export default function AboutKidzee() {
                             y: -5,
                           }
                     }
-                    className="group overflow-hidden rounded-[30px] border border-purple-100 bg-white p-5 shadow-[0_14px_40px_rgba(62,25,83,0.07)] transition-[border-color,box-shadow] duration-300 hover:border-purple-200 hover:shadow-[0_24px_60px_rgba(62,25,83,0.13)] sm:p-6"
+                    className="group snap-start overflow-hidden rounded-[30px] border border-purple-100 bg-white p-5 shadow-[0_14px_40px_rgba(62,25,83,0.07)] transition-[border-color,box-shadow] duration-300 hover:border-purple-200 hover:shadow-[0_24px_60px_rgba(62,25,83,0.13)] sm:p-6"
                   >
                     <div className="grid gap-5 sm:grid-cols-[auto_1fr] sm:items-start">
                       <div

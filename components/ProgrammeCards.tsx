@@ -1,248 +1,201 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import {
   ArrowRight,
   Baby,
   BookOpenCheck,
-  CalendarDays,
   GraduationCap,
   Sparkles,
 } from "lucide-react";
 
 const programmes = [
   {
+    key: "playgroup" as const,
     title: "Playgroup",
-    age: "2–3 years",
+    age: "2-3 years",
     href: "/programmes/playgroup",
     image: "/images/programmes/playgroup.jpg",
     icon: Baby,
-    label: "First preschool experience",
+    label: "A gentle first step",
     description:
-      "A warm and reassuring beginning where children build comfort, communication, social confidence and familiarity with simple classroom routines.",
-    focusAreas: [
-      "Settling and emotional comfort",
-      "Language through songs and stories",
-      "Sensory and movement activities",
-      "Sharing and group participation",
-    ],
+      "A warm beginning that helps children settle, communicate and enjoy simple routines with confidence.",
+    focus: "Stories, sensory play, movement and social comfort",
   },
   {
+    key: "nursery" as const,
     title: "Nursery",
-    age: "3–4 years",
+    age: "3-4 years",
     href: "/programmes/nursery",
     image: "/images/programmes/nursery.jpg",
     icon: BookOpenCheck,
-    label: "Building learning foundations",
+    label: "Strong early foundations",
     description:
-      "An active programme that introduces early language, numeracy, creativity and independence through play-based and hands-on learning.",
-    focusAreas: [
-      "Vocabulary and phonics readiness",
-      "Early number concepts",
-      "Fine and gross motor development",
-      "Confidence in classroom participation",
-    ],
+      "Hands-on learning introduces early language, number concepts, creativity and everyday independence.",
+    focus: "Vocabulary, phonics readiness, early maths and motor skills",
   },
   {
+    key: "junior-kg" as const,
     title: "Junior KG",
-    age: "4–5 years",
+    age: "4-5 years",
     href: "/programmes/junior-kg",
     image: "/images/programmes/junior-kg.jpg",
     icon: GraduationCap,
-    label: "Growing skills and confidence",
+    label: "Skills with growing confidence",
     description:
-      "A balanced programme that strengthens early reading, writing, numeracy, communication and independent classroom habits.",
-    focusAreas: [
-      "Phonics and early reading",
-      "Writing readiness",
-      "Number sense and patterns",
-      "Problem-solving and expression",
-    ],
+      "A balanced stage that strengthens reading, writing, numeracy and independent classroom habits.",
+    focus: "Phonics, writing readiness, number sense and expression",
   },
   {
+    key: "senior-kg" as const,
     title: "Senior KG",
-    age: "5–6 years",
+    age: "5-6 years",
     href: "/programmes/senior-kg",
     image: "/images/programmes/senior-kg.jpg",
     icon: GraduationCap,
-    label: "Preparing for formal school",
+    label: "Ready for the next classroom",
     description:
-      "A structured school-readiness programme that helps children become more confident, independent and prepared for primary school.",
-    focusAreas: [
-      "Reading and sentence formation",
-      "Writing and comprehension",
-      "Numeracy and logical thinking",
-      "School routines and independence",
-    ],
+      "A structured school-readiness programme for confident learning, communication and independence.",
+    focus: "Reading, writing, comprehension, numeracy and school routines",
   },
 ];
 
-export default function ProgrammeCards() {
+type ProgrammeCardKey =
+  | "playgroup"
+  | "nursery"
+  | "junior-kg"
+  | "senior-kg";
+
+type ProgrammeCardMedia = {
+  imageUrl?: string;
+  imageAlt?: string;
+};
+
+type ProgrammeCardsProps = {
+  images?: Partial<Record<ProgrammeCardKey, ProgrammeCardMedia>>;
+};
+
+function optimiseSanityImageUrl(source: string) {
+  try {
+    const url = new URL(source);
+
+    if (url.hostname !== "cdn.sanity.io") {
+      return source;
+    }
+
+    url.searchParams.set("auto", "format");
+    url.searchParams.set("fit", "max");
+    url.searchParams.set("w", "1200");
+    url.searchParams.set("q", "80");
+    return url.toString();
+  } catch {
+    return source;
+  }
+}
+
+export default function ProgrammeCards({ images }: ProgrammeCardsProps) {
   return (
     <section
-      className="relative overflow-hidden bg-[#faf8ff] py-20 sm:py-24 lg:py-28"
+      id="programme-options"
       aria-labelledby="programme-cards-heading"
+      className="relative scroll-mt-24 overflow-hidden bg-[#FAF8FD] py-16 sm:py-20 lg:py-24"
     >
-      <div
-        aria-hidden="true"
-        className="absolute -left-32 top-32 h-80 w-80 rounded-full bg-purple-200/35 blur-3xl"
-      />
-
-      <div
-        aria-hidden="true"
-        className="absolute -right-36 bottom-10 h-96 w-96 rounded-full bg-yellow-200/40 blur-3xl"
-      />
-
-      <div className="relative mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-8 xl:px-10">
-        <motion.div
-          initial={{ opacity: 0, y: 22 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mx-auto max-w-4xl text-center"
-        >
-          <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-white px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] text-[#702a96] shadow-sm">
-            <Sparkles size={16} aria-hidden="true" />
-            Explore our preschool programmes
+      <div className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-8 xl:px-10">
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#E3D5EA] bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#5B2A86] shadow-sm">
+            <Sparkles aria-hidden="true" size={16} />
+            Choose your child&apos;s stage
           </div>
 
           <h2
             id="programme-cards-heading"
-            className="mt-6 text-balance text-4xl font-extrabold leading-tight tracking-[-0.04em] text-[#281036] sm:text-5xl lg:text-[58px]"
+            className="mt-5 text-balance text-3xl font-black leading-[1.08] tracking-[-0.04em] text-[#281034] sm:text-4xl lg:text-[48px]"
           >
-            Four age-specific programmes,{" "}
-            <span className="text-[#702a96]">
-              one connected learning journey
-            </span>
+            Four programmes, each designed for a different age
           </h2>
 
-          <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-slate-600 sm:text-lg">
-            Each programme responds to the developmental needs of its age group
-            while preparing children naturally and confidently for the next
-            stage.
+          <p className="mx-auto mt-5 max-w-3xl text-base font-semibold leading-8 text-[#675E6B] sm:text-lg">
+            Start with your child&apos;s age, then open the programme to see its
+            daily focus, learning goals and admission details.
           </p>
-        </motion.div>
+        </div>
 
-        <div className="mt-14 grid gap-7 lg:grid-cols-2">
-          {programmes.map((programme, index) => {
+        <div className="mt-10 grid grid-flow-col auto-cols-[86%] gap-5 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-4 sm:auto-cols-[72%] lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-2 lg:overflow-visible lg:pb-0">
+          {programmes.map((programme) => {
             const Icon = programme.icon;
+            const suppliedImage = images?.[programme.key]?.imageUrl;
+            const cardImage = optimiseSanityImageUrl(
+              suppliedImage ?? programme.image,
+            );
 
             return (
-              <motion.article
+              <article
                 key={programme.title}
-                initial={{ opacity: 0, y: 28 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.16 }}
-                transition={{
-                  duration: 0.58,
-                  delay: index * 0.06,
-                  ease: "easeOut",
-                }}
-                className="group overflow-hidden rounded-[36px] border border-purple-100 bg-white shadow-[0_18px_50px_rgba(62,25,83,0.08)] transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_28px_68px_rgba(62,25,83,0.14)]"
+                className="group snap-start overflow-hidden rounded-[30px] border border-[#E9DFED] bg-white shadow-[0_16px_44px_rgba(40,16,52,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_58px_rgba(40,16,52,0.13)]"
               >
-                <div className="grid h-full md:grid-cols-[0.9fr_1.1fr]">
-                  <div className="relative min-h-[320px] overflow-hidden md:min-h-full">
-                    <Image
-                      src={programme.image}
-                      alt={`${programme.title} children learning at Kidzee Sector 12 Dwarka`}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 40vw"
-                      className="object-cover transition duration-700 group-hover:scale-[1.04]"
-                    />
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#281036]/65 via-transparent to-transparent" />
-
-                    <div className="absolute left-5 top-5">
-                      <div className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/90 px-4 py-2 text-xs font-extrabold text-[#702a96] shadow-lg backdrop-blur">
-                        <CalendarDays size={15} aria-hidden="true" />
-                        {programme.age}
-                      </div>
-                    </div>
-
-                    <div className="absolute bottom-5 left-5 right-5">
-                      <div className="inline-flex h-13 w-13 items-center justify-center rounded-[18px] bg-yellow-300 text-[#281036] shadow-lg">
-                        <Icon size={24} strokeWidth={2.1} aria-hidden="true" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col p-6 sm:p-7 lg:p-8">
-                    <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#702a96]">
-                      {programme.label}
-                    </p>
-
-                    <h3 className="mt-3 text-3xl font-extrabold tracking-[-0.03em] text-[#281036] sm:text-4xl">
-                      {programme.title}
-                    </h3>
-
-                    <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
-                      {programme.description}
-                    </p>
-
-                    <div className="mt-6 space-y-3">
-                      {programme.focusAreas.map((area) => (
-                        <div key={area} className="flex items-start gap-3">
-                          <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-yellow-400" />
-
-                          <p className="text-sm font-semibold leading-6 text-slate-700">
-                            {area}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-auto pt-7">
-                      <Link
-                        href={programme.href}
-                        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#64278f] px-6 text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(100,39,143,0.2)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#522071]"
-                      >
-                        View {programme.title}
-                        <ArrowRight size={17} aria-hidden="true" />
-                      </Link>
-                    </div>
-                  </div>
+                <div className="relative aspect-[16/10] overflow-hidden bg-[#EEE7F1]">
+                  <Image
+                    src={cardImage}
+                    alt={
+                      images?.[programme.key]?.imageAlt ||
+                      programme.title +
+                        " children learning at Kidzee Sector 12 Dwarka"
+                    }
+                    fill
+                    unoptimized={
+                      cardImage.startsWith("http") &&
+                      !cardImage.includes("cdn.sanity.io")
+                    }
+                    sizes="(max-width: 640px) 86vw, (max-width: 1024px) 72vw, 46vw"
+                    className="object-cover transition duration-700 group-hover:scale-[1.03]"
+                  />
                 </div>
-              </motion.article>
+
+                <div className="p-5 sm:p-6 lg:p-7">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#F0E5F6] text-[#5B2A86]">
+                        <Icon aria-hidden="true" size={21} />
+                      </span>
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.13em] text-[#7A568E]">
+                          {programme.label}
+                        </p>
+                        <h3 className="mt-1 text-2xl font-black tracking-[-0.03em] text-[#281034] sm:text-3xl">
+                          {programme.title}
+                        </h3>
+                      </div>
+                    </div>
+
+                    <span className="shrink-0 rounded-full bg-[#FFF5C8] px-3 py-1.5 text-xs font-black text-[#5D4300]">
+                      {programme.age}
+                    </span>
+                  </div>
+
+                  <p className="mt-4 text-sm font-semibold leading-7 text-[#675E6B] sm:text-base">
+                    {programme.description}
+                  </p>
+
+                  <p className="mt-4 rounded-2xl bg-[#FAF7FC] px-4 py-3 text-sm font-bold leading-6 text-[#4D4053]">
+                    <span className="text-[#5B2A86]">Focus:</span>{" "}
+                    {programme.focus}
+                  </p>
+
+                  <Link
+                    href={programme.href}
+                    className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#5B2A86] px-6 text-sm font-black text-white transition hover:bg-[#47206A]"
+                  >
+                    View {programme.title}
+                    <ArrowRight aria-hidden="true" size={17} />
+                  </Link>
+                </div>
+              </article>
             );
           })}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 22 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mt-14 rounded-[34px] border border-purple-100 bg-white p-7 shadow-[0_16px_46px_rgba(62,25,83,0.07)] sm:p-9"
-        >
-          <div className="grid gap-7 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.17em] text-[#702a96]">
-                Choosing the correct programme
-              </p>
-
-              <h3 className="mt-3 text-3xl font-extrabold leading-tight tracking-[-0.03em] text-[#281036] sm:text-4xl">
-                Age provides the starting point, and your child’s readiness
-                helps complete the decision
-              </h3>
-
-              <p className="mt-4 max-w-3xl leading-8 text-slate-600">
-                Our team can help parents understand the most suitable
-                programme based on age, previous preschool experience,
-                communication, comfort and current learning needs.
-              </p>
-            </div>
-
-            <Link
-              href="/contact"
-              className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full border border-purple-200 bg-purple-50 px-7 text-base font-extrabold text-[#64278f] transition duration-300 hover:-translate-y-0.5 hover:border-purple-300 hover:bg-purple-100"
-            >
-              Get Programme Guidance
-              <ArrowRight size={18} aria-hidden="true" />
-            </Link>
-          </div>
-        </motion.div>
+        <p className="mt-5 text-center text-sm font-semibold text-[#746A79] lg:hidden">
+          Swipe to compare all four programmes
+        </p>
       </div>
     </section>
   );

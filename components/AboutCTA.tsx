@@ -1,5 +1,6 @@
 "use client";
 
+import { useSiteContact } from "@/components/SiteContactProvider";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -12,7 +13,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { site } from "@/lib/site";
+
 
 const visitBenefits = [
   "See the classrooms and activity spaces",
@@ -22,11 +23,9 @@ const visitBenefits = [
 ];
 
 export default function AboutCTA() {
-  const visitMessage = encodeURIComponent(
-    "Hello, I would like to book a school visit at Kidzee Sector 12, Dwarka."
-  );
-
-  const visitLink = `https://wa.me/919667038673?text=${visitMessage}`;
+  const site = useSiteContact();
+  const visitLink =
+    "/admissions?enquiry=SCHOOL_VISIT#admission-enquiry";
 
   return (
     <section
@@ -91,15 +90,13 @@ export default function AboutCTA() {
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                <a
+                <Link
                   href={visitLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-yellow-300 px-7 text-base font-extrabold text-[#281036] shadow-[0_16px_36px_rgba(253,224,71,0.18)] transition duration-300 hover:-translate-y-0.5 hover:bg-yellow-200"
                 >
                   <CalendarCheck2 size={19} aria-hidden="true" />
                   Book a School Visit
-                </a>
+                </Link>
 
                 <a
                   href={`tel:${site.phone}`}
@@ -208,3 +205,4 @@ export default function AboutCTA() {
     </section>
   );
 }
+

@@ -1,0 +1,2479 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AdminRole {
+  OWNER
+  CENTRE_HEAD
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  NO_ANSWER
+  VISIT_SCHEDULED
+  VISIT_BOOKED
+  VISIT_COMPLETED
+  TRIAL_SCHEDULED
+  TRIAL_COMPLETED
+  QUALIFIED
+  INTERESTED
+  FOLLOW_UP
+  ADMITTED
+  NOT_INTERESTED
+  CLOSED
+}
+
+enum EnquirySource {
+  WEBSITE
+  FORMSPREE
+  GOOGLE_ADS
+  META_ADS
+  WHATSAPP
+  PHONE_CALL
+  WALK_IN
+  REFERRAL
+  OTHER
+}
+
+enum Programme {
+  PLAYGROUP
+  NURSERY
+  JUNIOR_KG
+  SENIOR_KG
+  DAYCARE
+}
+
+enum FollowUpStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum StudentStatus {
+  ACTIVE
+  INACTIVE
+  WITHDRAWN
+  GRADUATED
+}
+
+enum AdmissionStatus {
+  DRAFT
+  DOCUMENTS_PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum EnrollmentContractStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ENDED
+  CANCELLED
+}
+
+enum ContractServiceType {
+  PRESCHOOL
+  DAYCARE
+  MEAL
+  ANNUAL
+  KIT
+  ADMISSION
+  OTHER
+}
+
+enum ContractServiceFrequency {
+  MONTHLY
+  ONE_TIME
+  CUSTOM
+}
+
+enum ContractServiceStatus {
+  DRAFT
+  ACTIVE
+  ENDED
+  WAIVED
+  CANCELLED
+}
+
+enum GuardianRelationship {
+  MOTHER
+  FATHER
+  GRANDMOTHER
+  GRANDFATHER
+  GUARDIAN
+  OTHER
+}
+
+enum PaymentMethod {
+  CASH
+  UPI
+  BANK_TRANSFER
+  CARD
+  CHEQUE
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIALLY_PAID
+  CANCELLED
+  REFUNDED
+}
+
+enum FeeInvoiceStatus {
+  DRAFT
+  DUE
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+  WAIVED
+}
+
+enum FinancialCorrectionType {
+  ADJUSTMENT
+  CREDIT_NOTE
+  REFUND
+  REVERSAL
+}
+
+enum FinancialCorrectionStatus {
+  DRAFT
+  APPROVED
+  APPLIED
+  CANCELLED
+}
+
+enum StudentChargeStatus {
+  PENDING
+  BILLED
+  PAID
+  WAIVED
+  CANCELLED
+}
+
+enum FeeCategory {
+  ADMISSION_FEE
+  ANNUAL_FEE
+  MONTHLY_PRESCHOOL_FEE
+  DAYCARE_FEE
+  DAYCARE_LUNCH_FEE
+  DAYCARE_EVENING_SNACK_FEE
+  DAYCARE_MEAL_COMBO_FEE
+  FOOD_FEE
+  LATE_FEE
+  ACTIVITY_FEE
+  KIT_FEE
+  OTHER
+}
+
+enum DaycareBillingMode {
+  HOURLY
+  FULL_DAY
+}
+
+enum DaycarePlanType {
+  OCCASIONAL
+  FLEXIBLE_DAYS
+  MONTHLY_DAYCARE_ONLY
+  MONTHLY_PRESCHOOL_DAYCARE
+}
+
+enum CareerApplicationStatus {
+  NEW
+  REVIEWED
+  SHORTLISTED
+  INTERVIEW
+  SELECTED
+  REJECTED
+  JOINED
+}
+
+enum DaycareFoodOption {
+  NONE
+  LUNCH
+  EVENING_SNACK
+  BOTH
+}
+
+enum DaycareSessionStatus {
+  BOOKED
+  COMPLETED
+  BILLED
+  CANCELLED
+}
+
+enum CatalogueStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+  DELETED
+}
+
+enum PriceType {
+  GST_INCLUSIVE
+  GST_EXCLUSIVE
+}
+
+enum ConfigurableDaycareBillingType {
+  HOURLY
+  DAILY
+  WEEKLY
+  MONTHLY
+  CUSTOM
+}
+
+enum DaycareMealRule {
+  NOT_AVAILABLE
+  OPTIONAL
+  REQUIRED
+  INCLUDED
+}
+
+enum CalendarEventType {
+  ACADEMIC
+  ACTIVITY
+  CELEBRATION
+  HOLIDAY
+  MEETING
+  DEADLINE
+  OTHER
+}
+
+enum ExpenseCategory {
+  RENT
+  GST
+  SALARY
+  ELECTRICITY
+  FOOD
+  SECURITY
+  MAINTENANCE
+  MARKETING
+  STATIONERY
+  ACTIVITIES
+  TRANSPORT
+  PROFESSIONAL_FEES
+  SOFTWARE
+  EQUIPMENT
+  OTHER
+}
+
+enum ReceiptStatus {
+  ISSUED
+  CANCELLED
+  REFUNDED
+}
+
+enum StudentDocumentType {
+  BIRTH_CERTIFICATE
+  CHILD_AADHAAR_CARD
+  PARENT_ID_PROOF
+  ADDRESS_PROOF
+  IMMUNISATION_RECORD
+  MEDICAL_CERTIFICATE
+  PASSPORT_PHOTO
+  TRANSFER_CERTIFICATE
+  OTHER
+}
+
+enum StudentDocumentStatus {
+  UPLOADED
+  VERIFIED
+  REJECTED
+}
+
+enum StaffStatus {
+  ACTIVE
+  INACTIVE
+  LEFT
+}
+
+enum StaffExtraDutyStatus {
+  PENDING
+  APPROVED
+  PAID
+  CANCELLED
+}
+
+enum StaffPayrollStatus {
+  DRAFT
+  APPROVED
+  PAID
+  CANCELLED
+}
+
+enum StaffPaidLeaveCycle {
+  NONE
+  MONTHLY
+  YEARLY
+}
+
+enum StaffLeaveType {
+  PAID_LEAVE
+  UNPAID_LEAVE
+}
+
+enum StaffLeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ActivityAction {
+  CREATED
+  UPDATED
+  DELETED
+  CANCELLED
+  LOGIN
+  LOGOUT
+  EXPORTED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  HALF_DAY
+  LEAVE
+  HOLIDAY
+}
+
+enum MarketingConversionProvider {
+  GOOGLE_ADS
+  META
+}
+
+enum MarketingConversionEvent {
+  LEAD
+  QUALIFIED_LEAD
+  ADMISSION
+}
+
+enum MarketingConversionStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  RETRY
+  DEAD
+}
+
+enum LeadActivityType {
+  CREATED
+  STATUS_CHANGED
+  NOTE_ADDED
+  FOLLOW_UP_SCHEDULED
+  FOLLOW_UP_COMPLETED
+  VISIT_BOOKED
+  VISIT_COMPLETED
+  VISIT_NO_SHOW
+  TRIAL_SCHEDULED
+  TRIAL_COMPLETED
+  PARENT_FEEDBACK
+  ADMISSION_STARTED
+  ADMISSION_CONFIRMED
+  CLOSED
+  REOPENED
+  SIBLING_LINKED
+  CONVERSION_RESENT
+}
+
+enum LeadAppointmentKind {
+  VISIT
+  TRIAL
+}
+
+enum LeadAppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  NO_SHOW
+  CANCELLED
+}
+
+enum GrowthRecommendationStatus {
+  RECOMMENDED
+  APPROVED
+  REJECTED
+  APPLIED
+  ROLLED_BACK
+}
+
+enum AiModelScope {
+  WEBSITE
+  ADS
+  CHAT
+  MIRA
+  TERRA
+  LUNA
+}
+
+enum LandingPageStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum GrowthExperimentStatus {
+  DRAFT
+  RUNNING
+  PAUSED
+  COMPLETED
+}
+
+enum GrowthVersionStatus {
+  DRAFT
+  APPROVED
+  APPLIED
+  ROLLED_BACK
+}
+
+enum GrowthDataSource {
+  CENTREOS
+  WEBSITE
+  GOOGLE_ANALYTICS
+  SEARCH_CONSOLE
+  GOOGLE_ADS
+  META_ADS
+  GBP
+  PAGESPEED
+  MANUAL
+}
+
+enum InternalIdentityType {
+  FINGERPRINT
+  COOKIE
+  DEVICE_ID
+  STAFF_LOGIN
+  INTERNAL_TOKEN
+  IP
+  WIFI
+}
+
+enum SystemHealthStatus {
+  HEALTHY
+  WARNING
+  CRITICAL
+  UNKNOWN
+}
+
+enum WhatsAppAutomationType {
+  ENQUIRY_NOTIFICATION
+  VISIT_REMINDER
+  ADMISSION_CONFIRMATION
+  FEE_REMINDER
+  RECEIPT_DOCUMENT
+  DAYCARE_REMINDER
+  FOLLOW_UP_REMINDER
+}
+
+enum WhatsAppAutomationStatus {
+  PENDING
+  PROCESSING
+  ACCEPTED
+  SENT
+  DELIVERED
+  READ
+  RETRY
+  FAILED
+  CANCELLED
+}
+
+model AdminUser {
+  invoicesCreated    FeeInvoice[] @relation("InvoiceCreatedBy")
+  id                 String       @id @default(cuid())
+  name               String
+  email              String?      @unique
+  role               AdminRole
+  active             Boolean      @default(true)
+  passwordHash       String?
+  sessionVersion     Int          @default(1)
+  failedAttempts     Int          @default(0)
+  lockedUntil        DateTime?
+  passwordChangedAt  DateTime?
+  mustChangePassword Boolean      @default(false)
+  permissions        Json?
+  lastLoginAt        DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  activities                    ActivityLog[]
+  enquiriesCreated              Enquiry[]                  @relation("EnquiryCreatedBy")
+  followUpsCreated              FollowUp[]                 @relation("FollowUpCreatedBy")
+  paymentsCreated               FeePayment[]               @relation("PaymentCreatedBy")
+  expensesCreated               Expense[]                  @relation("ExpenseCreatedBy")
+  attendanceMarked              StudentAttendance[]        @relation("StudentAttendanceMarkedBy")
+  staffAttendanceMarked         StaffAttendance[]          @relation("StaffAttendanceMarkedBy")
+  extraDutiesCreated            StaffExtraDuty[]           @relation("StaffExtraDutyCreatedBy")
+  extraDutiesApproved           StaffExtraDuty[]           @relation("StaffExtraDutyApprovedBy")
+  staffLeavesCreated            StaffLeaveRequest[]        @relation("StaffLeaveCreatedBy")
+  staffLeavesApproved           StaffLeaveRequest[]        @relation("StaffLeaveApprovedBy")
+  staffPayrollsGenerated        StaffPayroll[]             @relation("StaffPayrollGeneratedBy")
+  staffPayrollsApproved         StaffPayroll[]             @relation("StaffPayrollApprovedBy")
+  staffPayrollsPaid             StaffPayroll[]             @relation("StaffPayrollPaidBy")
+  documentsUploaded             StudentDocument[]          @relation("StudentDocumentUploadedBy")
+  documentsVerified             StudentDocument[]          @relation("StudentDocumentVerifiedBy")
+  daycareSessionsCreated        DaycareSession[]           @relation("DaycareSessionCreatedBy")
+  daycareSessionsApproved       DaycareSession[]           @relation("DaycareSessionApprovedBy")
+  studentChargesCreated         StudentCharge[]            @relation("StudentChargeCreatedBy")
+  studentChargesApproved        StudentCharge[]            @relation("StudentChargeApprovedBy")
+  calendarDocumentsUploaded     AcademicCalendarDocument[] @relation("CalendarDocumentUploadedBy")
+  calendarEventsCreated         AcademicCalendarEvent[]    @relation("CalendarEventCreatedBy")
+  leadActivitiesRecorded        LeadActivity[]             @relation("LeadActivityRecordedBy")
+  leadAppointmentsRecorded      LeadAppointment[]          @relation("LeadAppointmentRecordedBy")
+  followUpsCompleted            FollowUp[]                 @relation("FollowUpCompletedBy")
+  growthRecommendationsMade     GrowthRecommendation[]     @relation("GrowthRecommendationCreatedBy")
+  growthRecommendationsReviewed GrowthRecommendation[]     @relation("GrowthRecommendationReviewedBy")
+  campaignUrlsCreated           CampaignUrl[]              @relation("CampaignUrlCreatedBy")
+  notifications                 AdminNotification[]        @relation("NotificationRecipient")
+  pushDevices                   PushDevice[]
+  notificationPreference        NotificationPreference?
+
+  @@index([role])
+  @@index([active])
+}
+
+model AdminCredential {
+  id                String    @id @default("primary")
+  passwordHash      String
+  sessionVersion    Int       @default(1)
+  failedAttempts    Int       @default(0)
+  lockedUntil       DateTime?
+  lastLoginAt       DateTime?
+  passwordChangedAt DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Enquiry {
+  id                       String        @id @default(cuid())
+  enquiryNumber            String        @unique
+  parentName               String
+  childName                String?
+  childDateOfBirth         DateTime?
+  childAgeText             String?
+  phone                    String
+  alternatePhone           String?
+  email                    String?
+  programme                Programme?
+  source                   EnquirySource
+  status                   EnquiryStatus @default(NEW)
+  message                  String?
+  notes                    String?
+  preferredVisitDate       DateTime?
+  trialDate                DateTime?
+  nextFollowUpAt           DateTime?
+  admittedAt               DateTime?
+  formSubmissionId         String?       @unique
+  lastWebsiteSubmissionAt  DateTime?
+  websiteSubmissionCount   Int           @default(0)
+  latestPageUrl            String?
+  latestLandingPage        String?
+  latestReferrer           String?
+  latestUtmSource          String?
+  latestUtmMedium          String?
+  latestUtmCampaign        String?
+  latestUtmContent         String?
+  latestUtmTerm            String?
+  latestGclid              String?
+  latestGbraid             String?
+  latestWbraid             String?
+  latestFbclid             String?
+  latestTrafficChannel     String?
+  latestTrafficClass       String?
+  firstTouchAttribution    Json?
+  lastTouchAttribution     Json?
+  googleAdmissionSentAt    DateTime?
+  googleAdmissionAttemptAt DateTime?
+  googleAdmissionAttempts  Int           @default(0)
+  googleAdmissionError     String?
+  metaAdmissionSentAt      DateTime?
+  metaAdmissionAttemptAt   DateTime?
+  metaAdmissionAttempts    Int           @default(0)
+  metaAdmissionError       String?
+  stageChangedAt           DateTime      @default(now())
+  qualifiedAt              DateTime?
+  closedAt                 DateTime?
+  lostReason               String?
+  familyId                 String?
+  createdById              String?
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
+
+  createdBy          AdminUser?                  @relation("EnquiryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  followUps          FollowUp[]
+  websiteSubmissions WebsiteLeadSubmission[]
+  admission          Admission?
+  enrollmentContract StudentEnrollmentContract?
+  marketingJobs      MarketingConversionJob[]
+  family             LeadFamily?                 @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  activities         LeadActivity[]
+  appointments       LeadAppointment[]
+  whatsappMessages   WhatsAppAutomationMessage[]
+
+  @@index([phone])
+  @@index([status])
+  @@index([source])
+  @@index([createdAt])
+  @@index([lastWebsiteSubmissionAt])
+  @@index([nextFollowUpAt])
+  @@index([familyId])
+  @@index([stageChangedAt])
+}
+
+model LeadFamily {
+  id           String   @id @default(cuid())
+  familyName   String
+  primaryPhone String
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  enquiries Enquiry[]
+
+  @@index([primaryPhone])
+}
+
+model LeadActivity {
+  id           String           @id @default(cuid())
+  enquiryId    String
+  type         LeadActivityType
+  fromStatus   EnquiryStatus?
+  toStatus     EnquiryStatus?
+  title        String
+  notes        String?
+  metadata     Json?
+  recordedById String?
+  occurredAt   DateTime         @default(now())
+  createdAt    DateTime         @default(now())
+
+  enquiry    Enquiry    @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  recordedBy AdminUser? @relation("LeadActivityRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  @@index([enquiryId, occurredAt])
+  @@index([type, occurredAt])
+  @@index([recordedById])
+}
+
+model LeadAppointment {
+  id             String                @id @default(cuid())
+  enquiryId      String
+  kind           LeadAppointmentKind
+  status         LeadAppointmentStatus @default(SCHEDULED)
+  scheduledAt    DateTime
+  completedAt    DateTime?
+  outcome        String?
+  parentFeedback String?
+  notes          String?
+  recordedById   String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  enquiry    Enquiry    @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  recordedBy AdminUser? @relation("LeadAppointmentRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  @@index([enquiryId, scheduledAt])
+  @@index([kind, status, scheduledAt])
+  @@index([recordedById])
+}
+
+model WebsiteLeadSubmission {
+  id                 String        @id @default(cuid())
+  submissionId       String        @unique
+  enquiryId          String
+  source             EnquirySource
+  enquiryType        String
+  leadType           String        @default("admission")
+  pageUrl            String?
+  landingPage        String?
+  referrer           String?
+  utmSource          String?
+  utmMedium          String?
+  utmCampaign        String?
+  utmContent         String?
+  utmTerm            String?
+  gclid              String?
+  gbraid             String?
+  wbraid             String?
+  fbclid             String?
+  trafficChannel     String?
+  trafficClass       String        @default("GENUINE")
+  isInternal         Boolean       @default(false)
+  isTest             Boolean       @default(false)
+  isBot              Boolean       @default(false)
+  marketingConsent   Boolean       @default(false)
+  fbc                String?
+  fbp                String?
+  firstTouch         Json?
+  lastTouch          Json?
+  landingPageId      String?
+  landingVariantId   String?
+  growthExperimentId String?
+  receivedAt         DateTime      @default(now())
+
+  enquiry Enquiry @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+
+  @@index([enquiryId, receivedAt])
+  @@index([source, receivedAt])
+  @@index([leadType, trafficClass, receivedAt])
+  @@index([trafficClass, receivedAt])
+  @@index([landingPageId, landingVariantId, receivedAt])
+  @@index([growthExperimentId, receivedAt])
+  @@index([receivedAt])
+}
+
+model CareerApplication {
+  id                  String                  @id @default(cuid())
+  applicationNumber   String                  @unique
+  name                String
+  phone               String
+  email               String?
+  location            String?
+  position            String
+  leadType            String                  @default("recruitment")
+  qualification       String?
+  experience          String?
+  currentRole         String?
+  expectedSalary      String?
+  joiningAvailability String?
+  message             String?
+  consent             Boolean                 @default(false)
+  status              CareerApplicationStatus @default(NEW)
+  resumeFileName      String?
+  resumeMimeType      String?
+  resumeSize          Int?
+  resumeStoragePath   String?
+  resumeData          Bytes?                  @db.ByteA
+  trafficClass        String                  @default("GENUINE")
+  source              String?
+  medium              String?
+  campaign            String?
+  content             String?
+  term                String?
+  referrer            String?
+  landingPage         String?
+  gclid               String?
+  gbraid              String?
+  wbraid              String?
+  fbclid              String?
+  fbc                 String?
+  fbp                 String?
+  firstTouch          Json?
+  lastTouch           Json?
+  notes               String?
+  reviewedAt          DateTime?
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+
+  @@index([status, createdAt])
+  @@index([leadType, trafficClass, createdAt])
+  @@index([source, campaign, createdAt])
+  @@index([phone])
+  @@index([createdAt])
+}
+
+model AiSeoRevision {
+  id           String    @id @default(cuid())
+  pageKey      String
+  status       String    @default("APPLIED")
+  currentData  Json
+  proposedData Json
+  evidence     Json?
+  createdById  String?
+  appliedAt    DateTime  @default(now())
+  undoneAt     DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([pageKey, createdAt])
+  @@index([status, createdAt])
+  @@index([createdAt])
+}
+
+model FollowUp {
+  id            String         @id @default(cuid())
+  enquiryId     String
+  title         String
+  notes         String?
+  dueAt         DateTime
+  completedAt   DateTime?
+  status        FollowUpStatus @default(PENDING)
+  createdById   String?
+  completedById String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  enquiry     Enquiry    @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  createdBy   AdminUser? @relation("FollowUpCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  completedBy AdminUser? @relation("FollowUpCompletedBy", fields: [completedById], references: [id], onDelete: SetNull)
+
+  @@index([enquiryId])
+  @@index([status, dueAt])
+  @@index([completedById])
+}
+
+model Admission {
+  id                String          @id @default(cuid())
+  admissionNumber   String          @unique
+  enquiryId         String?         @unique
+  studentId         String?         @unique
+  status            AdmissionStatus @default(DRAFT)
+  programme         Programme
+  admissionDate     DateTime?
+  joiningDate       DateTime?
+  documentsComplete Boolean         @default(false)
+  notes             String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  enquiry            Enquiry?                   @relation(fields: [enquiryId], references: [id], onDelete: SetNull)
+  student            Student?                   @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  enrollmentContract StudentEnrollmentContract?
+
+  @@index([status])
+  @@index([joiningDate])
+}
+
+model Student {
+  feeInvoices             FeeInvoice[]
+  id                      String        @id @default(cuid())
+  studentNumber           String        @unique
+  firstName               String
+  middleName              String?
+  lastName                String?
+  preferredName           String?
+  dateOfBirth             DateTime
+  gender                  String?
+  programme               Programme
+  programmeDefinitionId   String?
+  status                  StudentStatus @default(ACTIVE)
+  joiningDate             DateTime
+  leavingDate             DateTime?
+  bloodGroup              String?
+  medicalNotes            String?
+  allergies               String?
+  addressLine1            String?
+  addressLine2            String?
+  locality                String?
+  city                    String?
+  state                   String?
+  postalCode              String?
+  profilePhotoUrl         String?
+  identityFingerprint     String?
+  duplicateOfStudentId    String?
+  duplicateOverrideReason String?
+  notes                   String?
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  admission            Admission?
+  guardians            Guardian[]
+  feeAccounts          StudentFeeAccount[]
+  payments             FeePayment[]
+  receipts             Receipt[]
+  attendanceRecords    StudentAttendance[]
+  documents            StudentDocument[]
+  daycarePlans         StudentDaycarePlan[]
+  daycareSessions      DaycareSession[]
+  ledgerCharges        StudentCharge[]
+  enrollmentContract   StudentEnrollmentContract?
+  financialCorrections FinancialCorrection[]
+  programmeDefinition  ProgrammeDefinition?        @relation(fields: [programmeDefinitionId], references: [id], onDelete: SetNull)
+  whatsappMessages     WhatsAppAutomationMessage[]
+
+  @@index([programme])
+  @@index([programmeDefinitionId])
+  @@index([status])
+  @@index([dateOfBirth])
+  @@index([joiningDate])
+  @@index([identityFingerprint])
+  @@index([duplicateOfStudentId])
+}
+
+model StudentEnrollmentContract {
+  id                   String                   @id @default(cuid())
+  contractNumber       String                   @unique
+  studentId            String                   @unique
+  admissionId          String?                  @unique
+  enquiryId            String?                  @unique
+  academicSession      String
+  status               EnrollmentContractStatus @default(DRAFT)
+  startDate            DateTime
+  endDate              DateTime?
+  preschoolEnabled     Boolean                  @default(false)
+  preschoolProgrammeId String?
+  preschoolClass       String?
+  daycareEnabled       Boolean                  @default(false)
+  mealsEnabled         Boolean                  @default(false)
+  annualKitEnabled     Boolean                  @default(false)
+  annualKitSkipReason  String?
+  billingDay           Int                      @default(1)
+  dueDay               Int                      @default(5)
+  source               String                   @default("DIRECT")
+  createdById          String?
+  updatedById          String?
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+
+  student              Student               @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  admission            Admission?            @relation(fields: [admissionId], references: [id], onDelete: SetNull)
+  enquiry              Enquiry?              @relation(fields: [enquiryId], references: [id], onDelete: SetNull)
+  preschoolProgramme   ProgrammeDefinition?  @relation(fields: [preschoolProgrammeId], references: [id], onDelete: SetNull)
+  services             ContractService[]
+  daycarePlans         StudentDaycarePlan[]
+  ledgerCharges        StudentCharge[]
+  invoices             FeeInvoice[]
+  financialCorrections FinancialCorrection[]
+
+  @@index([status, startDate, endDate])
+  @@index([preschoolEnabled, preschoolClass, status])
+  @@index([daycareEnabled, status])
+  @@index([mealsEnabled, status])
+  @@index([preschoolProgrammeId])
+  @@index([academicSession])
+}
+
+model ContractService {
+  id                String                   @id @default(cuid())
+  contractId        String
+  serviceType       ContractServiceType
+  category          FeeCategory
+  catalogueItemType String?
+  catalogueItemId   String?
+  label             String
+  detail            String?
+  quantity          Decimal                  @default(1) @db.Decimal(8, 2)
+  amountSnapshot    Decimal                  @db.Decimal(12, 2)
+  discountSnapshot  Decimal                  @default(0) @db.Decimal(12, 2)
+  gstApplicable     Boolean                  @default(false)
+  gstRate           Decimal?                 @db.Decimal(5, 2)
+  gstInclusive      Boolean                  @default(true)
+  taxableValue      Decimal                  @db.Decimal(12, 2)
+  cgst              Decimal                  @default(0) @db.Decimal(12, 2)
+  sgst              Decimal                  @default(0) @db.Decimal(12, 2)
+  total             Decimal                  @db.Decimal(12, 2)
+  recurring         Boolean                  @default(false)
+  frequency         ContractServiceFrequency @default(ONE_TIME)
+  effectiveFrom     DateTime
+  effectiveTo       DateTime?
+  status            ContractServiceStatus    @default(ACTIVE)
+  sourceVersionId   String?
+  skipReason        String?
+  metadata          Json?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+
+  contract      StudentEnrollmentContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  daycarePlan   StudentDaycarePlan?
+  invoiceItems  FeeInvoiceItem[]
+  ledgerCharges StudentCharge[]
+
+  @@index([contractId, status, effectiveFrom, effectiveTo])
+  @@index([serviceType, status])
+  @@index([catalogueItemType, catalogueItemId])
+  @@index([sourceVersionId])
+  @@index([frequency, recurring, status])
+}
+
+model StudentDocument {
+  id              String                @id @default(cuid())
+  studentId       String
+  documentType    StudentDocumentType
+  title           String
+  fileName        String
+  mimeType        String
+  fileSize        Int
+  fileData        Bytes                 @db.ByteA
+  sha256          String
+  status          StudentDocumentStatus @default(UPLOADED)
+  notes           String?
+  rejectionReason String?
+  expiresAt       DateTime?
+  uploadedById    String?
+  verifiedById    String?
+  verifiedAt      DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  student    Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  uploadedBy AdminUser? @relation("StudentDocumentUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+  verifiedBy AdminUser? @relation("StudentDocumentVerifiedBy", fields: [verifiedById], references: [id], onDelete: SetNull)
+
+  @@index([studentId])
+  @@index([studentId, documentType])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ProgrammeFeeSetting {
+  id            String      @id @default(cuid())
+  programme     Programme
+  category      FeeCategory
+  title         String
+  amount        Decimal     @db.Decimal(12, 2)
+  gstApplicable Boolean     @default(false)
+  gstRate       Decimal?    @db.Decimal(5, 2)
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  active        Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([programme])
+  @@index([category])
+  @@index([effectiveFrom])
+  @@index([active, effectiveFrom, effectiveTo])
+  @@index([active])
+}
+
+model ProgrammeDefinition {
+  id               String          @id @default(cuid())
+  code             String          @unique
+  name             String
+  description      String?
+  ageMinimumMonths Int?
+  ageMaximumMonths Int?
+  colour           String          @default("#5B2A86")
+  capacity         Int?
+  status           CatalogueStatus @default(ACTIVE)
+  displayOrder     Int             @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  feeVersions         ProgrammeFeeVersion[]
+  students            Student[]
+  enrollmentContracts StudentEnrollmentContract[]
+
+  @@index([status, displayOrder])
+}
+
+model ProgrammeFeeVersion {
+  id                     String    @id @default(cuid())
+  programmeId            String
+  admissionFee           Decimal   @default(0) @db.Decimal(12, 2)
+  annualFee              Decimal   @default(0) @db.Decimal(12, 2)
+  kitFee                 Decimal   @default(0) @db.Decimal(12, 2)
+  combineAnnualAndKit    Boolean   @default(false)
+  monthlyFee             Decimal   @default(0) @db.Decimal(12, 2)
+  gstApplicable          Boolean   @default(false)
+  gstRate                Decimal?  @db.Decimal(5, 2)
+  admissionGstApplicable Boolean   @default(false)
+  admissionGstRate       Decimal?  @db.Decimal(5, 2)
+  admissionPriceType     PriceType @default(GST_INCLUSIVE)
+  annualGstApplicable    Boolean   @default(false)
+  annualGstRate          Decimal?  @db.Decimal(5, 2)
+  annualPriceType        PriceType @default(GST_INCLUSIVE)
+  kitGstApplicable       Boolean   @default(false)
+  kitGstRate             Decimal?  @db.Decimal(5, 2)
+  kitPriceType           PriceType @default(GST_INCLUSIVE)
+  monthlyGstApplicable   Boolean   @default(false)
+  monthlyGstRate         Decimal?  @db.Decimal(5, 2)
+  monthlyPriceType       PriceType @default(GST_INCLUSIVE)
+  effectiveFrom          DateTime
+  effectiveTo            DateTime?
+  active                 Boolean   @default(true)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  programme ProgrammeDefinition @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+
+  @@unique([programmeId, effectiveFrom])
+  @@index([programmeId, active, effectiveFrom, effectiveTo])
+}
+
+model DaycarePlanDefinition {
+  id              String                         @id @default(cuid())
+  code            String                         @unique
+  name            String
+  description     String?
+  billingType     ConfigurableDaycareBillingType
+  hoursIncluded   Decimal?                       @db.Decimal(6, 2)
+  timeWindowStart String?
+  timeWindowEnd   String?
+  mealRule        DaycareMealRule                @default(OPTIONAL)
+  recurring       Boolean                        @default(false)
+  maximumVisits   Int?
+  allowConcurrent Boolean                        @default(false)
+  active          Boolean                        @default(true)
+  status          CatalogueStatus                @default(ACTIVE)
+  displayOrder    Int                            @default(0)
+  createdAt       DateTime                       @default(now())
+  updatedAt       DateTime                       @updatedAt
+
+  priceVersions DaycarePlanPriceVersion[]
+  studentPlans  StudentDaycarePlan[]
+
+  @@index([active, displayOrder])
+  @@index([status, displayOrder])
+  @@index([billingType])
+}
+
+model DaycarePlanPriceVersion {
+  id            String    @id @default(cuid())
+  planId        String
+  price         Decimal   @db.Decimal(12, 2)
+  gstApplicable Boolean   @default(false)
+  gstRate       Decimal?  @db.Decimal(5, 2)
+  priceType     PriceType @default(GST_INCLUSIVE)
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  plan         DaycarePlanDefinition @relation(fields: [planId], references: [id], onDelete: Cascade)
+  studentPlans StudentDaycarePlan[]
+
+  @@unique([planId, effectiveFrom])
+  @@index([planId, active, effectiveFrom, effectiveTo])
+}
+
+model MealDefinition {
+  id           String          @id @default(cuid())
+  code         String          @unique
+  name         String
+  description  String?
+  status       CatalogueStatus @default(ACTIVE)
+  displayOrder Int             @default(0)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  priceVersions    MealPriceVersion[]
+  combinationItems MealCombinationItem[]
+  sessionMeals     DaycareSessionMeal[]
+
+  @@index([status, displayOrder])
+}
+
+model MealPriceVersion {
+  id            String    @id @default(cuid())
+  mealId        String
+  price         Decimal   @db.Decimal(12, 2)
+  gstApplicable Boolean   @default(false)
+  gstRate       Decimal?  @db.Decimal(5, 2)
+  priceType     PriceType @default(GST_INCLUSIVE)
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  meal MealDefinition @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@unique([mealId, effectiveFrom])
+  @@index([mealId, active, effectiveFrom, effectiveTo])
+}
+
+model MealCombination {
+  id           String          @id @default(cuid())
+  code         String          @unique
+  name         String
+  description  String?
+  status       CatalogueStatus @default(ACTIVE)
+  displayOrder Int             @default(0)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  items         MealCombinationItem[]
+  priceVersions MealCombinationPriceVersion[]
+  studentPlans  StudentDaycarePlan[]
+
+  @@index([status, displayOrder])
+}
+
+model MealCombinationItem {
+  id            String  @id @default(cuid())
+  combinationId String
+  mealId        String
+  quantity      Decimal @default(1) @db.Decimal(8, 2)
+
+  combination MealCombination @relation(fields: [combinationId], references: [id], onDelete: Cascade)
+  meal        MealDefinition  @relation(fields: [mealId], references: [id], onDelete: Restrict)
+
+  @@unique([combinationId, mealId])
+  @@index([mealId])
+}
+
+model MealCombinationPriceVersion {
+  id            String    @id @default(cuid())
+  combinationId String
+  price         Decimal   @db.Decimal(12, 2)
+  gstApplicable Boolean   @default(false)
+  gstRate       Decimal?  @db.Decimal(5, 2)
+  priceType     PriceType @default(GST_INCLUSIVE)
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  combination MealCombination @relation(fields: [combinationId], references: [id], onDelete: Cascade)
+
+  @@unique([combinationId, effectiveFrom])
+  @@index([combinationId, active, effectiveFrom, effectiveTo])
+}
+
+model ChargeDefinition {
+  id            String          @id @default(cuid())
+  code          String          @unique
+  name          String
+  description   String?
+  category      FeeCategory     @default(OTHER)
+  defaultAmount Decimal?        @db.Decimal(12, 2)
+  gstApplicable Boolean         @default(false)
+  gstRate       Decimal?        @db.Decimal(5, 2)
+  priceType     PriceType       @default(GST_INCLUSIVE)
+  active        Boolean         @default(true)
+  status        CatalogueStatus @default(ACTIVE)
+  displayOrder  Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  studentCharges StudentCharge[]
+
+  @@index([active, displayOrder])
+  @@index([status, displayOrder])
+  @@index([category])
+}
+
+model DaycareRateSetting {
+  id                        String    @id @default(cuid())
+  title                     String
+  hourlyRate                Decimal   @db.Decimal(12, 2)
+  foodCharge                Decimal   @default(0) @db.Decimal(12, 2)
+  lunchCharge               Decimal?  @db.Decimal(12, 2)
+  eveningSnackCharge        Decimal?  @db.Decimal(12, 2)
+  mealComboCharge           Decimal?  @db.Decimal(12, 2)
+  fullDayRate               Decimal   @db.Decimal(12, 2)
+  fullDayFoodIncluded       Boolean   @default(true)
+  monthlySixHourRate        Decimal?  @db.Decimal(12, 2)
+  monthlySixHalfHourRate    Decimal?  @db.Decimal(12, 2)
+  monthlyDaycareOnlyRate    Decimal?  @db.Decimal(12, 2)
+  monthlyPreschoolAddonRate Decimal?  @db.Decimal(12, 2)
+  gstApplicable             Boolean   @default(true)
+  gstRate                   Decimal?  @db.Decimal(5, 2)
+  priceType                 PriceType @default(GST_INCLUSIVE)
+  foodGstApplicable         Boolean   @default(true)
+  foodGstRate               Decimal?  @default(5) @db.Decimal(5, 2)
+  foodPriceType             PriceType @default(GST_INCLUSIVE)
+  effectiveFrom             DateTime
+  effectiveTo               DateTime?
+  active                    Boolean   @default(true)
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  sessions DaycareSession[]
+
+  @@index([effectiveFrom])
+  @@index([active])
+}
+
+model LateFeeSetting {
+  id              String    @id @default(cuid())
+  dueDay          Int       @default(5)
+  gracePeriodDays Int       @default(0)
+  calculationType String    @default("PER_DAY")
+  amount          Decimal   @default(0) @db.Decimal(12, 2)
+  maximumAmount   Decimal?  @db.Decimal(12, 2)
+  effectiveFrom   DateTime
+  effectiveTo     DateTime?
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([effectiveFrom])
+  @@index([active])
+}
+
+model Guardian {
+  id                   String               @id @default(cuid())
+  studentId            String
+  name                 String
+  relationship         GuardianRelationship
+  phone                String
+  alternatePhone       String?
+  email                String?
+  occupation           String?
+  addressSameAsStudent Boolean              @default(true)
+  address              String?
+  isPrimary            Boolean              @default(false)
+  authorisedPickup     Boolean              @default(true)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([phone])
+}
+
+model StudentFeeAccount {
+  id             String      @id @default(cuid())
+  studentId      String
+  category       FeeCategory
+  title          String
+  standardAmount Decimal     @db.Decimal(12, 2)
+  gstApplicable  Boolean     @default(false)
+  gstRate        Decimal?    @db.Decimal(5, 2)
+  priceType      PriceType   @default(GST_INCLUSIVE)
+  active         Boolean     @default(true)
+  startDate      DateTime?
+  endDate        DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([category])
+}
+
+model FeeInvoice {
+  id                   String           @id @default(cuid())
+  invoiceNumber        String           @unique
+  billingKey           String           @unique
+  studentId            String
+  enrollmentContractId String?
+  category             FeeCategory
+  feePeriodKey         String?
+  feePeriodLabel       String
+  issueDate            DateTime         @default(now())
+  dueDate              DateTime
+  amountBeforeTax      Decimal          @db.Decimal(12, 2)
+  discountAmount       Decimal          @default(0) @db.Decimal(12, 2)
+  lateFeeAmount        Decimal          @default(0) @db.Decimal(12, 2)
+  gstApplicable        Boolean          @default(false)
+  gstRate              Decimal?         @db.Decimal(5, 2)
+  cgstAmount           Decimal          @default(0) @db.Decimal(12, 2)
+  sgstAmount           Decimal          @default(0) @db.Decimal(12, 2)
+  totalAmount          Decimal          @db.Decimal(12, 2)
+  paidAmount           Decimal          @default(0) @db.Decimal(12, 2)
+  pendingAmount        Decimal          @db.Decimal(12, 2)
+  status               FeeInvoiceStatus @default(DUE)
+  createdById          String?
+  notes                String?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  student              Student                     @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  enrollmentContract   StudentEnrollmentContract?  @relation(fields: [enrollmentContractId], references: [id], onDelete: SetNull)
+  createdBy            AdminUser?                  @relation("InvoiceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  payments             FeePayment[]
+  daycareSessions      DaycareSession[]
+  items                FeeInvoiceItem[]
+  whatsappMessages     WhatsAppAutomationMessage[]
+  ledgerCharges        StudentCharge[]
+  financialCorrections FinancialCorrection[]
+
+  @@index([studentId])
+  @@index([enrollmentContractId])
+  @@index([category])
+  @@index([feePeriodKey])
+  @@index([dueDate])
+  @@index([status])
+}
+
+model FeeInvoiceItem {
+  id                String      @id @default(cuid())
+  invoiceId         String
+  contractServiceId String?
+  category          FeeCategory
+  title             String
+  detail            String?
+  quantity          Decimal     @default(1) @db.Decimal(8, 2)
+  unitAmount        Decimal     @db.Decimal(12, 2)
+  amount            Decimal     @db.Decimal(12, 2)
+  discountAmount    Decimal     @default(0) @db.Decimal(12, 2)
+  gstApplicable     Boolean     @default(false)
+  gstRate           Decimal?    @db.Decimal(5, 2)
+  priceType         PriceType   @default(GST_INCLUSIVE)
+  taxableAmount     Decimal     @db.Decimal(12, 2)
+  cgstAmount        Decimal     @default(0) @db.Decimal(12, 2)
+  sgstAmount        Decimal     @default(0) @db.Decimal(12, 2)
+  totalAmount       Decimal     @db.Decimal(12, 2)
+  sortOrder         Int         @default(0)
+  chargeKey         String?     @unique
+  sourceType        String?
+  sourceId          String?
+  sourceVersionId   String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  invoice         FeeInvoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  contractService ContractService? @relation(fields: [contractServiceId], references: [id], onDelete: SetNull)
+
+  @@index([invoiceId])
+  @@index([contractServiceId])
+  @@index([category])
+  @@index([sourceType, sourceId])
+}
+
+model StudentDaycarePlan {
+  id                     String             @id @default(cuid())
+  studentId              String
+  enrollmentContractId   String?
+  contractServiceId      String?            @unique
+  planDefinitionId       String?
+  priceVersionId         String?
+  mealCombinationId      String?
+  title                  String
+  planType               DaycarePlanType    @default(OCCASIONAL)
+  billingMode            DaycareBillingMode
+  scheduledWeekdays      Int[]              @default([])
+  foodRequired           Boolean            @default(false)
+  foodOption             DaycareFoodOption  @default(NONE)
+  dailyHours             Decimal?           @db.Decimal(6, 2)
+  includedDays           Int?
+  monthlyFeeOverride     Decimal?           @db.Decimal(12, 2)
+  monthlyFoodFeeOverride Decimal?           @db.Decimal(12, 2)
+  hourlyRateOverride     Decimal?           @db.Decimal(12, 2)
+  foodChargeOverride     Decimal?           @db.Decimal(12, 2)
+  fullDayRateOverride    Decimal?           @db.Decimal(12, 2)
+  fullDayFoodIncluded    Boolean?
+  effectiveFrom          DateTime
+  effectiveTo            DateTime?
+  active                 Boolean            @default(true)
+  lifecycleStatus        CatalogueStatus    @default(ACTIVE)
+  recurring              Boolean            @default(true)
+  maximumVisitsOverride  Int?
+  billingStoppedAt       DateTime?
+  separateInvoice        Boolean            @default(false)
+  notes                  String?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  student            Student                    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  enrollmentContract StudentEnrollmentContract? @relation(fields: [enrollmentContractId], references: [id], onDelete: SetNull)
+  contractService    ContractService?           @relation(fields: [contractServiceId], references: [id], onDelete: SetNull)
+  sessions           DaycareSession[]
+  planDefinition     DaycarePlanDefinition?     @relation(fields: [planDefinitionId], references: [id], onDelete: SetNull)
+  priceVersion       DaycarePlanPriceVersion?   @relation(fields: [priceVersionId], references: [id], onDelete: SetNull)
+  mealCombination    MealCombination?           @relation(fields: [mealCombinationId], references: [id], onDelete: SetNull)
+
+  @@index([studentId])
+  @@index([enrollmentContractId])
+  @@index([planDefinitionId])
+  @@index([priceVersionId])
+  @@index([mealCombinationId])
+  @@index([planType])
+  @@index([billingMode])
+  @@index([active])
+  @@index([lifecycleStatus, active])
+  @@index([effectiveFrom])
+  @@index([studentId, active, effectiveFrom, effectiveTo])
+}
+
+model DaycareSession {
+  id                String               @id @default(cuid())
+  sessionNumber     String               @unique
+  studentId         String
+  planId            String?
+  rateSettingId     String?
+  feeInvoiceId      String?
+  sessionDate       DateTime
+  billingMode       DaycareBillingMode
+  checkInAt         DateTime?
+  checkOutAt        DateTime?
+  billableHours     Decimal?             @db.Decimal(6, 2)
+  foodProvided      Boolean              @default(false)
+  foodOption        DaycareFoodOption    @default(NONE)
+  hourlyRate        Decimal?             @db.Decimal(12, 2)
+  foodCharge        Decimal              @default(0) @db.Decimal(12, 2)
+  fullDayRate       Decimal?             @db.Decimal(12, 2)
+  baseAmount        Decimal              @db.Decimal(12, 2)
+  totalAmount       Decimal              @db.Decimal(12, 2)
+  gstApplicable     Boolean              @default(true)
+  gstRate           Decimal?             @db.Decimal(5, 2)
+  priceType         PriceType            @default(GST_INCLUSIVE)
+  foodGstApplicable Boolean              @default(false)
+  foodGstRate       Decimal?             @db.Decimal(5, 2)
+  foodPriceType     PriceType            @default(GST_INCLUSIVE)
+  status            DaycareSessionStatus @default(BOOKED)
+  reason            String?
+  pickupPerson      String?
+  approved          Boolean              @default(false)
+  approvedAt        DateTime?
+  approvedById      String?
+  invoiceStatus     String               @default("PENDING")
+  emergencyCare     Boolean              @default(false)
+  notes             String?
+  createdById       String?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  student     Student              @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  plan        StudentDaycarePlan?  @relation(fields: [planId], references: [id], onDelete: SetNull)
+  rateSetting DaycareRateSetting?  @relation(fields: [rateSettingId], references: [id], onDelete: SetNull)
+  feeInvoice  FeeInvoice?          @relation(fields: [feeInvoiceId], references: [id], onDelete: SetNull)
+  createdBy   AdminUser?           @relation("DaycareSessionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  approvedBy  AdminUser?           @relation("DaycareSessionApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  meals       DaycareSessionMeal[]
+
+  @@unique([studentId, sessionDate])
+  @@index([studentId])
+  @@index([planId, sessionDate, status])
+  @@index([planId])
+  @@index([rateSettingId])
+  @@index([feeInvoiceId])
+  @@index([sessionDate])
+  @@index([status])
+  @@index([createdById])
+  @@index([approved, invoiceStatus])
+  @@index([approvedById])
+}
+
+model DaycareSessionMeal {
+  id            String    @id @default(cuid())
+  sessionId     String
+  mealId        String
+  quantity      Decimal   @default(1) @db.Decimal(8, 2)
+  unitPrice     Decimal   @db.Decimal(12, 2)
+  totalAmount   Decimal   @db.Decimal(12, 2)
+  gstApplicable Boolean   @default(false)
+  gstRate       Decimal?  @db.Decimal(5, 2)
+  priceType     PriceType @default(GST_INCLUSIVE)
+  createdAt     DateTime  @default(now())
+
+  session DaycareSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  meal    MealDefinition @relation(fields: [mealId], references: [id], onDelete: Restrict)
+
+  @@unique([sessionId, mealId])
+  @@index([mealId])
+}
+
+model StudentCharge {
+  id                   String              @id @default(cuid())
+  chargeNumber         String              @unique
+  chargeKey            String              @unique
+  studentId            String
+  enrollmentContractId String?
+  contractServiceId    String?
+  definitionId         String?
+  feeInvoiceId         String?
+  category             FeeCategory
+  title                String
+  detail               String?
+  chargeDate           DateTime
+  academicYear         String?
+  amount               Decimal             @db.Decimal(12, 2)
+  gstApplicable        Boolean             @default(false)
+  gstRate              Decimal?            @db.Decimal(5, 2)
+  priceType            PriceType           @default(GST_INCLUSIVE)
+  status               StudentChargeStatus @default(PENDING)
+  approved             Boolean             @default(false)
+  approvedAt           DateTime?
+  approvedById         String?
+  createdById          String?
+  notes                String?
+  cancellationReason   String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  student            Student                    @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  enrollmentContract StudentEnrollmentContract? @relation(fields: [enrollmentContractId], references: [id], onDelete: SetNull)
+  contractService    ContractService?           @relation(fields: [contractServiceId], references: [id], onDelete: SetNull)
+  definition         ChargeDefinition?          @relation(fields: [definitionId], references: [id], onDelete: SetNull)
+  feeInvoice         FeeInvoice?                @relation(fields: [feeInvoiceId], references: [id], onDelete: Restrict)
+  approvedBy         AdminUser?                 @relation("StudentChargeApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  createdBy          AdminUser?                 @relation("StudentChargeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([studentId, status, chargeDate])
+  @@index([enrollmentContractId])
+  @@index([contractServiceId])
+  @@index([definitionId])
+  @@index([feeInvoiceId])
+  @@index([approved, status])
+  @@index([academicYear])
+}
+
+model FeePayment {
+  id                   String                @id @default(cuid())
+  idempotencyKey       String?               @unique
+  paymentNumber        String                @unique
+  invoiceId            String?
+  studentId            String
+  category             FeeCategory
+  feePeriodLabel       String?
+  amountBeforeTax      Decimal               @db.Decimal(12, 2)
+  discountAmount       Decimal               @default(0) @db.Decimal(12, 2)
+  lateFeeAmount        Decimal               @default(0) @db.Decimal(12, 2)
+  gstApplicable        Boolean               @default(false)
+  gstRate              Decimal?              @db.Decimal(5, 2)
+  cgstAmount           Decimal               @default(0) @db.Decimal(12, 2)
+  sgstAmount           Decimal               @default(0) @db.Decimal(12, 2)
+  totalAmount          Decimal               @db.Decimal(12, 2)
+  amountReceived       Decimal               @db.Decimal(12, 2)
+  pendingAmount        Decimal               @default(0) @db.Decimal(12, 2)
+  paymentMethod        PaymentMethod
+  status               PaymentStatus         @default(PAID)
+  transactionReference String?
+  paymentDate          DateTime              @default(now())
+  notes                String?
+  createdById          String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  invoice              FeeInvoice?           @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  student              Student               @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  createdBy            AdminUser?            @relation("PaymentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  receipt              Receipt?
+  financialCorrections FinancialCorrection[]
+
+  @@index([invoiceId])
+  @@index([studentId])
+  @@index([paymentDate])
+  @@index([status])
+  @@index([category])
+}
+
+model Receipt {
+  id                 String        @id @default(cuid())
+  receiptNumber      String        @unique
+  paymentId          String        @unique
+  studentId          String
+  status             ReceiptStatus @default(ISSUED)
+  issuedAt           DateTime      @default(now())
+  cancelledAt        DateTime?
+  cancellationReason String?
+  refundedAt         DateTime?
+  refundReason       String?
+  pdfUrl             String?
+  emailedAt          DateTime?
+  whatsappSentAt     DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  payment              FeePayment                  @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  student              Student                     @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  whatsappMessages     WhatsAppAutomationMessage[]
+  financialCorrections FinancialCorrection[]
+
+  @@index([studentId])
+  @@index([issuedAt])
+  @@index([status])
+}
+
+model FinancialCorrection {
+  id                   String                    @id @default(cuid())
+  correctionNumber     String                    @unique
+  type                 FinancialCorrectionType
+  status               FinancialCorrectionStatus @default(DRAFT)
+  studentId            String
+  enrollmentContractId String?
+  invoiceId            String?
+  paymentId            String?
+  receiptId            String?
+  amount               Decimal                   @db.Decimal(12, 2)
+  reason               String
+  notes                String?
+  createdById          String?
+  approvedById         String?
+  approvedAt           DateTime?
+  appliedAt            DateTime?
+  cancelledAt          DateTime?
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+
+  student            Student                    @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  enrollmentContract StudentEnrollmentContract? @relation(fields: [enrollmentContractId], references: [id], onDelete: SetNull)
+  invoice            FeeInvoice?                @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  payment            FeePayment?                @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  receipt            Receipt?                   @relation(fields: [receiptId], references: [id], onDelete: Restrict)
+
+  @@index([studentId, createdAt])
+  @@index([enrollmentContractId])
+  @@index([invoiceId])
+  @@index([paymentId])
+  @@index([receiptId])
+  @@index([type, status, createdAt])
+}
+
+model Expense {
+  id                   String          @id @default(cuid())
+  expenseNumber        String          @unique
+  category             ExpenseCategory
+  title                String
+  vendorName           String?
+  expenseDate          DateTime        @default(now())
+  amountBeforeTax      Decimal         @db.Decimal(12, 2)
+  gstApplicable        Boolean         @default(false)
+  gstRate              Decimal?        @db.Decimal(5, 2)
+  cgstAmount           Decimal         @default(0) @db.Decimal(12, 2)
+  sgstAmount           Decimal         @default(0) @db.Decimal(12, 2)
+  totalAmount          Decimal         @db.Decimal(12, 2)
+  paymentMethod        PaymentMethod
+  transactionReference String?
+  invoiceNumber        String?
+  invoiceFileUrl       String?
+  notes                String?
+  createdById          String?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  createdBy AdminUser? @relation("ExpenseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([category])
+  @@index([expenseDate])
+}
+
+model Staff {
+  id                 String              @id @default(cuid())
+  staffNumber        String              @unique
+  name               String
+  phone              String
+  alternatePhone     String?
+  email              String?
+  designation        String
+  joiningDate        DateTime
+  leavingDate        DateTime?
+  status             StaffStatus         @default(ACTIVE)
+  monthlySalary      Decimal?            @db.Decimal(12, 2)
+  paidLeaveCycle     StaffPaidLeaveCycle @default(NONE)
+  paidLeaveAllowance Decimal             @default(0) @db.Decimal(6, 2)
+  address            String?
+  emergencyContact   String?
+  notes              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  attendanceRecords StaffAttendance[]
+  substituteDuties  StaffExtraDuty[]    @relation("ExtraDutyCoveringStaff")
+  dutiesCovered     StaffExtraDuty[]    @relation("ExtraDutyAbsentStaff")
+  leaveRequests     StaffLeaveRequest[]
+  payrollRecords    StaffPayroll[]
+
+  @@index([status])
+  @@index([designation])
+}
+
+model StudentAttendance {
+  id             String           @id @default(cuid())
+  studentId      String
+  attendanceDate DateTime
+  status         AttendanceStatus @default(PRESENT)
+  checkInAt      DateTime?
+  checkOutAt     DateTime?
+  notes          String?
+  markedById     String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  student  Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  markedBy AdminUser? @relation("StudentAttendanceMarkedBy", fields: [markedById], references: [id], onDelete: SetNull)
+
+  @@unique([studentId, attendanceDate])
+  @@index([attendanceDate])
+  @@index([status])
+  @@index([studentId])
+  @@index([markedById])
+}
+
+model StaffAttendance {
+  id             String           @id @default(cuid())
+  staffId        String
+  attendanceDate DateTime
+  status         AttendanceStatus @default(PRESENT)
+  checkInAt      DateTime?
+  checkOutAt     DateTime?
+  notes          String?
+  markedById     String?
+  leaveRequestId String?
+  isSandwichDay  Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  staff        Staff              @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  markedBy     AdminUser?         @relation("StaffAttendanceMarkedBy", fields: [markedById], references: [id], onDelete: SetNull)
+  leaveRequest StaffLeaveRequest? @relation(fields: [leaveRequestId], references: [id], onDelete: SetNull)
+
+  @@unique([staffId, attendanceDate])
+  @@index([attendanceDate])
+  @@index([status])
+  @@index([staffId])
+  @@index([markedById])
+  @@index([leaveRequestId])
+}
+
+model StaffLeaveRequest {
+  id            String           @id @default(cuid())
+  leaveNumber   String           @unique
+  staffId       String
+  startDate     DateTime
+  endDate       DateTime
+  leaveType     StaffLeaveType
+  status        StaffLeaveStatus @default(PENDING)
+  requestedDays Decimal          @db.Decimal(6, 2)
+  sandwichDays  Decimal          @default(0) @db.Decimal(6, 2)
+  chargedDays   Decimal          @db.Decimal(6, 2)
+  paidDays      Decimal          @default(0) @db.Decimal(6, 2)
+  unpaidDays    Decimal          @default(0) @db.Decimal(6, 2)
+  reason        String?
+  notes         String?
+  createdById   String?
+  approvedById  String?
+  approvedAt    DateTime?
+  rejectedAt    DateTime?
+  cancelledAt   DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  staff             Staff             @relation(fields: [staffId], references: [id], onDelete: Restrict)
+  createdBy         AdminUser?        @relation("StaffLeaveCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  approvedBy        AdminUser?        @relation("StaffLeaveApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  attendanceRecords StaffAttendance[]
+
+  @@index([staffId])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([status])
+  @@index([leaveType])
+  @@index([createdById])
+  @@index([approvedById])
+}
+
+model StaffExtraDuty {
+  id              String               @id @default(cuid())
+  dutyNumber      String               @unique
+  coveringStaffId String
+  absentStaffId   String?
+  dutyDate        DateTime
+  startAt         DateTime
+  endAt           DateTime
+  hours           Decimal              @db.Decimal(6, 2)
+  hourlyRate      Decimal              @db.Decimal(12, 2)
+  amount          Decimal              @db.Decimal(12, 2)
+  reason          String               @default("LEAVE_COVER")
+  status          StaffExtraDutyStatus @default(PENDING)
+  notes           String?
+  createdById     String?
+  approvedById    String?
+  payrollId       String?
+  approvedAt      DateTime?
+  paidAt          DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  coveringStaff Staff         @relation("ExtraDutyCoveringStaff", fields: [coveringStaffId], references: [id], onDelete: Restrict)
+  absentStaff   Staff?        @relation("ExtraDutyAbsentStaff", fields: [absentStaffId], references: [id], onDelete: SetNull)
+  createdBy     AdminUser?    @relation("StaffExtraDutyCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  approvedBy    AdminUser?    @relation("StaffExtraDutyApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  payroll       StaffPayroll? @relation(fields: [payrollId], references: [id], onDelete: SetNull)
+
+  @@unique([coveringStaffId, dutyDate, startAt, endAt])
+  @@index([coveringStaffId])
+  @@index([absentStaffId])
+  @@index([dutyDate])
+  @@index([status])
+  @@index([createdById])
+  @@index([approvedById])
+  @@index([payrollId])
+}
+
+model StaffPayroll {
+  id            String             @id @default(cuid())
+  payrollNumber String             @unique
+  staffId       String
+  payrollMonth  DateTime
+  periodStart   DateTime
+  periodEnd     DateTime
+  status        StaffPayrollStatus @default(DRAFT)
+
+  staffNumberSnapshot String
+  staffNameSnapshot   String
+  designationSnapshot String
+  baseSalary          Decimal @db.Decimal(12, 2)
+  workingDaysInMonth  Int
+  standardHoursPerDay Decimal @db.Decimal(6, 2)
+  dailyRate           Decimal @db.Decimal(12, 2)
+  hourlyRate          Decimal @db.Decimal(12, 2)
+
+  presentDays     Decimal @default(0) @db.Decimal(6, 2)
+  lateDays        Decimal @default(0) @db.Decimal(6, 2)
+  halfDays        Decimal @default(0) @db.Decimal(6, 2)
+  holidayDays     Decimal @default(0) @db.Decimal(6, 2)
+  paidLeaveDays   Decimal @default(0) @db.Decimal(6, 2)
+  unpaidLeaveDays Decimal @default(0) @db.Decimal(6, 2)
+  absentDays      Decimal @default(0) @db.Decimal(6, 2)
+  unmarkedDays    Decimal @default(0) @db.Decimal(6, 2)
+  deductionDays   Decimal @default(0) @db.Decimal(6, 2)
+
+  leaveDeduction   Decimal @default(0) @db.Decimal(12, 2)
+  absenceDeduction Decimal @default(0) @db.Decimal(12, 2)
+  manualDeduction  Decimal @default(0) @db.Decimal(12, 2)
+  extraDutyHours   Decimal @default(0) @db.Decimal(8, 2)
+  extraDutyAmount  Decimal @default(0) @db.Decimal(12, 2)
+  manualAddition   Decimal @default(0) @db.Decimal(12, 2)
+  grossEarnings    Decimal @db.Decimal(12, 2)
+  totalDeductions  Decimal @db.Decimal(12, 2)
+  netPayable       Decimal @db.Decimal(12, 2)
+
+  manualAdjustmentNotes String?
+  notes                 String?
+  paymentMethod         PaymentMethod?
+  paymentReference      String?
+  generatedById         String?
+  approvedById          String?
+  paidById              String?
+  approvedAt            DateTime?
+  paidAt                DateTime?
+  cancelledAt           DateTime?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  staff       Staff            @relation(fields: [staffId], references: [id], onDelete: Restrict)
+  generatedBy AdminUser?       @relation("StaffPayrollGeneratedBy", fields: [generatedById], references: [id], onDelete: SetNull)
+  approvedBy  AdminUser?       @relation("StaffPayrollApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  paidBy      AdminUser?       @relation("StaffPayrollPaidBy", fields: [paidById], references: [id], onDelete: SetNull)
+  extraDuties StaffExtraDuty[]
+
+  @@unique([staffId, payrollMonth])
+  @@index([payrollMonth])
+  @@index([status])
+  @@index([staffId])
+  @@index([generatedById])
+  @@index([approvedById])
+  @@index([paidById])
+}
+
+model ActivityLog {
+  id           String         @id @default(cuid())
+  adminUserId  String?
+  action       ActivityAction
+  entityType   String
+  entityId     String?
+  description  String
+  previousData Json?
+  newData      Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime       @default(now())
+
+  adminUser AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+
+  @@index([adminUserId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model CentreSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Json
+  description String?
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+}
+
+model AcademicCalendarDocument {
+  id           String   @id @default(cuid())
+  title        String
+  academicYear String?
+  sourceRegion String?
+  fileName     String
+  mimeType     String
+  fileSize     Int
+  fileData     Bytes    @db.ByteA
+  sha256       String
+  active       Boolean  @default(true)
+  uploadedById String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  uploadedBy AdminUser?              @relation("CalendarDocumentUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+  events     AcademicCalendarEvent[]
+
+  @@index([academicYear])
+  @@index([active])
+  @@index([uploadedById])
+  @@index([createdAt])
+}
+
+model AcademicCalendarEvent {
+  id          String            @id @default(cuid())
+  documentId  String?
+  title       String
+  eventType   CalendarEventType @default(ACADEMIC)
+  startDate   DateTime
+  endDate     DateTime?
+  allDay      Boolean           @default(true)
+  startTime   String?
+  endTime     String?
+  programmes  Programme[]       @default([])
+  description String?
+  active      Boolean           @default(true)
+  createdById String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  document  AcademicCalendarDocument? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  createdBy AdminUser?                @relation("CalendarEventCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([documentId])
+  @@index([eventType])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([active])
+  @@index([createdById])
+}
+
+model NumberSequence {
+  id           String    @id @default(cuid())
+  key          String    @unique
+  prefix       String?
+  currentValue Int       @default(0)
+  minimumWidth Int       @default(2)
+  resetPolicy  String    @default("NEVER")
+  lastResetAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([key])
+}
+
+model MarketingConversionJob {
+  id               String                      @id @default(cuid())
+  provider         MarketingConversionProvider
+  eventType        MarketingConversionEvent
+  status           MarketingConversionStatus   @default(PENDING)
+  deduplicationKey String                      @unique
+  enquiryId        String
+  payload          Json
+  attempts         Int                         @default(0)
+  maxAttempts      Int                         @default(8)
+  nextAttemptAt    DateTime                    @default(now())
+  lockedAt         DateTime?
+  lockedBy         String?
+  lastAttemptAt    DateTime?
+  completedAt      DateTime?
+  lastError        String?
+  createdAt        DateTime                    @default(now())
+  updatedAt        DateTime                    @updatedAt
+
+  enquiry Enquiry @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+
+  @@index([status, nextAttemptAt])
+  @@index([enquiryId])
+  @@index([provider, eventType])
+  @@index([lockedAt])
+}
+
+model GrowthRecommendation {
+  id               String                     @id @default(cuid())
+  fingerprint      String                     @unique
+  category         String
+  title            String
+  reason           String
+  expectedImpact   String
+  risk             String
+  preview          Json
+  affectedModules  Json
+  evidence         Json?
+  status           GrowthRecommendationStatus @default(RECOMMENDED)
+  approvalRequired Boolean                    @default(true)
+  rollbackPlan     String
+  createdById      String?
+  reviewedById     String?
+  reviewedAt       DateTime?
+  appliedAt        DateTime?
+  rolledBackAt     DateTime?
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+
+  createdBy  AdminUser? @relation("GrowthRecommendationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  reviewedBy AdminUser? @relation("GrowthRecommendationReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([category, createdAt])
+  @@index([createdById])
+  @@index([reviewedById])
+}
+
+model AiModelRoute {
+  id               String       @id @default(cuid())
+  scope            AiModelScope @unique
+  provider         String
+  protocol         String       @default("OPENAI_RESPONSES")
+  model            String
+  baseUrl          String       @default("https://api.openai.com/v1")
+  apiKeyEnvVar     String
+  enabled          Boolean      @default(true)
+  maxOutputTokens  Int          @default(1200)
+  monthlyCallLimit Int          @default(40)
+  updatedById      String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([enabled])
+  @@index([provider, model])
+}
+
+model GrowthDataSnapshot {
+  id               String           @id @default(cuid())
+  source           GrowthDataSource
+  dataset          String
+  deduplicationKey String           @unique
+  periodStart      DateTime?
+  periodEnd        DateTime?
+  dimensions       Json?
+  metrics          Json
+  collectedAt      DateTime         @default(now())
+  createdAt        DateTime         @default(now())
+
+  @@index([source, dataset, collectedAt])
+  @@index([periodStart, periodEnd])
+}
+
+model GrowthAnalysisRun {
+  id               String       @id @default(cuid())
+  scope            AiModelScope
+  status           String
+  question         String?
+  evidence         Json
+  answer           String?
+  provider         String?
+  model            String?
+  insufficientData Boolean      @default(false)
+  createdById      String?
+  createdAt        DateTime     @default(now())
+  completedAt      DateTime?
+
+  @@index([scope, createdAt])
+  @@index([status, createdAt])
+}
+
+model LandingPage {
+  id              String            @id @default(cuid())
+  slug            String            @unique
+  name            String
+  pageType        String
+  status          LandingPageStatus @default(DRAFT)
+  seoTitle        String
+  metaDescription String
+  content         Json
+  displayOrder    Int               @default(0)
+  createdById     String?
+  updatedById     String?
+  publishedAt     DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  variants     LandingPageVariant[]
+  versions     LandingPageVersion[]
+  experiments  GrowthExperiment[]
+  campaignUrls CampaignUrl[]
+
+  @@index([status, displayOrder])
+  @@index([pageType, status])
+}
+
+model LandingPageVariant {
+  id            String   @id @default(cuid())
+  landingPageId String
+  variantKey    String
+  name          String
+  content       Json
+  allocation    Int      @default(100)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  landingPage LandingPage               @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+  experiments GrowthExperimentVariant[]
+
+  @@unique([landingPageId, variantKey])
+  @@index([landingPageId, active])
+}
+
+model LandingPageVersion {
+  id             String              @id @default(cuid())
+  landingPageId  String
+  versionNumber  Int
+  status         GrowthVersionStatus @default(DRAFT)
+  snapshot       Json
+  reason         String
+  expectedImpact String
+  approval       String?
+  filesChanged   Json
+  createdById    String?
+  approvedById   String?
+  appliedAt      DateTime?
+  rolledBackAt   DateTime?
+  createdAt      DateTime            @default(now())
+
+  landingPage LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+
+  @@unique([landingPageId, versionNumber])
+  @@index([landingPageId, status, createdAt])
+}
+
+model GrowthExperiment {
+  id              String                 @id @default(cuid())
+  landingPageId   String
+  name            String
+  status          GrowthExperimentStatus @default(DRAFT)
+  primaryMetric   String                 @default("ADMISSION")
+  startedAt       DateTime?
+  endedAt         DateTime?
+  winnerVariantId String?
+  createdById     String?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  landingPage LandingPage               @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+  variants    GrowthExperimentVariant[]
+
+  @@index([landingPageId, status])
+  @@index([status, startedAt])
+}
+
+model GrowthExperimentVariant {
+  id           String @id @default(cuid())
+  experimentId String
+  variantId    String
+  allocation   Int    @default(50)
+
+  experiment GrowthExperiment   @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  variant    LandingPageVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@unique([experimentId, variantId])
+  @@index([variantId])
+}
+
+model InternalTrafficIdentity {
+  id             String               @id @default(cuid())
+  type           InternalIdentityType
+  label          String
+  identifierHash String               @unique
+  metadata       Json?
+  active         Boolean              @default(true)
+  addedById      String?
+  lastSeenAt     DateTime?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([type, active])
+  @@index([lastSeenAt])
+}
+
+model CampaignUrl {
+  id              String   @id @default(cuid())
+  trackingKey     String   @unique
+  platform        String
+  purpose         String
+  destinationType String
+  destinationUrl  String
+  campaignName    String
+  adSetName       String?
+  creativeName    String?
+  keyword         String?
+  utmSource       String
+  utmMedium       String
+  utmCampaign     String
+  utmContent      String?
+  utmTerm         String?
+  finalUrl        String   @unique
+  landingPageId   String?
+  createdById     String?
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  landingPage LandingPage? @relation(fields: [landingPageId], references: [id], onDelete: SetNull)
+  createdBy   AdminUser?   @relation("CampaignUrlCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([purpose, createdAt])
+  @@index([platform, createdAt])
+  @@index([landingPageId])
+  @@index([createdById])
+}
+
+model AdminNotification {
+  id              String    @id @default(cuid())
+  recipientUserId String
+  category        String
+  type            String
+  priority        String    @default("MEDIUM")
+  title           String
+  body            String
+  href            String
+  entityType      String?
+  entityId        String?
+  idempotencyKey  String    @unique
+  important       Boolean   @default(false)
+  readAt          DateTime?
+  snoozedUntil    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  recipient  AdminUser                  @relation("NotificationRecipient", fields: [recipientUserId], references: [id], onDelete: Cascade)
+  deliveries PushNotificationDelivery[]
+
+  @@index([recipientUserId, readAt, createdAt])
+  @@index([recipientUserId, category, createdAt])
+  @@index([priority, createdAt])
+}
+
+model PushDevice {
+  id                String    @id @default(cuid())
+  adminUserId       String
+  role              AdminRole
+  token             String    @unique
+  deviceName        String
+  browser           String
+  permissionStatus  String    @default("GRANTED")
+  enabledCategories Json
+  active            Boolean   @default(true)
+  lastActiveAt      DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  adminUser  AdminUser                  @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  deliveries PushNotificationDelivery[]
+
+  @@index([adminUserId, active])
+  @@index([lastActiveAt])
+}
+
+model NotificationPreference {
+  id                     String   @id @default(cuid())
+  adminUserId            String   @unique
+  enabledCategories      Json
+  quietHoursEnabled      Boolean  @default(false)
+  quietStart             String   @default("19:00")
+  quietEnd               String   @default("08:30")
+  detailedContentEnabled Boolean  @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  adminUser AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+}
+
+model PushNotificationDelivery {
+  id             String    @id @default(cuid())
+  notificationId String
+  deviceId       String
+  status         String    @default("PENDING")
+  attempts       Int       @default(0)
+  maxAttempts    Int       @default(5)
+  nextAttemptAt  DateTime  @default(now())
+  lastAttemptAt  DateTime?
+  deliveredAt    DateTime?
+  lastError      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  notification AdminNotification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  device       PushDevice        @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, deviceId])
+  @@index([status, nextAttemptAt])
+  @@index([deviceId, status])
+}
+
+model WhatsAppAutomationMessage {
+  id                String                   @id @default(cuid())
+  type              WhatsAppAutomationType
+  status            WhatsAppAutomationStatus @default(PENDING)
+  deduplicationKey  String                   @unique
+  recipientPhone    String
+  templateName      String?
+  templateLanguage  String?                  @default("en")
+  messageText       String?
+  documentUrl       String?
+  documentFilename  String?
+  providerMessageId String?                  @unique
+  enquiryId         String?
+  studentId         String?
+  invoiceId         String?
+  receiptId         String?
+  payload           Json?
+  attempts          Int                      @default(0)
+  maxAttempts       Int                      @default(8)
+  nextAttemptAt     DateTime                 @default(now())
+  lastAttemptAt     DateTime?
+  acceptedAt        DateTime?
+  sentAt            DateTime?
+  deliveredAt       DateTime?
+  readAt            DateTime?
+  failedAt          DateTime?
+  lastError         String?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+
+  enquiry Enquiry?    @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  student Student?    @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  invoice FeeInvoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  receipt Receipt?    @relation(fields: [receiptId], references: [id], onDelete: SetNull)
+
+  @@index([status, nextAttemptAt])
+  @@index([providerMessageId])
+  @@index([enquiryId, createdAt])
+  @@index([studentId, createdAt])
+  @@index([invoiceId])
+  @@index([receiptId])
+}
+
+model RateLimitBucket {
+  id          String   @id @default(cuid())
+  bucketKey   String   @unique
+  scope       String
+  windowStart DateTime
+  windowEnd   DateTime
+  count       Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([scope, windowEnd])
+  @@index([windowEnd])
+}
+
+model BusinessIntelligenceSnapshot {
+  id          String   @id @default(cuid())
+  snapshotKey String   @unique
+  periodStart DateTime
+  periodEnd   DateTime
+  metrics     Json
+  forecasts   Json
+  insights    Json
+  generatedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([generatedAt])
+  @@index([periodStart, periodEnd])
+}
+
+model SystemHealthCheck {
+  id        String             @id @default(cuid())
+  service   String
+  status    SystemHealthStatus
+  summary   String
+  details   Json?
+  checkedAt DateTime           @default(now())
+  createdAt DateTime           @default(now())
+
+  @@index([service, checkedAt])
+  @@index([status, checkedAt])
+}
+
+model ScheduledJobHeartbeat {
+  id              String             @id @default(cuid())
+  jobName         String             @unique
+  status          SystemHealthStatus @default(UNKNOWN)
+  lastStartedAt   DateTime?
+  lastSucceededAt DateTime?
+  lastFailedAt    DateTime?
+  lastError       String?
+  durationMs      Int?
+  metadata        Json?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([status, updatedAt])
+  @@index([lastSucceededAt])
+}

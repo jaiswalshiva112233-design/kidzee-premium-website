@@ -1,58 +1,67 @@
+import Image from "next/image";
 import {
   AirVent,
+  ArrowRight,
   Blocks,
   Camera,
   DoorOpen,
   ShieldCheck,
-  UtensilsCrossed,
 } from "lucide-react";
 
+import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
+import { getWebsiteMedia } from "@/lib/sanity/media";
 
-const facilities = [
+const facilityDetails = [
   {
     icon: DoorOpen,
-    title: "Purpose-built classrooms",
-    description:
-      "Classrooms are arranged for group learning, table activities, stories and everyday preschool routines.",
+    title: "Child-friendly classrooms",
+    text: "Arranged for stories, table work, group learning and daily routines.",
   },
   {
     icon: Blocks,
-    title: "Indoor play spaces",
-    description:
-      "Children have supervised spaces for movement, pretend play and age-appropriate indoor equipment.",
+    title: "Indoor play areas",
+    text: "Dedicated spaces for movement and supervised age-appropriate play.",
   },
   {
     icon: AirVent,
     title: "Air-conditioned rooms",
-    description:
-      "Classrooms are air-conditioned to help children remain comfortable during Delhi’s warmer months.",
+    text: "Comfortable learning spaces during Delhi's warmer months.",
   },
   {
     icon: Camera,
-    title: "CCTV-covered premises",
-    description:
-      "CCTV cameras cover key areas of the centre as part of the school’s supervision and security arrangements.",
-  },
-  {
-    icon: UtensilsCrossed,
-    title: "Meals at the centre",
-    description:
-      "Preschool children receive meals as part of their regular school-day routine.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Controlled entry and handover",
-    description:
-      "Entry and child collection follow centre procedures, with staff supervision and authorised handover.",
+    title: "CCTV-covered key areas",
+    text: "Part of the centre's everyday supervision and security arrangements.",
   },
 ] as const;
 
-export default function Facilities() {
+export default async function Facilities() {
+  const [
+    classroomMedia,
+    firstFloorPlayMedia,
+    groundFloorPlayMedia,
+  ] = await Promise.all([
+    getWebsiteMedia("home.facilities.classroom"),
+    getWebsiteMedia("home.facilities.firstFloorPlay"),
+    getWebsiteMedia("home.facilities.groundFloorPlay"),
+  ]);
+
+  const classroomImage =
+    classroomMedia?.imageUrl ??
+    "/images/facilities/classroom-1.jpg";
+
+  const firstFloorPlayImage =
+    firstFloorPlayMedia?.imageUrl ??
+    "/images/facilities/first-floor-play.jpg";
+
+  const groundFloorPlayImage =
+    groundFloorPlayMedia?.imageUrl ??
+    "/images/facilities/ground-floor-play.jpg";
+
   return (
     <section
       aria-labelledby="facilities-heading"
-      className="relative overflow-hidden bg-[#FAF7FC] py-16 sm:py-20 lg:py-24"
+      className="relative overflow-hidden bg-[#F8F4FC] py-16 sm:py-20 lg:py-24"
     >
       <div
         aria-hidden="true"
@@ -61,66 +70,167 @@ export default function Facilities() {
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-36 bottom-10 h-80 w-80 rounded-full bg-[#F6C84B]/20 blur-3xl"
+        className="pointer-events-none absolute -right-36 bottom-10 h-80 w-80 rounded-full bg-[#F6C84B]/18 blur-3xl"
       />
 
       <Container className="relative">
-        <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start lg:gap-16">
+        <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-end lg:gap-12">
           <div>
-            <p className="text-sm font-black uppercase tracking-[0.16em] text-[#7A459C]">
-              Inside our centre
+            <p className="text-sm font-black uppercase tracking-[0.16em] text-[#5B2A86]">
+              Inside our Sector 12B centre
             </p>
 
             <h2
               id="facilities-heading"
-              className="mt-4 max-w-xl text-balance text-3xl font-black leading-tight tracking-[-0.035em] text-[#2D1736] sm:text-4xl lg:text-5xl"
+              className="mt-4 max-w-xl text-balance text-3xl font-black leading-tight tracking-[-0.035em] text-[#2D1736] sm:text-4xl lg:text-[46px]"
             >
-              Spaces planned around the preschool day.
+              Real spaces for learning, movement and play.
             </h2>
+          </div>
 
-            <p className="mt-5 max-w-xl text-base leading-8 text-[#6F6474] sm:text-lg">
-              Our Sector 12B centre includes classrooms, play areas and
-              everyday facilities needed for learning, meals, rest and
-              supervised care.
-            </p>
+          <p className="max-w-2xl text-base leading-8 text-[#6F6474] sm:text-lg lg:justify-self-end">
+            These photographs show the centre families will visit—not a
+            stock-image version of preschool. Come and see how the
+            classrooms and indoor play areas fit into your child&apos;s
+            day.
+          </p>
+        </div>
 
-            <div className="mt-8 rounded-[28px] border border-[#5B2A86]/10 bg-white p-6 shadow-[0_16px_46px_rgba(52,20,68,0.06)] sm:p-7">
-              <p className="text-lg font-black text-[#2D1736]">
-                See the centre in person
+        <div className="mt-10 grid gap-4 lg:grid-cols-[1.22fr_0.78fr]">
+          <figure className="group relative min-h-[410px] overflow-hidden rounded-[30px] border-[3px] border-white bg-white shadow-[0_22px_64px_rgba(40,16,52,0.13)] sm:min-h-[520px]">
+            <Image
+              src={classroomImage}
+              alt={
+                classroomMedia?.altText ||
+                "Colourful classroom at Kidzee Preschool Sector 12 Dwarka"
+              }
+              fill
+              unoptimized={classroomImage.startsWith("http")}
+              sizes="(max-width: 1024px) 100vw, 62vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+            />
+
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-t from-[#281034]/72 via-transparent to-transparent"
+            />
+
+            <figcaption className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
+              <p className="text-xl font-black text-white sm:text-2xl">
+                Classrooms arranged for young learners
               </p>
 
-              <p className="mt-3 text-[15px] leading-7 text-[#6F6474]">
-                Photographs provide an introduction, but a school visit is the
-                best way to understand the classrooms, play spaces and daily
-                environment.
+              <p className="mt-1.5 max-w-xl text-sm leading-6 text-white/75">
+                Child-height furniture, activity materials and space
+                for guided group experiences.
+              </p>
+            </figcaption>
+          </figure>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+            <figure className="group relative min-h-[250px] overflow-hidden rounded-[28px] border-[3px] border-white bg-white shadow-[0_18px_52px_rgba(40,16,52,0.11)]">
+              <Image
+                src={groundFloorPlayImage}
+                alt={
+                  groundFloorPlayMedia?.altText ||
+                  "Ground-floor indoor play area at Kidzee Sector 12 Dwarka"
+                }
+                fill
+                unoptimized={groundFloorPlayImage.startsWith("http")}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 38vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-[1.025]"
+              />
+
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 bg-gradient-to-t from-[#281034]/70 via-transparent to-transparent"
+              />
+
+              <figcaption className="absolute inset-x-0 bottom-0 p-5">
+                <p className="font-black text-white">
+                  Ground-floor play space
+                </p>
+              </figcaption>
+            </figure>
+
+            <figure className="group relative min-h-[250px] overflow-hidden rounded-[28px] border-[3px] border-white bg-white shadow-[0_18px_52px_rgba(40,16,52,0.11)]">
+              <Image
+                src={firstFloorPlayImage}
+                alt={
+                  firstFloorPlayMedia?.altText ||
+                  "First-floor indoor play area at Kidzee Sector 12 Dwarka"
+                }
+                fill
+                unoptimized={firstFloorPlayImage.startsWith("http")}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 38vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-[1.025]"
+              />
+
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 bg-gradient-to-t from-[#281034]/70 via-transparent to-transparent"
+              />
+
+              <figcaption className="absolute inset-x-0 bottom-0 p-5">
+                <p className="font-black text-white">
+                  First-floor play space
+                </p>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {facilityDetails.map(({ icon: Icon, title, text }) => (
+            <article
+              key={title}
+              className="rounded-[24px] border border-[#E6DAEB] bg-white p-5 shadow-[0_10px_32px_rgba(40,16,52,0.05)]"
+            >
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#F3EAF8] text-[#5B2A86]">
+                <Icon aria-hidden="true" size={19} />
+              </span>
+
+              <h3 className="mt-4 font-black leading-6 text-[#281034]">
+                {title}
+              </h3>
+
+              <p className="mt-1.5 text-sm leading-6 text-[#6F6474]">
+                {text}
+              </p>
+            </article>
+          ))}
+        </div>
+
+        <div className="mt-7 flex flex-col items-start justify-between gap-5 rounded-[26px] bg-[#281034] px-6 py-6 text-white sm:flex-row sm:items-center sm:px-8">
+          <div className="flex items-start gap-3">
+            <ShieldCheck
+              aria-hidden="true"
+              size={22}
+              className="mt-0.5 shrink-0 text-[#F6C84B]"
+            />
+
+            <div>
+              <h3 className="font-black text-white">
+                Supervised entry and authorised handover
+              </h3>
+
+              <p className="mt-1 max-w-2xl text-sm leading-6 text-white/70">
+                Ask the centre team to explain the daily entry,
+                supervision and child-collection process during your
+                visit.
               </p>
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            {facilities.map((facility) => {
-              const Icon = facility.icon;
-
-              return (
-                <article
-                  key={facility.title}
-                  className="group rounded-[26px] border border-[#5B2A86]/10 bg-white p-6 shadow-[0_12px_38px_rgba(52,20,68,0.05)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_52px_rgba(52,20,68,0.09)]"
-                >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F3EAF8] text-[#5B2A86] transition-colors duration-300 group-hover:bg-[#5B2A86] group-hover:text-white">
-                    <Icon aria-hidden="true" size={22} />
-                  </div>
-
-                  <h3 className="mt-5 text-xl font-black tracking-[-0.02em] text-[#2D1736]">
-                    {facility.title}
-                  </h3>
-
-                  <p className="mt-3 text-[15px] leading-7 text-[#6F6474]">
-                    {facility.description}
-                  </p>
-                </article>
-              );
-            })}
-          </div>
+          <Button
+            href="/gallery"
+            variant="yellow"
+            size="md"
+            rightIcon={<ArrowRight size={17} />}
+            className="w-full sm:w-auto"
+          >
+            View Centre Gallery
+          </Button>
         </div>
       </Container>
     </section>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useSiteContact } from "@/components/SiteContactProvider";
 import { motion } from "framer-motion";
 import {
   Clock3,
@@ -13,27 +14,7 @@ import {
 
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
-import { site } from "@/lib/site";
 
-const contactDetails = [
-  {
-    icon: MapPin,
-    label: "School address",
-    value: site.address,
-  },
-  {
-    icon: Phone,
-    label: "Call us",
-    value: site.phoneDisplay,
-    href: `tel:${site.phone}`,
-  },
-  {
-    icon: Mail,
-    label: "Email",
-    value: site.email,
-    href: `mailto:${site.email}`,
-  },
-];
 
 const quickInformation = [
   {
@@ -50,14 +31,38 @@ const quickInformation = [
   },
 ];
 
-function createWhatsAppLink(message: string) {
-  const phoneNumber = site.phone.replace(/\D/g, "");
-
-  return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+function createWhatsAppLink(
+  phoneDigits: string,
+  message: string,
+) {
+  return `https://wa.me/${phoneDigits}?text=${encodeURIComponent(message)}`;
 }
 
 export default function ContactLocation() {
+  const site = useSiteContact();
+
+  const contactDetails = [
+    {
+      icon: MapPin,
+      label: "School address",
+      value: site.address,
+    },
+    {
+      icon: Phone,
+      label: "Call us",
+      value: site.phoneDisplay,
+      href: `tel:${site.phone}`,
+    },
+    {
+      icon: Mail,
+      label: "Email",
+      value: site.email,
+      href: `mailto:${site.email}`,
+    },
+  ];
+
   const visitLink = createWhatsAppLink(
+    site.phoneDigits,
     "Hello Kidzee Sector 12, Dwarka. I would like to schedule a visit to the preschool."
   );
 
@@ -262,3 +267,6 @@ export default function ContactLocation() {
     </section>
   );
 }
+
+
+

@@ -1,32 +1,68 @@
 import type { Metadata, Viewport } from "next";
-import { Nunito_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 
 import "./globals.css";
-import { site } from "@/lib/site";
+import { getWebsiteContentSettings } from "@/lib/sanity/contentSettings";
+import { getWebsiteContactSettings } from "@/lib/sanity/contactSettings";
+import { getWebsiteTrackingSettings } from "@/lib/sanity/websiteSettings";
+import { programmes, site } from "@/lib/site";
+import { buildSiteContact } from "@/lib/siteContact";
+import MiraLauncher from "@/components/mira/MiraLauncher";
+import SiteContactProvider from "@/components/SiteContactProvider";
+import { getWebsiteOperationalSettings } from "@/lib/website/operationalSettings";
 
-const nunitoSans = Nunito_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
+const defaultTitle = "Kidzee Preschool & Daycare in Sector 12 Dwarka";
 
-export const metadata: Metadata = {
+function createDefaultDescription(academicYear: string) {
+  return `Kidzee Preschool and daycare in Sector 12B, Dwarka for children aged ${site.ageRange.display}. Explore Playgroup to Senior KG, daycare until 7 PM and admissions for ${academicYear}.`;
+}
+
+const socialImage = "/images/hero/hero-main.jpg";
+
+function createMetadata(titleValue: string, defaultDescription: string): Metadata {
+  return {
   metadataBase: new URL(site.url),
 
   title: {
-    default: "Kidzee Preschool & Daycare in Sector 12 Dwarka",
+    default: titleValue,
     template: "%s | Kidzee Sector 12 Dwarka",
   },
 
-  description:
-    "Kidzee Preschool & Daycare in Sector 12B, Dwarka for children aged 2–6 years. Playgroup to Senior KG, daycare until 7 PM and a 3-day trial.",
+  description: defaultDescription,
 
   applicationName: site.shortName,
   category: "education",
+  creator: site.shortName,
+  publisher: site.shortName,
+
+  keywords: [
+    "preschool in Dwarka",
+    "preschool in Sector 12 Dwarka",
+    "play school in Dwarka",
+    "Kidzee Sector 12 Dwarka",
+    "nursery school in Dwarka",
+    "kindergarten in Dwarka",
+    "daycare in Dwarka",
+    "daycare in Sector 12 Dwarka",
+    "Playgroup in Dwarka",
+    "Nursery in Dwarka",
+    "Junior KG in Dwarka",
+    "Senior KG in Dwarka",
+  ],
 
   alternates: {
     canonical: "/",
+  },
+
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+  },
+
+  formatDetection: {
+    address: false,
+    email: false,
+    telephone: false,
   },
 
   openGraph: {
@@ -34,12 +70,11 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: site.url,
     siteName: site.shortName,
-    title: "Kidzee Preschool & Daycare in Sector 12 Dwarka",
-    description:
-      "Playgroup to Senior KG for children aged 2–6 years, with daycare until 7 PM in Sector 12B, Dwarka.",
+    title: titleValue,
+    description: defaultDescription,
     images: [
       {
-        url: "/images/hero-main.jpg",
+        url: socialImage,
         width: 1200,
         height: 630,
         alt: "Kidzee Preschool and Daycare in Sector 12B, Dwarka",
@@ -49,15 +84,15 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Kidzee Preschool & Daycare in Sector 12 Dwarka",
-    description:
-      "Preschool programmes for children aged 2–6 years and daycare until 7 PM in Sector 12B, Dwarka.",
-    images: ["/images/hero-main.jpg"],
+    title: defaultTitle,
+    description: defaultDescription,
+    images: [socialImage],
   },
 
   robots: {
     index: true,
     follow: true,
+    nocache: false,
     googleBot: {
       index: true,
       follow: true,
@@ -66,7 +101,19 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
-};
+  };
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [contentSettings, operationalSettings] = await Promise.all([
+    getWebsiteContentSettings(),
+    getWebsiteOperationalSettings(),
+  ]);
+  return createMetadata(
+    operationalSettings.defaultSeoTitle || defaultTitle,
+    operationalSettings.defaultSeoDescription || createDefaultDescription(contentSettings.academicYear),
+  );
+}
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -79,11 +126,31 @@ type RootLayoutProps = Readonly<{
   children: ReactNode;
 }>;
 
-export default function RootLayout({ children }: RootLayoutProps) {
+const weekdays = [
+  "https://schema.org/Monday",
+  "https://schema.org/Tuesday",
+  "https://schema.org/Wednesday",
+  "https://schema.org/Thursday",
+  "https://schema.org/Friday",
+];
+
+export default async function RootLayout({
+  children,
+}: RootLayoutProps) {
+  const [trackingSettings, contentSettings, contactSettings] = await Promise.all([
+    getWebsiteTrackingSettings(),
+    getWebsiteContentSettings(),
+    getWebsiteContactSettings(),
+  ]);
+  const contact = buildSiteContact(contactSettings);
+  const defaultDescription = createDefaultDescription(
+    contentSettings.academicYear,
+  );
+
   const socialProfiles = [
-    site.instagram,
-    site.facebook,
-    site.youtube,
+    contact.instagram,
+    contact.facebook,
+    contact.youtube,
   ].filter((profile): profile is string => Boolean(profile));
 
   const structuredData = {
@@ -94,6 +161,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
         "@id": `${site.url}/#website`,
         url: site.url,
         name: site.shortName,
+        alternateName: site.name,
+        description: defaultDescription,
         inLanguage: "en-IN",
         publisher: {
           "@id": `${site.url}/#preschool`,
@@ -105,37 +174,78 @@ export default function RootLayout({ children }: RootLayoutProps) {
         name: site.shortName,
         alternateName: site.name,
         url: site.url,
-        image: `${site.url}/images/hero-main.jpg`,
-        telephone: site.phone,
-        email: site.email,
+        logo: {
+          "@type": "ImageObject",
+          url: `${site.url}/images/kidzee-logo.png`,
+        },
+        image: [
+          `${site.url}/images/hero/hero-main.jpg`,
+          `${site.url}/images/hero/hero-building.jpg`,
+          `${site.url}/images/hero/hero-classroom.jpg`,
+        ],
+        telephone: contact.phone,
+        email: contact.email,
         description:
-          "Preschool and daycare in Sector 12B, Dwarka offering Playgroup, Nursery, Junior KG and Senior KG programmes for children aged 2–6 years.",
+          `Kidzee preschool and daycare in Sector 12B, Dwarka offering Playgroup, Nursery, Junior KG and Senior KG programmes for children aged ${site.ageRange.display}.`,
         address: {
           "@type": "PostalAddress",
-          streetAddress: "Building No. 19, Block B, Sector 12B",
+          streetAddress: contact.address,
           addressLocality: site.locality,
           addressRegion: site.region,
           postalCode: site.postalCode,
           addressCountry: site.country,
         },
-        areaServed: {
-          "@type": "Place",
-          name: "Dwarka, New Delhi",
-        },
+        areaServed: [
+          {
+            "@type": "Place",
+            name: "Sector 12, Dwarka",
+          },
+          {
+            "@type": "Place",
+            name: "Dwarka, New Delhi",
+          },
+        ],
+        hasMap: contact.map,
         openingHoursSpecification: [
           {
             "@type": "OpeningHoursSpecification",
-            dayOfWeek: [
-              "https://schema.org/Monday",
-              "https://schema.org/Tuesday",
-              "https://schema.org/Wednesday",
-              "https://schema.org/Thursday",
-              "https://schema.org/Friday",
-            ],
-            opens: site.preschoolHours.opens,
-            closes: site.daycareHours.closes,
+            dayOfWeek: weekdays,
+            opens: contact.preschoolHours.opens,
+            closes: contact.daycareHours.closes,
           },
         ],
+        contactPoint: {
+          "@type": "ContactPoint",
+          contactType: "admissions",
+          telephone: contact.phone,
+          email: contact.email,
+          areaServed: "IN",
+        },
+        hasOfferCatalog: {
+          "@type": "OfferCatalog",
+          name: "Preschool and daycare programmes",
+          itemListElement: [
+            ...programmes.map((programme) => ({
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "EducationalOccupationalProgram",
+                name: programme.title,
+                description: programme.intro,
+                url: `${site.url}/programmes/${programme.slug}`,
+              },
+            })),
+            {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: "Daycare",
+                description:
+                  "Weekday daycare in Sector 12B, Dwarka with flexible care options until 7 PM.",
+                url: `${site.url}/daycare`,
+              },
+            },
+          ],
+        },
         sameAs: socialProfiles,
         parentOrganization: {
           "@type": "Organization",
@@ -148,18 +258,37 @@ export default function RootLayout({ children }: RootLayoutProps) {
 
   const safeStructuredData = JSON.stringify(structuredData).replace(
     /</g,
-    "\\u003c"
+    "\\u003c",
   );
 
   return (
-    <html lang="en">
-      <body className={`${nunitoSans.variable} antialiased`}>
+    <html lang="en-IN">
+      <head>
+        {trackingSettings.googleSearchConsoleVerification ? (
+          <meta
+            name="google-site-verification"
+            content={trackingSettings.googleSearchConsoleVerification}
+          />
+        ) : null}
+
+        {trackingSettings.bingWebmasterVerification ? (
+          <meta
+            name="msvalidate.01"
+            content={trackingSettings.bingWebmasterVerification}
+          />
+        ) : null}
+      </head>
+
+      <body className="antialiased">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: safeStructuredData }}
         />
 
-        {children}
+        <SiteContactProvider settings={contactSettings}>
+          {children}
+          <MiraLauncher />
+        </SiteContactProvider>
       </body>
     </html>
   );

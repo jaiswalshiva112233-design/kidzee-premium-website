@@ -1,271 +1,156 @@
-"use client";
-
-import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowRight,
-  Baby,
-  BookOpenCheck,
   HeartHandshake,
-  MessageCircleHeart,
   ShieldCheck,
-  Sparkles,
+  UserRound,
   UsersRound,
 } from "lucide-react";
 
-const teamHighlights = [
-  {
-    icon: HeartHandshake,
-    title: "A patient, reassuring approach",
-    description:
-      "Teachers give children time to settle, participate and express themselves without unnecessary pressure.",
-  },
-  {
-    icon: Baby,
-    title: "Attention to individual needs",
-    description:
-      "Each child’s comfort, communication style, interests and pace are considered during the school day.",
-  },
-  {
-    icon: BookOpenCheck,
-    title: "Thoughtful classroom guidance",
-    description:
-      "Educators guide activities with clear routines while giving children space to explore and respond independently.",
-  },
-  {
-    icon: MessageCircleHeart,
-    title: "Meaningful parent communication",
-    description:
-      "Parents receive relevant feedback about adjustment, participation, routine and areas that may need support.",
-  },
-];
+import type { WebsiteTeamMember } from "@/lib/sanity/team";
 
-const dailySupport = [
-  "Welcoming children and helping them settle",
-  "Guiding classroom activities and routines",
-  "Observing participation and development",
-  "Supporting communication and social interaction",
-  "Managing meals, hygiene and comfort",
-  "Sharing relevant updates with parents",
-];
+type TeamProps = {
+  members: WebsiteTeamMember[];
+};
 
-export default function Team() {
-  const visitMessage = encodeURIComponent(
-    "Hello, I would like to book a school visit and meet the team at Kidzee Sector 12, Dwarka."
-  );
-
-  const visitLink = `https://wa.me/919667038673?text=${visitMessage}`;
+export default function Team({ members }: TeamProps) {
+  if (members.length === 0) {
+    return null;
+  }
 
   return (
     <section
       id="team"
-      className="relative overflow-hidden bg-white py-20 sm:py-24 lg:py-28"
       aria-labelledby="team-heading"
+      className="relative overflow-hidden bg-[#FBF8FC] py-18 sm:py-22 lg:py-24"
     >
       <div
         aria-hidden="true"
-        className="absolute -left-32 top-20 h-80 w-80 rounded-full bg-purple-100/60 blur-3xl"
+        className="absolute -left-28 top-16 h-72 w-72 rounded-full bg-purple-100/65 blur-3xl"
       />
-
       <div
         aria-hidden="true"
-        className="absolute -right-32 bottom-12 h-96 w-96 rounded-full bg-yellow-100/70 blur-3xl"
+        className="absolute -right-32 bottom-0 h-80 w-80 rounded-full bg-yellow-100/75 blur-3xl"
       />
 
       <div className="relative mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-8 xl:px-10">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mx-auto max-w-4xl text-center"
-        >
-          <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-purple-50 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.16em] text-[#702a96]">
-            <Sparkles size={16} />
-            The people children trust
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#DED0E5] bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#6A328F] shadow-sm">
+            <UsersRound aria-hidden="true" size={16} />
+            Meet our centre team
           </div>
 
           <h2
             id="team-heading"
-            className="mt-6 text-balance text-4xl font-extrabold leading-tight tracking-[-0.04em] text-[#281036] sm:text-5xl lg:text-[58px]"
+            className="mt-6 text-balance text-3xl font-black leading-[1.08] tracking-[-0.04em] text-[#281036] sm:text-4xl lg:text-5xl"
           >
-            Caring adults make the{" "}
-            <span className="text-[#702a96]">
-              biggest difference to a child’s day
-            </span>
+            Caring educators who help every child feel known
           </h2>
 
-          <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-slate-600 sm:text-lg">
-            Our teachers and support staff work together to help children feel
-            welcomed, understood and comfortable enough to participate,
-            communicate and learn.
+          <p className="mx-auto mt-5 max-w-3xl text-base font-semibold leading-8 text-[#6F6474] sm:text-lg">
+            Familiar faces, patient guidance and consistent routines help
+            children feel secure enough to participate, communicate and grow.
           </p>
-        </motion.div>
-
-        <div className="mt-14 grid gap-6 lg:grid-cols-[0.92fr_1.08fr]">
-          <motion.div
-            initial={{ opacity: 0, x: -26 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.65, ease: "easeOut" }}
-            className="relative overflow-hidden rounded-[36px] bg-[#2d1636] p-7 text-white shadow-[0_28px_75px_rgba(45,22,54,0.22)] sm:p-9 lg:p-10"
-          >
-            <div
-              aria-hidden="true"
-              className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-purple-500/25 blur-3xl"
-            />
-
-            <div
-              aria-hidden="true"
-              className="absolute -bottom-24 left-8 h-56 w-56 rounded-full bg-yellow-300/10 blur-3xl"
-            />
-
-            <div className="relative">
-              <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-yellow-300 text-[#281036] shadow-[0_12px_30px_rgba(253,224,71,0.18)]">
-                <UsersRound size={25} strokeWidth={2.1} />
-              </div>
-
-              <p className="mt-6 text-xs font-extrabold uppercase tracking-[0.18em] text-yellow-300">
-                Our approach to children
-              </p>
-
-              <h3 className="mt-3 max-w-2xl text-3xl font-extrabold leading-tight tracking-[-0.03em] sm:text-4xl">
-                Connection comes before instruction
-              </h3>
-
-              <p className="mt-5 max-w-2xl leading-8 text-purple-100">
-                Young children participate more naturally when they recognise
-                the adults around them, understand the routine and feel secure.
-                Our team focuses first on building that familiarity and trust.
-              </p>
-
-              <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-[24px] border border-white/10 bg-white/[0.07] p-5 backdrop-blur">
-                  <Baby size={22} className="text-yellow-300" />
-
-                  <h4 className="mt-4 font-extrabold text-white">
-                    Gentle settling support
-                  </h4>
-
-                  <p className="mt-2 text-sm leading-6 text-purple-100">
-                    Children are given time and reassurance as they become
-                    familiar with the school routine.
-                  </p>
-                </div>
-
-                <div className="rounded-[24px] border border-white/10 bg-white/[0.07] p-5 backdrop-blur">
-                  <ShieldCheck size={22} className="text-yellow-300" />
-
-                  <h4 className="mt-4 font-extrabold text-white">
-                    Consistent daily care
-                  </h4>
-
-                  <p className="mt-2 text-sm leading-6 text-purple-100">
-                    Teachers and support staff coordinate classroom, hygiene,
-                    meal and transition routines.
-                  </p>
-                </div>
-              </div>
-
-              <a
-                href={visitLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-8 inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-extrabold text-[#64278f] transition duration-300 hover:-translate-y-0.5 hover:bg-yellow-300 hover:text-[#281036]"
-              >
-                Meet the Team During Your Visit
-                <ArrowRight size={17} />
-              </a>
-            </div>
-          </motion.div>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            {teamHighlights.map((item, index) => {
-              const Icon = item.icon;
-
-              return (
-                <motion.article
-                  key={item.title}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.15 }}
-                  transition={{
-                    duration: 0.5,
-                    delay: index * 0.06,
-                    ease: "easeOut",
-                  }}
-                  whileHover={{ y: -6 }}
-                  className="group rounded-[30px] border border-purple-100 bg-[#fffaf2] p-6 shadow-[0_14px_38px_rgba(62,25,83,0.06)] transition duration-300 hover:border-purple-200 hover:shadow-[0_24px_55px_rgba(62,25,83,0.12)] sm:p-7"
-                >
-                  <div className="flex h-14 w-14 items-center justify-center rounded-[19px] bg-purple-100 text-[#702a96] transition duration-300 group-hover:-rotate-3 group-hover:bg-[#702a96] group-hover:text-white">
-                    <Icon size={24} strokeWidth={2.1} />
-                  </div>
-
-                  <h3 className="mt-5 text-xl font-extrabold leading-7 text-[#281036]">
-                    {item.title}
-                  </h3>
-
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
-                    {item.description}
-                  </p>
-                </motion.article>
-              );
-            })}
-          </div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mt-8 overflow-hidden rounded-[34px] border border-purple-100 bg-[#faf7fc] p-7 shadow-[0_18px_50px_rgba(67,38,76,0.08)] sm:p-9 lg:p-10"
-        >
-          <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
-            <div>
-              <div className="flex h-13 w-13 items-center justify-center rounded-[18px] bg-[#702a96] text-white">
-                <BookOpenCheck size={23} />
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {members.map((member) => (
+            <article
+              key={member._id}
+              className="group overflow-hidden rounded-[30px] border border-[#E5D9EA] bg-white shadow-[0_16px_48px_rgba(45,23,54,0.075)] transition duration-300 hover:-translate-y-1 hover:border-[#D3BEDD] hover:shadow-[0_24px_64px_rgba(45,23,54,0.13)]"
+            >
+              <div className="relative aspect-[4/5] overflow-hidden bg-[#EEE6F2]">
+                {member.imageUrl ? (
+                  <Image
+                    src={member.imageUrl}
+                    alt={member.photoAlt || `${member.name}, ${member.role}`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-700 motion-reduce:transition-none group-hover:scale-[1.018] motion-reduce:group-hover:scale-100"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center bg-gradient-to-br from-[#F6F0F8] to-[#E7DAEB] text-[#765087]">
+                    <div className="text-center">
+                      <span className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-white/85 shadow-sm">
+                        <UserRound aria-hidden="true" size={44} />
+                      </span>
+                      <p className="mt-4 text-xs font-black uppercase tracking-[0.12em]">
+                        Photo coming soon
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#281036]/45 to-transparent"
+                />
+
+                <span className="absolute bottom-4 left-4 rounded-full border border-white/35 bg-white/92 px-3 py-2 text-[0.68rem] font-black uppercase tracking-[0.1em] text-[#5B2A86] shadow-lg backdrop-blur">
+                  {member.role}
+                </span>
               </div>
 
-              <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.18em] text-[#702a96]">
-                Working together each day
-              </p>
-
-              <h3 className="mt-3 text-3xl font-extrabold leading-tight tracking-[-0.03em] text-[#281036]">
-                Support that continues throughout the routine
-              </h3>
-
-              <p className="mt-4 max-w-xl leading-7 text-slate-600">
-                The team’s role extends beyond conducting activities. It
-                includes observing, reassuring, communicating and helping
-                children manage everyday transitions comfortably.
-              </p>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              {dailySupport.map((item, index) => (
-                <motion.div
-                  key={item}
-                  initial={{ opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  transition={{
-                    duration: 0.4,
-                    delay: index * 0.04,
-                  }}
-                  className="flex items-start gap-3 rounded-[22px] border border-purple-100 bg-white p-4 shadow-[0_8px_24px_rgba(62,25,83,0.04)]"
-                >
-                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#702a96] text-xs font-extrabold text-white">
-                    ✓
+              <div className="p-5 sm:p-6">
+                <h3 className="text-xl font-black tracking-[-0.025em] text-[#281036]">
+                  {member.name}
+                </h3>
+                {member.programme ||
+                member.qualification ||
+                member.experience ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {[member.programme, member.qualification, member.experience]
+                      .filter(Boolean)
+                      .map((detail) => (
+                        <span
+                          key={detail}
+                          className="rounded-full bg-[#F4EDF7] px-3 py-1.5 text-[0.68rem] font-black text-[#654074]"
+                        >
+                          {detail}
+                        </span>
+                      ))}
                   </div>
+                ) : null}
+                <p className="mt-3 text-sm font-semibold leading-7 text-[#6F6474]">
+                  {member.introduction}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
 
-                  <p className="text-sm font-semibold leading-6 text-[#3d2a43]">
-                    {item}
-                  </p>
-                </motion.div>
-              ))}
+        <div className="mt-8 flex flex-col gap-5 rounded-[28px] bg-[#2D1736] p-6 text-white shadow-[0_20px_58px_rgba(45,23,54,0.18)] sm:p-7 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start gap-4">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F6C84B] text-[#281036]">
+              <HeartHandshake aria-hidden="true" size={22} />
+            </span>
+            <div>
+              <h3 className="text-xl font-black">
+                Meet the team before making your decision
+              </h3>
+              <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-white/72">
+                A school visit lets you understand the classroom routine,
+                speak with our team and see how children are supported each
+                day.
+              </p>
             </div>
           </div>
-        </motion.div>
+
+          <Link
+            href="/admissions?enquiry=SCHOOL_VISIT#admission-enquiry"
+            className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-[#F6C84B] px-6 text-sm font-black text-[#281036] transition hover:-translate-y-0.5 hover:bg-[#FFD65F] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/35"
+          >
+            Book a School Visit
+            <ArrowRight aria-hidden="true" size={17} />
+          </Link>
+        </div>
+
+        <p className="mt-5 flex items-center justify-center gap-2 text-center text-xs font-bold text-[#7B7080]">
+          <ShieldCheck aria-hidden="true" size={15} className="text-[#5B2A86]" />
+          Team photographs are published with permission and can be updated by
+          the centre.
+        </p>
       </div>
     </section>
   );

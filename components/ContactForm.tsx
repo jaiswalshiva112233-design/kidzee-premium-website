@@ -7,7 +7,7 @@ import {
   Phone,
 } from "lucide-react";
 
-import { site } from "@/lib/site";
+import { useSiteContact } from "@/components/SiteContactProvider";
 
 interface ContactFormData {
   parentName: string;
@@ -37,6 +37,7 @@ const programmeOptions = [
 ];
 
 export default function ContactForm() {
+  const site = useSiteContact();
   const [formData, setFormData] =
     useState<ContactFormData>(initialFormData);
 
@@ -414,3 +415,4 @@ function inputClasses(hasError: boolean) {
       : "border-[#DFD5E5] focus:border-[#5B2A86]",
   ].join(" ");
 }
+
