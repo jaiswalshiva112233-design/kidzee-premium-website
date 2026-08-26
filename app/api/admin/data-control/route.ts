@@ -163,6 +163,25 @@ function errorResponse(error: unknown) {
     );
   }
 
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "P2028"
+  ) {
+    console.error("Safe Launch Cleanup transaction timed out:", {
+      code: "P2028",
+    });
+    return NextResponse.json(
+      {
+        success: false,
+        message:
+          "The cleanup took longer than the protected database window. Nothing was deleted. Try the same cleanup again; if it repeats, select the student records first and the unused catalogue records second.",
+      },
+      { status: 503 },
+    );
+  }
+
   console.error("Unable to manage CentreOS data:", error);
 
   return NextResponse.json(

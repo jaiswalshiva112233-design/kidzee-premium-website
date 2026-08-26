@@ -30,7 +30,8 @@ try {
   const tables = new Set(rows.rows.map((row) => row.table_name));
   for (const required of [
     "Enquiry", "Student", "FeeInvoice", "StudentDaycarePlan", "StaffPayroll",
-    "MarketingConversionJob", "RateLimitBucket",
+    "MarketingConversionJob", "RateLimitBucket", "StoredFile", "MediaSafetySetting",
+    "BackupExport",
   ]) {
     if (!tables.has(required)) throw new Error(`Fresh database is missing ${required}.`);
   }

@@ -35,7 +35,7 @@ export async function getPublishedWebsiteTeamMembers(): Promise<
         experience,
         introduction,
         photoAlt,
-        "imageUrl": photo.asset->url,
+        "imageUrl": coalesce(externalImageUrl, photo.asset->url),
         featured,
         sortOrder
       }`,

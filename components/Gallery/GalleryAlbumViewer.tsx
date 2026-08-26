@@ -12,6 +12,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 
 import ParentReelPlayer from "@/components/Gallery/ParentReelPlayer";
+import ExternalMediaEmbed from "@/components/Gallery/ExternalMediaEmbed";
 import type { PublicGalleryMedia } from "@/lib/sanity/gallery";
 
 type GalleryAlbumViewerProps = {
@@ -50,13 +51,15 @@ export default function GalleryAlbumViewer({
       media.filter(
         (item) =>
           (item.mediaType === "PHOTO" && Boolean(item.imageUrl)) ||
-          (item.mediaType === "VIDEO" && Boolean(item.videoUrl)),
+          (item.mediaType === "VIDEO" && Boolean(item.videoUrl || item.embedPlayerUrl)),
       ).length,
     [media],
   );
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(
     null,
   );
+  const [visibleCount, setVisibleCount] = useState(12);
+  const visibleMedia = media.slice(0, visibleCount);
 
   const selectedIndex = selectedPhotoId
     ? photos.findIndex((item) => item._id === selectedPhotoId)
@@ -143,7 +146,7 @@ export default function GalleryAlbumViewer({
             : "grid gap-5 sm:grid-cols-2 xl:grid-cols-3"
         }
       >
-        {media.map((item, index) => {
+        {visibleMedia.map((item, index) => {
           const isFeaturedPhoto =
             item.mediaType === "PHOTO" &&
             index === 0 &&
@@ -209,6 +212,17 @@ export default function GalleryAlbumViewer({
                 </div>
               </div>
             </button>
+          ) : item.mediaType === "VIDEO" && item.embedPlayerUrl && item.embedProvider && item.embedUrl ? (
+            <article key={item._id} className={parentStories ? "snap-start" : "overflow-hidden rounded-[28px] border-[4px] border-white bg-white shadow-[0_18px_54px_rgba(40,16,52,0.1)]"}>
+              <ExternalMediaEmbed
+                provider={item.embedProvider}
+                embedUrl={item.embedPlayerUrl}
+                publicUrl={item.embedUrl}
+                poster={item.thumbnailUrl ?? item.imageUrl ?? undefined}
+                title={item.altText || item.caption || albumTitle}
+              />
+              {item.caption ? <p className="p-4 text-center text-sm font-bold leading-6 text-[#504456]">{item.caption}</p> : null}
+            </article>
           ) : item.mediaType === "VIDEO" && item.videoUrl && parentStories ? (
             <article
               key={item._id}
@@ -265,6 +279,14 @@ export default function GalleryAlbumViewer({
           ) : null;
         })}
       </div>
+
+      {visibleCount < media.length ? (
+        <div className="mt-7 text-center">
+          <button type="button" onClick={() => setVisibleCount((value) => value + 12)} className="min-h-12 rounded-full border border-[#D9CBE0] bg-white px-7 text-sm font-black text-[#5B2A86] shadow-sm transition hover:bg-[#F7F1FA]">
+            Load more moments
+          </button>
+        </div>
+      ) : null}
 
       {selectedPhoto?.imageUrl ? (
         <div

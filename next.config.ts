@@ -15,7 +15,7 @@ const contentSecurityPolicy = [
   "img-src 'self' data: blob: https://cdn.sanity.io https://storage.googleapis.com https://firebasestorage.googleapis.com https://www.google-analytics.com https://www.googletagmanager.com https://www.google.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://www.facebook.com",
   "media-src 'self' blob: https://cdn.sanity.io https://storage.googleapis.com https://firebasestorage.googleapis.com",
   "connect-src 'self' https://*.api.sanity.io https://*.google-analytics.com https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://www.google.com https://www.googleadservices.com https://*.doubleclick.net https://www.facebook.com https://connect.facebook.net https://firestore.googleapis.com https://storage.googleapis.com https://firebasestorage.googleapis.com https://firebaseinstallations.googleapis.com https://fcmregistrations.googleapis.com https://fcm.googleapis.com https://api.openai.com",
-  "frame-src 'self' https://www.google.com https://maps.google.com https://*.doubleclick.net https://www.youtube.com https://www.youtube-nocookie.com https://www.facebook.com",
+  "frame-src 'self' https://www.google.com https://maps.google.com https://*.doubleclick.net https://www.youtube.com https://www.youtube-nocookie.com https://www.instagram.com https://www.facebook.com",
   "worker-src 'self' blob:",
   "upgrade-insecure-requests",
 ].join("; ");
@@ -23,7 +23,7 @@ const contentSecurityPolicy = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
-  serverExternalPackages: ["pdfkit"],
+  serverExternalPackages: ["pdfkit", "sharp"],
   experimental: {
     proxyClientMaxBodySize: 85 * 1024 * 1024,
   },

@@ -14,6 +14,7 @@ import {
   ImagePlus,
   Images,
   LoaderCircle,
+  Link2,
   Save,
   ShieldCheck,
   Star,
@@ -64,7 +65,11 @@ type GalleryMedia = {
   mimeType: string;
   fileSize: number;
   imageUrl: string | null;
+  thumbnailUrl: string | null;
   videoUrl: string | null;
+  embedUrl: string | null;
+  embedProvider: "INSTAGRAM" | "YOUTUBE" | null;
+  storedFileId: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -95,6 +100,12 @@ type ApiResponse = {
   limits?: {
     imageMegabytes: number;
     videoMegabytes: number;
+  };
+  mediaSafety?: {
+    directVideoUploadEnabled: boolean;
+    externalEmbedsEnabled: boolean;
+    originalArchiveEnabled: boolean;
+    compressionEnabled: boolean;
   };
 };
 
@@ -160,6 +171,14 @@ export default function GalleryManager() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [consentConfirmed, setConsentConfirmed] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
+  const [embedUrl, setEmbedUrl] = useState("");
+  const [embedCaption, setEmbedCaption] = useState("");
+  const [mediaSafety, setMediaSafety] = useState({
+    directVideoUploadEnabled: false,
+    externalEmbedsEnabled: true,
+    originalArchiveEnabled: false,
+    compressionEnabled: true,
+  });
   const [limits, setLimits] = useState({
     imageMegabytes: 12,
     videoMegabytes: 80,
@@ -223,6 +242,12 @@ export default function GalleryManager() {
           videoMegabytes: 80,
         },
       );
+      setMediaSafety(result.mediaSafety ?? {
+        directVideoUploadEnabled: false,
+        externalEmbedsEnabled: true,
+        originalArchiveEnabled: false,
+        compressionEnabled: true,
+      });
       setSelectedAlbumId((current) => {
         const requested = preferredAlbumId || current;
 
@@ -601,6 +626,41 @@ export default function GalleryManager() {
     } finally {
       setBusyKey("");
       setUploadProgress("");
+    }
+  }
+
+  async function addExternalReel() {
+    if (!selectedAlbum || !embedUrl.trim()) {
+      showResult("Paste an Instagram Reel or YouTube URL.", true);
+      return;
+    }
+    if (!consentConfirmed) {
+      showResult("Confirm media permission before adding the reel.", true);
+      return;
+    }
+    setBusyKey("embed");
+    try {
+      const response = await fetch("/api/admin/gallery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "createEmbed",
+          albumId: selectedAlbum._id,
+          embedUrl,
+          caption: embedCaption,
+          altText: embedCaption,
+          consentConfirmed: true,
+        }),
+      });
+      const result = await readResponse(response);
+      setEmbedUrl("");
+      setEmbedCaption("");
+      await loadGallery(selectedAlbum._id);
+      showResult(result.message ?? "The reel has been added as a draft.");
+    } catch (embedError) {
+      showResult(embedError instanceof Error ? embedError.message : "The reel could not be added.", true);
+    } finally {
+      setBusyKey("");
     }
   }
 
@@ -1101,9 +1161,12 @@ export default function GalleryManager() {
                   </span>
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.13em] text-[#7A459C]">Add media</p>
-                    <h2 className="mt-1 text-xl font-black text-[#2D1736]">Upload photos or videos</h2>
+                    <h2 className="mt-1 text-xl font-black text-[#2D1736]">Add photos or reels</h2>
                     <p className="mt-1 text-sm font-semibold leading-6 text-[#7C7180]">
-                      Choose up to 20 files together. Photos can be up to {limits.imageMegabytes} MB and videos up to {limits.videoMegabytes} MB each.
+                      Upload up to 20 photos together. Each photo can be up to {limits.imageMegabytes} MB and is compressed automatically for the website.
+                    </p>
+                    <p className="mt-2 text-xs font-bold leading-5 text-[#746779]">
+                      Instagram and YouTube reels load only after a visitor taps them. Direct heavy video upload is {mediaSafety.directVideoUploadEnabled ? "Owner-enabled" : "off for the trial launch"}.
                     </p>
                     {selectedAlbum.category === "PARENT_STORIES" ? (
                       <p className="mt-2 rounded-xl bg-[#FFF6D9] px-3 py-2 text-xs font-black leading-5 text-[#755600]">
@@ -1113,11 +1176,29 @@ export default function GalleryManager() {
                   </div>
                 </div>
 
+                {mediaSafety.externalEmbedsEnabled ? (
+                  <div className="mt-5 rounded-2xl border border-[#E1D6E6] bg-[#FAF7FC] p-4">
+                    <div className="flex items-center gap-2 text-sm font-black text-[#3E3144]">
+                      <Link2 aria-hidden="true" size={17} className="text-[#5B2A86]" />
+                      Add Instagram Reel or YouTube video
+                    </div>
+                    <div className="mt-3 grid gap-3 lg:grid-cols-[1.35fr_1fr_auto]">
+                      <input type="url" value={embedUrl} onChange={(event) => setEmbedUrl(event.target.value)} placeholder="Paste Instagram Reel or YouTube URL" className={fieldClass} />
+                      <input value={embedCaption} onChange={(event) => setEmbedCaption(event.target.value)} maxLength={300} placeholder="Short caption" className={fieldClass} />
+                      <button type="button" disabled={Boolean(busyKey) || !embedUrl.trim() || !consentConfirmed} onClick={() => void addExternalReel()} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#2D1736] px-5 text-sm font-black text-white disabled:opacity-45">
+                        {busyKey === "embed" ? <LoaderCircle aria-hidden="true" size={17} className="animate-spin" /> : <Link2 aria-hidden="true" size={17} />}
+                        Add Reel
+                      </button>
+                    </div>
+                    <p className="mt-2 text-xs font-semibold text-[#817684]">After adding it, upload a custom thumbnail on the reel card before publishing.</p>
+                  </div>
+                ) : null}
+
                 <input
                   ref={fileInputRef}
                   type="file"
                   multiple
-                  accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm"
+                  accept={mediaSafety.directVideoUploadEnabled ? "image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm" : "image/jpeg,image/png,image/webp,image/avif"}
                   disabled={busyKey === "upload"}
                   onChange={selectFiles}
                   className="mt-5 block w-full cursor-pointer rounded-2xl border border-[#DCCFE4] bg-white text-sm font-semibold text-[#5F5663] file:mr-4 file:cursor-pointer file:border-0 file:bg-[#F3EAF8] file:px-4 file:py-3 file:text-sm file:font-black file:text-[#5B2A86] hover:file:bg-[#EADDF1] disabled:cursor-not-allowed disabled:opacity-60"
@@ -1174,7 +1255,7 @@ export default function GalleryManager() {
                   className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#5B2A86] px-5 text-sm font-black text-white transition hover:bg-[#4B206F] disabled:cursor-not-allowed disabled:opacity-45"
                 >
                   {busyKey === "upload" ? <LoaderCircle aria-hidden="true" size={18} className="animate-spin" /> : <Upload aria-hidden="true" size={18} />}
-                  {busyKey === "upload" ? "Uploading…" : `Upload ${selectedFiles.length || "Selected"} ${selectedFiles.length === 1 ? "Item" : "Items"}`}
+                  {busyKey === "upload" ? "Uploading…" : `Upload ${selectedFiles.length || "Selected"} ${selectedFiles.length === 1 ? "Photo" : "Photos"}`}
                 </button>
               </section>
 
@@ -1227,6 +1308,19 @@ export default function GalleryManager() {
                               >
                                 Your browser does not support this video.
                               </video>
+                            ) : item.mediaType === "VIDEO" && item.imageUrl ? (
+                              <div className="relative h-full w-full">
+                                <Image
+                                  src={item.imageUrl}
+                                  alt={item.altText || item.caption || "Reel thumbnail"}
+                                  fill
+                                  sizes="(max-width: 1024px) 100vw, 50vw"
+                                  className="object-cover"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center bg-[#2D1736]/20">
+                                  <span className="rounded-full bg-white/95 px-4 py-2 text-xs font-black text-[#5B2A86]">{item.embedProvider ?? "External"} reel</span>
+                                </div>
+                              </div>
                             ) : (
                               <div className="flex h-full items-center justify-center text-[#8B7D91]">
                                 {item.mediaType === "PHOTO" ? <Images aria-hidden="true" size={30} /> : <Film aria-hidden="true" size={30} />}
@@ -1249,7 +1343,9 @@ export default function GalleryManager() {
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
                                 <p className="truncate text-xs font-bold text-[#837887]">{item.fileName}</p>
-                                <p className="mt-1 text-xs font-semibold text-[#A096A3]">{formatFileSize(item.fileSize)}</p>
+                                <p className="mt-1 text-xs font-semibold text-[#A096A3]">
+                                  {item.embedProvider ? `${item.embedProvider} · externally hosted` : formatFileSize(item.fileSize)}
+                                </p>
                               </div>
                               <StatusBadge published={item.published} />
                             </div>

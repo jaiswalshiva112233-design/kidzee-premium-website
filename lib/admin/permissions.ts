@@ -33,6 +33,8 @@ export const ADMIN_PAGE_PERMISSION_RULES = [
     permission: ["dashboard.view", "centre.settings"],
   },
   { path: "/admin/settings/data", permission: "owner.only" },
+  { path: "/admin/settings/storage", permission: "owner.only" },
+  { path: "/admin/settings/backup", permission: "owner.only" },
   { path: "/admin/settings/access", permission: "owner.only" },
   { path: "/admin/settings/billing", permission: "owner.only" },
   { path: "/admin/settings/integrations", permission: "owner.only" },
@@ -61,6 +63,8 @@ export const ADMIN_PAGE_PERMISSION_RULES = [
 
 export const ADMIN_API_PERMISSION_RULES = [
   { path: "/api/admin/notifications", permission: "dashboard.view" },
+  { path: "/api/admin/storage-health", permission: "owner.only" },
+  { path: "/api/admin/backup-exports", permission: "owner.only" },
   { path: "/api/admin/intelligence", permission: "owner.only" },
   { path: "/api/admin/marketing", permission: "owner.only" },
   { path: "/api/admin/dashboard", permission: "dashboard.view" },

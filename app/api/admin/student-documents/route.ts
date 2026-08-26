@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import type {
   $Enums,
@@ -7,12 +7,16 @@ import type {
 import { NextResponse } from "next/server";
 
 import { getCurrentAdminUser } from "@/lib/admin/auth";
+import { deleteStoredFile, downloadPrivateFile } from "@/lib/firebase/storageRest";
+import { storePrivateStudentFile } from "@/lib/media/storedFiles";
 import { prisma } from "@/lib/prisma";
+import { logServerError } from "@/lib/server/safeLogging";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_FILE_SIZE = 8 * 1024 * 1024;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_PROFILE_PHOTO_SIZE = 5 * 1024 * 1024;
 
 const DOCUMENT_TYPES = [
   "BIRTH_CERTIFICATE",
@@ -294,10 +298,20 @@ export async function GET(request: Request) {
             id: documentId,
           },
           select: {
+            id: true,
+            studentId: true,
             fileName: true,
             mimeType: true,
             fileSize: true,
             fileData: true,
+            storedFile: {
+              select: {
+                provider: true,
+                storagePath: true,
+                visibility: true,
+                status: true,
+              },
+            },
           },
         });
 
@@ -314,8 +328,23 @@ export async function GET(request: Request) {
         );
       }
 
-      const fileBytes =
-        new Uint8Array(document.fileData);
+      if (document.storedFile?.visibility === "PUBLIC") {
+        return NextResponse.json(
+          { success: false, message: "Private document protection is invalid for this file." },
+          { status: 409 },
+        );
+      }
+      const fileBytes = document.storedFile?.storagePath
+        ? await downloadPrivateFile(document.storedFile.storagePath)
+        : document.fileData
+          ? new Uint8Array(document.fileData)
+          : null;
+      if (!fileBytes) {
+        return NextResponse.json(
+          { success: false, message: "The private document file is unavailable." },
+          { status: 410 },
+        );
+      }
       const fileBody = fileBytes.buffer.slice(
         fileBytes.byteOffset,
         fileBytes.byteOffset +
@@ -327,6 +356,17 @@ export async function GET(request: Request) {
       const safeFileName = sanitiseFileName(
         document.fileName,
       ).replace(/["\\]/g, "-");
+
+      await prisma.activityLog.create({
+        data: {
+          adminUserId: session.userId,
+          action: download ? "DOWNLOADED" : "VIEWED",
+          entityType: "StudentDocument",
+          entityId: document.id,
+          description: `${download ? "Downloaded" : "Viewed"} a protected student document.`,
+          newData: { studentId: document.studentId, private: true },
+        },
+      });
 
       return new NextResponse(fileBody, {
         status: 200,
@@ -445,7 +485,7 @@ export async function GET(request: Request) {
       ),
     });
   } catch (error) {
-    console.error(
+    logServerError(
       "Unable to load student documents:",
       error,
     );
@@ -555,11 +595,21 @@ export async function POST(request: Request) {
         {
           success: false,
           message:
-            "The file must be between 1 byte and 8 MB.",
+            "The file must be between 1 byte and 10 MB.",
         },
         {
           status: 400,
         },
+      );
+    }
+
+    if (
+      documentTypeValue === "PASSPORT_PHOTO" &&
+      fileValue.size > MAX_PROFILE_PHOTO_SIZE
+    ) {
+      return NextResponse.json(
+        { success: false, message: "Student profile photographs must be 5 MB or smaller." },
+        { status: 400 },
       );
     }
 
@@ -613,6 +663,19 @@ export async function POST(request: Request) {
     const fileName = sanitiseFileName(
       fileValue.name,
     );
+    const documentId = randomUUID();
+    const storedFile = await storePrivateStudentFile({
+      bytes: fileData,
+      fileName,
+      mimeType: fileValue.type,
+      studentId,
+      linkedRecordId: documentId,
+      uploadedById: session.userId,
+      compressImage: documentTypeValue === "PASSPORT_PHOTO",
+    });
+    const storedFileName = storedFile.mimeType === "image/webp"
+      ? `${fileName.replace(/\.[^.]+$/, "")}.webp`
+      : fileName;
 
     const result =
       await prisma.$transaction(
@@ -620,14 +683,16 @@ export async function POST(request: Request) {
           const document =
             await transaction.studentDocument.create({
               data: {
+                id: documentId,
                 studentId,
                 documentType:
                   documentTypeValue,
                 title,
-                fileName,
-                mimeType: fileValue.type,
-                fileSize: fileValue.size,
-                fileData,
+                fileName: storedFileName,
+                mimeType: storedFile.mimeType,
+                fileSize: storedFile.optimizedSize ?? storedFile.originalSize,
+                fileData: null,
+                storedFileId: storedFile.id,
                 sha256,
                 status: "UPLOADED",
                 notes,
@@ -689,11 +754,14 @@ export async function POST(request: Request) {
                 studentId,
                 documentType:
                   documentTypeValue,
-                fileName,
-                fileSize: fileValue.size,
-                mimeType: fileValue.type,
+                fileName: storedFileName,
+                fileSize: storedFile.optimizedSize ?? storedFile.originalSize,
+                originalFileSize: fileValue.size,
+                mimeType: storedFile.mimeType,
                 sha256,
                 status: "UPLOADED",
+                storageProvider: storedFile.provider,
+                private: true,
               },
             },
           });
@@ -716,7 +784,7 @@ export async function POST(request: Request) {
       },
     );
   } catch (error) {
-    console.error(
+    logServerError(
       "Unable to upload student document:",
       error,
     );
@@ -954,7 +1022,7 @@ export async function PATCH(request: Request) {
         result.documentsComplete,
     });
   } catch (error) {
-    console.error(
+    logServerError(
       "Unable to update student document:",
       error,
     );
@@ -1024,6 +1092,13 @@ export async function DELETE(request: Request) {
           documentType: true,
           fileName: true,
           status: true,
+          storedFileId: true,
+          storedFile: {
+            select: {
+              storagePath: true,
+              provider: true,
+            },
+          },
           student: {
             select: {
               firstName: true,
@@ -1056,6 +1131,13 @@ export async function DELETE(request: Request) {
               id: documentId,
             },
           });
+
+          if (existingDocument.storedFileId) {
+            await transaction.storedFile.update({
+              where: { id: existingDocument.storedFileId },
+              data: { status: "DELETED", deletedAt: new Date() },
+            });
+          }
 
           const completionState =
             await updateAdmissionDocumentState(
@@ -1093,15 +1175,34 @@ export async function DELETE(request: Request) {
         },
       );
 
+    let cleanupWarning = false;
+    if (existingDocument.storedFile?.storagePath) {
+      try {
+        await deleteStoredFile(existingDocument.storedFile.storagePath);
+      } catch (storageError) {
+        cleanupWarning = true;
+        if (existingDocument.storedFileId) {
+          await prisma.storedFile.update({
+            where: { id: existingDocument.storedFileId },
+            data: {
+              status: "FAILED",
+              processingError: storageError instanceof Error ? storageError.name : "StorageDeletionError",
+            },
+          });
+        }
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      message:
-        "Student document deleted permanently.",
+      message: cleanupWarning
+        ? "The document record was deleted, but storage cleanup needs attention in Storage & Media Health."
+        : "Student document deleted permanently.",
       documentId,
       documentsComplete,
     });
   } catch (error) {
-    console.error(
+    logServerError(
       "Unable to delete student document:",
       error,
     );

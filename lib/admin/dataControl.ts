@@ -27,6 +27,11 @@ export type DataControlAction =
   | "deleteExpense"
   | "deleteSelected";
 
+const BULK_CLEANUP_TRANSACTION_OPTIONS = {
+  maxWait: 15_000,
+  timeout: 120_000,
+} as const;
+
 export class DataControlBlockedError extends Error {
   constructor(
     public readonly safeMessage: string,
@@ -699,6 +704,7 @@ async function deleteStudentBundle(
       daycareSessions: { select: { id: true } },
       ledgerCharges: { select: { id: true } },
       financialCorrections: { select: { id: true } },
+      documents: { select: { id: true, storedFileId: true } },
     },
   });
 
@@ -758,6 +764,7 @@ async function deleteStudentBundle(
     ...student.daycareSessions.map((item) => item.id),
     ...student.ledgerCharges.map((item) => item.id),
     ...student.financialCorrections.map((item) => item.id),
+    ...student.documents.map((item) => item.id),
     admission?.id,
   ].filter((id): id is string => Boolean(id));
 
@@ -801,6 +808,15 @@ async function deleteStudentBundle(
   ).count;
   await transaction.studentFeeAccount.deleteMany({ where: { studentId } });
   await transaction.studentAttendance.deleteMany({ where: { studentId } });
+  const storedFileIds = student.documents
+    .map((item) => item.storedFileId)
+    .filter((id): id is string => Boolean(id));
+  if (storedFileIds.length > 0) {
+    await transaction.storedFile.updateMany({
+      where: { id: { in: storedFileIds }, status: { not: "DELETED" } },
+      data: { status: "ARCHIVED", archivedAt: new Date() },
+    });
+  }
   await transaction.studentDocument.deleteMany({ where: { studentId } });
   if (student.enrollmentContract) {
     summary.contractServices += (
@@ -1381,7 +1397,7 @@ export async function executeDataControlAction(input: {
         });
       }
       return { summary, blockers };
-    });
+    }, BULK_CLEANUP_TRANSACTION_OPTIONS);
 
     return {
       message: summaryMessage(result.summary, result.blockers),

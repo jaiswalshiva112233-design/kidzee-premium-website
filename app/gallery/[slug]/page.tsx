@@ -135,14 +135,18 @@ export default async function GalleryAlbumPage({
     image: photoUrls,
     associatedMedia: album.media
       .filter(
-        (item) => item.mediaType === "VIDEO" && Boolean(item.videoUrl),
+        (item) =>
+          item.mediaType === "VIDEO" &&
+          Boolean(item.videoUrl || item.embedUrl),
       )
       .map((item) => ({
         "@type": "VideoObject",
         name: item.caption || album.title,
         description:
           item.altText || item.caption || `A short video from ${album.title}`,
-        contentUrl: item.videoUrl,
+        contentUrl: item.videoUrl || item.embedUrl,
+        embedUrl: item.embedPlayerUrl || undefined,
+        thumbnailUrl: item.thumbnailUrl || item.imageUrl || undefined,
         uploadDate: item.createdAt,
       })),
     isPartOf: {

@@ -33,7 +33,7 @@ const VIDEO_TYPES = new Set([
   "video/webm",
   "video/x-m4v",
 ]);
-const MAX_IMAGE_BYTES = 80 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 800 * 1024 * 1024;
 
 function mediaJobId(path) {

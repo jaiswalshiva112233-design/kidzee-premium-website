@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 import {
-  hasAdminPermission,
-  isAdminAuthenticated,
+  getCurrentAdminUser,
 } from "@/lib/admin/auth";
+import { storePublicGalleryImage } from "@/lib/media/storedFiles";
+import { prisma } from "@/lib/prisma";
 import { sanityServerClient } from "@/lib/sanity/serverClient";
 import { logServerError, logServerWarning } from "@/lib/server/safeLogging";
 import { site } from "@/lib/site";
@@ -44,6 +45,7 @@ type AdminTeamMember = {
 
 type StoredTeamMember = AdminTeamMember & {
   assetId: string | null;
+  storedFileId: string | null;
   consentConfirmedAt: string | null;
 };
 
@@ -129,9 +131,9 @@ function hasAllowedOrigin(request: Request) {
 }
 
 async function requireWebsiteManager() {
-  const authenticated = await isAdminAuthenticated();
+  const session = await getCurrentAdminUser();
 
-  if (!authenticated) {
+  if (!session) {
     return {
       allowed: false as const,
       response: noStoreJson(
@@ -144,7 +146,11 @@ async function requireWebsiteManager() {
     };
   }
 
-  if (!(await hasAdminPermission("website.manage"))) {
+  if (
+    session.role !== "OWNER" &&
+    !session.permissions.includes("*") &&
+    !session.permissions.includes("website.manage")
+  ) {
     return {
       allowed: false as const,
       response: noStoreJson(
@@ -160,6 +166,7 @@ async function requireWebsiteManager() {
 
   return {
     allowed: true as const,
+    session,
   };
 }
 
@@ -184,8 +191,9 @@ async function getStoredMember(id: string) {
       experience,
       introduction,
       photoAlt,
-      "imageUrl": photo.asset->url,
+      "imageUrl": coalesce(externalImageUrl, photo.asset->url),
       "assetId": photo.asset->_id,
+      storedFileId,
       consentConfirmedAt,
       published,
       featured,
@@ -259,7 +267,7 @@ export async function GET() {
           experience,
           introduction,
           photoAlt,
-          "imageUrl": photo.asset->url,
+          "imageUrl": coalesce(externalImageUrl, photo.asset->url),
           published,
           featured,
           sortOrder,
@@ -440,7 +448,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const hasPhoto = Boolean(file || existing?.assetId);
+    const hasPhoto = Boolean(file || existing?.imageUrl);
 
     if (published && !hasPhoto) {
       return noStoreJson(
@@ -492,28 +500,28 @@ export async function POST(request: Request) {
       }
     }
 
-    let uploadedAsset: { _id: string; url: string } | null = null;
-
-    if (file) {
-      uploadedAsset = await sanityServerClient.assets.upload(
-        "image",
-        Buffer.from(await file.arrayBuffer()),
-        {
-          filename: cleanText(file.name, 180) || "teacher-portrait",
-          contentType: file.type,
-        },
-      );
-    }
-
     const now = new Date().toISOString();
     const documentId = id || `websiteTeamMember.${randomUUID()}`;
+    const storedPhoto = file
+      ? await storePublicGalleryImage({
+          bytes: new Uint8Array(await file.arrayBuffer()),
+          fileName: cleanText(file.name, 180) || "teacher-portrait",
+          mimeType: file.type,
+          albumId: "team",
+          uploadedById: access.session.userId,
+          module: "WEBSITE_TEAM",
+          linkedRecordType: "WebsiteTeamMember",
+          linkedRecordId: documentId,
+          pathPrefix: "public/website/team",
+        })
+      : null;
     const sortOrder = existing
       ? cleanSortOrder(formData.get("sortOrder"))
       : await sanityServerClient.fetch<number>(
           `count(*[_type == "websiteTeamMember"])`,
         );
-    const assetId = uploadedAsset?._id ?? existing?.assetId ?? null;
-    const imageUrl = uploadedAsset?.url ?? existing?.imageUrl ?? null;
+    const assetId = storedPhoto ? null : existing?.assetId ?? null;
+    const imageUrl = storedPhoto?.publicUrl ?? existing?.imageUrl ?? null;
     const finalPhotoAlt =
       photoAlt || `${name}, ${role} at Kidzee Sector 12 Dwarka`;
 
@@ -536,6 +544,8 @@ export async function POST(request: Request) {
         : existing?.consentConfirmedAt ?? null,
       createdAt: existing?.createdAt || now,
       updatedAt: now,
+      externalImageUrl: storedPhoto?.publicUrl ?? (existing?.storedFileId ? existing.imageUrl : null),
+      storedFileId: storedPhoto?.id ?? existing?.storedFileId ?? null,
       ...(assetId
         ? {
             photo: {
@@ -552,12 +562,32 @@ export async function POST(request: Request) {
     await sanityServerClient.createOrReplace(document);
     refreshTeamPages();
 
-    if (
-      uploadedAsset &&
-      existing?.assetId &&
-      existing.assetId !== uploadedAsset._id
-    ) {
+    if (storedPhoto && existing?.assetId) {
       await removeUnusedAsset(existing.assetId);
+    }
+
+    if (storedPhoto && existing?.storedFileId) {
+      await prisma.storedFile.updateMany({
+        where: { id: existing.storedFileId, status: { not: "DELETED" } },
+        data: { status: "ARCHIVED", archivedAt: new Date() },
+      });
+    }
+    if (storedPhoto) {
+      await prisma.activityLog.create({
+        data: {
+          adminUserId: access.session.userId,
+          action: "CREATED",
+          entityType: "WebsiteTeamMedia",
+          entityId: storedPhoto.id,
+          description: `Optimised public team portrait saved for ${name}.`,
+          newData: {
+            teamMemberId: documentId,
+            originalSize: file?.size,
+            optimizedSize: storedPhoto.optimizedSize,
+            thumbnailSize: storedPhoto.thumbnailSize,
+          },
+        },
+      });
     }
 
     return noStoreJson({
@@ -698,7 +728,7 @@ export async function PATCH(request: Request) {
     if (action === "setPublished") {
       const published = cleanBoolean(body.value);
 
-      if (published && !existing.assetId) {
+      if (published && !existing.imageUrl) {
         return noStoreJson(
           {
             success: false,
@@ -860,6 +890,22 @@ export async function DELETE(request: Request) {
 
     await sanityServerClient.delete(id);
     await removeUnusedAsset(existing.assetId);
+    if (existing.storedFileId) {
+      await prisma.storedFile.updateMany({
+        where: { id: existing.storedFileId, status: { not: "DELETED" } },
+        data: { status: "ARCHIVED", archivedAt: new Date() },
+      });
+    }
+    await prisma.activityLog.create({
+      data: {
+        adminUserId: access.session.userId,
+        action: "ARCHIVED",
+        entityType: "WebsiteTeamMember",
+        entityId: id,
+        description: `${existing.name} removed from the public team; external portrait retained in the archive index.`,
+        previousData: { storedFileId: existing.storedFileId },
+      },
+    });
     refreshTeamPages();
 
     return noStoreJson({

@@ -75,6 +75,9 @@ test("bulk deletion requires exact phrase, backup and test-data confirmation", (
 
 test("cleanup executes all related deletions in one transaction", () => {
   assert.match(cleanup, /prisma\.\$transaction\(async \(transaction\) =>/);
+  assert.match(cleanup, /BULK_CLEANUP_TRANSACTION_OPTIONS/);
+  assert.match(cleanup, /maxWait:\s*15_000/);
+  assert.match(cleanup, /timeout:\s*120_000/);
   assert.match(endpoint, /No partial deletion was kept/);
 });
 

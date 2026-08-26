@@ -335,6 +335,35 @@ enum ActivityAction {
   LOGIN
   LOGOUT
   EXPORTED
+  VIEWED
+  DOWNLOADED
+  ARCHIVED
+}
+
+enum StoredFileVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum StoredFileStatus {
+  PROCESSING
+  READY
+  FAILED
+  ARCHIVED
+  DELETED
+}
+
+enum BackupExportType {
+  DATABASE
+  WEBSITE_CONTENT
+  MEDIA_INDEX
+  SETTINGS
+}
+
+enum BackupExportStatus {
+  GENERATING
+  COMPLETED
+  FAILED
 }
 
 enum AttendanceStatus {
@@ -989,7 +1018,8 @@ model StudentDocument {
   fileName        String
   mimeType        String
   fileSize        Int
-  fileData        Bytes                 @db.ByteA
+  fileData        Bytes?                @db.ByteA
+  storedFileId    String?               @unique
   sha256          String
   status          StudentDocumentStatus @default(UPLOADED)
   notes           String?
@@ -1001,14 +1031,84 @@ model StudentDocument {
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt
 
-  student    Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  uploadedBy AdminUser? @relation("StudentDocumentUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
-  verifiedBy AdminUser? @relation("StudentDocumentVerifiedBy", fields: [verifiedById], references: [id], onDelete: SetNull)
+  student    Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  uploadedBy AdminUser?  @relation("StudentDocumentUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+  verifiedBy AdminUser?  @relation("StudentDocumentVerifiedBy", fields: [verifiedById], references: [id], onDelete: SetNull)
+  storedFile StoredFile? @relation(fields: [storedFileId], references: [id], onDelete: SetNull)
 
   @@index([studentId])
   @@index([studentId, documentType])
   @@index([status])
   @@index([createdAt])
+}
+
+model StoredFile {
+  id               String               @id @default(cuid())
+  provider         String               @default("FIREBASE_STORAGE")
+  bucket           String?
+  storagePath      String?              @unique
+  publicUrl        String?
+  visibility       StoredFileVisibility
+  module           String
+  linkedRecordType String?
+  linkedRecordId   String?
+  originalName     String
+  mimeType         String
+  originalSize     Int
+  optimizedSize    Int?
+  thumbnailSize    Int?
+  width            Int?
+  height           Int?
+  sha256           String?
+  status           StoredFileStatus     @default(PROCESSING)
+  processingError  String?
+  metadata         Json?
+  uploadedById     String?
+  archivedAt       DateTime?
+  deletedAt        DateTime?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  studentDocument StudentDocument?
+
+  @@index([visibility, status])
+  @@index([module, linkedRecordType, linkedRecordId])
+  @@index([uploadedById, createdAt])
+  @@index([createdAt])
+}
+
+model MediaSafetySetting {
+  id                       String   @id @default("centre-media-safety")
+  aiMediaFeaturesEnabled   Boolean  @default(false)
+  directVideoUploadEnabled Boolean  @default(false)
+  externalEmbedsEnabled    Boolean  @default(true)
+  originalArchiveEnabled   Boolean  @default(false)
+  compressionEnabled       Boolean  @default(true)
+  privateProtectionLocked  Boolean  @default(true)
+  backupWarningsEnabled    Boolean  @default(true)
+  growthWarningsEnabled    Boolean  @default(true)
+  updatedById              String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+}
+
+model BackupExport {
+  id            String             @id @default(cuid())
+  exportType    BackupExportType
+  status        BackupExportStatus @default(GENERATING)
+  fileName      String?
+  sizeBytes     Int?
+  recordCount   Int?
+  errorMessage  String?
+  createdById   String
+  createdByName String
+  completedAt   DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([exportType, createdAt])
+  @@index([status, createdAt])
+  @@index([createdById, createdAt])
 }
 
 model ProgrammeFeeSetting {

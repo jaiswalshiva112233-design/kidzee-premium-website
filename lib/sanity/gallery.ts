@@ -9,7 +9,11 @@ export type PublicGalleryMedia = {
   caption: string;
   altText: string;
   imageUrl: string | null;
+  thumbnailUrl: string | null;
   videoUrl: string | null;
+  embedUrl: string | null;
+  embedPlayerUrl: string | null;
+  embedProvider: "INSTAGRAM" | "YOUTUBE" | null;
   sortOrder: number;
   createdAt: string;
 };
@@ -145,8 +149,12 @@ export async function getPublishedGalleryAlbums(): Promise<
           mediaType,
           caption,
           altText,
-          "imageUrl": image.asset->url,
+          "imageUrl": coalesce(externalImageUrl, image.asset->url),
+          "thumbnailUrl": coalesce(externalThumbnailUrl, externalImageUrl, image.asset->url),
           "videoUrl": video.asset->url,
+          embedUrl,
+          embedPlayerUrl,
+          embedProvider,
           sortOrder,
           createdAt
         }
@@ -211,8 +219,12 @@ export async function getPublishedGalleryAlbumBySlug(
           mediaType,
           caption,
           altText,
-          "imageUrl": image.asset->url,
+          "imageUrl": coalesce(externalImageUrl, image.asset->url),
+          "thumbnailUrl": coalesce(externalThumbnailUrl, externalImageUrl, image.asset->url),
           "videoUrl": video.asset->url,
+          embedUrl,
+          embedPlayerUrl,
+          embedProvider,
           sortOrder,
           createdAt
         }

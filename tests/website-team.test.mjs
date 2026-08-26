@@ -27,7 +27,7 @@ test("website team manager and API enforce a nine-profile limit", () => {
 
 test("website team page and upload API require website.manage", () => {
   assert.match(page, /hasAdminPermission\("website\.manage"\)/);
-  assert.match(route, /hasAdminPermission\("website\.manage"\)/);
+  assert.match(route, /session\.permissions\.includes\("website\.manage"\)/);
   assert.match(route, /hasAllowedOrigin\(request\)/);
   assert.match(permissions, /path: "\/admin\/website"[\s\S]*permission: "website\.manage"/);
   assert.match(permissions, /path: "\/api\/admin\/website-team"[\s\S]*permission: "website\.manage"/);
