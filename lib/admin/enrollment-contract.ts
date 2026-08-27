@@ -497,6 +497,22 @@ export async function createEnrollmentContractAndDraftInvoice(
   for (const requested of selection.daycareSelections) {
     const definition = daycareDefinitions.find((item) => item.id === requested.planDefinitionId)!;
     const price = definition.priceVersions[0];
+    const selectedPlanType = daycarePlanType(
+      selection.preschoolEnabled,
+      definition.billingType,
+    );
+    const includedDays =
+      selectedPlanType === "FLEXIBLE_DAYS"
+        ? definition.maximumVisits
+        : null;
+    if (
+      selectedPlanType === "FLEXIBLE_DAYS" &&
+      (includedDays == null || includedDays < 1 || includedDays > 31)
+    ) {
+      throw new Error(
+        `${definition.name} needs a maximum of 1 to 31 visits before it can be added to an enrollment contract.`,
+      );
+    }
     const service = services.find(
       (item) => item.serviceType === "DAYCARE" && item.catalogueItemId === definition.id,
     )!;
@@ -509,13 +525,13 @@ export async function createEnrollmentContractAndDraftInvoice(
         priceVersionId: price.id,
         mealCombinationId: mealCombination?.id ?? null,
         title: definition.name,
-        planType: daycarePlanType(selection.preschoolEnabled, definition.billingType),
+        planType: selectedPlanType,
         billingMode: daycareBillingMode(definition.billingType),
         scheduledWeekdays: requested.scheduledWeekdays,
         foodRequired: Boolean(mealCombination),
         foodOption: mealCombination ? "BOTH" : "NONE",
         dailyHours: definition.hoursIncluded,
-        includedDays: definition.maximumVisits,
+        includedDays,
         effectiveFrom: requested.effectiveFrom,
         effectiveTo: requested.effectiveTo,
         active: input.documentsComplete,

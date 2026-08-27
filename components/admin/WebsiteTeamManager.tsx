@@ -49,7 +49,12 @@ type ApiResponse = {
   message?: string;
   members?: TeamMember[];
   member?: TeamMember;
+  teamSettings?: {
+    movementSpeed: TeamMovementSpeed;
+  };
 };
+
+type TeamMovementSpeed = "SLOW" | "NORMAL" | "FAST";
 
 type TeamFormState = {
   id: string;
@@ -99,6 +104,9 @@ export default function WebsiteTeamManager() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState("");
+  const [movementSpeed, setMovementSpeed] =
+    useState<TeamMovementSpeed>("NORMAL");
+  const [savingMovementSpeed, setSavingMovementSpeed] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const formRef = useRef<HTMLDivElement>(null);
@@ -149,6 +157,7 @@ export default function WebsiteTeamManager() {
 
       const nextMembers = sortMembers(result.members ?? []);
       setMembers(nextMembers);
+      setMovementSpeed(result.teamSettings?.movementSpeed ?? "NORMAL");
       setForm((current) =>
         current.id
           ? current
@@ -455,6 +464,48 @@ export default function WebsiteTeamManager() {
     }
   }
 
+  async function saveMovementSpeed(nextSpeed: TeamMovementSpeed) {
+    const previousSpeed = movementSpeed;
+    setMovementSpeed(nextSpeed);
+    setSavingMovementSpeed(true);
+    setMessage("");
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/website-team", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "setMovementSpeed",
+          value: nextSpeed,
+        }),
+      });
+      const result = (await response.json()) as ApiResponse;
+
+      if (!response.ok || !result.success) {
+        throw new Error(
+          result.message ?? "The staff movement speed could not be saved.",
+        );
+      }
+
+      setMovementSpeed(result.teamSettings?.movementSpeed ?? nextSpeed);
+      setMessage(
+        result.message ?? "The staff movement speed has been saved.",
+      );
+    } catch (saveError) {
+      setMovementSpeed(previousSpeed);
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "The staff movement speed could not be saved.",
+      );
+    } finally {
+      setSavingMovementSpeed(false);
+    }
+  }
+
   return (
     <div className="space-y-7">
       <section className="grid gap-4 sm:grid-cols-3">
@@ -478,6 +529,43 @@ export default function WebsiteTeamManager() {
             </p>
           </article>
         ))}
+      </section>
+
+      <section className="rounded-[26px] border border-[#E4D7E9] bg-white p-5 shadow-[0_14px_42px_rgba(45,23,54,0.06)] sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-6">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.14em] text-[#7A459C]">
+            Homepage presentation
+          </p>
+          <h2 className="mt-2 text-xl font-black tracking-[-0.025em] text-[#2D1736]">
+            Staff photo movement speed
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[#756A79]">
+            Controls the continuous team strip on the homepage. Normal is the
+            recommended balanced speed.
+          </p>
+        </div>
+
+        <div
+          className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-[#F6F1F8] p-1.5 sm:mt-0 sm:min-w-[300px]"
+          aria-label="Staff photo movement speed"
+        >
+          {(["SLOW", "NORMAL", "FAST"] as const).map((speed) => (
+            <button
+              key={speed}
+              type="button"
+              disabled={savingMovementSpeed}
+              aria-pressed={movementSpeed === speed}
+              onClick={() => void saveMovementSpeed(speed)}
+              className={`min-h-11 rounded-xl px-3 text-xs font-black transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45 disabled:cursor-wait disabled:opacity-65 ${
+                movementSpeed === speed
+                  ? "bg-[#5B2A86] text-white shadow-sm"
+                  : "text-[#5B2A86] hover:bg-white"
+              }`}
+            >
+              {speed.charAt(0) + speed.slice(1).toLowerCase()}
+            </button>
+          ))}
+        </div>
       </section>
 
       {message ? (

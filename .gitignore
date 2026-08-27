@@ -46,3 +46,29 @@ next-env.d.ts
 /generated/prisma
 
 .codex-backups/
+# Environment and secrets
+.env
+.env.local
+.env.production
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+.next/
+
+# Logs
+*.log
+
+# Database backups / dumps
+*.dump
+*.backup
+*.sql
+backups/
+backup/
+
+# Local private uploads / sensitive media
+private/
+uploads/private/
+student-media/
+student-uploads/

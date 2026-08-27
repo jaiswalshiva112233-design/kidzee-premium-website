@@ -49,6 +49,8 @@ type StoredTeamMember = AdminTeamMember & {
   consentConfirmedAt: string | null;
 };
 
+type TeamMovementSpeed = "SLOW" | "NORMAL" | "FAST";
+
 type TeamUpdateRequest = {
   action?: unknown;
   id?: unknown;
@@ -90,6 +92,13 @@ function cleanId(value: unknown) {
 
 function cleanBoolean(value: unknown) {
   return value === true || value === "true" || value === "1";
+}
+
+function cleanMovementSpeed(value: unknown): TeamMovementSpeed | null {
+  const speed = cleanText(value, 20).toUpperCase();
+  return speed === "SLOW" || speed === "NORMAL" || speed === "FAST"
+    ? speed
+    : null;
 }
 
 function cleanSortOrder(value: unknown) {
@@ -256,8 +265,9 @@ export async function GET() {
       return access.response;
     }
 
-    const members = await sanityServerClient.fetch<AdminTeamMember[]>(
-      `*[_type == "websiteTeamMember"] |
+    const [members, storedSettings] = await Promise.all([
+      sanityServerClient.fetch<AdminTeamMember[]>(
+        `*[_type == "websiteTeamMember"] |
         order(sortOrder asc, createdAt asc) {
           _id,
           name,
@@ -274,15 +284,27 @@ export async function GET() {
           createdAt,
           updatedAt
         }`,
-      {},
-      {
-        cache: "no-store",
-      },
-    );
+        {},
+        { cache: "no-store" },
+      ),
+      sanityServerClient.fetch<{ movementSpeed?: string } | null>(
+        `*[
+          _type == "websiteTeamSettings" &&
+          _id == "websiteTeamSettings"
+        ][0] {
+          movementSpeed
+        }`,
+        {},
+        { cache: "no-store" },
+      ),
+    ]);
+    const movementSpeed =
+      cleanMovementSpeed(storedSettings?.movementSpeed) ?? "NORMAL";
 
     return noStoreJson({
       success: true,
       members: members ?? [],
+      teamSettings: { movementSpeed },
     });
   } catch (error) {
     logServerError("Unable to load website team profiles.", error);
@@ -659,6 +681,44 @@ export async function PATCH(request: Request) {
 
     const action = cleanText(body.action, 40);
     const now = new Date().toISOString();
+
+    if (action === "setMovementSpeed") {
+      const movementSpeed = cleanMovementSpeed(body.value);
+
+      if (!movementSpeed) {
+        return noStoreJson(
+          {
+            success: false,
+            message: "Choose Slow, Normal or Fast movement.",
+          },
+          400,
+        );
+      }
+
+      await sanityServerClient.createOrReplace({
+        _id: "websiteTeamSettings",
+        _type: "websiteTeamSettings",
+        movementSpeed,
+        updatedAt: now,
+      });
+      await prisma.activityLog.create({
+        data: {
+          adminUserId: access.session.userId,
+          action: "UPDATED",
+          entityType: "WebsiteTeamSettings",
+          entityId: "websiteTeamSettings",
+          description: `Homepage staff movement speed changed to ${movementSpeed.toLowerCase()}.`,
+          newData: { movementSpeed },
+        },
+      });
+      refreshTeamPages();
+
+      return noStoreJson({
+        success: true,
+        message: `Staff photo movement is now ${movementSpeed.toLowerCase()}.`,
+        teamSettings: { movementSpeed },
+      });
+    }
 
     if (action === "reorderMembers") {
       const orderedIds = cleanOrderedIds(body.orderedIds);

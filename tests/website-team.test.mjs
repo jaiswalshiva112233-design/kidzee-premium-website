@@ -14,6 +14,7 @@ const preview = source("components/HomeTeamPreview.tsx");
 const carousel = source("components/HomeTeamCarousel.tsx");
 const aboutTeam = source("components/Team.tsx");
 const permissions = source("lib/admin/permissions.ts");
+const globals = source("app/globals.css");
 
 test("website team manager and API enforce a nine-profile limit", () => {
   assert.match(route, /const MAX_TEAM_MEMBERS = 9/);
@@ -56,11 +57,12 @@ test("public team query exposes only approved public profile fields", () => {
   );
 });
 
-test("homepage receives up to nine featured profiles and shows at most three at once", () => {
+test("homepage receives up to nine featured profiles and applies managed movement speed", () => {
   assert.match(home, /getFeaturedWebsiteTeamMembers\(9\)/);
+  assert.match(home, /getWebsiteTeamSettings\(\)/);
   assert.match(teamData, /MAX_WEBSITE_TEAM_PROFILES = 9/);
   assert.match(teamData, /Math\.min\(limit, MAX_WEBSITE_TEAM_PROFILES\)/);
-  assert.match(preview, /<HomeTeamCarousel members=\{members\}/);
+  assert.match(preview, /movementSpeed=\{movementSpeed\}/);
   assert.match(carousel, /const DESKTOP_PAGE_SIZE = 3/);
   assert.match(carousel, /members\.length > DESKTOP_PAGE_SIZE/);
 });
@@ -72,22 +74,22 @@ test("one to three homepage profiles remain static", () => {
   assert.match(carousel, /lg:grid-cols-3/);
 });
 
-test("four to nine profiles use a slow one-direction desktop carousel and manual mobile swipe", () => {
-  assert.match(carousel, /const AUTOPLAY_DELAY_MS = 6200/);
-  assert.match(carousel, /setPageIndex\(\(current\) => current \+ 1\)/);
-  assert.match(carousel, /duration-\[900ms\]/);
-  assert.match(carousel, /snap-x snap-mandatory/);
-  assert.match(carousel, /lg:hidden/);
-  assert.match(carousel, /hidden lg:block/);
-  assert.match(carousel, /Show the next team profiles/);
+test("four to nine profiles use a seamless one-direction marquee on desktop and mobile", () => {
+  assert.match(carousel, /repeatedMembers = \[\.\.\.members, \.\.\.members\]/);
+  assert.match(carousel, /team-marquee-track/);
+  assert.match(carousel, /speedDurations\[movementSpeed\]/);
+  assert.match(globals, /animation: team-marquee/);
+  assert.match(globals, /translate3d/);
 });
 
-test("team motion pauses for interaction and respects reduced motion", () => {
-  assert.match(carousel, /prefers-reduced-motion: reduce/);
-  assert.match(carousel, /paused \|\| reducedMotion/);
-  assert.match(carousel, /onMouseEnter=\{\(\) => setPaused\(true\)\}/);
-  assert.match(carousel, /onFocusCapture=\{\(\) => setPaused\(true\)\}/);
-  assert.match(carousel, /motion-reduce:transition-none/);
+test("team motion speed is owner managed in Sanity and respects reduced motion", () => {
+  assert.match(route, /action === "setMovementSpeed"/);
+  assert.match(route, /_id: "websiteTeamSettings"/);
+  assert.match(manager, /Staff photo movement speed/);
+  assert.match(manager, /\["SLOW", "NORMAL", "FAST"\]/);
+  assert.match(teamData, /movementSpeed/);
+  assert.match(globals, /prefers-reduced-motion: reduce/);
+  assert.match(globals, /\.team-marquee-track[\s\S]*animation: none !important/);
 });
 
 test("About page supports all nine published profiles with stable portrait crops and fallback", () => {

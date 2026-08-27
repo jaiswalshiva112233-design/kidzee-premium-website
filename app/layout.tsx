@@ -9,6 +9,7 @@ import { programmes, site } from "@/lib/site";
 import { buildSiteContact } from "@/lib/siteContact";
 import MiraLauncher from "@/components/mira/MiraLauncher";
 import SiteContactProvider from "@/components/SiteContactProvider";
+import SiteMotionManager from "@/components/SiteMotionManager";
 import { getWebsiteOperationalSettings } from "@/lib/website/operationalSettings";
 
 const defaultTitle = "Kidzee Preschool & Daycare in Sector 12 Dwarka";
@@ -262,7 +263,7 @@ export default async function RootLayout({
   );
 
   return (
-    <html lang="en-IN">
+    <html lang="en-IN" data-scroll-behavior="smooth">
       <head>
         {trackingSettings.googleSearchConsoleVerification ? (
           <meta
@@ -286,6 +287,7 @@ export default async function RootLayout({
         />
 
         <SiteContactProvider settings={contactSettings}>
+          <SiteMotionManager />
           {children}
           <MiraLauncher />
         </SiteContactProvider>

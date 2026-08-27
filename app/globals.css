@@ -430,6 +430,75 @@ body[data-mobile-menu-open="true"] .mobile-contact-bar {
   color: var(--ink);
 }
 
+/* Continuous, settings-controlled homepage team movement */
+.team-marquee {
+  --team-marquee-gap: 1rem;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 30px;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 3%,
+    #000 97%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 3%,
+    #000 97%,
+    transparent
+  );
+}
+
+.team-marquee-track {
+  display: flex;
+  width: max-content;
+  gap: var(--team-marquee-gap);
+  will-change: transform;
+  animation: team-marquee var(--team-marquee-duration, 34s) linear infinite;
+}
+
+.team-marquee-card {
+  width: clamp(230px, 21vw, 290px);
+  flex: 0 0 auto;
+}
+
+@keyframes team-marquee {
+  to {
+    transform: translate3d(
+      calc(-50% - (var(--team-marquee-gap) / 2)),
+      0,
+      0
+    );
+  }
+}
+
+/* Public-page reveal enhancement; content stays visible without JavaScript. */
+[data-site-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 560ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-site-reveal="pending"] {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+}
+
+[data-site-reveal="visible"] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+[data-site-reveal="visible"] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
 .card-hover {
   transition:
     transform 0.28s ease,
@@ -797,6 +866,16 @@ details[open] summary {
     font-size: 0.98rem;
     line-height: 1.78;
   }
+
+  .team-marquee {
+    --team-marquee-gap: 0.75rem;
+    margin-inline: -12px;
+    width: calc(100% + 24px);
+  }
+
+  .team-marquee-card {
+    width: min(72vw, 270px);
+  }
 }
 
 /* =========================================================
@@ -815,6 +894,39 @@ details[open] summary {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .team-marquee {
+    overflow: visible;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  .team-marquee-track {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .team-marquee-card {
+    width: auto;
+  }
+
+  .team-marquee-card[aria-hidden="true"] {
+    display: none;
+  }
+
+  [data-site-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 900px) {
+  .team-marquee-track {
+    grid-template-columns: 1fr;
   }
 }
 

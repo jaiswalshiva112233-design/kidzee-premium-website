@@ -3,6 +3,54 @@ export type EffectiveRange = {
   effectiveTo: Date | null;
 };
 
+export type DaycarePlanDependencySummary = {
+  activeAssignments: number;
+  attendanceRecords: number;
+  invoiceItems: number;
+  ledgerCharges: number;
+  contractLinks: number;
+  auditRecords: number;
+};
+
+/**
+ * StudentDaycarePlan_catalogue_values_check requires a billing stop timestamp
+ * to be on or after the plan start. Future-dated plans therefore stop at their
+ * effective start, while plans that have already begun stop at the action time.
+ */
+export function daycareLifecycleStopAt(effectiveFrom: Date, actionAt: Date) {
+  return actionAt < effectiveFrom ? effectiveFrom : actionAt;
+}
+
+export function daycareServiceEndAt(
+  effectiveFrom: Date,
+  configuredEnd: Date | null,
+  actionAt: Date,
+) {
+  const lifecycleEnd = daycareLifecycleStopAt(effectiveFrom, actionAt);
+  return configuredEnd && configuredEnd < lifecycleEnd
+    ? configuredEnd
+    : lifecycleEnd;
+}
+
+export function daycarePlanHistoricalDependencyCount(
+  dependencies: DaycarePlanDependencySummary,
+) {
+  return (
+    dependencies.attendanceRecords +
+    dependencies.invoiceItems +
+    dependencies.ledgerCharges
+  );
+}
+
+export function canPermanentlyDeleteDaycarePlan(
+  dependencies: DaycarePlanDependencySummary,
+) {
+  return (
+    dependencies.activeAssignments === 0 &&
+    daycarePlanHistoricalDependencyCount(dependencies) === 0
+  );
+}
+
 export function effectiveRangesOverlap(
   left: EffectiveRange,
   right: EffectiveRange,

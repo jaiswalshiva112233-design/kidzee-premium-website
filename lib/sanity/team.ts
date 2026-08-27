@@ -16,7 +16,38 @@ export type WebsiteTeamMember = {
   sortOrder: number;
 };
 
+export type WebsiteTeamMovementSpeed = "SLOW" | "NORMAL" | "FAST";
+
+export type WebsiteTeamSettings = {
+  movementSpeed: WebsiteTeamMovementSpeed;
+};
+
 export const MAX_WEBSITE_TEAM_PROFILES = 9;
+
+export async function getWebsiteTeamSettings(): Promise<WebsiteTeamSettings> {
+  try {
+    const settings = await sanityServerClient.fetch<{
+      movementSpeed?: string;
+    } | null>(
+      `*[_type == "websiteTeamSettings" && _id == "websiteTeamSettings"][0] {
+        movementSpeed
+      }`,
+      {},
+      { next: { revalidate: 60 } },
+    );
+
+    return {
+      movementSpeed:
+        settings?.movementSpeed === "SLOW" ||
+        settings?.movementSpeed === "FAST"
+          ? settings.movementSpeed
+          : "NORMAL",
+    };
+  } catch {
+    console.error("Unable to load website team movement settings.");
+    return { movementSpeed: "NORMAL" };
+  }
+}
 
 export async function getPublishedWebsiteTeamMembers(): Promise<
   WebsiteTeamMember[]

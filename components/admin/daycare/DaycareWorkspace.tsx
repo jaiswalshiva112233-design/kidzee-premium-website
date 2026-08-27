@@ -1,12 +1,15 @@
 "use client";
 
 import {
+  AlertTriangle,
+  Archive,
   BadgeIndianRupee,
   CheckCircle2,
   Clock3,
   CreditCard,
   IndianRupee,
   LoaderCircle,
+  MoreHorizontal,
   Pencil,
   RefreshCcw,
   Save,
@@ -14,9 +17,17 @@ import {
   Trash2,
   Utensils,
   UsersRound,
+  X,
 } from "lucide-react";
 import Link from "next/link";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 type BillingMode = "HOURLY" | "FULL_DAY";
 type PlanType =
@@ -92,6 +103,7 @@ type DaycarePlan = {
   billingStoppedAt: string | null;
   separateInvoice: boolean;
   notes: string | null;
+  canEdit: boolean;
   planDefinition: {
     id: string;
     name: string;
@@ -108,6 +120,24 @@ type DaycarePlan = {
     priceType: PriceType;
   } | null;
   mealCombination: { id: string; name: string } | null;
+};
+
+type PlanLifecyclePreview = {
+  planId: string;
+  studentId: string;
+  title: string;
+  lifecycleStatus: DaycarePlan["lifecycleStatus"];
+  dependencies: {
+    activeAssignments: number;
+    attendanceRecords: number;
+    invoiceItems: number;
+    ledgerCharges: number;
+    contractLinks: number;
+    auditRecords: number;
+  };
+  historicalRecords: number;
+  canPermanentDelete: boolean;
+  recommendation: "DEACTIVATE" | "ARCHIVE" | "PERMANENT_DELETE";
 };
 
 type DaycareSession = {
@@ -179,6 +209,7 @@ type DaycareResponse = {
   mealDefinitions?: CatalogueMeal[];
   mealCombinations?: CatalogueCombination[];
   dashboard?: DaycareDashboard;
+  planLifecyclePreview?: PlanLifecyclePreview;
 };
 
 type DaycareDashboard = {
@@ -424,8 +455,20 @@ export default function DaycareWorkspace() {
   const [dashboard, setDashboard] = useState<DaycareDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const planSavingRef = useRef(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [openActionsPlanId, setOpenActionsPlanId] = useState<string | null>(
+    null,
+  );
+  const [deleteReview, setDeleteReview] = useState<{
+    plan: DaycarePlan;
+    preview: PlanLifecyclePreview | null;
+  } | null>(null);
+  const [deleteReviewLoading, setDeleteReviewLoading] = useState(false);
+  const [deleteReviewReason, setDeleteReviewReason] = useState("");
+  const [deleteReviewConfirmation, setDeleteReviewConfirmation] = useState("");
+  const [deleteReviewError, setDeleteReviewError] = useState("");
   const [activeTab, setActiveTab] = useState<"sessions" | "plans" | "rates">(
     "sessions",
   );
@@ -658,6 +701,8 @@ export default function DaycareWorkspace() {
 
   async function savePlan(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (planSavingRef.current) return;
+    planSavingRef.current = true;
     setSaving(true);
     setError("");
     setMessage("");
@@ -674,6 +719,7 @@ export default function DaycareWorkspace() {
           : "The daycare plan could not be saved.",
       );
     } finally {
+      planSavingRef.current = false;
       setSaving(false);
     }
   }
@@ -792,19 +838,15 @@ export default function DaycareWorkspace() {
     }
   }
 
-  async function removeRecord(kind: "plan" | "session", id: string) {
-    const label =
-      kind === "plan"
-        ? "deactivate this daycare plan"
-        : "cancel this unbilled booking";
-    if (!window.confirm(`Are you sure you want to ${label}?`)) return;
+  async function removeRecord(id: string) {
+    if (!window.confirm("Cancel this unbilled daycare booking?")) return;
 
     setSaving(true);
     setError("");
 
     try {
       const response = await fetch(
-        `/api/admin/daycare?${kind === "plan" ? "planId" : "sessionId"}=${encodeURIComponent(id)}`,
+        `/api/admin/daycare?sessionId=${encodeURIComponent(id)}`,
         { method: "DELETE" },
       );
       const result = (await response.json()) as DaycareResponse;
@@ -823,37 +865,16 @@ export default function DaycareWorkspace() {
     }
   }
 
-  async function changePlanLifecycle(
+  async function submitPlanLifecycle(
     plan: DaycarePlan,
-    operation:
-      "ACTIVATE" | "DEACTIVATE" | "ARCHIVE" | "DELETE" | "PERMANENT_DELETE",
+    operation: "ACTIVATE" | "DEACTIVATE" | "ARCHIVE" | "PERMANENT_DELETE",
+    reason = "",
+    confirmation = "",
   ) {
-    const destructive = ["ARCHIVE", "DELETE", "PERMANENT_DELETE"].includes(
-      operation,
-    );
-    if (
-      !window.confirm(
-        `${operation.replaceAll("_", " ")} ${plan.title}? Historical invoices and attendance will never be changed.`,
-      )
-    )
-      return;
-    const reason = destructive
-      ? (window
-          .prompt(
-            "Reason for this audited Owner action:",
-            operation === "ARCHIVE" ? "Contract ended" : "Owner cleanup",
-          )
-          ?.trim() ?? "")
-      : "";
-    if (destructive && reason.length < 4)
-      return setError("Enter a clear reason for this audited action.");
-    const confirmation =
-      operation === "PERMANENT_DELETE"
-        ? (window.prompt("Type PERMANENT DELETE to confirm:")?.trim() ?? "")
-        : "";
     setSaving(true);
     setError("");
     setMessage("");
+    setDeleteReviewError("");
     try {
       const result = await postAction({
         action: "plan-lifecycle",
@@ -864,15 +885,82 @@ export default function DaycareWorkspace() {
       });
       setMessage(result.message ?? "Child plan lifecycle updated.");
       await loadData();
+      setOpenActionsPlanId(null);
+      return true;
     } catch (reasonValue) {
-      setError(
+      const friendlyMessage =
         reasonValue instanceof Error
           ? reasonValue.message
-          : "The child plan could not be updated.",
-      );
+          : "The child plan could not be updated.";
+      setError(friendlyMessage);
+      setDeleteReviewError(friendlyMessage);
+      return false;
     } finally {
       setSaving(false);
     }
+  }
+
+  async function changePlanLifecycle(
+    plan: DaycarePlan,
+    operation: "ACTIVATE" | "DEACTIVATE" | "ARCHIVE",
+  ) {
+    const prompt =
+      operation === "ACTIVATE"
+        ? `Reactivate ${plan.title}? It will become available for this child again.`
+        : operation === "DEACTIVATE"
+          ? `Deactivate ${plan.title}? New attendance and recurring billing will stop until the Owner reactivates it.`
+          : `Archive ${plan.title}? It will stop being used while attendance and billing history stay unchanged.`;
+    if (!window.confirm(prompt)) return;
+    const reason =
+      operation === "ARCHIVE"
+        ? (window.prompt("Why is this plan being archived?", "No longer used")
+            ?.trim() ?? "")
+        : "";
+    if (operation === "ARCHIVE" && reason.length < 4) {
+      setError("Add a short reason for archiving this plan.");
+      return;
+    }
+    await submitPlanLifecycle(plan, operation, reason);
+  }
+
+  async function openDeleteReview(plan: DaycarePlan) {
+    setDeleteReview({ plan, preview: null });
+    setDeleteReviewLoading(true);
+    setDeleteReviewReason("No longer used");
+    setDeleteReviewConfirmation("");
+    setDeleteReviewError("");
+    setError("");
+    try {
+      const result = await postAction({
+        action: "plan-delete-preview",
+        planId: plan.id,
+      });
+      if (!result.planLifecyclePreview) {
+        throw new Error("The plan’s safe deletion review could not be loaded.");
+      }
+      setDeleteReview({ plan, preview: result.planLifecyclePreview });
+    } catch (previewError) {
+      const friendlyMessage =
+        previewError instanceof Error
+          ? previewError.message
+          : "The plan’s safe deletion review could not be loaded.";
+      setDeleteReviewError(friendlyMessage);
+    } finally {
+      setDeleteReviewLoading(false);
+    }
+  }
+
+  async function finishDeleteReview(
+    operation: "DEACTIVATE" | "ARCHIVE" | "PERMANENT_DELETE",
+  ) {
+    if (!deleteReview) return;
+    const completed = await submitPlanLifecycle(
+      deleteReview.plan,
+      operation,
+      operation === "DEACTIVATE" ? "" : deleteReviewReason,
+      operation === "PERMANENT_DELETE" ? deleteReviewConfirmation : "",
+    );
+    if (completed) setDeleteReview(null);
   }
 
   function duplicatePlan(plan: DaycarePlan) {
@@ -1802,7 +1890,7 @@ export default function DaycareWorkspace() {
                           type="button"
                           disabled={saving}
                           onClick={() =>
-                            void removeRecord("session", session.id)
+                            void removeRecord(session.id)
                           }
                           className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-red-200 px-4 text-xs font-black text-red-700"
                         >
@@ -2402,25 +2490,62 @@ export default function DaycareWorkspace() {
                         value={formatDate(plan.effectiveFrom)}
                       />
                     </div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => editPlan(plan)}
-                        className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#5B2A86] px-4 text-xs font-black text-white"
-                      >
-                        <Pencil aria-hidden="true" size={14} />
-                        Edit
-                      </button>
-                      {canManageLifecycle ? (
-                        <>
+                    {canManageContracts ? (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {plan.canEdit ? (
                           <button
                             type="button"
                             disabled={saving}
-                            onClick={() => duplicatePlan(plan)}
-                            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#D9CCE1] px-4 text-xs font-black text-[#5B2A86]"
+                            onClick={() => editPlan(plan)}
+                            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#5B2A86] px-4 text-xs font-black text-white disabled:opacity-60"
                           >
-                            Duplicate
+                            <Pencil aria-hidden="true" size={14} />
+                            Edit
                           </button>
+                        ) : null}
+                        {!plan.canEdit &&
+                        plan.planDefinitionId &&
+                        (plan.lifecycleStatus === "ACTIVE" ||
+                          plan.lifecycleStatus === "INACTIVE") ? (
+                          <Link
+                            href={`/admin/settings/billing?oldPlanId=${encodeURIComponent(plan.planDefinitionId)}#daycare-plan-replacement`}
+                            className="inline-flex min-h-10 items-center rounded-xl bg-[#5B2A86] px-4 text-xs font-black text-white"
+                          >
+                            Replace plan
+                          </Link>
+                        ) : null}
+                        <button
+                          type="button"
+                          disabled={saving}
+                          onClick={() => duplicatePlan(plan)}
+                          className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#D9CCE1] px-4 text-xs font-black text-[#5B2A86] disabled:opacity-60"
+                        >
+                          Duplicate
+                        </button>
+                        {canManageLifecycle ? (
+                          <button
+                            type="button"
+                            disabled={saving}
+                            aria-expanded={openActionsPlanId === plan.id}
+                            onClick={() =>
+                              setOpenActionsPlanId((current) =>
+                                current === plan.id ? null : plan.id,
+                              )
+                            }
+                            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#D9CCE1] px-4 text-xs font-black text-[#5B2A86] disabled:opacity-60"
+                          >
+                            <MoreHorizontal aria-hidden="true" size={15} />
+                            More actions
+                          </button>
+                        ) : null}
+                      </div>
+                    ) : null}
+                    {canManageLifecycle && openActionsPlanId === plan.id ? (
+                      <div className="mt-3 rounded-2xl border border-[#E2D6E7] bg-white p-3">
+                        <p className="px-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#817684]">
+                          Owner actions
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
                           {plan.lifecycleStatus === "ACTIVE" ? (
                             <button
                               type="button"
@@ -2428,64 +2553,53 @@ export default function DaycareWorkspace() {
                               onClick={() =>
                                 void changePlanLifecycle(plan, "DEACTIVATE")
                               }
-                              className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 px-4 text-xs font-black text-slate-700"
+                              className="min-h-10 rounded-xl border border-slate-200 px-4 text-xs font-black text-slate-700 disabled:opacity-60"
                             >
                               Deactivate
                             </button>
-                          ) : (
+                          ) : plan.lifecycleStatus === "INACTIVE" ? (
                             <button
                               type="button"
                               disabled={saving}
                               onClick={() =>
                                 void changePlanLifecycle(plan, "ACTIVATE")
                               }
-                              className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-green-100 px-4 text-xs font-black text-green-800"
+                              className="min-h-10 rounded-xl bg-green-100 px-4 text-xs font-black text-green-800 disabled:opacity-60"
                             >
                               Activate
                             </button>
-                          )}
+                          ) : null}
+                          {plan.lifecycleStatus !== "ARCHIVED" ? (
+                            <button
+                              type="button"
+                              disabled={saving}
+                              onClick={() =>
+                                void changePlanLifecycle(plan, "ARCHIVE")
+                              }
+                              className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-amber-100 px-4 text-xs font-black text-amber-800 disabled:opacity-60"
+                            >
+                              <Archive aria-hidden="true" size={14} />
+                              Archive
+                            </button>
+                          ) : null}
                           <button
                             type="button"
-                            disabled={saving}
-                            onClick={() =>
-                              void changePlanLifecycle(plan, "ARCHIVE")
-                            }
-                            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-amber-100 px-4 text-xs font-black text-amber-800"
+                            disabled={saving || deleteReviewLoading}
+                            onClick={() => void openDeleteReview(plan)}
+                            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-rose-50 px-4 text-xs font-black text-rose-700 disabled:opacity-60"
                           >
-                            Archive
-                          </button>
-                          <button
-                            type="button"
-                            disabled={saving}
-                            onClick={() =>
-                              void changePlanLifecycle(plan, "DELETE")
-                            }
-                            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-rose-100 px-4 text-xs font-black text-rose-800"
-                          >
+                            <Trash2 aria-hidden="true" size={14} />
                             Delete
                           </button>
-                          <button
-                            type="button"
-                            disabled={saving}
-                            onClick={() =>
-                              void changePlanLifecycle(plan, "PERMANENT_DELETE")
-                            }
-                            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-red-300 px-4 text-xs font-black text-red-700"
-                          >
-                            Permanent Delete
-                          </button>
-                        </>
-                      ) : plan.active ? (
-                        <button
-                          type="button"
-                          onClick={() => void removeRecord("plan", plan.id)}
-                          className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-red-200 px-4 text-xs font-black text-red-700"
-                        >
-                          <Trash2 aria-hidden="true" size={14} />
-                          Deactivate
-                        </button>
-                      ) : null}
-                    </div>
+                        </div>
+                        {plan.lifecycleStatus === "ARCHIVED" ? (
+                          <p className="mt-2 px-1 text-xs font-semibold leading-5 text-[#817684]">
+                            Archived plans stay available in history. Duplicate
+                            this plan if it should be used again.
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </article>
                 ))}
               </div>
@@ -2927,6 +3041,228 @@ export default function DaycareWorkspace() {
                     </p>
                   </article>
                 ))}
+              </div>
+            )}
+          </section>
+        </div>
+      ) : null}
+
+      {deleteReview ? (
+        <div
+          className="fixed inset-0 z-[90] flex items-end justify-center bg-[#1F1228]/55 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="daycare-delete-title"
+        >
+          <section className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-[28px] border border-[#E5DAE9] bg-white p-5 shadow-2xl sm:p-7">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.13em] text-[#7A459C]">
+                  Safe plan review
+                </p>
+                <h2
+                  id="daycare-delete-title"
+                  className="mt-2 text-2xl font-black text-[#2D1736]"
+                >
+                  {deleteReviewLoading
+                    ? "Checking this plan…"
+                    : deleteReview.preview?.dependencies.activeAssignments
+                      ? "This plan is active for a child"
+                      : deleteReview.preview?.historicalRecords
+                        ? "This plan has centre history"
+                        : "Delete this unused plan permanently?"}
+                </h2>
+                <p className="mt-2 text-sm font-semibold leading-6 text-[#817684]">
+                  {deleteReview.plan.studentName} · {deleteReview.plan.title}
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => setDeleteReview(null)}
+                aria-label="Close plan review"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F3EDF6] text-[#5B2A86] disabled:opacity-60"
+              >
+                <X aria-hidden="true" size={18} />
+              </button>
+            </div>
+
+            {deleteReviewLoading ? (
+              <div className="mt-8 flex items-center gap-3 rounded-2xl bg-[#FAF8FC] p-5 text-sm font-bold text-[#5B2A86]">
+                <LoaderCircle
+                  aria-hidden="true"
+                  size={20}
+                  className="animate-spin"
+                />
+                Checking attendance, billing and contract links…
+              </div>
+            ) : deleteReview.preview ? (
+              <>
+                <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                  <div className="flex gap-3">
+                    <AlertTriangle
+                      aria-hidden="true"
+                      size={20}
+                      className="mt-0.5 shrink-0 text-amber-700"
+                    />
+                    <p className="text-sm font-bold leading-6 text-amber-900">
+                      {deleteReview.preview.dependencies.activeAssignments > 0
+                        ? "This daycare arrangement is currently active. It cannot be permanently deleted while it is assigned to the child."
+                        : deleteReview.preview.historicalRecords > 0
+                          ? "This plan has attendance or billing history. It cannot be permanently deleted because those records must remain available. Archive it instead from this window."
+                          : deleteReview.preview.dependencies.contractLinks > 0
+                            ? "This plan has never been used for attendance or billing. Its unused contract link will be removed safely with the plan."
+                            : "This plan has never been used for attendance or billing. Permanent deletion is available to the Owner."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <MiniDetail
+                    label="Attendance"
+                    value={String(
+                      deleteReview.preview.dependencies.attendanceRecords,
+                    )}
+                  />
+                  <MiniDetail
+                    label="Invoice items"
+                    value={String(deleteReview.preview.dependencies.invoiceItems)}
+                  />
+                  <MiniDetail
+                    label="Ledger charges"
+                    value={String(
+                      deleteReview.preview.dependencies.ledgerCharges,
+                    )}
+                  />
+                  <MiniDetail
+                    label="Contract link"
+                    value={
+                      deleteReview.preview.dependencies.contractLinks
+                        ? "Yes"
+                        : "No"
+                    }
+                  />
+                </div>
+
+                {deleteReview.preview.dependencies.activeAssignments > 0 ||
+                deleteReview.preview.historicalRecords > 0 ? (
+                  <Field label="Reason for the audited action" className="mt-5">
+                    <input
+                      value={deleteReviewReason}
+                      onChange={(event) =>
+                        setDeleteReviewReason(event.target.value)
+                      }
+                      maxLength={500}
+                      className="input-style"
+                      placeholder="For example: Plan ended"
+                    />
+                  </Field>
+                ) : (
+                  <div className="mt-5 space-y-4">
+                    <Field label="Reason for permanent deletion">
+                      <input
+                        value={deleteReviewReason}
+                        onChange={(event) =>
+                          setDeleteReviewReason(event.target.value)
+                        }
+                        maxLength={500}
+                        className="input-style"
+                        placeholder="For example: Created by mistake"
+                      />
+                    </Field>
+                    <Field label="Type PERMANENT DELETE to confirm">
+                      <input
+                        value={deleteReviewConfirmation}
+                        onChange={(event) =>
+                          setDeleteReviewConfirmation(event.target.value)
+                        }
+                        autoComplete="off"
+                        className="input-style"
+                      />
+                    </Field>
+                  </div>
+                )}
+
+                {deleteReviewError ? (
+                  <p
+                    role="alert"
+                    className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700"
+                  >
+                    {deleteReviewError}
+                  </p>
+                ) : null}
+
+                <div className="mt-6 flex flex-wrap justify-end gap-3">
+                  {deleteReview.preview.dependencies.activeAssignments > 0 ? (
+                    <>
+                      <Link
+                        href={`/admin/students/${deleteReview.plan.studentId}`}
+                        className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#D9CCE1] px-4 text-sm font-black text-[#5B2A86]"
+                      >
+                        View child profile
+                      </Link>
+                      <button
+                        type="button"
+                        disabled={saving}
+                        onClick={() => void finishDeleteReview("DEACTIVATE")}
+                        className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-black text-slate-700 disabled:opacity-60"
+                      >
+                        Deactivate
+                      </button>
+                      <button
+                        type="button"
+                        disabled={saving || deleteReviewReason.trim().length < 4}
+                        onClick={() => void finishDeleteReview("ARCHIVE")}
+                        className="min-h-11 rounded-xl bg-amber-100 px-4 text-sm font-black text-amber-900 disabled:opacity-50"
+                      >
+                        Archive plan
+                      </button>
+                    </>
+                  ) : deleteReview.preview.historicalRecords > 0 ? (
+                    deleteReview.plan.lifecycleStatus === "ARCHIVED" ? (
+                      <span className="rounded-xl bg-[#F3EDF6] px-4 py-3 text-sm font-black text-[#5B2A86]">
+                        Already archived safely
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={saving || deleteReviewReason.trim().length < 4}
+                        onClick={() => void finishDeleteReview("ARCHIVE")}
+                        className="min-h-11 rounded-xl bg-amber-100 px-4 text-sm font-black text-amber-900 disabled:opacity-50"
+                      >
+                        Archive plan
+                      </button>
+                    )
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={
+                        saving ||
+                        deleteReviewReason.trim().length < 8 ||
+                        deleteReviewConfirmation !== "PERMANENT DELETE"
+                      }
+                      onClick={() =>
+                        void finishDeleteReview("PERMANENT_DELETE")
+                      }
+                      className="min-h-11 rounded-xl bg-red-600 px-4 text-sm font-black text-white disabled:opacity-50"
+                    >
+                      Delete permanently
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    disabled={saving}
+                    onClick={() => setDeleteReview(null)}
+                    className="min-h-11 rounded-xl border border-[#D9CCE1] px-4 text-sm font-black text-[#5B2A86] disabled:opacity-60"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold leading-6 text-red-700">
+                {deleteReviewError ||
+                  "The plan’s safe deletion review could not be loaded."}
               </div>
             )}
           </section>

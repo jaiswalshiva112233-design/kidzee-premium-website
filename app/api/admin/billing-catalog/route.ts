@@ -900,6 +900,14 @@ export async function POST(request: Request) {
         throw new CatalogueError("Choose a valid meal rule.");
       if (gstApplicable && (Number.isNaN(gstRate) || gstRate > 100))
         throw new CatalogueError("Enter a valid GST rate.");
+      if (
+        (billingType === "WEEKLY" || billingType === "CUSTOM") &&
+        (maximumVisits == null || maximumVisits < 1 || maximumVisits > 31)
+      ) {
+        throw new CatalogueError(
+          "Weekly and custom daycare plans need a maximum of 1 to 31 visits per billing month.",
+        );
+      }
 
       await prisma.$transaction(
         async (tx) => {

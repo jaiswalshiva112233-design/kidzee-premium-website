@@ -273,6 +273,17 @@ export default function BillingCatalogueManager() {
     string[]
   >([]);
 
+  useEffect(() => {
+    const requestedPlanId = new URLSearchParams(window.location.search).get(
+      "oldPlanId",
+    );
+    if (!requestedPlanId) return;
+    setReplacement((current) => ({
+      ...current,
+      oldPlanId: requestedPlanId,
+    }));
+  }, []);
+
   async function load() {
     const response = await fetch("/api/admin/billing-catalog", {
       cache: "no-store",
@@ -983,7 +994,10 @@ export default function BillingCatalogueManager() {
               }
             />
           ) : null}
-          <div className="rounded-[26px] border border-[#DCCDE5] bg-[#FBF8FD] p-5 md:p-6">
+          <div
+            id="daycare-plan-replacement"
+            className="scroll-mt-28 rounded-[26px] border border-[#DCCDE5] bg-[#FBF8FD] p-5 md:p-6"
+          >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.12em] text-[#7A459C]">

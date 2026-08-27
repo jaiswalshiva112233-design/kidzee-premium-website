@@ -34,7 +34,7 @@ export default async function PageShell({
         Skip to main content
       </a>
       <Header />
-      <div id="main-content" tabIndex={-1}>
+      <div id="main-content" tabIndex={-1} data-site-page>
         {children}
       </div>
       <Footer />

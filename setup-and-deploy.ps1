@@ -168,8 +168,9 @@ if ($DeployFirebase) {
   Step "Checking Firebase login and selected project"
   Run "firebase.cmd" @("login:list")
   Run "firebase.cmd" @("use", $env:FIREBASE_PROJECT_ID)
-  Step "Deploying deny-by-default rules, indexes and background Functions"
-  Run "firebase.cmd" @("deploy", "--only", "firestore:rules,firestore:indexes,storage,functions")
+  Step "Deploying deny-by-default rules, indexes and the required billing safety job"
+  Run "firebase.cmd" @("deploy", "--only", "firestore:rules,firestore:indexes,storage,functions:generateMonthlyCentreInvoices")
+  Write-Host "Optional marketing, WhatsApp, notification, growth, Owner Intelligence and media-processing Functions remain undeployed for the controlled trial." -ForegroundColor Yellow
   Write-Host "App Hosting rollout still requires the Firebase Console backend/GitHub connection the first time. Firebase will then deploy the apphosting.yaml configuration from the selected branch." -ForegroundColor Yellow
 }
 

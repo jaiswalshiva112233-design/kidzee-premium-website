@@ -81,13 +81,18 @@ test("WhatsApp webhook verification fails closed", async () => {
   assert.doesNotMatch(source, /if \(!appSecret\) return true/);
 });
 
-test("App Hosting includes every Phase 1 integration family", () => {
+test("App Hosting requires only the controlled-trial core while preserving optional integration configuration", () => {
   const hosting = read("apphosting.yaml");
   for (const variable of [
     "DATABASE_URL", "DIRECT_URL", "FIREBASE_PROJECT_ID", "FIREBASE_STORAGE_BUCKET",
-    "SANITY_API_WRITE_TOKEN", "OPENAI_API_KEY", "OPENAI_MIRA_MODEL", "OPENAI_GROWTH_MODEL",
-    "WHATSAPP_ACCESS_TOKEN", "WHATSAPP_APP_SECRET", "META_CONVERSIONS_API_ACCESS_TOKEN",
-    "GOOGLE_ADS_DEVELOPER_TOKEN", "GOOGLE_ADS_REFRESH_TOKEN", "MARKETING_CRON_SECRET",
-    "NEXT_PUBLIC_GTM_ID", "NEXT_PUBLIC_GA_MEASUREMENT_ID", "NEXT_PUBLIC_META_PIXEL_ID",
+    "SANITY_API_WRITE_TOKEN", "ADMIN_SESSION_SECRET", "INTERNAL_DEVICE_SECRET",
+    "ADMIN_PANEL_PASSWORD", "BILLING_CRON_SECRET",
   ]) assert.match(hosting, new RegExp(`variable: ${variable}\\b`));
+  for (const variable of ["WEBSITE_ANALYTICS_ENABLED", "WEBSITE_ADVERTISING_ENABLED", "WEBSITE_META_PIXEL_ENABLED"]) {
+    assert.match(hosting, new RegExp(`variable: ${variable}\\s+value: ["']?false["']?`, "m"));
+  }
+  for (const variable of ["OPENAI_API_KEY", "WHATSAPP_ACCESS_TOKEN", "META_CONVERSIONS_API_ACCESS_TOKEN", "GOOGLE_ADS_DEVELOPER_TOKEN", "MARKETING_CRON_SECRET"]) {
+    assert.doesNotMatch(hosting, new RegExp(`variable: ${variable}\\b`));
+    assert.match(read(".env.example"), new RegExp(`^${variable}=`, "m"));
+  }
 });

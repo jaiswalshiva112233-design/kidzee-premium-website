@@ -12,7 +12,10 @@ import Reviews from "@/components/Reviews";
 import TrustBar from "@/components/TrustBar";
 import WhyChooseUs from "@/components/WhyChooseUs";
 import { buildWebsitePageMetadata } from "@/lib/sanity/seo";
-import { getFeaturedWebsiteTeamMembers } from "@/lib/sanity/team";
+import {
+  getFeaturedWebsiteTeamMembers,
+  getWebsiteTeamSettings,
+} from "@/lib/sanity/team";
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildWebsitePageMetadata({
@@ -38,8 +41,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const featuredTeamMembers =
-    await getFeaturedWebsiteTeamMembers(9);
+  const [featuredTeamMembers, teamSettings] = await Promise.all([
+    getFeaturedWebsiteTeamMembers(9),
+    getWebsiteTeamSettings(),
+  ]);
 
   return (
     <PageShell>
@@ -48,7 +53,10 @@ export default async function HomePage() {
         <TrustBar />
         <Programs />
         <WhyChooseUs />
-        <HomeTeamPreview members={featuredTeamMembers} />
+        <HomeTeamPreview
+          members={featuredTeamMembers}
+          movementSpeed={teamSettings.movementSpeed}
+        />
         <Daycare />
         <Gallery />
         <Reviews />

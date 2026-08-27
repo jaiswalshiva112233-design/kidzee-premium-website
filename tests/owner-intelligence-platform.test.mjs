@@ -59,5 +59,6 @@ test("System health and the protected scheduled refresh cover launch services", 
   assert.match(functions, /refreshOwnerIntelligence = onSchedule/);
   assert.match(functions, /every 15 minutes/);
   assert.match(functions, /OWNER_INTELLIGENCE_CRON_SECRET/);
-  assert.match(environment, /required\("OWNER_INTELLIGENCE_CRON_SECRET", 32\)/);
+  assert.match(environment, /if \(present\(name\)\) required\(name, 32\)/);
+  assert.match(environment, /OWNER_INTELLIGENCE_CRON_SECRET/);
 });

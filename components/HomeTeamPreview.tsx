@@ -2,14 +2,19 @@ import Link from "next/link";
 import { ArrowRight, UsersRound } from "lucide-react";
 
 import HomeTeamCarousel from "@/components/HomeTeamCarousel";
-import type { WebsiteTeamMember } from "@/lib/sanity/team";
+import type {
+  WebsiteTeamMember,
+  WebsiteTeamMovementSpeed,
+} from "@/lib/sanity/team";
 
 type HomeTeamPreviewProps = {
   members: WebsiteTeamMember[];
+  movementSpeed: WebsiteTeamMovementSpeed;
 };
 
 export default function HomeTeamPreview({
   members,
+  movementSpeed,
 }: HomeTeamPreviewProps) {
   if (members.length === 0) {
     return null;
@@ -48,7 +53,10 @@ export default function HomeTeamPreview({
           </Link>
         </div>
 
-        <HomeTeamCarousel members={members} />
+        <HomeTeamCarousel
+          members={members}
+          movementSpeed={movementSpeed}
+        />
       </div>
     </section>
   );

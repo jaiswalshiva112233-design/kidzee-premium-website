@@ -65,14 +65,14 @@ export default function Footer() {
             <Link
               href="/"
               aria-label="Kidzee Sector 12 Dwarka homepage"
-              className="inline-flex rounded-2xl bg-white p-3 shadow-[0_14px_34px_rgba(0,0,0,0.16)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45"
+              className="inline-flex rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-2 shadow-[0_12px_30px_rgba(0,0,0,0.12)] transition hover:border-[#F6C84B]/35 hover:bg-white/[0.09] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/45"
             >
               <Image
                 src="/images/kidzee-logo.png"
                 alt="Kidzee"
                 width={150}
                 height={72}
-                className="h-[58px] w-auto object-contain"
+                className="h-[54px] w-auto object-contain"
               />
             </Link>
 
@@ -170,7 +170,8 @@ export default function Footer() {
               ⭐ Read what local parents say on Google
             </p>
           </div>
-                    <div>
+
+          <div>
             <h2 className="mb-5 !text-lg !font-black !text-white">
               Explore
             </h2>
@@ -187,8 +188,8 @@ export default function Footer() {
               ))}
 
               <Link href="/blog" className={footerLinkClass}>
-  Parent Blog
-</Link>
+                Parent Blog
+              </Link>
             </nav>
           </div>
 
@@ -326,8 +327,9 @@ export default function Footer() {
         <Container>
           <div className="flex flex-col items-center justify-between gap-4 py-5 text-center text-sm text-white/60 md:flex-row md:text-left">
             <p className="!text-white/60">
-  © {new Date().getFullYear()} {site.shortName}. All rights reserved.
-</p>
+              © {new Date().getFullYear()} {site.shortName}. All rights
+              reserved.
+            </p>
 
             <nav
               aria-label="Legal links"

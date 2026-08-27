@@ -22,6 +22,8 @@ const httpsUrl = (name) => {
     problems.push(`${name} must be a valid HTTPS URL`);
   }
 };
+const present = (name) => value(name).length > 0;
+const enabled = (name) => value(name) === "true";
 
 httpsUrl("NEXT_PUBLIC_SITE_URL");
 httpsUrl("CENTREOS_BASE_URL");
@@ -39,75 +41,90 @@ required("NEXT_PUBLIC_FIREBASE_API_KEY", 20);
 required("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN", 6);
 match("NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID", /^\d{5,30}$/, "is invalid");
 required("NEXT_PUBLIC_FIREBASE_APP_ID", 10);
-required("NEXT_PUBLIC_FIREBASE_VAPID_KEY", 40);
-httpsUrl("MEDIA_WORKER_URL");
+if (present("NEXT_PUBLIC_FIREBASE_VAPID_KEY")) required("NEXT_PUBLIC_FIREBASE_VAPID_KEY", 40);
+if (present("MEDIA_WORKER_URL")) httpsUrl("MEDIA_WORKER_URL");
 
 required("NEXT_PUBLIC_SANITY_PROJECT_ID", 6);
 match("NEXT_PUBLIC_SANITY_DATASET", /^[A-Za-z0-9_-]{1,64}$/, "is invalid");
 match("NEXT_PUBLIC_SANITY_API_VERSION", /^\d{4}-\d{2}-\d{2}$/, "must use YYYY-MM-DD");
 required("SANITY_API_WRITE_TOKEN", 20);
 
-required("OPENAI_API_KEY", 20);
-required("OPENAI_MIRA_MODEL", 2);
-required("OPENAI_GROWTH_MODEL", 2);
-for (const name of ["OPENAI_MIRA_MONTHLY_CALL_LIMIT", "OPENAI_GROWTH_MONTHLY_CALL_LIMIT"]) {
-  if (!Number.isInteger(Number(value(name))) || Number(value(name)) < 1) problems.push(`${name} must be a positive integer`);
-}
-
-required("WHATSAPP_ACCESS_TOKEN", 20);
-match("WHATSAPP_PHONE_NUMBER_ID", /^\d{5,30}$/, "is invalid");
-required("WHATSAPP_VERIFY_TOKEN", 24);
-required("WHATSAPP_APP_SECRET", 32);
-required("MARKETING_CRON_SECRET", 32);
-required("WHATSAPP_CRON_SECRET", 32);
-required("BILLING_CRON_SECRET", 32);
-required("GROWTH_SYNC_SECRET", 32);
-required("OWNER_INTELLIGENCE_CRON_SECRET", 32);
-required("NOTIFICATION_CRON_SECRET", 32);
-required("WHATSAPP_DOCUMENT_SECRET", 32);
-for (const name of [
-  "WHATSAPP_TEMPLATE_ENQUIRY_NOTIFICATION",
-  "WHATSAPP_TEMPLATE_VISIT_REMINDER",
-  "WHATSAPP_TEMPLATE_ADMISSION_CONFIRMATION",
-  "WHATSAPP_TEMPLATE_FEE_REMINDER",
-  "WHATSAPP_TEMPLATE_RECEIPT_DOCUMENT",
-  "WHATSAPP_TEMPLATE_DAYCARE_REMINDER",
-  "WHATSAPP_TEMPLATE_FOLLOW_UP_REMINDER",
-]) match(name, /^[a-z0-9_]{1,512}$/, "must be an approved lowercase WhatsApp template name");
-required("META_CONVERSIONS_API_ACCESS_TOKEN", 20);
-match("META_GRAPH_API_VERSION", /^v\d{1,2}\.\d{1,2}$/, "is invalid");
-
-for (const name of [
-  "GOOGLE_ADS_CUSTOMER_ID",
-  "GOOGLE_ADS_ADMISSION_CONVERSION_ACTION_ID",
-  "GOOGLE_ADS_LEAD_CONVERSION_ACTION_ID",
-  "GOOGLE_ADS_QUALIFIED_LEAD_CONVERSION_ACTION_ID",
-]) match(name, /^\d{5,20}$/, "is invalid");
-for (const name of [
-  "GOOGLE_ADS_DEVELOPER_TOKEN",
-  "GOOGLE_ADS_CLIENT_ID",
-  "GOOGLE_ADS_CLIENT_SECRET",
-  "GOOGLE_ADS_REFRESH_TOKEN",
-]) required(name, 10);
-match("GOOGLE_ADS_API_VERSION", /^v\d+$/, "is invalid");
-for (const name of [
-  "GOOGLE_ADS_ADMISSION_VALUE",
-  "GOOGLE_ADS_LEAD_VALUE",
-  "GOOGLE_ADS_QUALIFIED_LEAD_VALUE",
-]) {
-  if (!Number.isFinite(Number(value(name))) || Number(value(name)) < 0) {
-    problems.push(`${name} must be a non-negative number`);
+const aiVariables = ["OPENAI_API_KEY", "OPENAI_MIRA_MODEL", "OPENAI_GROWTH_MODEL"];
+if (aiVariables.some(present)) {
+  required("OPENAI_API_KEY", 20);
+  required("OPENAI_MIRA_MODEL", 2);
+  required("OPENAI_GROWTH_MODEL", 2);
+  for (const name of ["OPENAI_MIRA_MONTHLY_CALL_LIMIT", "OPENAI_GROWTH_MONTHLY_CALL_LIMIT"]) {
+    if (!Number.isInteger(Number(value(name))) || Number(value(name)) < 1) problems.push(`${name} must be a positive integer`);
   }
 }
 
-if (!/^GTM-[A-Z0-9]{4,20}$/.test(value("NEXT_PUBLIC_GTM_ID")) &&
-    !/^G-[A-Z0-9]{4,20}$/.test(value("NEXT_PUBLIC_GA_MEASUREMENT_ID"))) {
-  problems.push("NEXT_PUBLIC_GTM_ID or NEXT_PUBLIC_GA_MEASUREMENT_ID must be configured");
+const whatsappCore = ["WHATSAPP_ACCESS_TOKEN", "WHATSAPP_PHONE_NUMBER_ID", "WHATSAPP_VERIFY_TOKEN", "WHATSAPP_APP_SECRET"];
+if (whatsappCore.some(present) || present("WHATSAPP_CRON_SECRET")) {
+  required("WHATSAPP_ACCESS_TOKEN", 20);
+  match("WHATSAPP_PHONE_NUMBER_ID", /^\d{5,30}$/, "is invalid");
+  required("WHATSAPP_VERIFY_TOKEN", 24);
+  required("WHATSAPP_APP_SECRET", 32);
+  required("WHATSAPP_DOCUMENT_SECRET", 32);
 }
-match("NEXT_PUBLIC_GOOGLE_ADS_ID", /^AW-\d{5,20}$/, "is invalid");
-required("NEXT_PUBLIC_GOOGLE_ADS_LEAD_LABEL", 1);
-match("NEXT_PUBLIC_META_PIXEL_ID", /^\d{5,30}$/, "is invalid");
-required("GOOGLE_SITE_VERIFICATION", 5);
+required("BILLING_CRON_SECRET", 32);
+for (const name of ["MARKETING_CRON_SECRET", "WHATSAPP_CRON_SECRET", "GROWTH_SYNC_SECRET", "OWNER_INTELLIGENCE_CRON_SECRET", "NOTIFICATION_CRON_SECRET"]) {
+  if (present(name)) required(name, 32);
+}
+if (present("WHATSAPP_CRON_SECRET")) {
+  for (const name of [
+    "WHATSAPP_TEMPLATE_ENQUIRY_NOTIFICATION",
+    "WHATSAPP_TEMPLATE_VISIT_REMINDER",
+    "WHATSAPP_TEMPLATE_ADMISSION_CONFIRMATION",
+    "WHATSAPP_TEMPLATE_FEE_REMINDER",
+    "WHATSAPP_TEMPLATE_RECEIPT_DOCUMENT",
+    "WHATSAPP_TEMPLATE_DAYCARE_REMINDER",
+    "WHATSAPP_TEMPLATE_FOLLOW_UP_REMINDER",
+  ]) match(name, /^[a-z0-9_]{1,512}$/, "must be an approved lowercase WhatsApp template name");
+}
+
+if (enabled("WEBSITE_META_PIXEL_ENABLED")) {
+  required("META_CONVERSIONS_API_ACCESS_TOKEN", 20);
+  match("META_GRAPH_API_VERSION", /^v\d{1,2}\.\d{1,2}$/, "is invalid");
+  match("NEXT_PUBLIC_META_PIXEL_ID", /^\d{5,30}$/, "is invalid");
+  required("MARKETING_CRON_SECRET", 32);
+}
+
+if (enabled("WEBSITE_ADVERTISING_ENABLED")) {
+  for (const name of [
+    "GOOGLE_ADS_CUSTOMER_ID",
+    "GOOGLE_ADS_ADMISSION_CONVERSION_ACTION_ID",
+    "GOOGLE_ADS_LEAD_CONVERSION_ACTION_ID",
+    "GOOGLE_ADS_QUALIFIED_LEAD_CONVERSION_ACTION_ID",
+  ]) match(name, /^\d{5,20}$/, "is invalid");
+  for (const name of [
+    "GOOGLE_ADS_DEVELOPER_TOKEN",
+    "GOOGLE_ADS_CLIENT_ID",
+    "GOOGLE_ADS_CLIENT_SECRET",
+    "GOOGLE_ADS_REFRESH_TOKEN",
+  ]) required(name, 10);
+  match("GOOGLE_ADS_API_VERSION", /^v\d+$/, "is invalid");
+  for (const name of [
+    "GOOGLE_ADS_ADMISSION_VALUE",
+    "GOOGLE_ADS_LEAD_VALUE",
+    "GOOGLE_ADS_QUALIFIED_LEAD_VALUE",
+  ]) {
+    if (!Number.isFinite(Number(value(name))) || Number(value(name)) < 0) {
+      problems.push(`${name} must be a non-negative number`);
+    }
+  }
+  match("NEXT_PUBLIC_GOOGLE_ADS_ID", /^AW-\d{5,20}$/, "is invalid");
+  required("NEXT_PUBLIC_GOOGLE_ADS_LEAD_LABEL", 1);
+  required("MARKETING_CRON_SECRET", 32);
+}
+
+if (enabled("WEBSITE_ANALYTICS_ENABLED")) {
+  if (!/^GTM-[A-Z0-9]{4,20}$/.test(value("NEXT_PUBLIC_GTM_ID")) &&
+      !/^G-[A-Z0-9]{4,20}$/.test(value("NEXT_PUBLIC_GA_MEASUREMENT_ID"))) {
+    problems.push("NEXT_PUBLIC_GTM_ID or NEXT_PUBLIC_GA_MEASUREMENT_ID must be configured");
+  }
+}
+if (present("GOOGLE_SITE_VERIFICATION")) required("GOOGLE_SITE_VERIFICATION", 5);
 for (const name of [
   "WEBSITE_ANALYTICS_ENABLED",
   "WEBSITE_ADVERTISING_ENABLED",

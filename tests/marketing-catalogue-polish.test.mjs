@@ -119,13 +119,16 @@ test("used catalogue records cannot be permanently deleted", () => {
 
 test("child daycare plans have the same protected Owner lifecycle", () => {
   assert.match(daycareApi, /action === "plan-lifecycle"/);
+  assert.match(daycareApi, /action === "plan-delete-preview"/);
   assert.match(daycareApi, /session\.role !== "OWNER"/);
-  assert.match(daycareApi, /sessions \+ invoiceItems > 0/);
-  assert.match(daycareApi, /daycare-plan:\$\{planId\}:/);
-  assert.match(daycareApi, /daycare-meal-plan:\$\{planId\}:/);
-  assert.match(daycareApi, /affectedRecords: \{ sessions, invoiceItems \}/);
+  assert.match(daycareApi, /canPermanentlyDeleteDaycarePlan\(dependencies\)/);
+  assert.match(daycareApi, /dependencies\.activeAssignments > 0/);
+  assert.match(daycareApi, /transaction\.studentCharge\.count/);
+  assert.match(daycareApi, /daycare-plan:\$\{plan\.id\}:/);
+  assert.match(daycareApi, /daycare-meal-plan:\$\{plan\.id\}:/);
+  assert.match(daycareApi, /affectedRecords: dependencies/);
   assert.match(daycareManager, /canManageLifecycle/);
-  for (const action of ["Duplicate", "Archive", "Permanent Delete"]) {
+  for (const action of ["Duplicate", "More actions", "Archive plan", "PERMANENT DELETE"]) {
     assert.match(daycareManager, new RegExp(action));
   }
 });

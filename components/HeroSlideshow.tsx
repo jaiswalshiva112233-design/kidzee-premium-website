@@ -129,7 +129,8 @@ export default function HeroSlideshow({
                 src={slide.src}
                 alt={active ? slide.alt : ""}
                 fill
-                preload={index === 0}
+                loading={index === 0 ? "eager" : "lazy"}
+                fetchPriority={index === 0 ? "high" : "auto"}
                 unoptimized={shouldSkipImageOptimisation(slide.src)}
                 sizes="(max-width: 640px) 92vw, (max-width: 1024px) 88vw, 52vw"
                 className="object-cover object-center"

@@ -513,11 +513,16 @@ export async function POST(
             });
 
           for (const plan of activeDaycarePlans) {
+            const billingStoppedAt =
+              leavingDate < plan.effectiveFrom
+                ? plan.effectiveFrom
+                : leavingDate;
             await transaction.studentDaycarePlan.update({
               where: { id: plan.id },
               data: {
                 active: false,
-                billingStoppedAt: leavingDate,
+                lifecycleStatus: "INACTIVE",
+                billingStoppedAt,
                 effectiveTo:
                   plan.effectiveFrom > leavingDayEnd
                     ? plan.effectiveFrom

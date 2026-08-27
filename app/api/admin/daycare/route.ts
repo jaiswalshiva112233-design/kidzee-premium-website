@@ -3,9 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getAdminSession } from "@/lib/admin/auth";
 import {
+  canPermanentlyDeleteDaycarePlan,
+  daycareLifecycleStopAt,
+  daycarePlanHistoricalDependencyCount,
+  daycareServiceEndAt,
   dateIsWithinEffectiveRange,
   effectiveRangesOverlap,
   getIndiaMonthRange,
+  type DaycarePlanDependencySummary,
 } from "@/lib/admin/daycare-rules";
 import { prepaidPlanCoversWeekday } from "@/lib/admin/academic-contract-rules";
 import {
@@ -14,6 +19,7 @@ import {
 } from "@/lib/admin/charge-pricing";
 import { getNextSequence } from "@/lib/numbering";
 import { prisma } from "@/lib/prisma";
+import { publicPersistenceError } from "@/lib/admin/public-persistence-error";
 
 type DaycareRequestBody = {
   action?: unknown;
@@ -276,6 +282,156 @@ function isUniqueConflict(error: unknown) {
   );
 }
 
+type LifecyclePlanRecord = {
+  id: string;
+  studentId: string;
+  title: string;
+  active: boolean;
+  lifecycleStatus: $Enums.CatalogueStatus;
+  effectiveFrom: Date;
+  effectiveTo: Date | null;
+  foodRequired: boolean;
+  mealCombinationId: string | null;
+  contractServiceId: string | null;
+  enrollmentContractId: string | null;
+};
+
+const DAYCARE_FINANCIAL_CATEGORIES: $Enums.FeeCategory[] = [
+  "DAYCARE_FEE",
+  "DAYCARE_LUNCH_FEE",
+  "DAYCARE_EVENING_SNACK_FEE",
+  "DAYCARE_MEAL_COMBO_FEE",
+  "FOOD_FEE",
+];
+
+function planDateRange(plan: LifecyclePlanRecord) {
+  return {
+    gte: plan.effectiveFrom,
+    ...(plan.effectiveTo ? { lte: plan.effectiveTo } : {}),
+  };
+}
+
+async function linkedPlanMealServices(
+  transaction: Prisma.TransactionClient,
+  plan: LifecyclePlanRecord,
+) {
+  if (!plan.enrollmentContractId) return [];
+
+  return transaction.contractService.findMany({
+    where: {
+      contractId: plan.enrollmentContractId,
+      serviceType: "MEAL",
+      metadata: { path: ["studentDaycarePlanId"], equals: plan.id },
+    },
+    select: {
+      id: true,
+      status: true,
+      effectiveFrom: true,
+      catalogueItemId: true,
+      metadata: true,
+    },
+  });
+}
+
+async function daycarePlanDependencies(
+  transaction: Prisma.TransactionClient,
+  plan: LifecyclePlanRecord,
+): Promise<DaycarePlanDependencySummary> {
+  const mealServices = await linkedPlanMealServices(transaction, plan);
+  const serviceIds = [
+    ...(plan.contractServiceId ? [plan.contractServiceId] : []),
+    ...mealServices.map((service) => service.id),
+  ];
+  const dateRange = planDateRange(plan);
+  const [attendanceRecords, invoiceItems, ledgerCharges, auditRecords] =
+    await Promise.all([
+      transaction.daycareSession.count({ where: { planId: plan.id } }),
+      transaction.feeInvoiceItem.count({
+        where: {
+          OR: [
+            { sourceId: plan.id },
+            ...(serviceIds.length
+              ? [{ contractServiceId: { in: serviceIds } }]
+              : []),
+            { chargeKey: { startsWith: `daycare-plan:${plan.id}:` } },
+            { chargeKey: { startsWith: `daycare-meal-plan:${plan.id}:` } },
+            {
+              category: { in: DAYCARE_FINANCIAL_CATEGORIES },
+              createdAt: dateRange,
+              invoice: {
+                studentId: plan.studentId,
+                ...(plan.enrollmentContractId
+                  ? { enrollmentContractId: plan.enrollmentContractId }
+                  : {}),
+              },
+            },
+          ],
+        },
+      }),
+      transaction.studentCharge.count({
+        where: {
+          OR: [
+            ...(serviceIds.length
+              ? [{ contractServiceId: { in: serviceIds } }]
+              : []),
+            { chargeKey: { startsWith: `daycare-plan:${plan.id}:` } },
+            { chargeKey: { startsWith: `daycare-meal-plan:${plan.id}:` } },
+            {
+              studentId: plan.studentId,
+              ...(plan.enrollmentContractId
+                ? { enrollmentContractId: plan.enrollmentContractId }
+                : {}),
+              category: { in: DAYCARE_FINANCIAL_CATEGORIES },
+              chargeDate: dateRange,
+            },
+          ],
+        },
+      }),
+      transaction.activityLog.count({
+        where: { entityType: "StudentDaycarePlan", entityId: plan.id },
+      }),
+    ]);
+
+  return {
+    activeAssignments:
+      plan.active && plan.lifecycleStatus === "ACTIVE" ? 1 : 0,
+    attendanceRecords,
+    invoiceItems,
+    ledgerCharges,
+    contractLinks:
+      plan.contractServiceId ||
+      plan.enrollmentContractId ||
+      mealServices.length > 0
+        ? 1
+        : 0,
+    auditRecords,
+  };
+}
+
+function deletionPreview(
+  plan: LifecyclePlanRecord,
+  dependencies: DaycarePlanDependencySummary,
+) {
+  const historicalRecords = daycarePlanHistoricalDependencyCount(dependencies);
+  const canPermanentDelete = canPermanentlyDeleteDaycarePlan(dependencies);
+
+  return {
+    planId: plan.id,
+    studentId: plan.studentId,
+    title: plan.title,
+    lifecycleStatus: plan.lifecycleStatus,
+    dependencies,
+    historicalRecords,
+    canPermanentDelete,
+    recommendation:
+      dependencies.activeAssignments > 0
+        ? ("DEACTIVATE" as const)
+        : canPermanentDelete
+          ? ("PERMANENT_DELETE" as const)
+          : ("ARCHIVE" as const),
+  };
+}
+
 function studentName(student: {
   firstName: string;
   middleName: string | null;
@@ -388,6 +544,7 @@ function serialisePlan(plan: {
   planDefinitionId: string | null;
   priceVersionId: string | null;
   mealCombinationId: string | null;
+  contractServiceId: string | null;
   title: string;
   planType: $Enums.DaycarePlanType;
   billingMode: $Enums.DaycareBillingMode;
@@ -434,6 +591,7 @@ function serialisePlan(plan: {
     priceType: $Enums.PriceType;
   } | null;
   mealCombination?: { id: string; name: string } | null;
+  _count?: { sessions: number };
 }) {
   return {
     ...plan,
@@ -459,6 +617,11 @@ function serialisePlan(plan: {
     effectiveFrom: plan.effectiveFrom.toISOString(),
     effectiveTo: plan.effectiveTo?.toISOString() ?? null,
     billingStoppedAt: plan.billingStoppedAt?.toISOString() ?? null,
+    canEdit:
+      !plan.contractServiceId &&
+      (plan._count?.sessions ?? 0) === 0 &&
+      (plan.lifecycleStatus === "ACTIVE" ||
+        plan.lifecycleStatus === "INACTIVE"),
     planDefinition: plan.planDefinition
       ? {
           ...plan.planDefinition,
@@ -479,6 +642,8 @@ function serialisePlan(plan: {
         }
       : null,
     student: undefined,
+    contractServiceId: undefined,
+    _count: undefined,
   };
 }
 
@@ -662,6 +827,7 @@ export async function GET(request: NextRequest) {
         planDefinition: true,
         priceVersion: true,
         mealCombination: true,
+        _count: { select: { sessions: true } },
         student: {
           select: {
             studentNumber: true,
@@ -1054,44 +1220,68 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as DaycareRequestBody;
     const action = cleanText(body.action, 40);
 
+    if (action === "plan-delete-preview") {
+      if (session.role !== "OWNER")
+        throw new DaycareRequestError(
+          "Only the Owner can review permanent deletion of child plans.",
+          403,
+        );
+      const planId = cleanText(body.planId, 100);
+      if (!planId) throw new DaycareRequestError("Choose a daycare plan.");
+
+      const preview = await prisma.$transaction(
+        async (transaction) => {
+          const existing = await transaction.studentDaycarePlan.findUnique({
+            where: { id: planId },
+            select: {
+              id: true,
+              studentId: true,
+              title: true,
+              active: true,
+              lifecycleStatus: true,
+              effectiveFrom: true,
+              effectiveTo: true,
+              foodRequired: true,
+              mealCombinationId: true,
+              contractServiceId: true,
+              enrollmentContractId: true,
+            },
+          });
+          if (!existing)
+            throw new DaycareRequestError("Daycare plan was not found.", 404);
+          const dependencies = await daycarePlanDependencies(
+            transaction,
+            existing,
+          );
+          return deletionPreview(existing, dependencies);
+        },
+        { isolationLevel: "Serializable" },
+      );
+
+      return NextResponse.json({ success: true, planLifecyclePreview: preview });
+    }
+
     if (action === "plan-lifecycle") {
       if (session.role !== "OWNER")
         throw new DaycareRequestError(
-          "Only the Owner can archive or permanently delete child plans.",
+          "Only the Owner can change a child plan’s lifecycle.",
           403,
         );
       const planId = cleanText(body.planId, 100);
       const operation = cleanText(body.operation, 30).toUpperCase();
       const reason = cleanText(body.reason, 500);
-      const existing = await prisma.studentDaycarePlan.findUnique({
-        where: { id: planId },
-        select: {
-          id: true,
-          title: true,
-          active: true,
-          lifecycleStatus: true,
-          effectiveFrom: true,
-          contractServiceId: true,
-          enrollmentContractId: true,
-        },
-      });
-      if (!existing)
-        throw new DaycareRequestError("Daycare plan was not found.", 404);
-      const [sessions, invoiceItems] = await Promise.all([
-        prisma.daycareSession.count({ where: { planId } }),
-        prisma.feeInvoiceItem.count({
-          where: {
-            OR: [
-              { sourceId: planId },
-              ...(existing.contractServiceId
-                ? [{ contractServiceId: existing.contractServiceId }]
-                : []),
-              { chargeKey: { startsWith: `daycare-plan:${planId}:` } },
-              { chargeKey: { startsWith: `daycare-meal-plan:${planId}:` } },
-            ],
-          },
-        }),
-      ]);
+      if (!planId) throw new DaycareRequestError("Choose a daycare plan.");
+      if (
+        !["ACTIVATE", "DEACTIVATE", "ARCHIVE", "PERMANENT_DELETE"].includes(
+          operation,
+        )
+      ) {
+        throw new DaycareRequestError("Choose a valid child-plan action.");
+      }
+      if (operation === "ARCHIVE" && reason.length < 4)
+        throw new DaycareRequestError(
+          "Add a short reason for archiving this plan.",
+        );
       if (operation === "PERMANENT_DELETE") {
         if (cleanText(body.confirmation, 40) !== "PERMANENT DELETE")
           throw new DaycareRequestError("Type PERMANENT DELETE to confirm.");
@@ -1099,134 +1289,496 @@ export async function POST(request: NextRequest) {
           throw new DaycareRequestError(
             "Enter a clear reason for permanent deletion.",
           );
-        if (sessions + invoiceItems > 0)
-          throw new DaycareRequestError(
-            `This plan has ${sessions + invoiceItems} attendance or historical billing records. Archive it instead.`,
-            409,
-          );
-        await prisma.$transaction(async (transaction) => {
-          await transaction.activityLog.create({
-            data: {
-              adminUserId,
-              action: "DELETED",
-              entityType: "StudentDaycarePlan",
-              entityId: planId,
-              description: `${existing.title} was permanently deleted by the Owner.`,
-              previousData: { title: existing.title },
-              newData: {
-                permanent: true,
-                reason,
-                affectedRecords: { sessions, invoiceItems },
-              },
+      }
+
+      const result = await prisma.$transaction(
+        async (transaction) => {
+          const existing = await transaction.studentDaycarePlan.findUnique({
+            where: { id: planId },
+            select: {
+              id: true,
+              studentId: true,
+              title: true,
+              active: true,
+              lifecycleStatus: true,
+              effectiveFrom: true,
+              effectiveTo: true,
+              foodRequired: true,
+              mealCombinationId: true,
+              contractServiceId: true,
+              enrollmentContractId: true,
             },
           });
-          await transaction.studentDaycarePlan.delete({
-            where: { id: planId },
-          });
-          if (existing.contractServiceId) {
-            await transaction.contractService.delete({
-              where: { id: existing.contractServiceId },
-            });
-          }
-          if (existing.enrollmentContractId) {
-            const remainingPlans = await transaction.studentDaycarePlan.count({
+          if (!existing)
+            throw new DaycareRequestError("Daycare plan was not found.", 404);
+
+          const dependencies = await daycarePlanDependencies(
+            transaction,
+            existing,
+          );
+
+          if (operation === "PERMANENT_DELETE") {
+            if (dependencies.activeAssignments > 0) {
+              throw new DaycareRequestError(
+                "This plan is still active for a child. Deactivate or archive it before reviewing permanent deletion.",
+                409,
+              );
+            }
+            if (!canPermanentlyDeleteDaycarePlan(dependencies)) {
+              throw new DaycareRequestError(
+                "This plan has attendance or billing history, so it can’t be permanently deleted. Archive it to keep those records safely.",
+                409,
+              );
+            }
+
+            const planMealServices = await linkedPlanMealServices(
+              transaction,
+              existing,
+            );
+            const replacementMealPlan =
+              existing.enrollmentContractId && existing.mealCombinationId
+                ? await transaction.studentDaycarePlan.findFirst({
+                    where: {
+                      id: { not: existing.id },
+                      enrollmentContractId: existing.enrollmentContractId,
+                      mealCombinationId: existing.mealCombinationId,
+                      foodRequired: true,
+                      active: true,
+                      lifecycleStatus: "ACTIVE",
+                    },
+                    select: { id: true },
+                    orderBy: { createdAt: "desc" },
+                  })
+                : null;
+
+            const removed = await transaction.studentDaycarePlan.deleteMany({
               where: {
-                enrollmentContractId: existing.enrollmentContractId,
-                active: true,
+                id: planId,
+                active: false,
+                lifecycleStatus: existing.lifecycleStatus,
               },
             });
-            if (remainingPlans === 0) {
+            if (removed.count !== 1) {
+              throw new DaycareRequestError(
+                "This plan changed after the deletion review. Refresh and review it again.",
+                409,
+              );
+            }
+
+            if (replacementMealPlan && planMealServices.length > 0) {
               await transaction.contractService.updateMany({
-                where: {
-                  contractId: existing.enrollmentContractId,
-                  serviceType: "MEAL",
-                  status: { in: ["ACTIVE", "DRAFT"] },
+                where: { id: { in: planMealServices.map((service) => service.id) } },
+                data: {
+                  metadata: {
+                    studentDaycarePlanId: replacementMealPlan.id,
+                    reassignedFromPlanId: existing.id,
+                  },
                 },
-                data: { status: "ENDED", effectiveTo: new Date() },
-              });
-              await transaction.studentEnrollmentContract.update({
-                where: { id: existing.enrollmentContractId },
-                data: { daycareEnabled: false, mealsEnabled: false },
               });
             }
-          }
-        });
-      } else {
-        const target =
-          operation === "ACTIVATE"
-            ? "ACTIVE"
-            : operation === "DEACTIVATE"
-              ? "INACTIVE"
-              : operation === "ARCHIVE"
-                ? "ARCHIVED"
-                : operation === "DELETE"
-                  ? "DELETED"
-                  : null;
-        if (!target)
-          throw new DaycareRequestError("Choose a valid child-plan action.");
-        if (["ARCHIVE", "DELETE"].includes(operation) && reason.length < 4)
-          throw new DaycareRequestError(
-            "Enter a reason for this audited change.",
-          );
-        const now = new Date();
-        await prisma.$transaction(async (transaction) => {
-          await transaction.studentDaycarePlan.update({
-            where: { id: planId },
-            data: {
-              lifecycleStatus: target,
-              active: target === "ACTIVE",
-              billingStoppedAt: target === "ACTIVE" ? null : now,
-            },
-          });
-          if (existing.contractServiceId) {
-            await transaction.contractService.update({
-              where: { id: existing.contractServiceId },
-              data: {
-                status: target === "ACTIVE" ? "ACTIVE" : "ENDED",
-                effectiveTo:
-                  target === "ACTIVE"
-                    ? null
-                    : now < existing.effectiveFrom
-                      ? existing.effectiveFrom
-                      : now,
-              },
-            });
-          }
-          if (existing.enrollmentContractId) {
-            const remainingPlans = await transaction.studentDaycarePlan.count({
-              where: {
-                enrollmentContractId: existing.enrollmentContractId,
-                active: true,
-              },
-            });
-            if (target === "ACTIVE") {
-              await transaction.studentEnrollmentContract.update({
-                where: { id: existing.enrollmentContractId },
-                data: { daycareEnabled: true, updatedById: adminUserId },
-              });
-            } else if (remainingPlans === 0) {
-              await transaction.contractService.updateMany({
+
+            const unusedServiceIds = [
+              ...(existing.contractServiceId ? [existing.contractServiceId] : []),
+              ...(replacementMealPlan
+                ? []
+                : planMealServices.map((service) => service.id)),
+            ];
+            if (unusedServiceIds.length > 0) {
+              const removedServices = await transaction.contractService.deleteMany({
                 where: {
-                  contractId: existing.enrollmentContractId,
-                  serviceType: "MEAL",
-                  status: { in: ["ACTIVE", "DRAFT"] },
-                },
-                data: {
-                  status: "ENDED",
-                  effectiveTo:
-                    now < existing.effectiveFrom ? existing.effectiveFrom : now,
+                  id: { in: unusedServiceIds },
+                  invoiceItems: { none: {} },
+                  ledgerCharges: { none: {} },
                 },
               });
+              if (removedServices.count !== unusedServiceIds.length) {
+                throw new DaycareRequestError(
+                  "Billing history was added after this review. Nothing was deleted; refresh and review the plan again.",
+                  409,
+                );
+              }
+            }
+
+            if (existing.enrollmentContractId) {
+              const [
+                activeDaycarePlans,
+                activeMealPlans,
+                activeDaycareServices,
+                activeMealServices,
+              ] =
+                await Promise.all([
+                  transaction.studentDaycarePlan.count({
+                    where: {
+                      enrollmentContractId: existing.enrollmentContractId,
+                      active: true,
+                      lifecycleStatus: "ACTIVE",
+                    },
+                  }),
+                  transaction.studentDaycarePlan.count({
+                    where: {
+                      enrollmentContractId: existing.enrollmentContractId,
+                      foodRequired: true,
+                      active: true,
+                      lifecycleStatus: "ACTIVE",
+                    },
+                  }),
+                  transaction.contractService.count({
+                    where: {
+                      contractId: existing.enrollmentContractId,
+                      serviceType: "DAYCARE",
+                      status: { in: ["ACTIVE", "DRAFT"] },
+                    },
+                  }),
+                  transaction.contractService.count({
+                    where: {
+                      contractId: existing.enrollmentContractId,
+                      serviceType: "MEAL",
+                      status: { in: ["ACTIVE", "DRAFT"] },
+                    },
+                  }),
+                ]);
               await transaction.studentEnrollmentContract.update({
                 where: { id: existing.enrollmentContractId },
                 data: {
-                  daycareEnabled: false,
-                  mealsEnabled: false,
+                  daycareEnabled:
+                    activeDaycarePlans > 0 || activeDaycareServices > 0,
+                  mealsEnabled: activeMealPlans > 0 || activeMealServices > 0,
                   updatedById: adminUserId,
                 },
               });
             }
+            await transaction.activityLog.create({
+              data: {
+                adminUserId,
+                action: "DELETED",
+                entityType: "StudentDaycarePlan",
+                entityId: planId,
+                description: `${existing.title} was permanently deleted by the Owner.`,
+                previousData: {
+                  title: existing.title,
+                  status: existing.lifecycleStatus,
+                },
+                newData: {
+                  permanent: true,
+                  reason,
+                  affectedRecords: dependencies,
+                },
+              },
+            });
+            return { message: "Unused daycare plan permanently deleted." };
           }
+
+          const target =
+            operation === "ACTIVATE"
+              ? ("ACTIVE" as const)
+              : operation === "DEACTIVATE"
+                ? ("INACTIVE" as const)
+                : ("ARCHIVED" as const);
+
+          if (existing.lifecycleStatus === target) {
+            return {
+              message:
+                target === "ACTIVE"
+                  ? "This daycare plan is already active."
+                  : target === "INACTIVE"
+                    ? "This daycare plan is already inactive."
+                    : "This daycare plan is already archived.",
+            };
+          }
+          if (
+            operation === "ACTIVATE" &&
+            existing.lifecycleStatus !== "INACTIVE"
+          ) {
+            throw new DaycareRequestError(
+              "Archived plans remain preserved for history. Duplicate this plan if it should be used again.",
+              409,
+            );
+          }
+          if (
+            operation === "DEACTIVATE" &&
+            existing.lifecycleStatus !== "ACTIVE"
+          ) {
+            throw new DaycareRequestError(
+              "Only an active daycare plan can be deactivated.",
+              409,
+            );
+          }
+
+          const actionAt = new Date();
+          if (
+            target === "ACTIVE" &&
+            existing.effectiveTo &&
+            existing.effectiveTo < actionAt
+          ) {
+            throw new DaycareRequestError(
+              "This plan’s end date has passed. Duplicate it with new dates instead.",
+              409,
+            );
+          }
+          const billingStoppedAt = daycareLifecycleStopAt(
+            existing.effectiveFrom,
+            actionAt,
+          );
+          let mealServiceToActivate: {
+            id: string;
+            effectiveFrom: Date;
+            effectiveTo: Date | null;
+          } | null = null;
+          if (
+            target === "ACTIVE" &&
+            existing.enrollmentContractId &&
+            existing.foodRequired &&
+            existing.mealCombinationId
+          ) {
+            const activeMealService =
+              await transaction.contractService.findFirst({
+                where: {
+                  contractId: existing.enrollmentContractId,
+                  serviceType: "MEAL",
+                  catalogueItemId: existing.mealCombinationId,
+                  status: { in: ["ACTIVE", "DRAFT"] },
+                },
+                select: { id: true },
+              });
+            if (!activeMealService) {
+              const exactEndedServices =
+                await transaction.contractService.findMany({
+                  where: {
+                    contractId: existing.enrollmentContractId,
+                    serviceType: "MEAL",
+                    catalogueItemId: existing.mealCombinationId,
+                    status: "ENDED",
+                    metadata: {
+                      path: ["studentDaycarePlanId"],
+                      equals: existing.id,
+                    },
+                  },
+                  select: { id: true, effectiveFrom: true, effectiveTo: true },
+                  orderBy: { updatedAt: "desc" },
+                  take: 2,
+                });
+              const legacyEndedServices =
+                exactEndedServices.length > 0
+                  ? []
+                  : await transaction.contractService.findMany({
+                      where: {
+                        contractId: existing.enrollmentContractId,
+                        serviceType: "MEAL",
+                        catalogueItemId: existing.mealCombinationId,
+                        status: "ENDED",
+                      },
+                      select: {
+                        id: true,
+                        effectiveFrom: true,
+                        effectiveTo: true,
+                      },
+                      orderBy: { updatedAt: "desc" },
+                      take: 2,
+                    });
+              const candidates =
+                exactEndedServices.length > 0
+                  ? exactEndedServices
+                  : legacyEndedServices;
+              if (candidates.length > 1) {
+                throw new DaycareRequestError(
+                  "More than one older meal charge matches this plan. Duplicate the plan instead so billing stays unambiguous.",
+                  409,
+                );
+              }
+              mealServiceToActivate = candidates[0] ?? null;
+            }
+          }
+          const claimed = await transaction.studentDaycarePlan.updateMany({
+            where: {
+              id: planId,
+              active: existing.active,
+              lifecycleStatus: existing.lifecycleStatus,
+            },
+            data: {
+              lifecycleStatus: target,
+              active: target === "ACTIVE",
+              billingStoppedAt: target === "ACTIVE" ? null : billingStoppedAt,
+            },
+          });
+          if (claimed.count !== 1) {
+            throw new DaycareRequestError(
+              "This plan was updated somewhere else. Refresh and try again.",
+              409,
+            );
+          }
+
+          if (existing.contractServiceId) {
+            const service = await transaction.contractService.findUnique({
+              where: { id: existing.contractServiceId },
+              select: { effectiveFrom: true, effectiveTo: true },
+            });
+            if (service) {
+              await transaction.contractService.updateMany({
+                where: { id: existing.contractServiceId },
+                data: {
+                  status: target === "ACTIVE" ? "ACTIVE" : "ENDED",
+                  effectiveTo:
+                    target === "ACTIVE"
+                      ? existing.effectiveTo
+                      : daycareServiceEndAt(
+                          service.effectiveFrom,
+                          service.effectiveTo,
+                          actionAt,
+                        ),
+                },
+              });
+            }
+          }
+
+          if (existing.enrollmentContractId) {
+            if (target === "ACTIVE") {
+              const contract =
+                await transaction.studentEnrollmentContract.findUnique({
+                  where: { id: existing.enrollmentContractId },
+                  select: { status: true },
+                });
+              if (contract?.status !== "ACTIVE") {
+                throw new DaycareRequestError(
+                  "This child’s enrollment contract is not active. Update the admission status before reactivating daycare.",
+                  409,
+                );
+              }
+              if (mealServiceToActivate) {
+                await transaction.contractService.update({
+                  where: { id: mealServiceToActivate.id },
+                  data: {
+                    status: "ACTIVE",
+                    effectiveTo: existing.effectiveTo,
+                    metadata: { studentDaycarePlanId: existing.id },
+                  },
+                });
+              }
+            } else if (existing.mealCombinationId) {
+              const otherActiveMealPlans =
+                await transaction.studentDaycarePlan.count({
+                  where: {
+                    id: { not: existing.id },
+                    enrollmentContractId: existing.enrollmentContractId,
+                    mealCombinationId: existing.mealCombinationId,
+                    foodRequired: true,
+                    active: true,
+                    lifecycleStatus: "ACTIVE",
+                  },
+                });
+              if (otherActiveMealPlans === 0) {
+                const exactMealServices =
+                  await transaction.contractService.findMany({
+                    where: {
+                      contractId: existing.enrollmentContractId,
+                      serviceType: "MEAL",
+                      catalogueItemId: existing.mealCombinationId,
+                      status: { in: ["ACTIVE", "DRAFT"] },
+                      metadata: {
+                        path: ["studentDaycarePlanId"],
+                        equals: existing.id,
+                      },
+                    },
+                    select: {
+                      id: true,
+                      effectiveFrom: true,
+                      effectiveTo: true,
+                    },
+                  });
+                const legacyMealServices =
+                  exactMealServices.length > 0
+                    ? []
+                    : await transaction.contractService.findMany({
+                        where: {
+                          contractId: existing.enrollmentContractId,
+                          serviceType: "MEAL",
+                          catalogueItemId: existing.mealCombinationId,
+                          status: { in: ["ACTIVE", "DRAFT"] },
+                        },
+                        select: {
+                          id: true,
+                          effectiveFrom: true,
+                          effectiveTo: true,
+                        },
+                        orderBy: { updatedAt: "desc" },
+                        take: 2,
+                      });
+                const mealServices =
+                  exactMealServices.length > 0
+                    ? exactMealServices
+                    : legacyMealServices;
+                if (
+                  exactMealServices.length === 0 &&
+                  legacyMealServices.length > 1
+                ) {
+                  throw new DaycareRequestError(
+                    "More than one active meal charge matches this older plan. Review the child’s billing before ending the plan.",
+                    409,
+                  );
+                }
+                for (const mealService of mealServices) {
+                  await transaction.contractService.update({
+                    where: { id: mealService.id },
+                    data: {
+                      status: "ENDED",
+                      effectiveTo: daycareServiceEndAt(
+                        mealService.effectiveFrom,
+                        mealService.effectiveTo,
+                        actionAt,
+                      ),
+                    },
+                  });
+                }
+              }
+            }
+
+            const [
+              activeDaycarePlans,
+              activeMealPlans,
+              activeDaycareServices,
+              activeMealServices,
+            ] =
+              await Promise.all([
+                transaction.studentDaycarePlan.count({
+                  where: {
+                    enrollmentContractId: existing.enrollmentContractId,
+                    active: true,
+                    lifecycleStatus: "ACTIVE",
+                  },
+                }),
+                transaction.studentDaycarePlan.count({
+                  where: {
+                    enrollmentContractId: existing.enrollmentContractId,
+                    foodRequired: true,
+                    active: true,
+                    lifecycleStatus: "ACTIVE",
+                  },
+                }),
+                transaction.contractService.count({
+                  where: {
+                    contractId: existing.enrollmentContractId,
+                    serviceType: "DAYCARE",
+                    status: { in: ["ACTIVE", "DRAFT"] },
+                  },
+                }),
+                transaction.contractService.count({
+                  where: {
+                    contractId: existing.enrollmentContractId,
+                    serviceType: "MEAL",
+                    status: { in: ["ACTIVE", "DRAFT"] },
+                  },
+                }),
+              ]);
+            await transaction.studentEnrollmentContract.update({
+              where: { id: existing.enrollmentContractId },
+              data: {
+                daycareEnabled:
+                  activeDaycarePlans > 0 || activeDaycareServices > 0,
+                mealsEnabled: activeMealPlans > 0 || activeMealServices > 0,
+                updatedById: adminUserId,
+              },
+            });
+          }
+
           await transaction.activityLog.create({
             data: {
               adminUserId,
@@ -1241,16 +1793,24 @@ export async function POST(request: NextRequest) {
               newData: {
                 status: target,
                 reason: reason || null,
-                affectedRecords: { sessions, invoiceItems },
+                affectedRecords: dependencies,
               },
             },
           });
-        });
-      }
-      return NextResponse.json({
-        success: true,
-        message: "Child daycare plan lifecycle updated.",
-      });
+
+          return {
+            message:
+              target === "ACTIVE"
+                ? "Daycare plan reactivated."
+                : target === "INACTIVE"
+                  ? "Daycare plan deactivated. History remains unchanged."
+                  : "Daycare plan archived. Attendance and billing history remain unchanged.",
+          };
+        },
+        { isolationLevel: "Serializable" },
+      );
+
+      return NextResponse.json({ success: true, message: result.message });
     }
 
     if (action === "save-rates") {
@@ -1754,13 +2314,35 @@ export async function POST(request: NextRequest) {
 
       const planId = cleanText(body.planId, 100);
       if (planId) {
-        const linkedPlan = await prisma.studentDaycarePlan.findUnique({
+        const existingPlan = await prisma.studentDaycarePlan.findUnique({
           where: { id: planId },
-          select: { contractServiceId: true },
+          select: {
+            studentId: true,
+            contractServiceId: true,
+            lifecycleStatus: true,
+          },
         });
-        if (linkedPlan?.contractServiceId) {
+        if (!existingPlan) {
+          throw new DaycareRequestError("Daycare plan was not found.", 404);
+        }
+        if (existingPlan.studentId !== studentId) {
+          throw new DaycareRequestError(
+            "A saved plan cannot be moved to another child. Duplicate it for the other child instead.",
+            409,
+          );
+        }
+        if (existingPlan.contractServiceId) {
           throw new DaycareRequestError(
             "This plan belongs to the child's enrollment contract. Use Replace Plan so historical prices and invoices remain unchanged.",
+            409,
+          );
+        }
+        if (
+          existingPlan.lifecycleStatus === "ARCHIVED" ||
+          existingPlan.lifecycleStatus === "DELETED"
+        ) {
+          throw new DaycareRequestError(
+            "Archived plans are kept unchanged for history. Duplicate this plan to create a new arrangement.",
             409,
           );
         }
@@ -1802,7 +2384,6 @@ export async function POST(request: NextRequest) {
                 (includedDays ?? 0)))
           : monthlyFeeOverride;
       const planData = {
-        studentId,
         planDefinitionId,
         priceVersionId: catalogPrice?.id ?? null,
         mealCombinationId,
@@ -1831,19 +2412,54 @@ export async function POST(request: NextRequest) {
             : parseBoolean(body.planFullDayFoodIncluded),
         effectiveFrom,
         effectiveTo,
-        active: true,
-        lifecycleStatus: "ACTIVE" as const,
         recurring: planDefinition
           ? booleanValueOrDefault(body.recurring, planDefinition.recurring)
           : planType !== "OCCASIONAL",
         maximumVisitsOverride,
         separateInvoice: parseBoolean(body.separateInvoice),
-        billingStoppedAt: null,
         notes: cleanOptionalText(body.notes),
       };
 
       const plan = await prisma.$transaction(
         async (transaction) => {
+          if (planId) {
+            const currentPlan =
+              await transaction.studentDaycarePlan.findUnique({
+                where: { id: planId },
+                select: {
+                  id: true,
+                  studentId: true,
+                  title: true,
+                  active: true,
+                  lifecycleStatus: true,
+                  effectiveFrom: true,
+                  effectiveTo: true,
+                  foodRequired: true,
+                  mealCombinationId: true,
+                  contractServiceId: true,
+                  enrollmentContractId: true,
+                },
+              });
+            if (!currentPlan) {
+              throw new DaycareRequestError("Daycare plan was not found.", 404);
+            }
+            const dependencies = await daycarePlanDependencies(
+              transaction,
+              currentPlan,
+            );
+            if (currentPlan.contractServiceId) {
+              throw new DaycareRequestError(
+                "This plan belongs to the child’s enrollment contract. Use Replace Plan so historical prices and invoices remain unchanged.",
+                409,
+              );
+            }
+            if (daycarePlanHistoricalDependencyCount(dependencies) > 0) {
+              throw new DaycareRequestError(
+                "This plan already has attendance or billing history. Duplicate it to make a new arrangement without changing past records.",
+                409,
+              );
+            }
+          }
           const otherPlans = await transaction.studentDaycarePlan.findMany({
             where: {
               studentId,
@@ -1956,6 +2572,7 @@ export async function POST(request: NextRequest) {
               })
             : await transaction.studentDaycarePlan.create({
                 data: {
+                  studentId,
                   ...planData,
                   enrollmentContractId: contract?.id ?? null,
                   contractServiceId: contractService?.id ?? null,
@@ -1964,6 +2581,7 @@ export async function POST(request: NextRequest) {
                     contract && contract.status !== "ACTIVE"
                       ? "INACTIVE"
                       : "ACTIVE",
+                  billingStoppedAt: null,
                 },
                 include: {
                   planDefinition: true,
@@ -3334,12 +3952,16 @@ export async function POST(request: NextRequest) {
     throw new DaycareRequestError("Please choose a valid daycare action.");
   } catch (error) {
     console.error("Daycare update failed", error);
+    const persistenceError = publicPersistenceError(
+      error,
+      "The daycare record could not be saved. Please try again or contact the Owner.",
+    );
     const status =
       error instanceof DaycareRequestError
         ? error.status
         : isSerializationConflict(error) || isUniqueConflict(error)
           ? 409
-          : 500;
+          : persistenceError.status;
 
     return NextResponse.json(
       {
@@ -3348,9 +3970,9 @@ export async function POST(request: NextRequest) {
           ? "Another daycare update was saved at the same time. Please refresh and try once more."
           : isUniqueConflict(error)
             ? "A daycare entry for this child and date already exists. Refresh and open the existing entry."
-            : error instanceof Error
+            : error instanceof DaycareRequestError
               ? error.message
-              : "The daycare record could not be saved.",
+              : persistenceError.message,
       },
       { status },
     );
@@ -3374,57 +3996,12 @@ export async function DELETE(request: NextRequest) {
 
   try {
     if (planId) {
-      await prisma.$transaction(async (transaction) => {
-        const existingPlan = await transaction.studentDaycarePlan.findUnique({
-          where: { id: planId },
-          select: { id: true, title: true, active: true, effectiveFrom: true },
-        });
-
-        if (!existingPlan) {
-          throw new DaycareRequestError("Daycare plan was not found.", 404);
-        }
-        if (!existingPlan.active) {
-          throw new DaycareRequestError(
-            "This daycare plan is already inactive.",
-            409,
-          );
-        }
-
-        const now = new Date();
-        const planEnd =
-          now < existingPlan.effectiveFrom ? existingPlan.effectiveFrom : now;
-        const claimed = await transaction.studentDaycarePlan.updateMany({
-          where: { id: planId, active: true },
-          data: {
-            active: false,
-            lifecycleStatus: "INACTIVE",
-            effectiveTo: planEnd,
-            billingStoppedAt: now,
-          },
-        });
-
-        if (claimed.count !== 1) {
-          throw new DaycareRequestError(
-            "This daycare plan was already updated.",
-            409,
-          );
-        }
-
-        await transaction.activityLog.create({
-          data: {
-            adminUserId,
-            action: "CANCELLED",
-            entityType: "StudentDaycarePlan",
-            entityId: existingPlan.id,
-            description: `${existingPlan.title} deactivated.`,
-          },
-        });
-      });
-
-      return NextResponse.json({
-        success: true,
-        message: "Daycare plan deactivated.",
-      });
+      throw new DaycareRequestError(
+        session.role === "OWNER"
+          ? "Use the plan’s More actions menu so daycare, meals and recurring billing are updated together."
+          : "Only the Owner can deactivate a child’s contracted daycare plan. You can continue managing daily attendance and meals.",
+        403,
+      );
     }
 
     if (sessionId) {
@@ -3485,15 +4062,23 @@ export async function DELETE(request: NextRequest) {
 
     throw new DaycareRequestError("Select a plan or session to deactivate.");
   } catch (error) {
-    const status = error instanceof DaycareRequestError ? error.status : 500;
+    console.error("Daycare removal failed", error);
+    const persistenceError = publicPersistenceError(
+      error,
+      "The daycare record could not be updated. Please try again or contact the Owner.",
+    );
+    const status =
+      error instanceof DaycareRequestError
+        ? error.status
+        : persistenceError.status;
 
     return NextResponse.json(
       {
         success: false,
         message:
-          error instanceof Error
+          error instanceof DaycareRequestError
             ? error.message
-            : "The daycare record could not be updated.",
+            : persistenceError.message,
       },
       { status },
     );
