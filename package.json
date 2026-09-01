@@ -17,7 +17,8 @@
     "test:build:production": "node scripts/test-production-build.mjs",
     "audit:media": "node scripts/audit-media-storage.mjs",
     "prepare:migrations": "node scripts/prepare-prisma-deploy.mjs",
-    "deploy:check": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./setup-and-deploy.ps1"
+    "deploy:check": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./setup-and-deploy.ps1",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",
