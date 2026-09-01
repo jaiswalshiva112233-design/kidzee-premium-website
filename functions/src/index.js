@@ -241,7 +241,7 @@ exports.refreshOwnerIntelligence = onSchedule(
 
 exports.processGalleryUpload = onObjectFinalized(
   {
-    region: "asia-south1",
+    region: "asia-south2",
     memory: "1GiB",
     timeoutSeconds: 540,
     maxInstances: 2,
