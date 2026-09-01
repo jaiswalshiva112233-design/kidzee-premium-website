@@ -506,7 +506,7 @@ export async function GET(request: Request) {
       {
         success: false,
         message:
-          "Unable to load enquiries. Check the server terminal.",
+          "Unable to load enquiries. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,
@@ -782,7 +782,7 @@ export async function POST(request: Request) {
       {
         success: false,
         message:
-          "The enquiry could not be saved. Check the server terminal.",
+          "The enquiry could not be saved. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,

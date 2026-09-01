@@ -941,7 +941,7 @@ export async function GET(request: Request) {
       {
         success: false,
         message:
-          "Unable to load the staff leave register. Check the server terminal.",
+          "Unable to load the staff leave register. Please try again. If the problem continues, contact the Owner.",
       },
       { status: 500 },
     );
@@ -1331,7 +1331,7 @@ export async function POST(request: Request) {
       {
         success: false,
         message:
-          "The staff leave request could not be saved. Check the server terminal.",
+          "The staff leave request could not be saved. Please try again. If the problem continues, contact the Owner.",
       },
       { status: 500 },
     );
@@ -1616,7 +1616,7 @@ export async function PATCH(request: Request) {
       {
         success: false,
         message:
-          "The staff leave request could not be updated. Check the server terminal.",
+          "The staff leave request could not be updated. Please try again. If the problem continues, contact the Owner.",
       },
       { status: 500 },
     );

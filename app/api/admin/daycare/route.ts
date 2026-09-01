@@ -311,6 +311,12 @@ function planDateRange(plan: LifecyclePlanRecord) {
   };
 }
 
+function preserveJsonObject(value: Prisma.JsonValue | null) {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Prisma.JsonObject)
+    : {};
+}
+
 async function linkedPlanMealServices(
   transaction: Prisma.TransactionClient,
   plan: LifecyclePlanRecord,
@@ -1356,6 +1362,7 @@ export async function POST(request: NextRequest) {
                 id: planId,
                 active: false,
                 lifecycleStatus: existing.lifecycleStatus,
+                sessions: { none: {} },
               },
             });
             if (removed.count !== 1) {
@@ -1366,15 +1373,18 @@ export async function POST(request: NextRequest) {
             }
 
             if (replacementMealPlan && planMealServices.length > 0) {
-              await transaction.contractService.updateMany({
-                where: { id: { in: planMealServices.map((service) => service.id) } },
-                data: {
-                  metadata: {
-                    studentDaycarePlanId: replacementMealPlan.id,
-                    reassignedFromPlanId: existing.id,
+              for (const mealService of planMealServices) {
+                await transaction.contractService.update({
+                  where: { id: mealService.id },
+                  data: {
+                    metadata: {
+                      ...preserveJsonObject(mealService.metadata),
+                      studentDaycarePlanId: replacementMealPlan.id,
+                      reassignedFromPlanId: existing.id,
+                    },
                   },
-                },
-              });
+                });
+              }
             }
 
             const unusedServiceIds = [
@@ -1523,6 +1533,7 @@ export async function POST(request: NextRequest) {
             id: string;
             effectiveFrom: Date;
             effectiveTo: Date | null;
+            metadata: Prisma.JsonValue | null;
           } | null = null;
           if (
             target === "ACTIVE" &&
@@ -1553,7 +1564,12 @@ export async function POST(request: NextRequest) {
                       equals: existing.id,
                     },
                   },
-                  select: { id: true, effectiveFrom: true, effectiveTo: true },
+                  select: {
+                    id: true,
+                    effectiveFrom: true,
+                    effectiveTo: true,
+                    metadata: true,
+                  },
                   orderBy: { updatedAt: "desc" },
                   take: 2,
                 });
@@ -1571,6 +1587,7 @@ export async function POST(request: NextRequest) {
                         id: true,
                         effectiveFrom: true,
                         effectiveTo: true,
+                        metadata: true,
                       },
                       orderBy: { updatedAt: "desc" },
                       take: 2,
@@ -1649,7 +1666,10 @@ export async function POST(request: NextRequest) {
                   data: {
                     status: "ACTIVE",
                     effectiveTo: existing.effectiveTo,
-                    metadata: { studentDaycarePlanId: existing.id },
+                    metadata: {
+                      ...preserveJsonObject(mealServiceToActivate.metadata),
+                      studentDaycarePlanId: existing.id,
+                    },
                   },
                 });
               }

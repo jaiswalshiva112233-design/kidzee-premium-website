@@ -12,11 +12,13 @@ import {
   normalisePaymentComponents,
 } from "@/lib/admin/financial-report-allocation";
 import { hasAdminPermissionRequirement } from "@/lib/admin/permissions";
+import { formatCentreAddress } from "@/lib/centreAddress";
 import {
   buildOperationalReport,
   isOperationalReportType,
 } from "@/lib/admin/operational-report-data";
 import { prisma } from "@/lib/prisma";
+import { site } from "@/lib/site";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -457,16 +459,7 @@ async function getSchoolProfile():
     ? setting.value
     : {};
 
-  const address = [
-    getJsonText(value, "addressLine1"),
-    getJsonText(value, "addressLine2"),
-    getJsonText(value, "locality"),
-    getJsonText(value, "city"),
-    getJsonText(value, "state"),
-    getJsonText(value, "postalCode"),
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const address = formatCentreAddress(value);
 
   return {
     schoolName:
@@ -479,7 +472,7 @@ async function getSchoolProfile():
 
     address:
       address ||
-      "Plot No. 19, Block B, Sector 12B, Dwarka, New Delhi",
+      site.address,
 
     phone:
       getJsonText(value, "phone") ||
@@ -3584,7 +3577,7 @@ export async function GET(request: Request) {
       {
         success: false,
         message:
-          "The report could not be generated. Check the server terminal.",
+          "The report could not be generated. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,

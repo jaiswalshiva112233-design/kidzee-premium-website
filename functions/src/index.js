@@ -9,16 +9,15 @@ const sharp = require("sharp");
 
 initializeApp();
 
-const marketingCronSecret = defineSecret("MARKETING_CRON_SECRET");
-const whatsappCronSecret = defineSecret("WHATSAPP_CRON_SECRET");
 const billingCronSecret = defineSecret("BILLING_CRON_SECRET");
-const growthSyncSecret = defineSecret("GROWTH_SYNC_SECRET");
-const ownerIntelligenceCronSecret = defineSecret("OWNER_INTELLIGENCE_CRON_SECRET");
-const notificationCronSecret = defineSecret("NOTIFICATION_CRON_SECRET");
 const centreOsBaseUrl = defineString("CENTREOS_BASE_URL", {
   default: "https://kidzeedwarka.com",
 });
 const mediaWorkerUrl = defineString("MEDIA_WORKER_URL", { default: "" });
+
+function optionalSchedulerEnabled(flagName) {
+  return String(process.env[flagName] || "").trim().toLowerCase() === "true";
+}
 
 const IMAGE_TYPES = new Set([
   "image/jpeg",
@@ -52,6 +51,7 @@ async function saveDerivative(bucket, destination, data, contentType) {
   return destination;
 }
 
+if (optionalSchedulerEnabled("GROWTH_SUMMARY_SCHEDULER_ENABLED")) {
 exports.buildDailyGrowthSummary = onSchedule(
   {
     schedule: "every day 06:15",
@@ -88,7 +88,10 @@ exports.buildDailyGrowthSummary = onSchedule(
     );
   },
 );
+}
 
+if (optionalSchedulerEnabled("MARKETING_SCHEDULER_ENABLED")) {
+const marketingCronSecret = defineSecret("MARKETING_CRON_SECRET");
 exports.retryMarketingConversions = onSchedule(
   {
     schedule: "every 15 minutes",
@@ -114,7 +117,10 @@ exports.retryMarketingConversions = onSchedule(
     }
   },
 );
+}
 
+if (optionalSchedulerEnabled("GROWTH_SCHEDULER_ENABLED")) {
+const growthSyncSecret = defineSecret("GROWTH_SYNC_SECRET");
 exports.synchronizeGrowthSources = onSchedule(
   {
     schedule: "every day 05:45",
@@ -132,7 +138,10 @@ exports.synchronizeGrowthSources = onSchedule(
     if (!response.ok) throw new Error(`Growth source endpoint returned ${response.status}.`);
   },
 );
+}
 
+if (optionalSchedulerEnabled("WHATSAPP_SCHEDULER_ENABLED")) {
+const whatsappCronSecret = defineSecret("WHATSAPP_CRON_SECRET");
 exports.processWhatsAppAutomation = onSchedule(
   {
     schedule: "every 15 minutes",
@@ -156,7 +165,10 @@ exports.processWhatsAppAutomation = onSchedule(
     if (!response.ok) throw new Error(`WhatsApp automation endpoint returned ${response.status}.`);
   },
 );
+}
 
+if (optionalSchedulerEnabled("NOTIFICATION_SCHEDULER_ENABLED")) {
+const notificationCronSecret = defineSecret("NOTIFICATION_CRON_SECRET");
 exports.processCentreNotifications = onSchedule(
   {
     schedule: "every 15 minutes",
@@ -174,6 +186,7 @@ exports.processCentreNotifications = onSchedule(
     if (!response.ok) throw new Error(`Notification endpoint returned ${response.status}.`);
   },
 );
+}
 
 exports.generateMonthlyCentreInvoices = onSchedule(
   {
@@ -199,6 +212,8 @@ exports.generateMonthlyCentreInvoices = onSchedule(
   },
 );
 
+if (optionalSchedulerEnabled("OWNER_INTELLIGENCE_SCHEDULER_ENABLED")) {
+const ownerIntelligenceCronSecret = defineSecret("OWNER_INTELLIGENCE_CRON_SECRET");
 exports.refreshOwnerIntelligence = onSchedule(
   {
     schedule: "every 15 minutes",
@@ -222,6 +237,7 @@ exports.refreshOwnerIntelligence = onSchedule(
     if (!response.ok) throw new Error(`Owner intelligence endpoint returned ${response.status}.`);
   },
 );
+}
 
 exports.processGalleryUpload = onObjectFinalized(
   {

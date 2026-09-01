@@ -494,7 +494,7 @@ export async function GET(request: Request) {
       {
         success: false,
         message:
-          "Student documents could not be loaded. Check the server terminal.",
+          "Student documents could not be loaded. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,
@@ -793,7 +793,7 @@ export async function POST(request: Request) {
       {
         success: false,
         message:
-          "The document could not be uploaded. Check the server terminal.",
+          "The document could not be uploaded. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,
@@ -1031,7 +1031,7 @@ export async function PATCH(request: Request) {
       {
         success: false,
         message:
-          "The document status could not be updated. Check the server terminal.",
+          "The document status could not be updated. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,
@@ -1211,7 +1211,7 @@ export async function DELETE(request: Request) {
       {
         success: false,
         message:
-          "The document could not be deleted. Check the server terminal.",
+          "The document could not be deleted. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,

@@ -18,7 +18,7 @@ const faqs = [
   {
     question: "What are the preschool and daycare timings?",
     answer:
-      "Playgroup and Nursery run from 9:30 AM to 12:30 PM. Junior KG and Senior KG run from 9:30 AM to 1:00 PM. Daycare is available from 12:30 PM to 7:00 PM, Monday to Friday.",
+      "Preschool runs Monday to Friday: Playgroup and Nursery from 9:30 AM to 12:30 PM, and Junior KG and Senior KG from 9:30 AM to 1:00 PM. Daycare is available Monday to Saturday from 12:30 PM to 7:00 PM.",
   },
   {
     question: "Can my child try preschool before admission?",

@@ -14,6 +14,7 @@ type ParentReelPlayerProps = {
   poster?: string;
   title: string;
   analyticsName: string;
+  badge?: string;
   className?: string;
 };
 
@@ -35,6 +36,7 @@ export default function ParentReelPlayer({
   poster,
   title,
   analyticsName,
+  badge = "Parent Story",
   className = "",
 }: ParentReelPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -144,7 +146,7 @@ export default function ParentReelPlayer({
 
       <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-3 p-4">
         <span className="rounded-full border border-white/25 bg-[#281034]/72 px-3 py-2 text-[0.64rem] font-black uppercase tracking-[0.12em] text-[#F6C84B] backdrop-blur-md">
-          Parent Story
+          {badge}
         </span>
 
         {duration > 0 ? (

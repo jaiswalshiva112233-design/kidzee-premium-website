@@ -627,7 +627,7 @@ export async function GET() {
       {
         success: false,
         message:
-          "Website SEO settings could not be loaded. Check the server terminal.",
+          "Website SEO settings could not be loaded. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );
@@ -806,7 +806,7 @@ export async function PATCH(request: Request) {
       {
         success: false,
         message:
-          "Website SEO settings could not be saved. Check the server terminal.",
+          "Website SEO settings could not be saved. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );
@@ -903,7 +903,7 @@ export async function PUT(request: Request) {
     return noStoreJson(
       {
         success: false,
-        message: "The SEO change could not be undone. Check the server terminal.",
+        message: "The SEO change could not be undone. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );
@@ -1039,7 +1039,7 @@ export async function POST(request: Request) {
       {
         success: false,
         message:
-          "The sharing image could not be uploaded. Check the server terminal.",
+          "The sharing image could not be uploaded. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );
@@ -1112,7 +1112,7 @@ export async function DELETE(request: Request) {
       {
         success: false,
         message:
-          "The sharing image could not be removed. Check the server terminal.",
+          "The sharing image could not be removed. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );

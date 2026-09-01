@@ -6,10 +6,10 @@ import {
   ArrowRight,
   Camera,
   Expand,
-  Film,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 import ParentReelPlayer from "@/components/Gallery/ParentReelPlayer";
 import ExternalMediaEmbed from "@/components/Gallery/ExternalMediaEmbed";
@@ -223,58 +223,23 @@ export default function GalleryAlbumViewer({
               />
               {item.caption ? <p className="p-4 text-center text-sm font-bold leading-6 text-[#504456]">{item.caption}</p> : null}
             </article>
-          ) : item.mediaType === "VIDEO" && item.videoUrl && parentStories ? (
+          ) : item.mediaType === "VIDEO" && item.videoUrl ? (
             <article
               key={item._id}
-              className="snap-start"
+              className={parentStories ? "snap-start" : "mx-auto w-full max-w-[360px]"}
             >
               <ParentReelPlayer
                 src={item.videoUrl}
                 poster={item.imageUrl ?? undefined}
                 title={item.altText || item.caption || albumTitle}
-                analyticsName="gallery_parent_story_reel"
+                analyticsName={parentStories ? "gallery_parent_story_reel" : "gallery_album_reel"}
+                badge={parentStories ? "Parent Story" : "Centre Reel"}
               />
               {item.caption ? (
                 <p className="mt-3 text-center text-sm font-bold leading-6 text-[#504456]">
                   {item.caption}
                 </p>
               ) : null}
-            </article>
-          ) : item.mediaType === "VIDEO" && item.videoUrl ? (
-            <article
-              key={item._id}
-              className="overflow-hidden rounded-[28px] border-[4px] border-white bg-white shadow-[0_18px_54px_rgba(40,16,52,0.1)]"
-            >
-              <div className="relative aspect-video overflow-hidden bg-[#1F1026]">
-                <video
-                  src={item.videoUrl}
-                  controls
-                  playsInline
-                  preload="metadata"
-                  aria-label={item.altText || item.caption || albumTitle}
-                  data-analytics-name="gallery_album_video"
-                  className="h-full w-full object-contain"
-                >
-                  Your browser does not support this video.
-                </video>
-              </div>
-
-              <div className="p-5">
-                <p className="inline-flex items-center gap-2 text-[0.68rem] font-black uppercase tracking-[0.1em] text-[#7A459C]">
-                  <Film aria-hidden="true" size={14} />
-                  Click to play
-                </p>
-
-                {item.caption ? (
-                  <p className="mt-2 text-sm font-bold leading-6 text-[#504456]">
-                    {item.caption}
-                  </p>
-                ) : (
-                  <p className="mt-2 text-sm font-semibold leading-6 text-[#817684]">
-                    A short video from {albumTitle}.
-                  </p>
-                )}
-              </div>
             </article>
           ) : null;
         })}
@@ -288,8 +253,9 @@ export default function GalleryAlbumViewer({
         </div>
       ) : null}
 
-      {selectedPhoto?.imageUrl ? (
-        <div
+      {selectedPhoto?.imageUrl && typeof document !== "undefined"
+        ? createPortal(
+            <div
           role="dialog"
           aria-modal="true"
           aria-label={`Photograph viewer for ${albumTitle}`}
@@ -360,8 +326,10 @@ export default function GalleryAlbumViewer({
               ) : null}
             </div>
           </div>
-        </div>
-      ) : null}
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

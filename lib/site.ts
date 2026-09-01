@@ -1,3 +1,8 @@
+import {
+  VERIFIED_FULL_CENTRE_ADDRESS,
+  VERIFIED_SHORT_CENTRE_ADDRESS,
+} from "@/lib/centreAddress";
+
 const phoneNumber = "919667038673";
 
 function createWhatsAppLink(message: string) {
@@ -17,10 +22,9 @@ export const site = {
 
   email: "kidzeepreschoolsector12@gmail.com",
 
-  address:
-    "Building No. 19, Block B, Sector 12B, Dwarka, New Delhi, Delhi 110075",
-  addressShort: "Building No. 19, Block B, Sector 12B, Dwarka, Delhi",
-  postalCode: "110075",
+  address: VERIFIED_FULL_CENTRE_ADDRESS,
+  addressShort: VERIFIED_SHORT_CENTRE_ADDRESS,
+  postalCode: "110078",
   locality: "Dwarka",
   region: "Delhi",
   country: "IN",
@@ -29,7 +33,7 @@ export const site = {
     "https://www.google.com/maps/search/?api=1&query=Kidzee+Sector+12+Dwarka",
 
   mapEmbed:
-    "https://www.google.com/maps?q=Kidzee%20Sector%2012%20Dwarka%2C%20Building%20No.%2019%2C%20Block%20B%2C%20Sector%2012B%2C%20Dwarka%2C%20New%20Delhi%20110075&output=embed",
+    "https://www.google.com/maps?q=Kidzee%20Sector%2012%20Dwarka%2C%20Building%20No.%2019%2C%20Sector%2012B%2C%20Dwarka%2C%20New%20Delhi%20110078&output=embed",
 
   googleReviews:
     "https://www.google.com/search?q=Kidzee+Sector+12+Dwarka+reviews",
@@ -84,7 +88,7 @@ export const site = {
   },
 
   daycareHours: {
-    days: "Monday to Friday",
+    days: "Monday to Saturday",
     opens: "12:30",
     closes: "19:00",
     display: "12:30 PM–7:00 PM",

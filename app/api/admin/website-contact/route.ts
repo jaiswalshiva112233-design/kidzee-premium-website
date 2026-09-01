@@ -339,7 +339,7 @@ export async function PATCH(request: Request) {
       {
         success: false,
         message:
-          "Website contact settings could not be saved. Check the server terminal.",
+          "Website contact settings could not be saved. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );

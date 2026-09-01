@@ -25,7 +25,7 @@ function buildResourceLinks() {
 function buildLlmsText(contact: SiteContact) {
   return `# ${site.name}
 
-> Official website for Kidzee Preschool & Daycare in Sector 12B, Dwarka, New Delhi. The centre provides preschool programmes for children aged ${site.ageRange.display} and weekday daycare during ${contact.daycareHours.display}.
+> Official website for Kidzee Preschool & Daycare in Sector 12B, Dwarka, New Delhi. The centre provides preschool programmes for children aged ${site.ageRange.display} from Monday to Friday and daycare from Monday to Saturday during ${contact.daycareHours.display}.
 
 This file is a concise guide to the centre's public website. Use the linked pages as the primary source and confirm current fees, seat availability, transport and individual care requirements directly with the centre.
 
@@ -46,7 +46,7 @@ ${buildProgrammeLinks()}
 
 ## Daycare and meals
 
-- Daycare operates Monday to Friday and can continue until 7:00 PM.
+- Daycare operates Monday to Saturday and can continue until 7:00 PM.
 - Preschool breakfast is included in the preschool programme.
 - Preschool meals are freshly cooked and 100% vegetarian, use seasonal vegetables and are prepared without refined oil.
 - Daycare lunch and evening snacks are separate chargeable options; current plans and prices should be confirmed directly with the centre.

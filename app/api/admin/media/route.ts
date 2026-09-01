@@ -367,7 +367,7 @@ export async function POST(request: Request) {
       {
         success: false,
         message:
-          "The photograph could not be uploaded. Check the server terminal.",
+          "The photograph could not be uploaded. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );
@@ -441,7 +441,7 @@ export async function DELETE(request: Request) {
       {
         success: false,
         message:
-          "The original photograph could not be restored. Check the server terminal.",
+          "The original photograph could not be restored. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );

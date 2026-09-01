@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
     path: "/contact",
     title: "Contact & School Visits",
     description:
-      "Contact Kidzee Preschool & Daycare at Building No. 19, Block B, Sector 12B, Dwarka. Call or WhatsApp +91 96670 38673 to book a school visit or three-day trial.",
+      "Contact Kidzee Preschool & Daycare at Building No. 19, Sector 12B, Dwarka. Call or WhatsApp +91 96670 38673 to book a school visit or three-day trial.",
     keywords: [
       "contact Kidzee Sector 12 Dwarka",
       "Kidzee Dwarka phone number",
@@ -60,9 +60,9 @@ const enquiryTopics = [
   },
   {
     icon: BusFront,
-    title: "Transport availability",
+    title: "Preschool cab availability",
     description:
-      "Share your location so our team can confirm whether cab service is available.",
+      "Preschool cab service is available on selected routes. Daycare cab service is not available.",
   },
 ];
 
@@ -72,7 +72,7 @@ const visitChecklist = [
   "See the indoor and outdoor play areas",
   "Understand the daily routine",
   "Discuss fees and seat availability",
-  "Ask about daycare and transport",
+  "Ask about daycare and preschool cab routes",
 ];
 
 const faqs = [
@@ -104,7 +104,7 @@ const faqs = [
   {
     question: "Is transport available?",
     answer:
-      "Cab transport is available on selected routes. Availability depends on the pickup location and the centre’s current transport route.",
+      "Preschool cab service is available on selected routes, subject to route confirmation. Daycare cab service is not available.",
   },
 ];
 
@@ -131,7 +131,8 @@ export default async function ContactPage() {
 
               <p className="lead mx-auto mt-6 max-w-3xl">
                 Ask us about preschool admissions, daycare, trial classes,
-                transport, programme timings and current seat availability.
+                preschool cab routes, programme timings and current seat
+                availability. Daycare cab service is not available.
               </p>
 
               <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
@@ -157,7 +158,7 @@ export default async function ContactPage() {
                   "School visits available",
                   "3-day trial",
                   "Daycare till 7 PM",
-                  "Transport on selected routes",
+                  "Preschool cab on selected routes",
                 ].map((item) => (
                   <span
                     key={item}
@@ -440,8 +441,8 @@ export default async function ContactPage() {
                 <p className="mt-4 text-sm leading-7 text-purple-100 sm:text-base">
                   The purpose of the visit is to help you understand the centre
                   clearly. You can ask about classroom routines, safety,
-                  teacher-child ratios, meals, daycare, transport and the
-                  settling process.
+                  teacher-child ratios, meals, daycare, preschool cab routes
+                  and the settling process.
                 </p>
 
                 <div className="mt-7 rounded-[24px] border border-white/10 bg-white/10 p-5">
@@ -473,7 +474,7 @@ export default async function ContactPage() {
 
                 <p className="mt-5 text-base leading-8 text-slate-600">
                   Our preschool and daycare centre is located at Building No.
-                  19, Block B, Sector 12B, Dwarka, Delhi.
+                  19, Sector 12B, Dwarka, New Delhi, Delhi 110078.
                 </p>
 
                 <p className="mt-4 text-base leading-8 text-slate-600">

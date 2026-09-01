@@ -89,7 +89,7 @@ const admissionSteps = [
     icon: CalendarCheck,
     title: "Visit and meet the team",
     description:
-      "See the classrooms, understand the routine and ask about settling, meals, daycare, transport and current availability.",
+      "See the classrooms, understand the routine and ask about settling, meals, daycare, preschool cab routes and current availability.",
   },
   {
     number: "03",

@@ -19,8 +19,10 @@ import {
 import AdminLayout from "@/components/admin/AdminLayout";
 import ReceiptQuickActions from "@/components/admin/receipts/ReceiptQuickActions";
 import { getAdminSession } from "@/lib/admin/auth";
+import { formatCentreAddress } from "@/lib/centreAddress";
 import { getNextSequence } from "@/lib/numbering";
 import { prisma } from "@/lib/prisma";
+import { site } from "@/lib/site";
 
 type ReceiptPageProps = {
   params: Promise<{
@@ -61,8 +63,7 @@ type SchoolProfile = {
 const defaultSchoolProfile: SchoolProfile = {
   schoolName: "Kidzee Preschool & Daycare",
   centreName: "Kidzee Sector 12, Dwarka",
-  address:
-    "Plot No. 19, Block B, Sector 12B, Dwarka, New Delhi, Delhi",
+  address: site.address,
   phone: "9667038673",
   email: "kidzeepreschoolsector12@gmail.com",
   gstNumber: "",
@@ -184,16 +185,7 @@ function normaliseSchoolProfile(
     return defaultSchoolProfile;
   }
 
-  const address = [
-    cleanText(value.addressLine1),
-    cleanText(value.addressLine2),
-    cleanText(value.locality),
-    cleanText(value.city),
-    cleanText(value.state),
-    cleanText(value.postalCode),
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const address = formatCentreAddress(value);
 
   return {
     schoolName:

@@ -24,12 +24,19 @@ import {
 } from "lucide-react";
 import {
   type ChangeEvent,
+  type ClipboardEvent,
   type FormEvent,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
+
+import {
+  looksLikeInstagramLink,
+  normalizeInstagramEmbedUrl,
+  normalizeInstagramShareUrl,
+} from "@/lib/media/instagram-embed";
 
 const CATEGORIES = [
   ["CELEBRATION", "Celebration"],
@@ -191,6 +198,19 @@ export default function GalleryManager() {
     () => albums.find((album) => album._id === selectedAlbumId) ?? null,
     [albums, selectedAlbumId],
   );
+  const normalizedInstagramEmbed = useMemo(
+    () => normalizeInstagramEmbedUrl(embedUrl),
+    [embedUrl],
+  );
+  const normalizedInstagramShareUrl = useMemo(
+    () => normalizeInstagramShareUrl(embedUrl),
+    [embedUrl],
+  );
+  const invalidInstagramEmbed =
+    Boolean(embedUrl.trim()) &&
+    looksLikeInstagramLink(embedUrl) &&
+    !normalizedInstagramEmbed &&
+    !normalizedInstagramShareUrl;
 
   const totals = useMemo(() => {
     const allMedia = albums.flatMap((album) => album.media);
@@ -634,6 +654,13 @@ export default function GalleryManager() {
       showResult("Paste an Instagram Reel or YouTube URL.", true);
       return;
     }
+    if (invalidInstagramEmbed) {
+      showResult(
+        "Please paste a complete Instagram Reel link. In Instagram, open the Reel, tap Share → Copy link, then paste it here.",
+        true,
+      );
+      return;
+    }
     if (!consentConfirmed) {
       showResult("Confirm media permission before adding the reel.", true);
       return;
@@ -646,7 +673,10 @@ export default function GalleryManager() {
         body: JSON.stringify({
           action: "createEmbed",
           albumId: selectedAlbum._id,
-          embedUrl,
+          embedUrl:
+            normalizedInstagramEmbed?.publicUrl ??
+            normalizedInstagramShareUrl ??
+            embedUrl.trim(),
           caption: embedCaption,
           altText: embedCaption,
           consentConfirmed: true,
@@ -662,6 +692,15 @@ export default function GalleryManager() {
     } finally {
       setBusyKey("");
     }
+  }
+
+  function handleEmbedPaste(event: ClipboardEvent<HTMLInputElement>) {
+    const pastedValue = event.clipboardData.getData("text").trim();
+    if (!pastedValue) return;
+    const normalized = normalizeInstagramEmbedUrl(pastedValue);
+    const shareUrl = normalizeInstagramShareUrl(pastedValue);
+    event.preventDefault();
+    setEmbedUrl(normalized?.publicUrl ?? shareUrl ?? pastedValue);
   }
 
   async function reorderAlbums(from: number, to: number) {
@@ -1183,14 +1222,45 @@ export default function GalleryManager() {
                       Add Instagram Reel or YouTube video
                     </div>
                     <div className="mt-3 grid gap-3 lg:grid-cols-[1.35fr_1fr_auto]">
-                      <input type="url" value={embedUrl} onChange={(event) => setEmbedUrl(event.target.value)} placeholder="Paste Instagram Reel or YouTube URL" className={fieldClass} />
+                      <input
+                        type="text"
+                        inputMode="url"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        spellCheck={false}
+                        value={embedUrl}
+                        onChange={(event) => setEmbedUrl(event.target.value)}
+                        onPaste={handleEmbedPaste}
+                        onBlur={() => {
+                          const normalized = normalizeInstagramEmbedUrl(embedUrl);
+                          const shareUrl = normalizeInstagramShareUrl(embedUrl);
+                          if (normalized) setEmbedUrl(normalized.publicUrl);
+                          else if (shareUrl) setEmbedUrl(shareUrl);
+                        }}
+                        placeholder="Paste Instagram Reel or YouTube URL"
+                        className={fieldClass}
+                      />
                       <input value={embedCaption} onChange={(event) => setEmbedCaption(event.target.value)} maxLength={300} placeholder="Short caption" className={fieldClass} />
-                      <button type="button" disabled={Boolean(busyKey) || !embedUrl.trim() || !consentConfirmed} onClick={() => void addExternalReel()} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#2D1736] px-5 text-sm font-black text-white disabled:opacity-45">
+                      <button type="button" disabled={Boolean(busyKey) || !embedUrl.trim() || invalidInstagramEmbed || !consentConfirmed} onClick={() => void addExternalReel()} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#2D1736] px-5 text-sm font-black text-white disabled:opacity-45">
                         {busyKey === "embed" ? <LoaderCircle aria-hidden="true" size={17} className="animate-spin" /> : <Link2 aria-hidden="true" size={17} />}
                         Add Reel
                       </button>
                     </div>
-                    <p className="mt-2 text-xs font-semibold text-[#817684]">After adding it, upload a custom thumbnail on the reel card before publishing.</p>
+                    {normalizedInstagramEmbed ? (
+                      <p className="mt-2 text-xs font-bold text-emerald-700">
+                        Instagram link recognised. It will be saved in the standard Reel format.
+                      </p>
+                    ) : normalizedInstagramShareUrl ? (
+                      <p className="mt-2 text-xs font-bold leading-5 text-emerald-700">
+                        Instagram share link recognised. CentreOS will safely resolve it to the original Reel before saving.
+                      </p>
+                    ) : invalidInstagramEmbed ? (
+                      <p className="mt-2 text-xs font-bold leading-5 text-red-700">
+                        Please paste a complete Instagram Reel link. In Instagram, open the Reel, tap Share → Copy link, then paste it here.
+                      </p>
+                    ) : (
+                      <p className="mt-2 text-xs font-semibold text-[#817684]">After adding it, upload a custom thumbnail on the reel card before publishing.</p>
+                    )}
                   </div>
                 ) : null}
 

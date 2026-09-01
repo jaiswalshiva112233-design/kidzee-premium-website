@@ -5,9 +5,17 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getAdminSession } from "@/lib/admin/auth";
 import { importKidzeeCalendarPdf } from "@/lib/admin/calendar-import";
+import { publicPersistenceError } from "@/lib/admin/public-persistence-error";
 import { prisma } from "@/lib/prisma";
 
 const MAX_CALENDAR_SIZE = 12 * 1024 * 1024;
+
+class CalendarRequestError extends Error {}
+const SAFE_CALENDAR_IMPORT_MESSAGES = new Set([
+  "The uploaded file is not a valid PDF calendar.",
+  "The PDF does not contain readable calendar pages.",
+  "No Delhi/NCR holiday rows could be read. Upload a text-based Kidzee PDF or add events manually.",
+]);
 const EVENT_TYPES: readonly $Enums.CalendarEventType[] = [
   "ACADEMIC",
   "ACTIVITY",
@@ -368,14 +376,15 @@ function calendarEventKey(title: string, startDate: Date) {
 }
 
 export async function GET(request: NextRequest) {
-  const session = await getAdminSession();
+  try {
+    const session = await getAdminSession();
 
-  if (!canViewCalendar(session)) {
-    return NextResponse.json(
-      { success: false, message: "You do not have access to the calendar." },
-      { status: session ? 403 : 401 },
-    );
-  }
+    if (!canViewCalendar(session)) {
+      return NextResponse.json(
+        { success: false, message: "You do not have access to the calendar." },
+        { status: session ? 403 : 401 },
+      );
+    }
 
   const documentId = request.nextUrl.searchParams.get("documentId");
 
@@ -450,17 +459,28 @@ export async function GET(request: NextRequest) {
     }),
   ]);
 
-  return NextResponse.json({
-    success: true,
-    canManage: canManageCalendar(session),
-    documents: documents.map((document) => ({
-      ...document,
-      createdAt: document.createdAt.toISOString(),
-      eventCount: document._count.events,
-      _count: undefined,
-    })),
-    events: events.map(formatEvent),
-  });
+    return NextResponse.json({
+      success: true,
+      canManage: canManageCalendar(session),
+      documents: documents.map((document) => ({
+        ...document,
+        createdAt: document.createdAt.toISOString(),
+        eventCount: document._count.events,
+        _count: undefined,
+      })),
+      events: events.map(formatEvent),
+    });
+  } catch (error) {
+    console.error("Calendar load failed", error);
+    const persistenceError = publicPersistenceError(
+      error,
+      "The calendar could not be loaded. Please refresh or contact the Owner.",
+    );
+    return NextResponse.json(
+      { success: false, message: persistenceError.message },
+      { status: persistenceError.status },
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -479,7 +499,14 @@ export async function POST(request: NextRequest) {
 
   try {
     if (contentType.includes("multipart/form-data")) {
-      const formData = await request.formData();
+      let formData: FormData;
+      try {
+        formData = await request.formData();
+      } catch {
+        throw new CalendarRequestError(
+          "The calendar upload could not be read. Choose the PDF again and retry.",
+        );
+      }
       const file = formData.get("file");
 
       if (!(file instanceof File)) {
@@ -508,7 +535,18 @@ export async function POST(request: NextRequest) {
         formData.get("region"),
         120,
       ) || "Delhi, NCR, UK, Haryana";
-      const imported = importKidzeeCalendarPdf(buffer, region);
+      let imported: ReturnType<typeof importKidzeeCalendarPdf>;
+      try {
+        imported = importKidzeeCalendarPdf(buffer, region);
+      } catch (error) {
+        console.error("Calendar PDF import failed", error);
+        const importMessage = error instanceof Error ? error.message : "";
+        throw new CalendarRequestError(
+          SAFE_CALENDAR_IMPORT_MESSAGES.has(importMessage)
+            ? importMessage
+            : "The calendar PDF could not be read. Choose a valid Kidzee calendar PDF and try again.",
+        );
+      }
       const title = cleanText(formData.get("title"), 180) ||
         `Kidzee Holiday Calendar ${imported.academicYear ?? ""}`.trim();
       const sha256 = createHash("sha256").update(buffer).digest("hex");
@@ -799,23 +837,37 @@ export async function POST(request: NextRequest) {
       event: formatEvent(event),
     });
   } catch (error) {
+    if (error instanceof CalendarRequestError || error instanceof SyntaxError) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            error instanceof CalendarRequestError
+              ? error.message
+              : "The calendar request could not be read. Refresh and try again.",
+        },
+        { status: 400 },
+      );
+    }
     console.error("Calendar update failed", error);
+    const persistenceError = publicPersistenceError(
+      error,
+      "The calendar could not be updated. Please try again or contact the Owner.",
+    );
 
     return NextResponse.json(
       {
         success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : "The calendar could not be updated.",
+        message: persistenceError.message,
       },
-      { status: 500 },
+      { status: persistenceError.status },
     );
   }
 }
 
 export async function DELETE(request: NextRequest) {
-  const session = await getAdminSession();
+  try {
+    const session = await getAdminSession();
 
   if (!session || !canManageCalendar(session)) {
     return NextResponse.json(
@@ -851,8 +903,19 @@ export async function DELETE(request: NextRequest) {
     },
   });
 
-  return NextResponse.json({
-    success: true,
-    message: "Calendar event removed.",
-  });
+    return NextResponse.json({
+      success: true,
+      message: "Calendar event removed.",
+    });
+  } catch (error) {
+    console.error("Calendar removal failed", error);
+    const persistenceError = publicPersistenceError(
+      error,
+      "The calendar event could not be removed. Please try again or contact the Owner.",
+    );
+    return NextResponse.json(
+      { success: false, message: persistenceError.message },
+      { status: persistenceError.status },
+    );
+  }
 }

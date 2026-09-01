@@ -15,6 +15,10 @@ const daycarePage = source("app/daycare/page.tsx");
 const miraLauncher = source("components/mira/MiraLauncher.tsx");
 const miraPanel = source("components/mira/MiraPanel.tsx");
 const whatsapp = source("components/FloatingWhatsApp.tsx");
+const site = source("lib/site.ts");
+const faq = source("components/FAQ.tsx");
+const llms = source("app/llms.txt/route.ts");
+const layout = source("app/layout.tsx");
 
 test("1 homepage hero keeps the established responsive photo treatment", () => {
   for (const file of [slideshow, programmesHero, daycarePage]) {
@@ -67,4 +71,15 @@ test("6 desktop stacks MIRA above WhatsApp while mobile offsets remain unchanged
   assert.match(whatsapp, /bottom-6 right-6/);
   assert.match(miraPanel, /bottom-\[9rem\] right-3/);
   assert.match(miraPanel, /md:bottom-\[10rem\] md:right-6/);
+});
+
+test("7 preschool and daycare operating days remain truthful everywhere", () => {
+  assert.match(site, /preschoolHours:[\s\S]*days: "Monday to Friday"/);
+  assert.match(site, /daycareHours:[\s\S]*days: "Monday to Saturday"/);
+  assert.match(daycarePage, /Monday to Saturday/);
+  assert.match(daycarePage, /"Saturday"/);
+  assert.match(faq, /Preschool runs Monday to Friday/);
+  assert.match(faq, /Daycare is available Monday to Saturday/);
+  assert.match(llms, /Daycare operates Monday to Saturday/);
+  assert.match(layout, /https:\/\/schema\.org\/Saturday/);
 });

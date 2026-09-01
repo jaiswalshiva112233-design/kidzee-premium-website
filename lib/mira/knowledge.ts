@@ -15,6 +15,7 @@ export function miraKnowledge() {
     },
     rules: [
       "Do not quote fees. Offer Get Fee Details or Request a Call.",
+      "Preschool cab service is available only on selected confirmed routes. Daycare cab service is not available.",
       "Do not claim seat availability, transport availability or services that are not confirmed.",
       "Never access or discuss student, applicant, fee, admin or analytics records.",
     ],

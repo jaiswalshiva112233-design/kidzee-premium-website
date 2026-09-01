@@ -6,7 +6,6 @@ import { NextResponse } from "next/server";
 import {
   getCurrentAdminUser,
 } from "@/lib/admin/auth";
-import { storePublicGalleryImage } from "@/lib/media/storedFiles";
 import { prisma } from "@/lib/prisma";
 import { sanityServerClient } from "@/lib/sanity/serverClient";
 import { logServerError, logServerWarning } from "@/lib/server/safeLogging";
@@ -243,18 +242,18 @@ function explainTeamError(error: unknown) {
       : "";
 
   if (/permission|unauthori[sz]ed|forbidden|403/i.test(message)) {
-    return "Sanity refused the change. Check that SANITY_API_WRITE_TOKEN has Editor permission.";
+    return "This account could not save the Website Team photo. If you are the Owner, refresh your session and try again. Centre Head accounts need Website Manager access.";
   }
 
   if (/token|credential|authentication|401/i.test(message)) {
-    return "The Sanity write token is invalid or expired.";
+    return "The Website Team photo service is temporarily unavailable. Please try again; if the problem continues, contact the Owner.";
   }
 
   if (/fetch failed|network|connect|timeout|econn/i.test(message)) {
-    return "The server could not connect to Sanity. Check the internet connection and try again.";
+    return "The website content service could not be reached. Check the internet connection and try again.";
   }
 
-  return "The team change could not be saved. Check the server terminal.";
+  return "The team change could not be saved. Please try again. If the problem continues, contact the Owner.";
 }
 
 export async function GET() {
@@ -524,26 +523,24 @@ export async function POST(request: Request) {
 
     const now = new Date().toISOString();
     const documentId = id || `websiteTeamMember.${randomUUID()}`;
-    const storedPhoto = file
-      ? await storePublicGalleryImage({
-          bytes: new Uint8Array(await file.arrayBuffer()),
-          fileName: cleanText(file.name, 180) || "teacher-portrait",
-          mimeType: file.type,
-          albumId: "team",
-          uploadedById: access.session.userId,
-          module: "WEBSITE_TEAM",
-          linkedRecordType: "WebsiteTeamMember",
-          linkedRecordId: documentId,
-          pathPrefix: "public/website/team",
-        })
+    const uploadedAsset = file
+      ? await sanityServerClient.assets.upload(
+          "image",
+          Buffer.from(await file.arrayBuffer()),
+          {
+            filename:
+              cleanText(file.name, 180) || "teacher-portrait",
+            contentType: file.type,
+          },
+        )
       : null;
     const sortOrder = existing
       ? cleanSortOrder(formData.get("sortOrder"))
       : await sanityServerClient.fetch<number>(
           `count(*[_type == "websiteTeamMember"])`,
         );
-    const assetId = storedPhoto ? null : existing?.assetId ?? null;
-    const imageUrl = storedPhoto?.publicUrl ?? existing?.imageUrl ?? null;
+    const assetId = uploadedAsset?._id ?? existing?.assetId ?? null;
+    const imageUrl = uploadedAsset?.url ?? existing?.imageUrl ?? null;
     const finalPhotoAlt =
       photoAlt || `${name}, ${role} at Kidzee Sector 12 Dwarka`;
 
@@ -566,8 +563,14 @@ export async function POST(request: Request) {
         : existing?.consentConfirmedAt ?? null,
       createdAt: existing?.createdAt || now,
       updatedAt: now,
-      externalImageUrl: storedPhoto?.publicUrl ?? (existing?.storedFileId ? existing.imageUrl : null),
-      storedFileId: storedPhoto?.id ?? existing?.storedFileId ?? null,
+      externalImageUrl: uploadedAsset
+        ? null
+        : existing?.assetId
+          ? null
+          : existing?.imageUrl ?? null,
+      storedFileId: uploadedAsset
+        ? null
+        : existing?.storedFileId ?? null,
       ...(assetId
         ? {
             photo: {
@@ -581,35 +584,56 @@ export async function POST(request: Request) {
         : {}),
     };
 
-    await sanityServerClient.createOrReplace(document);
+    try {
+      await sanityServerClient.createOrReplace(document);
+    } catch (error) {
+      if (uploadedAsset) {
+        await removeUnusedAsset(uploadedAsset._id);
+      }
+      throw error;
+    }
     refreshTeamPages();
 
-    if (storedPhoto && existing?.assetId) {
+    if (
+      uploadedAsset &&
+      existing?.assetId &&
+      existing.assetId !== uploadedAsset._id
+    ) {
       await removeUnusedAsset(existing.assetId);
     }
 
-    if (storedPhoto && existing?.storedFileId) {
-      await prisma.storedFile.updateMany({
-        where: { id: existing.storedFileId, status: { not: "DELETED" } },
-        data: { status: "ARCHIVED", archivedAt: new Date() },
-      });
-    }
-    if (storedPhoto) {
-      await prisma.activityLog.create({
-        data: {
-          adminUserId: access.session.userId,
-          action: "CREATED",
-          entityType: "WebsiteTeamMedia",
-          entityId: storedPhoto.id,
-          description: `Optimised public team portrait saved for ${name}.`,
-          newData: {
-            teamMemberId: documentId,
-            originalSize: file?.size,
-            optimizedSize: storedPhoto.optimizedSize,
-            thumbnailSize: storedPhoto.thumbnailSize,
+    if (uploadedAsset) {
+      try {
+        if (existing?.storedFileId) {
+          await prisma.storedFile.updateMany({
+            where: {
+              id: existing.storedFileId,
+              status: { not: "DELETED" },
+            },
+            data: { status: "ARCHIVED", archivedAt: new Date() },
+          });
+        }
+
+        await prisma.activityLog.create({
+          data: {
+            adminUserId: access.session.userId,
+            action: "CREATED",
+            entityType: "WebsiteTeamMedia",
+            entityId: uploadedAsset._id,
+            description: `Public team portrait saved for ${name}.`,
+            newData: {
+              teamMemberId: documentId,
+              originalSize: file?.size,
+              provider: "SANITY_ASSET",
+            },
           },
-        },
-      });
+        });
+      } catch (error) {
+        logServerWarning(
+          "The Team portrait was saved, but its audit entry could not be completed.",
+          error,
+        );
+      }
     }
 
     return noStoreJson({

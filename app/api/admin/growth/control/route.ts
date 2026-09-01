@@ -2,6 +2,7 @@ import type { AiModelScope } from "@/generated/prisma/client";
 import { NextResponse } from "next/server";
 
 import { getAdminSession } from "@/lib/admin/auth";
+import { publicPersistenceError } from "@/lib/admin/public-persistence-error";
 import { getGrowthAiControl, setGrowthAiControl } from "@/lib/growth/aiControl";
 import { prisma } from "@/lib/prisma";
 
@@ -10,6 +11,8 @@ export const dynamic = "force-dynamic";
 const scopes = new Set<AiModelScope>(["WEBSITE", "ADS", "CHAT", "MIRA", "TERRA", "LUNA"]);
 const protocols = new Set(["OPENAI_RESPONSES", "OPENAI_CHAT_COMPATIBLE"]);
 const text = (value: unknown, limit: number) => typeof value === "string" ? value.replace(/[\u0000-\u001F\u007F]/g, " ").trim().slice(0, limit) : "";
+
+class GrowthControlRequestError extends Error {}
 
 async function owner() {
   const session = await getAdminSession();
@@ -31,9 +34,21 @@ async function responseData() {
 }
 
 export async function GET() {
-  const session = await getAdminSession();
-  if (!session) return NextResponse.json({ success: false, message: "You are not authorised." }, { status: 401 });
-  return NextResponse.json({ success: true, canManage: session.role === "OWNER", ...(await responseData()) });
+  try {
+    const session = await getAdminSession();
+    if (!session) return NextResponse.json({ success: false, message: "You are not authorised." }, { status: 401 });
+    return NextResponse.json({ success: true, canManage: session.role === "OWNER", ...(await responseData()) });
+  } catch (error) {
+    console.error("Unable to load AI Growth controls:", error);
+    const persistenceError = publicPersistenceError(
+      error,
+      "AI Growth settings could not be loaded. Please refresh or contact the Owner.",
+    );
+    return NextResponse.json(
+      { success: false, message: persistenceError.message },
+      { status: persistenceError.status },
+    );
+  }
 }
 
 export async function POST(request: Request) {
@@ -51,13 +66,20 @@ export async function POST(request: Request) {
       const model = text(body.model, 150);
       const baseUrl = text(body.baseUrl, 500);
       const apiKeyEnvVar = text(body.apiKeyEnvVar, 100);
-      const maxOutputTokens = Math.trunc(Number(body.maxOutputTokens));
-      const monthlyCallLimit = Math.trunc(Number(body.monthlyCallLimit));
-      if (!scopes.has(scope) || !provider || !protocols.has(protocol) || !model || !/^[A-Z][A-Z0-9_]{2,100}$/.test(apiKeyEnvVar) || maxOutputTokens < 64 || maxOutputTokens > 16_000 || monthlyCallLimit < 0) {
+      const maxOutputTokens = Number(body.maxOutputTokens);
+      const monthlyCallLimit = Number(body.monthlyCallLimit);
+      if (!scopes.has(scope) || !provider || !protocols.has(protocol) || !model || !/^[A-Z][A-Z0-9_]{2,100}$/.test(apiKeyEnvVar) || !Number.isFinite(maxOutputTokens) || !Number.isInteger(maxOutputTokens) || maxOutputTokens < 64 || maxOutputTokens > 16_000 || !Number.isFinite(monthlyCallLimit) || !Number.isInteger(monthlyCallLimit) || monthlyCallLimit < 0) {
         return NextResponse.json({ success: false, message: "Enter a valid AI route, model, limits and secret environment-variable name." }, { status: 400 });
       }
-      const parsed = new URL(baseUrl);
-      if (parsed.protocol !== "https:") throw new Error("AI provider URLs must use HTTPS.");
+      let parsed: URL;
+      try {
+        parsed = new URL(baseUrl);
+      } catch {
+        throw new GrowthControlRequestError(
+          "Enter a valid HTTPS AI provider URL.",
+        );
+      }
+      if (parsed.protocol !== "https:") throw new GrowthControlRequestError("AI provider URLs must use HTTPS.");
       const saved = await prisma.aiModelRoute.upsert({
         where: { scope },
         create: { scope, provider, protocol, model, baseUrl: parsed.toString().replace(/\/$/, ""), apiKeyEnvVar, enabled: body.enabled === true, maxOutputTokens, monthlyCallLimit, updatedById: session.userId },
@@ -69,6 +91,26 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ success: true, message: "AI Growth settings saved.", canManage: true, ...(await responseData()) });
   } catch (error) {
-    return NextResponse.json({ success: false, message: error instanceof Error ? error.message : "AI Growth settings could not be saved." }, { status: 400 });
+    if (error instanceof GrowthControlRequestError || error instanceof SyntaxError) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            error instanceof GrowthControlRequestError
+              ? error.message
+              : "The AI Growth request could not be read. Refresh and try again.",
+        },
+        { status: 400 },
+      );
+    }
+    console.error("Unable to save AI Growth controls:", error);
+    const persistenceError = publicPersistenceError(
+      error,
+      "AI Growth settings could not be saved. Please try again or contact the Owner.",
+    );
+    return NextResponse.json(
+      { success: false, message: persistenceError.message },
+      { status: persistenceError.status },
+    );
   }
 }

@@ -10,6 +10,7 @@ import {
   staffDeviceCookieOptions,
   type StaffDeviceMode,
 } from "@/lib/marketing/internalTraffic";
+import { publicPersistenceError } from "@/lib/admin/public-persistence-error";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -132,7 +133,20 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Request failed.";
-    const status = message === "UNAUTHENTICATED" ? 401 : 500;
-    return NextResponse.json({ success: false, message }, { status });
+    if (message === "UNAUTHENTICATED") {
+      return NextResponse.json(
+        { success: false, message: "Your session has expired. Please sign in again." },
+        { status: 401 },
+      );
+    }
+    console.error("Unable to update the internal traffic device:", error);
+    const persistenceError = publicPersistenceError(
+      error,
+      "This device setting could not be saved. Please try again or contact the Owner.",
+    );
+    return NextResponse.json(
+      { success: false, message: persistenceError.message },
+      { status: persistenceError.status },
+    );
   }
 }

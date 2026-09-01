@@ -2,9 +2,12 @@ import type { Prisma } from "@/generated/prisma/client";
 import { NextResponse } from "next/server";
 
 import { getAdminSession } from "@/lib/admin/auth";
+import { publicPersistenceError } from "@/lib/admin/public-persistence-error";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
+
+class LandingPageRequestError extends Error {}
 
 const text = (value: unknown, limit: number) =>
   typeof value === "string"
@@ -185,17 +188,29 @@ async function requireOwner() {
 }
 
 export async function GET() {
-  const session = await getAdminSession();
-  if (!session)
-    return NextResponse.json(
-      { success: false, message: "You are not authorised." },
-      { status: 401 },
+  try {
+    const session = await getAdminSession();
+    if (!session)
+      return NextResponse.json(
+        { success: false, message: "You are not authorised." },
+        { status: 401 },
+      );
+    return NextResponse.json({
+      success: true,
+      canManage: session.role === "OWNER",
+      pages: await pages(),
+    });
+  } catch (error) {
+    console.error("Landing-page growth data could not be loaded:", error);
+    const persistenceError = publicPersistenceError(
+      error,
+      "Landing pages could not be loaded. Please refresh or contact the Owner.",
     );
-  return NextResponse.json({
-    success: true,
-    canManage: session.role === "OWNER",
-    pages: await pages(),
-  });
+    return NextResponse.json(
+      { success: false, message: persistenceError.message },
+      { status: persistenceError.status },
+    );
+  }
 }
 
 export async function POST(request: Request) {
@@ -228,7 +243,7 @@ export async function POST(request: Request) {
         !pageContent.heading ||
         !requestedPageType
       )
-        throw new Error(
+        throw new LandingPageRequestError(
           "Enter the page name, slug, SEO title, description and heading.",
         );
       await prisma.$transaction(async (transaction) => {
@@ -283,11 +298,11 @@ export async function POST(request: Request) {
         where: { id: pageId },
         include: { variants: { orderBy: { variantKey: "asc" } } },
       });
-      if (!existing) throw new Error("Landing page not found.");
+      if (!existing) throw new LandingPageRequestError("Landing page not found.");
       const duplicateSlug = slug(body.slug || `${existing.slug}-copy`);
       const duplicateName = text(body.name, 120) || `${existing.name} Copy`;
       if (!duplicateSlug)
-        throw new Error("Enter a valid URL slug for the duplicate.");
+        throw new LandingPageRequestError("Enter a valid URL slug for the duplicate.");
       await prisma.$transaction(async (transaction) => {
         const copy = await transaction.landingPage.create({
           data: {
@@ -347,7 +362,7 @@ export async function POST(request: Request) {
       const existing = await prisma.landingPage.findUnique({
         where: { id: pageId },
       });
-      if (!existing) throw new Error("Landing page not found.");
+      if (!existing) throw new LandingPageRequestError("Landing page not found.");
       await prisma.$transaction([
         prisma.landingPage.update({
           where: { id: pageId },
@@ -374,7 +389,7 @@ export async function POST(request: Request) {
         where: { id: pageId },
         include: { versions: { orderBy: { versionNumber: "desc" }, take: 1 } },
       });
-      if (!existing) throw new Error("Landing page not found.");
+      if (!existing) throw new LandingPageRequestError("Landing page not found.");
       const snapshot = {
         seoTitle: text(body.seoTitle, 70) || existing.seoTitle,
         metaDescription:
@@ -412,7 +427,7 @@ export async function POST(request: Request) {
         },
       });
       if (!version || version.landingPageId !== pageId)
-        throw new Error("Landing page version not found.");
+        throw new LandingPageRequestError("Landing page version not found.");
       if (action === "approve-version") {
         await prisma.landingPageVersion.update({
           where: { id: version.id },
@@ -424,7 +439,7 @@ export async function POST(request: Request) {
         });
       } else if (action === "apply-version") {
         if (version.status !== "APPROVED")
-          throw new Error("Approve the preview before applying it.");
+          throw new LandingPageRequestError("Approve the preview before applying it.");
         const snapshot = version.snapshot as {
           seoTitle?: unknown;
           metaDescription?: unknown;
@@ -466,7 +481,7 @@ export async function POST(request: Request) {
         ]);
       } else {
         if (version.status !== "APPLIED")
-          throw new Error(
+          throw new LandingPageRequestError(
             "Only the currently applied version can be rolled back.",
           );
         const previous = version.landingPage.versions.find(
@@ -475,7 +490,7 @@ export async function POST(request: Request) {
             item.status !== "DRAFT",
         );
         if (!previous)
-          throw new Error(
+          throw new LandingPageRequestError(
             "No earlier applied version is available for rollback.",
           );
         const snapshot = previous.snapshot as {
@@ -523,15 +538,17 @@ export async function POST(request: Request) {
     } else if (action === "save-variant") {
       const variantKey = text(body.variantKey, 20).toUpperCase();
       const name = text(body.name, 80);
-      const allocation = Math.trunc(Number(body.allocation));
+      const allocation = Number(body.allocation);
       if (
         !pageId ||
         !/^[A-Z0-9_-]{1,20}$/.test(variantKey) ||
         !name ||
+        !Number.isFinite(allocation) ||
+        !Number.isInteger(allocation) ||
         allocation < 0 ||
         allocation > 100
       )
-        throw new Error("Enter a valid variant name, key and allocation.");
+        throw new LandingPageRequestError("Enter a valid variant name, key and allocation.");
       await prisma.landingPageVariant.upsert({
         where: {
           landingPageId_variantKey: { landingPageId: pageId, variantKey },
@@ -556,12 +573,12 @@ export async function POST(request: Request) {
         ? body.variantIds.map((item) => text(item, 100)).filter(Boolean)
         : [];
       if (!pageId || variantIds.length < 2)
-        throw new Error("Choose at least two variants for an A/B test.");
+        throw new LandingPageRequestError("Choose at least two variants for an A/B test.");
       const variants = await prisma.landingPageVariant.findMany({
         where: { id: { in: variantIds }, landingPageId: pageId, active: true },
       });
       if (variants.length !== variantIds.length)
-        throw new Error("One selected variant is not available.");
+        throw new LandingPageRequestError("One selected variant is not available.");
       await prisma.$transaction(async (transaction) => {
         await transaction.growthExperiment.updateMany({
           where: { landingPageId: pageId, status: "RUNNING" },
@@ -609,15 +626,29 @@ export async function POST(request: Request) {
       canManage: true,
     });
   } catch (error) {
+    if (error instanceof LandingPageRequestError || error instanceof SyntaxError) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            error instanceof LandingPageRequestError
+              ? error.message
+              : "The landing-page request could not be read. Refresh and try again.",
+        },
+        { status: 400 },
+      );
+    }
+    console.error("Landing-page growth change failed:", error);
+    const persistenceError = publicPersistenceError(
+      error,
+      "The landing-page change could not be saved. Please try again or contact the Owner.",
+    );
     return NextResponse.json(
       {
         success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : "Landing-page change failed.",
+        message: persistenceError.message,
       },
-      { status: 400 },
+      { status: persistenceError.status },
     );
   }
 }

@@ -2,7 +2,6 @@
 
 import {
   AlertTriangle,
-  Archive,
   BadgeIndianRupee,
   CheckCircle2,
   Clock3,
@@ -456,6 +455,8 @@ export default function DaycareWorkspace() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const planSavingRef = useRef(false);
+  const lifecycleSavingRef = useRef(false);
+  const deleteReviewLoadingRef = useRef(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [openActionsPlanId, setOpenActionsPlanId] = useState<string | null>(
@@ -871,6 +872,8 @@ export default function DaycareWorkspace() {
     reason = "",
     confirmation = "",
   ) {
+    if (lifecycleSavingRef.current) return false;
+    lifecycleSavingRef.current = true;
     setSaving(true);
     setError("");
     setMessage("");
@@ -896,34 +899,26 @@ export default function DaycareWorkspace() {
       setDeleteReviewError(friendlyMessage);
       return false;
     } finally {
+      lifecycleSavingRef.current = false;
       setSaving(false);
     }
   }
 
   async function changePlanLifecycle(
     plan: DaycarePlan,
-    operation: "ACTIVATE" | "DEACTIVATE" | "ARCHIVE",
+    operation: "ACTIVATE" | "DEACTIVATE",
   ) {
     const prompt =
       operation === "ACTIVATE"
         ? `Reactivate ${plan.title}? It will become available for this child again.`
-        : operation === "DEACTIVATE"
-          ? `Deactivate ${plan.title}? New attendance and recurring billing will stop until the Owner reactivates it.`
-          : `Archive ${plan.title}? It will stop being used while attendance and billing history stay unchanged.`;
+        : `Pause ${plan.title}? New attendance and recurring billing will stop until the Owner resumes it.`;
     if (!window.confirm(prompt)) return;
-    const reason =
-      operation === "ARCHIVE"
-        ? (window.prompt("Why is this plan being archived?", "No longer used")
-            ?.trim() ?? "")
-        : "";
-    if (operation === "ARCHIVE" && reason.length < 4) {
-      setError("Add a short reason for archiving this plan.");
-      return;
-    }
-    await submitPlanLifecycle(plan, operation, reason);
+    await submitPlanLifecycle(plan, operation);
   }
 
   async function openDeleteReview(plan: DaycarePlan) {
+    if (deleteReviewLoadingRef.current || lifecycleSavingRef.current) return;
+    deleteReviewLoadingRef.current = true;
     setDeleteReview({ plan, preview: null });
     setDeleteReviewLoading(true);
     setDeleteReviewReason("No longer used");
@@ -946,6 +941,7 @@ export default function DaycareWorkspace() {
           : "The plan’s safe deletion review could not be loaded.";
       setDeleteReviewError(friendlyMessage);
     } finally {
+      deleteReviewLoadingRef.current = false;
       setDeleteReviewLoading(false);
     }
   }
@@ -2555,7 +2551,7 @@ export default function DaycareWorkspace() {
                               }
                               className="min-h-10 rounded-xl border border-slate-200 px-4 text-xs font-black text-slate-700 disabled:opacity-60"
                             >
-                              Deactivate
+                              Pause
                             </button>
                           ) : plan.lifecycleStatus === "INACTIVE" ? (
                             <button
@@ -2566,20 +2562,7 @@ export default function DaycareWorkspace() {
                               }
                               className="min-h-10 rounded-xl bg-green-100 px-4 text-xs font-black text-green-800 disabled:opacity-60"
                             >
-                              Activate
-                            </button>
-                          ) : null}
-                          {plan.lifecycleStatus !== "ARCHIVED" ? (
-                            <button
-                              type="button"
-                              disabled={saving}
-                              onClick={() =>
-                                void changePlanLifecycle(plan, "ARCHIVE")
-                              }
-                              className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-amber-100 px-4 text-xs font-black text-amber-800 disabled:opacity-60"
-                            >
-                              <Archive aria-hidden="true" size={14} />
-                              Archive
+                              Resume
                             </button>
                           ) : null}
                           <button
@@ -2589,7 +2572,7 @@ export default function DaycareWorkspace() {
                             className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-rose-50 px-4 text-xs font-black text-rose-700 disabled:opacity-60"
                           >
                             <Trash2 aria-hidden="true" size={14} />
-                            Delete
+                            Remove
                           </button>
                         </div>
                         {plan.lifecycleStatus === "ARCHIVED" ? (
@@ -3144,8 +3127,8 @@ export default function DaycareWorkspace() {
                   />
                 </div>
 
-                {deleteReview.preview.dependencies.activeAssignments > 0 ||
-                deleteReview.preview.historicalRecords > 0 ? (
+                {deleteReview.preview.dependencies.activeAssignments >
+                0 ? null : deleteReview.preview.historicalRecords > 0 ? (
                   <Field label="Reason for the audited action" className="mt-5">
                     <input
                       value={deleteReviewReason}
@@ -3207,15 +3190,7 @@ export default function DaycareWorkspace() {
                         onClick={() => void finishDeleteReview("DEACTIVATE")}
                         className="min-h-11 rounded-xl border border-slate-200 px-4 text-sm font-black text-slate-700 disabled:opacity-60"
                       >
-                        Deactivate
-                      </button>
-                      <button
-                        type="button"
-                        disabled={saving || deleteReviewReason.trim().length < 4}
-                        onClick={() => void finishDeleteReview("ARCHIVE")}
-                        className="min-h-11 rounded-xl bg-amber-100 px-4 text-sm font-black text-amber-900 disabled:opacity-50"
-                      >
-                        Archive plan
+                        Pause plan
                       </button>
                     </>
                   ) : deleteReview.preview.historicalRecords > 0 ? (

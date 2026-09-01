@@ -1385,7 +1385,7 @@ export async function POST(request: Request) {
       {
         success: false,
         message:
-          "The billing catalogue could not be saved. Check the server terminal.",
+          "The billing catalogue could not be saved. Please try again. If the problem continues, contact the Owner.",
       },
       { status: 500 },
     );

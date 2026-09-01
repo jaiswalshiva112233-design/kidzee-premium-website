@@ -16,8 +16,14 @@ export default async function Location() {
     await getWebsiteContactSettings(),
   );
   const timings = [
-    { label: "Preschool", value: site.preschoolHours.display },
-    { label: "Daycare", value: site.daycareHours.display },
+    {
+      label: "Preschool",
+      value: `${site.preschoolHours.days}, ${site.preschoolHours.display}`,
+    },
+    {
+      label: "Daycare",
+      value: `${site.daycareHours.days}, ${site.daycareHours.display}`,
+    },
   ];
   return (
     <section
@@ -81,7 +87,7 @@ export default async function Location() {
                 />
 
                 <h3 className="font-black text-white">
-                  Monday to Friday timings
+                  Centre timings
                 </h3>
               </div>
 

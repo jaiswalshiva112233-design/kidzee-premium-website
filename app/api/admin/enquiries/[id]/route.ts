@@ -719,7 +719,7 @@ export async function PATCH(
       {
         success: false,
         message:
-          "The enquiry could not be updated. Check the server terminal.",
+          "The enquiry could not be updated. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,

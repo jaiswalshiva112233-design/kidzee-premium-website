@@ -172,7 +172,7 @@ export async function POST(request: Request) {
       {
         success: false,
         message:
-          "Unable to sign in right now. Please check the server terminal.",
+          "Unable to sign in right now. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,

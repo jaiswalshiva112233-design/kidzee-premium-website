@@ -12,6 +12,7 @@ const embed = read("components/Gallery/ExternalMediaEmbed.tsx");
 const studentDocuments = read("app/api/admin/student-documents/route.ts");
 const storageRules = read("storage.rules");
 const backup = read("lib/admin/backupExports.ts");
+const backupPage = read("app/admin/settings/backup/page.tsx");
 const permissions = read("lib/admin/permissions.ts");
 const dataControl = read("lib/admin/dataControl.ts");
 
@@ -42,12 +43,15 @@ test("student photo and document limits match launch policy", () => {
   assert.match(read("lib/media/imageProcessing.ts"), /output\.byteLength > 300 \* 1024/);
 });
 
-test("gallery images are capped, compressed and stored outside Sanity", () => {
+test("public gallery photos keep the established compressed Sanity asset path", () => {
   assert.match(galleryApi, /MAX_IMAGE_SIZE_BYTES = 12 \* 1024 \* 1024/);
-  assert.match(galleryApi, /storePublicGalleryImage/);
-  assert.match(galleryApi, /externalImageUrl: storedPhoto\?\.publicUrl/);
+  assert.match(galleryApi, /processPublicImage\(fileBytes\)/);
+  assert.match(galleryApi, /assets\.upload\("image", processedPhoto\.web/);
+  assert.match(galleryApi, /mediaSource: "SANITY_ASSET"/);
+  assert.match(galleryApi, /_ref: uploadedPhotoAsset\?\._id/);
+  assert.doesNotMatch(galleryApi, /mediaSource: "FIREBASE_STORAGE"/);
+  assert.match(galleryApi, /revalidatePath\("\/gallery\/\[slug\]", "page"\)/);
   assert.match(read("lib/media/imageProcessing.ts"), /resize\(\{ width: 1_600/);
-  assert.match(read("lib/media/imageProcessing.ts"), /thumbnail/);
 });
 
 test("reels are URL-based, duplicate-safe and lazy loaded after click", () => {
@@ -76,9 +80,13 @@ test("broken media cannot be published", () => {
 
 test("public gallery supports lightbox, lazy embeds and load more", () => {
   assert.match(viewer, /role="dialog"/);
+  assert.match(viewer, /createPortal\(/);
+  assert.match(viewer, /document\.body/);
   assert.match(viewer, /ExternalMediaEmbed/);
   assert.match(viewer, /visibleCount/);
   assert.match(viewer, /Load more moments/);
+  assert.match(viewer, /badge=\{parentStories \? "Parent Story" : "Centre Reel"\}/);
+  assert.doesNotMatch(viewer, /<video\s/);
 });
 
 test("trial defaults disable AI and direct uploads while enabling safe features", () => {
@@ -96,6 +104,8 @@ test("Owner-only storage and backup controls are permission protected", () => {
   assert.match(permissions, /\/admin\/settings\/backup", permission: "owner\.only"/);
   assert.match(permissions, /\/api\/admin\/storage-health", permission: "owner\.only"/);
   assert.match(permissions, /\/api\/admin\/backup-exports", permission: "owner\.only"/);
+  assert.match(backupPage, /session\.role !== "OWNER"/);
+  assert.match(backupPage, /<BackupExportCenter/);
 });
 
 test("safe backups exclude credentials, signed URLs and binary file bodies", () => {

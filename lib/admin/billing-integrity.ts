@@ -32,7 +32,7 @@ export function assertSourceCharges(items: SourceCharge[]) {
       throw new BillingIntegrityError("Invoice generation stopped because a charge is zero or negative.");
     }
     if (keys.has(item.chargeKey)) {
-      throw new BillingIntegrityError(`Invoice generation stopped because charge ${item.chargeKey} appears more than once.`);
+      throw new BillingIntegrityError("Invoice generation stopped because the same charge appears more than once.");
     }
     keys.add(item.chargeKey);
   }
@@ -42,7 +42,7 @@ export function assertUniqueChargeKeys(items: Array<{ chargeKey: string }>) {
   const keys = new Set<string>();
   for (const item of items) {
     if (keys.has(item.chargeKey)) {
-      throw new BillingIntegrityError(`Invoice generation stopped because charge ${item.chargeKey} was assigned to more than one bill.`);
+      throw new BillingIntegrityError("Invoice generation stopped because the same charge was assigned to more than one bill.");
     }
     keys.add(item.chargeKey);
   }

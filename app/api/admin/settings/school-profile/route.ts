@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { isAdminAuthenticated } from "@/lib/admin/auth";
 import { prisma } from "@/lib/prisma";
+import { isLegacySeedCentreAddress } from "@/lib/centreAddress";
 import { sanityServerClient } from "@/lib/sanity/serverClient";
 
 const SCHOOL_PROFILE_KEY = "SCHOOL_PROFILE";
@@ -103,12 +104,12 @@ const defaultSchoolProfile: SchoolProfile = {
   franchiseName: "Kidzee",
   schoolCode: "",
 
-  addressLine1: "Plot No. 19, Block B",
-  addressLine2: "Sector 12B, Dwarka",
+  addressLine1: "Building No. 19, 1st Floor, Block-B",
+  addressLine2: "Parmanand Colony, Pocket 8, Block B, Sector 12 Dwarka",
   locality: "Dwarka",
   city: "New Delhi",
   state: "Delhi",
-  postalCode: "",
+  postalCode: "110078",
   googleMapUrl: "",
 
   phone: "9667038673",
@@ -242,6 +243,8 @@ function normaliseStoredProfile(
     return defaultSchoolProfile;
   }
 
+  const replaceLegacyAddress = isLegacySeedCentreAddress(value);
+
   return {
     schoolName:
       cleanText(value.schoolName) ||
@@ -258,11 +261,11 @@ function normaliseStoredProfile(
     schoolCode: cleanText(value.schoolCode),
 
     addressLine1:
-      cleanText(value.addressLine1) ||
+      (replaceLegacyAddress ? "" : cleanText(value.addressLine1)) ||
       defaultSchoolProfile.addressLine1,
 
     addressLine2:
-      cleanText(value.addressLine2) ||
+      (replaceLegacyAddress ? "" : cleanText(value.addressLine2)) ||
       defaultSchoolProfile.addressLine2,
 
     locality:
@@ -277,7 +280,9 @@ function normaliseStoredProfile(
       cleanText(value.state) ||
       defaultSchoolProfile.state,
 
-    postalCode: cleanText(value.postalCode),
+    postalCode: replaceLegacyAddress
+      ? defaultSchoolProfile.postalCode
+      : cleanText(value.postalCode),
 
     googleMapUrl: cleanText(value.googleMapUrl),
 
@@ -795,7 +800,7 @@ export async function PATCH(request: Request) {
       {
         success: false,
         message:
-          "Unable to save the school profile. Check the server terminal.",
+          "Unable to save the school profile. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,
@@ -963,7 +968,7 @@ export async function POST(request: Request) {
       {
         success: false,
         message:
-          "The image could not be uploaded. Check the server terminal.",
+          "The image could not be uploaded. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,

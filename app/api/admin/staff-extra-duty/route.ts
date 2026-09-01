@@ -525,7 +525,7 @@ export async function GET(request: Request) {
       {
         success: false,
         message:
-          "Unable to load substitute duties. Check the server terminal.",
+          "Unable to load substitute duties. Please try again. If the problem continues, contact the Owner.",
       },
       { status: 500 },
     );
@@ -1011,7 +1011,7 @@ export async function POST(request: Request) {
       {
         success: false,
         message:
-          "The substitute-duty record could not be saved. Check the server terminal.",
+          "The substitute-duty record could not be saved. Please try again. If the problem continues, contact the Owner.",
       },
       { status: 500 },
     );
@@ -1207,7 +1207,7 @@ export async function PATCH(request: Request) {
       {
         success: false,
         message:
-          "The substitute-duty record could not be updated. Check the server terminal.",
+          "The substitute-duty record could not be updated. Please try again. If the problem continues, contact the Owner.",
       },
       { status: 500 },
     );

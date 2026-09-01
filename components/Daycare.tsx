@@ -97,7 +97,7 @@ export default async function Daycare() {
             </figure>
 
             <div className="absolute right-4 top-4 rounded-full border border-white/80 bg-white/95 px-4 py-2 text-xs font-black text-[#5B2A86] shadow-lg backdrop-blur sm:right-6 sm:top-6">
-              Monday-Friday · until 7:00 PM
+              Monday-Saturday · until 7:00 PM
             </div>
           </div>
 
@@ -251,7 +251,7 @@ export default async function Daycare() {
                   </p>
 
                   <h3 className="mt-2 text-2xl font-black text-[#281034]">
-                    Monday to Friday
+                    Monday to Saturday
                   </h3>
                 </div>
 

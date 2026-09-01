@@ -168,7 +168,7 @@ export async function GET() {
     return noStoreJson(
       {
         success: false,
-        message: "Website text could not be loaded. Check the server terminal.",
+        message: "Website text could not be loaded. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );
@@ -233,7 +233,7 @@ export async function PATCH(request: Request) {
     return noStoreJson(
       {
         success: false,
-        message: "Website text could not be saved. Check the server terminal.",
+        message: "Website text could not be saved. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );

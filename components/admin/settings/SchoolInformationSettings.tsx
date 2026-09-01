@@ -102,12 +102,12 @@ const defaultProfile: SchoolProfile = {
   franchiseName: "Kidzee",
   schoolCode: "",
 
-  addressLine1: "Plot No. 19, Block B",
-  addressLine2: "Sector 12B, Dwarka",
+  addressLine1: "Building No. 19, 1st Floor, Block-B",
+  addressLine2: "Parmanand Colony, Pocket 8, Block B, Sector 12 Dwarka",
   locality: "Dwarka",
   city: "New Delhi",
   state: "Delhi",
-  postalCode: "",
+  postalCode: "110078",
   googleMapUrl: "",
 
   phone: "9667038673",
@@ -596,7 +596,7 @@ export default function SchoolInformationSettings() {
               label="Address line 1"
               value={profile.addressLine1}
               disabled={saving}
-              placeholder="Plot No. 19, Block B"
+              placeholder="Building No. 19, 1st Floor, Block-B"
               onChange={(value) =>
                 updateField("addressLine1", value)
               }
@@ -606,7 +606,7 @@ export default function SchoolInformationSettings() {
               label="Address line 2"
               value={profile.addressLine2}
               disabled={saving}
-              placeholder="Sector 12B, Dwarka"
+              placeholder="Parmanand Colony, Pocket 8, Block B, Sector 12 Dwarka"
               onChange={(value) =>
                 updateField("addressLine2", value)
               }
@@ -646,7 +646,7 @@ export default function SchoolInformationSettings() {
               label="PIN code"
               value={profile.postalCode}
               disabled={saving}
-              placeholder="1100XX"
+              placeholder="110078"
               onChange={(value) =>
                 updateField("postalCode", value)
               }

@@ -1751,7 +1751,7 @@ export async function GET(
       {
         success: false,
         message:
-          "Unable to load fee information. Check the server terminal.",
+          "Unable to load fee information. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,
@@ -3191,7 +3191,7 @@ export async function POST(
       {
         success: false,
         message:
-          "The fee payment could not be recorded. Check the server terminal.",
+          "The fee payment could not be recorded. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,

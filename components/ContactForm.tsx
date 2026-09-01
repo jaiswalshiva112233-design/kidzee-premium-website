@@ -315,7 +315,8 @@ export default function ContactForm() {
 
           <p className="text-sm leading-6 text-[#5F5F6D]">
             You can ask our team about programme suitability, the 3-day
-            trial, daycare till 7 PM and transport availability.
+            trial, daycare till 7 PM and preschool cab availability on selected
+            routes. Daycare cab service is not available.
           </p>
         </div>
       </div>
@@ -415,4 +416,3 @@ function inputClasses(hasError: boolean) {
       : "border-[#DFD5E5] focus:border-[#5B2A86]",
   ].join(" ");
 }
-

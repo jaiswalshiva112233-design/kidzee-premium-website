@@ -1,14 +1,22 @@
+import { createHash } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 import {
   getCurrentAdminUser,
 } from "@/lib/admin/auth";
+import { persistExternalEmbedRecord } from "@/lib/media/embed-persistence";
+import {
+  InstagramShareResolutionError,
+  resolveInstagramEmbedUrl,
+} from "@/lib/media/instagram-embed";
+import { processPublicImage } from "@/lib/media/imageProcessing";
 import { getMediaSafetySetting } from "@/lib/media/mediaSafety";
 import { storePublicGalleryImage } from "@/lib/media/storedFiles";
 import { prisma } from "@/lib/prisma";
 import { sanityServerClient } from "@/lib/sanity/serverClient";
-import { logServerError } from "@/lib/server/safeLogging";
+import { logServerError, logServerWarning } from "@/lib/server/safeLogging";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -131,15 +139,15 @@ function explainGallerySaveError(error: unknown) {
   const message = rawMessage.replace(/\s+/g, " ").trim();
 
   if (/permission|unauthori[sz]ed|forbidden|403/i.test(message)) {
-    return "Sanity refused the change. The SANITY_API_WRITE_TOKEN needs permission to create and update documents in this dataset.";
+    return "Website media service is not configured correctly. Please contact the Owner.";
   }
 
   if (/token|credential|authentication|401/i.test(message)) {
-    return "The Sanity write token is invalid or expired. Create a new Editor token and update SANITY_API_WRITE_TOKEN.";
+    return "Website media service is not configured correctly. Please contact the Owner.";
   }
 
   if (/dataset/i.test(message) && /not found|does not exist|invalid/i.test(message)) {
-    return "The configured Sanity dataset could not be found. Check NEXT_PUBLIC_SANITY_DATASET.";
+    return "Website media service is not configured correctly. Please contact the Owner.";
   }
 
   if (/fetch failed|network|connect|timeout|econn/i.test(message)) {
@@ -147,6 +155,28 @@ function explainGallerySaveError(error: unknown) {
   }
 
   return "The gallery change could not be saved. Please try again or check the server connection.";
+}
+
+async function removeUnusedSanityAsset(assetId: string | null) {
+  if (!assetId) {
+    return;
+  }
+
+  try {
+    const referenceCount = await sanityServerClient.fetch<number>(
+      "count(*[references($assetId)])",
+      { assetId },
+    );
+
+    if (referenceCount === 0) {
+      await sanityServerClient.delete(assetId);
+    }
+  } catch (error) {
+    logServerWarning(
+      "The unused gallery asset could not be removed.",
+      error,
+    );
+  }
 }
 
 function cleanText(value: unknown, maximumLength: number) {
@@ -248,9 +278,11 @@ function cleanOrderedIds(value: unknown) {
   );
 }
 
-function parseEmbedUrl(value: unknown) {
+async function parseEmbedUrl(value: unknown) {
   const raw = cleanText(value, 500);
   if (!raw) return null;
+  const instagram = await resolveInstagramEmbedUrl(raw);
+  if (instagram) return instagram;
   let url: URL;
   try {
     url = new URL(raw);
@@ -258,15 +290,6 @@ function parseEmbedUrl(value: unknown) {
     return null;
   }
   const host = url.hostname.toLowerCase().replace(/^www\./, "");
-  if (host === "instagram.com") {
-    const match = url.pathname.match(/^\/(reel|p)\/([A-Za-z0-9_-]+)/);
-    if (!match) return null;
-    return {
-      provider: "INSTAGRAM" as const,
-      publicUrl: `https://www.instagram.com/${match[1]}/${match[2]}/`,
-      embedUrl: `https://www.instagram.com/${match[1]}/${match[2]}/embed/`,
-    };
-  }
   if (host === "youtu.be" || host === "youtube.com" || host === "m.youtube.com") {
     const id = host === "youtu.be"
       ? url.pathname.split("/").filter(Boolean)[0]
@@ -278,14 +301,37 @@ function parseEmbedUrl(value: unknown) {
       provider: "YOUTUBE" as const,
       publicUrl: `https://www.youtube.com/watch?v=${id}`,
       embedUrl: `https://www.youtube-nocookie.com/embed/${id}?rel=0`,
+      duplicateKey: `youtube:${id}`,
     };
   }
   return null;
 }
 
+function stableEmbedIds(albumId: string, duplicateKey: string) {
+  const digest = createHash("sha256")
+    .update(`${albumId}:${duplicateKey}`)
+    .digest("hex")
+    .slice(0, 40);
+  return {
+    mediaId: `galleryEmbed.${digest}`,
+    storedFileId: `gallery_embed_${digest}`,
+    activityId: `gallery_embed_activity_${digest}`,
+  };
+}
+
+function isUniqueConflict(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    String((error as { code?: unknown }).code) === "P2002"
+  );
+}
+
 function refreshGalleryPages() {
   revalidatePath("/");
   revalidatePath("/gallery");
+  revalidatePath("/gallery/[slug]", "page");
   revalidatePath("/admin/website/gallery");
 }
 
@@ -446,7 +492,7 @@ export async function GET() {
       {
         success: false,
         message:
-          "The website gallery could not be loaded. Check the server terminal.",
+          "The website gallery could not be loaded. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );
@@ -704,7 +750,21 @@ export async function POST(request: Request) {
 
     if (action === "createEmbed") {
       const albumId = cleanId(postData.get("albumId"));
-      const parsedEmbed = parseEmbedUrl(postData.get("embedUrl"));
+      let parsedEmbed: Awaited<ReturnType<typeof parseEmbedUrl>>;
+      try {
+        parsedEmbed = await parseEmbedUrl(postData.get("embedUrl"));
+      } catch (error) {
+        if (error instanceof InstagramShareResolutionError) {
+          const message =
+            error.code === "TIMEOUT"
+              ? "Instagram took too long to open that share link. Please try again, or paste the Reel's full browser URL."
+              : error.code === "UNSAFE_REDIRECT"
+                ? "That link left Instagram and was blocked for safety. Please copy the Reel link again from Instagram."
+                : "CentreOS could not resolve that Instagram share link. Open the Reel, tap Share → Copy link, and try once more.";
+          return noStoreJson({ success: false, message }, 422);
+        }
+        throw error;
+      }
       const consentConfirmed = cleanBoolean(postData.get("consentConfirmed"));
       const settings = await getMediaSafetySetting();
 
@@ -714,9 +774,19 @@ export async function POST(request: Request) {
           409,
         );
       }
-      if (!albumId || !parsedEmbed) {
+      if (!albumId) {
         return noStoreJson(
-          { success: false, message: "Paste a valid Instagram Reel or YouTube video URL and choose an album." },
+          { success: false, message: "Choose a gallery album first." },
+          400,
+        );
+      }
+      if (!parsedEmbed) {
+        return noStoreJson(
+          {
+            success: false,
+            message:
+              "Please paste a complete Instagram Reel link. In Instagram, open the Reel, tap Share → Copy link, then paste it here.",
+          },
           400,
         );
       }
@@ -733,12 +803,39 @@ export async function POST(request: Request) {
       if (!albumExists) {
         return noStoreJson({ success: false, message: "This gallery album no longer exists." }, 404);
       }
-      const duplicate = await sanityServerClient.fetch<boolean>(
-        `count(*[_type == "websiteGalleryMedia" && albumId == $albumId && embedUrl == $embedUrl]) > 0`,
-        { albumId, embedUrl: parsedEmbed.publicUrl },
+      const duplicateUrls =
+        parsedEmbed.provider === "INSTAGRAM"
+          ? [
+              `https://www.instagram.com/reel/${parsedEmbed.shortcode}/`,
+              `https://www.instagram.com/p/${parsedEmbed.shortcode}/`,
+            ]
+          : [parsedEmbed.publicUrl];
+      const stableIds = stableEmbedIds(albumId, parsedEmbed.duplicateKey);
+      const existingMedia = await sanityServerClient.fetch<{
+        _id: string;
+        storedFileId: string | null;
+      } | null>(
+        `*[
+          _type == "websiteGalleryMedia" &&
+          albumId == $albumId &&
+          (_id == $mediaId || embedUrl in $duplicateUrls)
+        ][0]{ _id, storedFileId }`,
+        { albumId, mediaId: stableIds.mediaId, duplicateUrls },
       );
-      if (duplicate) {
-        return noStoreJson({ success: false, message: "This reel is already in the selected album." }, 409);
+      const existingInventory = existingMedia?.storedFileId
+        ? await prisma.storedFile.findUnique({
+            where: { id: existingMedia.storedFileId },
+            select: { id: true },
+          })
+        : null;
+      if (existingMedia && existingInventory) {
+        return noStoreJson(
+          {
+            success: false,
+            message: "This reel is already in the selected album.",
+          },
+          409,
+        );
       }
       const albumMediaCount = await sanityServerClient.fetch<number>(
         `count(*[_type == "websiteGalleryMedia" && albumId == $albumId])`,
@@ -747,62 +844,121 @@ export async function POST(request: Request) {
       const now = new Date().toISOString();
       const caption = cleanText(postData.get("caption"), 300);
       const altText = cleanText(postData.get("altText"), 180);
-      const mediaDocument = await sanityServerClient.create({
-        _type: "websiteGalleryMedia",
-        albumId,
-        mediaType: "VIDEO",
-        mediaSource: "EXTERNAL_EMBED",
-        embedProvider: parsedEmbed.provider,
-        embedUrl: parsedEmbed.publicUrl,
-        embedPlayerUrl: parsedEmbed.embedUrl,
-        caption,
-        altText: altText || caption || `${parsedEmbed.provider === "INSTAGRAM" ? "Instagram Reel" : "YouTube video"} from Kidzee Sector 12 Dwarka`,
-        published: false,
-        sortOrder: albumMediaCount,
-        consentConfirmed: true,
-        consentConfirmedAt: now,
-        fileName: `${parsedEmbed.provider.toLowerCase()}-embed`,
-        mimeType: "text/uri-list",
-        fileSize: 0,
-        createdAt: now,
-        updatedAt: now,
-      });
-      const storedFile = await prisma.storedFile.create({
-        data: {
-          provider: "EXTERNAL_EMBED",
-          publicUrl: parsedEmbed.publicUrl,
-          visibility: "PUBLIC",
-          module: "WEBSITE_GALLERY",
-          linkedRecordType: "WebsiteGalleryMedia",
-          linkedRecordId: mediaDocument._id,
-          originalName: `${parsedEmbed.provider.toLowerCase()}-embed`,
-          mimeType: "text/uri-list",
-          originalSize: 0,
-          optimizedSize: 0,
-          status: "READY",
-          uploadedById: access.session.userId,
-          metadata: { provider: parsedEmbed.provider, playerUrl: parsedEmbed.embedUrl },
+      const mediaId = existingMedia?._id ?? stableIds.mediaId;
+      const storedFileId = existingMedia?.storedFileId ?? stableIds.storedFileId;
+      await persistExternalEmbedRecord({
+        findStoredFile: () =>
+          prisma.storedFile.findUnique({
+            where: { id: storedFileId },
+          }),
+        createStoredFile: () =>
+          prisma.storedFile.create({
+            data: {
+              id: storedFileId,
+              provider: "EXTERNAL_EMBED",
+              publicUrl: parsedEmbed.publicUrl,
+              visibility: "PUBLIC",
+              module: "WEBSITE_GALLERY",
+              linkedRecordType: "WebsiteGalleryMedia",
+              linkedRecordId: mediaId,
+              originalName: `${parsedEmbed.provider.toLowerCase()}-embed`,
+              mimeType: "text/uri-list",
+              originalSize: 0,
+              optimizedSize: 0,
+              status: "READY",
+              uploadedById: access.session.userId,
+              metadata: {
+                provider: parsedEmbed.provider,
+                playerUrl: parsedEmbed.embedUrl,
+                duplicateKey: parsedEmbed.duplicateKey,
+              },
+            },
+          }),
+        recoverStoredFile: () =>
+          prisma.storedFile.findUnique({
+            where: { id: storedFileId },
+          }),
+        isUniqueConflict,
+        persistMedia: async (persistedStoredFile) => {
+          const mediaDocument = {
+            _id: mediaId,
+            _type: "websiteGalleryMedia",
+            albumId,
+            mediaType: "VIDEO",
+            mediaSource: "EXTERNAL_EMBED",
+            embedProvider: parsedEmbed.provider,
+            embedUrl: parsedEmbed.publicUrl,
+            embedPlayerUrl: parsedEmbed.embedUrl,
+            caption,
+            altText:
+              altText ||
+              caption ||
+              `${parsedEmbed.provider === "INSTAGRAM" ? "Instagram Reel" : "YouTube video"} from Kidzee Sector 12 Dwarka`,
+            published: false,
+            sortOrder: albumMediaCount,
+            consentConfirmed: true,
+            consentConfirmedAt: now,
+            fileName: `${parsedEmbed.provider.toLowerCase()}-embed`,
+            mimeType: "text/uri-list",
+            fileSize: 0,
+            storedFileId: persistedStoredFile.id,
+            createdAt: now,
+            updatedAt: now,
+          };
+          if (existingMedia) {
+            await sanityServerClient.patch(mediaId).set(mediaDocument).commit();
+          } else {
+            await sanityServerClient.createIfNotExists(mediaDocument);
+          }
+        },
+        compensateStoredFile: async () => {
+          try {
+            const linkedStoredFileId = await sanityServerClient.fetch<
+              string | null
+            >(`*[_id == $mediaId][0].storedFileId`, { mediaId });
+            if (linkedStoredFileId !== storedFileId) {
+              await prisma.storedFile.deleteMany({
+                where: { id: storedFileId },
+              });
+            }
+          } catch (cleanupError) {
+            logServerError(
+              "Gallery embed compensation needs a retry.",
+              cleanupError,
+            );
+          }
         },
       });
-      await sanityServerClient
-        .patch(mediaDocument._id)
-        .set({ storedFileId: storedFile.id })
-        .commit();
-      await prisma.activityLog.create({
-        data: {
-          adminUserId: access.session.userId,
-          action: "CREATED",
-          entityType: "WebsiteGalleryMedia",
-          entityId: mediaDocument._id,
-          description: `${parsedEmbed.provider} gallery reel added as a draft.`,
-          newData: { albumId, provider: parsedEmbed.provider, storedFileId: storedFile.id },
-        },
-      });
+
+      try {
+        await prisma.activityLog.upsert({
+          where: { id: stableIds.activityId },
+          update: {},
+          create: {
+            id: stableIds.activityId,
+            adminUserId: access.session.userId,
+            action: "CREATED",
+            entityType: "WebsiteGalleryMedia",
+            entityId: mediaId,
+            description: `${parsedEmbed.provider} gallery reel added as a draft.`,
+            newData: {
+              albumId,
+              provider: parsedEmbed.provider,
+              storedFileId,
+            },
+          },
+        });
+      } catch (activityError) {
+        logServerError(
+          "Gallery embed saved but its activity entry needs a retry.",
+          activityError,
+        );
+      }
       refreshGalleryPages();
       return noStoreJson({
         success: true,
         message: "The reel has been added as a draft. Add a thumbnail, caption and publish it when ready.",
-        mediaId: mediaDocument._id,
+        mediaId,
       });
     }
 
@@ -958,18 +1114,15 @@ export async function POST(request: Request) {
       const caption = cleanText(postData.get("caption"), 300);
       const altText = cleanText(postData.get("altText"), 180);
 
-      const storedPhoto = mediaType === "PHOTO"
-        ? await storePublicGalleryImage({
-            bytes: fileBytes,
-            fileName,
-            mimeType: fileMimeType,
-            albumId,
-            uploadedById: access.session.userId,
+      const processedPhoto = mediaType === "PHOTO"
+        ? await processPublicImage(fileBytes)
+        : null;
+      const uploadedPhotoAsset = processedPhoto
+        ? await sanityServerClient.assets.upload("image", processedPhoto.web, {
+            filename: `${fileName.replace(/\.[^.]+$/, "") || "gallery-upload"}.webp`,
+            contentType: "image/webp",
           })
         : null;
-      const photoMetadata = storedPhoto?.metadata as {
-        thumbnailUrl?: string;
-      } | null;
       const uploadedVideoAsset = mediaType === "VIDEO"
         ? await sanityServerClient.assets.upload("file", fileBytes, {
             filename: fileName,
@@ -995,45 +1148,48 @@ export async function POST(request: Request) {
         fileName,
         mimeType: fileMimeType,
         fileSize: fileBytes.byteLength,
-        storedFileId: storedPhoto?.id ?? null,
+        storedFileId: null,
         createdAt: now,
         updatedAt: now,
       };
 
-      const mediaDocument =
-        mediaType === "PHOTO"
-          ? await sanityServerClient.create({
-              ...sharedMediaFields,
-              mediaSource: "FIREBASE_STORAGE",
-              externalImageUrl: storedPhoto?.publicUrl,
-              externalThumbnailUrl:
-                photoMetadata?.thumbnailUrl ?? storedPhoto?.publicUrl,
-              optimizedFileSize: storedPhoto?.optimizedSize,
-              thumbnailFileSize: storedPhoto?.thumbnailSize,
-              width: storedPhoto?.width,
-              height: storedPhoto?.height,
-            })
-          : await sanityServerClient.create({
-              ...sharedMediaFields,
-              mediaSource: "SANITY_SELF_HOSTED_VIDEO",
-              video: {
-                _type: "file",
-                asset: {
-                  _type: "reference",
-                  _ref: uploadedVideoAsset?._id,
+      const mediaDocument = await (async () => {
+        try {
+          return mediaType === "PHOTO"
+            ? await sanityServerClient.create({
+                ...sharedMediaFields,
+                mediaSource: "SANITY_ASSET",
+                image: {
+                  _type: "image",
+                  asset: {
+                    _type: "reference",
+                    _ref: uploadedPhotoAsset?._id,
+                  },
                 },
-              },
-            });
+                optimizedFileSize: processedPhoto?.web.byteLength,
+                width: processedPhoto?.width,
+                height: processedPhoto?.height,
+              })
+            : await sanityServerClient.create({
+                ...sharedMediaFields,
+                mediaSource: "SANITY_SELF_HOSTED_VIDEO",
+                video: {
+                  _type: "file",
+                  asset: {
+                    _type: "reference",
+                    _ref: uploadedVideoAsset?._id,
+                  },
+                },
+              });
+        } catch (error) {
+          await removeUnusedSanityAsset(
+            uploadedPhotoAsset?._id ?? uploadedVideoAsset?._id ?? null,
+          );
+          throw error;
+        }
+      })();
 
-      if (storedPhoto) {
-        await prisma.storedFile.update({
-          where: { id: storedPhoto.id },
-          data: {
-            linkedRecordType: "WebsiteGalleryMedia",
-            linkedRecordId: mediaDocument._id,
-          },
-        });
-      } else if (uploadedVideoAsset) {
+      if (uploadedVideoAsset) {
         const videoFile = await prisma.storedFile.create({
           data: {
             provider: "SANITY_SELF_HOSTED_VIDEO",
@@ -1068,9 +1224,10 @@ export async function POST(request: Request) {
             albumId,
             mediaType,
             originalSize: fileBytes.byteLength,
-            optimizedSize: storedPhoto?.optimizedSize ?? fileBytes.byteLength,
-            thumbnailSize: storedPhoto?.thumbnailSize ?? null,
-            storedFileId: storedPhoto?.id ?? null,
+            optimizedSize: processedPhoto?.web.byteLength ?? fileBytes.byteLength,
+            thumbnailSize: null,
+            storedFileId: null,
+            provider: mediaType === "PHOTO" ? "SANITY_ASSET" : "SANITY_SELF_HOSTED_VIDEO",
           },
         },
       });
@@ -1100,8 +1257,8 @@ export async function POST(request: Request) {
       return noStoreJson({
         success: true,
         message:
-          storedPhoto
-            ? `The photo was compressed from ${Math.round(fileBytes.byteLength / 1024)} KB to ${Math.round((storedPhoto.optimizedSize ?? 0) / 1024)} KB with a ${Math.round((storedPhoto.thumbnailSize ?? 0) / 1024)} KB thumbnail. It remains a draft until you publish it.`
+          processedPhoto
+            ? `The photo was compressed from ${Math.round(fileBytes.byteLength / 1024)} KB to ${Math.round(processedPhoto.web.byteLength / 1024)} KB. It remains a draft until you publish it.`
             : "The media has been uploaded as a draft. Review it before publishing.",
         mediaId: mediaDocument._id,
       });
@@ -1498,7 +1655,7 @@ export async function PATCH(request: Request) {
       {
         success: false,
         message:
-          "The gallery update could not be saved. Check the server terminal.",
+          "The gallery update could not be saved. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );
@@ -1723,7 +1880,7 @@ export async function DELETE(request: Request) {
       {
         success: false,
         message:
-          "The gallery content could not be removed. Check the server terminal.",
+          "The gallery content could not be removed. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );

@@ -613,7 +613,7 @@ export async function POST(
       {
         success: false,
         message:
-          "The student could not be withdrawn. Check the server terminal.",
+          "The student could not be withdrawn. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,

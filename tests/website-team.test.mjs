@@ -34,6 +34,14 @@ test("website team page and upload API require website.manage", () => {
   assert.match(permissions, /path: "\/api\/admin\/website-team"[\s\S]*permission: "website\.manage"/);
 });
 
+test("website team portraits use the existing Sanity website-media storage path", () => {
+  assert.match(route, /sanityServerClient\.assets\.upload/);
+  assert.match(route, /uploadedAsset\?\._id/);
+  assert.match(route, /_ref: assetId/);
+  assert.doesNotMatch(route, /pathPrefix: "public\/website\/team"/);
+  assert.doesNotMatch(route, /storePublicGalleryImage/);
+});
+
 test("public team query exposes only approved public profile fields", () => {
   for (const field of [
     "name",

@@ -279,6 +279,6 @@ export async function POST(request: Request) {
     if (typeof error === "object" && error && "code" in error && (error as { code?: string }).code === "P2002") {
       return NextResponse.json({ success: false, message: "This charge already exists; no duplicate was created." }, { status: 409 });
     }
-    return NextResponse.json({ success: false, message: "The student ledger could not be updated. Check the server terminal." }, { status: 500 });
+    return NextResponse.json({ success: false, message: "The student ledger could not be updated. Please try again. If the problem continues, contact the Owner." }, { status: 500 });
   }
 }

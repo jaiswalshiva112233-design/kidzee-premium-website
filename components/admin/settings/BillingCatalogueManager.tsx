@@ -278,10 +278,13 @@ export default function BillingCatalogueManager() {
       "oldPlanId",
     );
     if (!requestedPlanId) return;
-    setReplacement((current) => ({
-      ...current,
-      oldPlanId: requestedPlanId,
-    }));
+    const timer = window.setTimeout(() => {
+      setReplacement((current) => ({
+        ...current,
+        oldPlanId: requestedPlanId,
+      }));
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   async function load() {

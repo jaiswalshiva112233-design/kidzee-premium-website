@@ -27,9 +27,9 @@ export function daycareServiceEndAt(
   actionAt: Date,
 ) {
   const lifecycleEnd = daycareLifecycleStopAt(effectiveFrom, actionAt);
-  return configuredEnd && configuredEnd < lifecycleEnd
-    ? configuredEnd
-    : lifecycleEnd;
+  if (!configuredEnd) return lifecycleEnd;
+  if (configuredEnd < effectiveFrom) return effectiveFrom;
+  return configuredEnd < lifecycleEnd ? configuredEnd : lifecycleEnd;
 }
 
 export function daycarePlanHistoricalDependencyCount(

@@ -127,7 +127,7 @@ type RootLayoutProps = Readonly<{
   children: ReactNode;
 }>;
 
-const weekdays = [
+const preschoolWeekdays = [
   "https://schema.org/Monday",
   "https://schema.org/Tuesday",
   "https://schema.org/Wednesday",
@@ -210,8 +210,14 @@ export default async function RootLayout({
         openingHoursSpecification: [
           {
             "@type": "OpeningHoursSpecification",
-            dayOfWeek: weekdays,
+            dayOfWeek: preschoolWeekdays,
             opens: contact.preschoolHours.opens,
+            closes: contact.daycareHours.closes,
+          },
+          {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: ["https://schema.org/Saturday"],
+            opens: contact.daycareHours.opens,
             closes: contact.daycareHours.closes,
           },
         ],

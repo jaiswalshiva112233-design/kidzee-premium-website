@@ -328,7 +328,7 @@ export async function GET(request: Request) {
       {
         success: false,
         message:
-          "Unable to load students. Check the server terminal.",
+          "Unable to load students. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,
@@ -1058,7 +1058,7 @@ export async function POST(request: Request) {
       {
         success: false,
         message:
-          "The student could not be saved. Check the server terminal.",
+          "The student could not be saved. Please try again. If the problem continues, contact the Owner.",
       },
       {
         status: 500,

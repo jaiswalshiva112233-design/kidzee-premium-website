@@ -119,7 +119,7 @@ const faqs = [
   {
     question: "What are the daycare timings?",
     answer:
-      "Daycare is available from 12:30 PM to 7:00 PM, Monday to Friday. Tell us the hours you usually need so we can check the most suitable routine and current availability.",
+      "Daycare is available from 12:30 PM to 7:00 PM, Monday to Saturday. Tell us the hours you usually need so we can check the most suitable routine and current availability.",
   },
   {
     question: "Can I choose only some days or book occasional daycare?",
@@ -168,7 +168,8 @@ const daycareSchema = {
   image: site.url + "/images/daycare/daycare-main.jpg",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Building No. 19, Block B, Sector 12B",
+    streetAddress:
+      "Building No. 19, 1st Floor, Block-B, Parmanand Colony, Pocket 8, Block B, Sector 12 Dwarka",
     addressLocality: "Dwarka",
     addressRegion: "Delhi",
     postalCode: site.postalCode,
@@ -176,7 +177,14 @@ const daycareSchema = {
   },
   openingHoursSpecification: {
     "@type": "OpeningHoursSpecification",
-    dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    dayOfWeek: [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ],
     opens: site.daycareHours.opens,
     closes: site.daycareHours.closes,
   },

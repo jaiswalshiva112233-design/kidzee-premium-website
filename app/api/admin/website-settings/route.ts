@@ -305,7 +305,7 @@ export async function GET() {
       {
         success: false,
         message:
-          "Website tracking settings could not be loaded. Check the server terminal.",
+          "Website tracking settings could not be loaded. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );
@@ -379,7 +379,7 @@ export async function PATCH(request: Request) {
       {
         success: false,
         message:
-          "Website tracking settings could not be saved. Check the server terminal.",
+          "Website tracking settings could not be saved. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );

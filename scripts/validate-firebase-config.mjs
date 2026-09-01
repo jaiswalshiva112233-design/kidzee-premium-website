@@ -49,4 +49,32 @@ if (!functionsSource.includes("retryMarketingConversions") || !functionsSource.i
 if (!functionsSource.includes("generateMonthlyCentreInvoices") || !functionsSource.includes("every day 00:10")) {
   throw new Error("The scheduled recurring billing function is missing.");
 }
+for (const [flag, exportName] of [
+  ["GROWTH_SUMMARY_SCHEDULER_ENABLED", "buildDailyGrowthSummary"],
+  ["MARKETING_SCHEDULER_ENABLED", "retryMarketingConversions"],
+  ["GROWTH_SCHEDULER_ENABLED", "synchronizeGrowthSources"],
+  ["WHATSAPP_SCHEDULER_ENABLED", "processWhatsAppAutomation"],
+  ["NOTIFICATION_SCHEDULER_ENABLED", "processCentreNotifications"],
+  ["OWNER_INTELLIGENCE_SCHEDULER_ENABLED", "refreshOwnerIntelligence"],
+]) {
+  const guard = `if (optionalSchedulerEnabled("${flag}")) {`;
+  const guardIndex = functionsSource.indexOf(guard);
+  const exportIndex = functionsSource.indexOf(`exports.${exportName} = onSchedule`);
+  if (guardIndex < 0 || exportIndex < guardIndex) {
+    throw new Error(`${exportName} must remain absent unless ${flag} is explicitly enabled.`);
+  }
+}
+for (const secret of [
+  "MARKETING_CRON_SECRET",
+  "GROWTH_SYNC_SECRET",
+  "WHATSAPP_CRON_SECRET",
+  "NOTIFICATION_CRON_SECRET",
+  "OWNER_INTELLIGENCE_CRON_SECRET",
+]) {
+  const declarationIndex = functionsSource.indexOf(`defineSecret("${secret}")`);
+  const firstGuardIndex = functionsSource.lastIndexOf("if (optionalSchedulerEnabled(", declarationIndex);
+  if (declarationIndex < 0 || firstGuardIndex < 0) {
+    throw new Error(`${secret} must be declared only inside its enabled scheduler block.`);
+  }
+}
 console.log("Firebase configuration files and deny-by-default rules are valid.");

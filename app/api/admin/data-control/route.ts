@@ -138,26 +138,18 @@ function errorResponse(error: unknown) {
     "code" in error &&
     error.code === "P2003"
   ) {
-    const metadata = "meta" in error && typeof error.meta === "object" && error.meta
-      ? (error.meta as Record<string, unknown>)
-      : {};
-    const model = typeof metadata.modelName === "string"
-      ? metadata.modelName
-      : "a protected module";
-    const relation = typeof metadata.constraint === "string"
-      ? metadata.constraint
-      : typeof metadata.field_name === "string"
-        ? metadata.field_name
-        : "a linked record";
     console.error("Safe Launch Cleanup dependency blocked:", {
       code: "P2003",
-      model,
-      relation,
+      metadata:
+        "meta" in error && typeof error.meta === "object"
+          ? error.meta
+          : undefined,
     });
     return NextResponse.json(
       {
         success: false,
-        message: `Cleanup is blocked by ${model}: ${relation}. Delete the linked pre-launch test record first, or archive/cancel it if it is genuine centre history. Nothing was deleted.`,
+        message:
+          "This record is still connected to another CentreOS record, so it was not deleted. Delete the linked pre-launch test record first, or archive/cancel it if it is genuine centre history.",
       },
       { status: 409 },
     );

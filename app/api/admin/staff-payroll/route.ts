@@ -5,6 +5,7 @@ import type {
 import { NextResponse } from "next/server";
 
 import { getAdminSession } from "@/lib/admin/auth";
+import { publicPersistenceError } from "@/lib/admin/public-persistence-error";
 import { prisma } from "@/lib/prisma";
 
 const PAYROLL_SETTINGS_KEY = "STAFF_PAYROLL_SETTINGS";
@@ -1335,10 +1336,11 @@ export async function GET(request: Request) {
           ),
         );
       } catch (error) {
-        previewError =
-          error instanceof Error
-            ? error.message
-            : "Payroll preview is unavailable.";
+        console.error("Unable to prepare staff payroll preview:", error);
+        previewError = publicPersistenceError(
+          error,
+          "Payroll preview is temporarily unavailable. Refresh the page or contact the Owner.",
+        ).message;
       }
 
       staff.push({
@@ -1419,7 +1421,7 @@ export async function GET(request: Request) {
       {
         success: false,
         message:
-          "Unable to load staff payroll. Check the server terminal.",
+          "Unable to load staff payroll. Please try again. If the problem continues, contact the Owner.",
       },
       { status: 500 },
     );
@@ -1693,7 +1695,7 @@ export async function POST(request: Request) {
       {
         success: false,
         message:
-          "The payroll draft could not be saved. Check the server terminal.",
+          "The payroll draft could not be saved. Please try again. If the problem continues, contact the Owner.",
       },
       { status: 500 },
     );
@@ -2251,7 +2253,7 @@ export async function PATCH(request: Request) {
       {
         success: false,
         message:
-          "The payroll record could not be updated. Check the server terminal.",
+          "The payroll record could not be updated. Please try again. If the problem continues, contact the Owner.",
       },
       { status: 500 },
     );

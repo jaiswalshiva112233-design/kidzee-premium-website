@@ -360,7 +360,7 @@ export async function GET(request: Request) {
       {
         success: false,
         message:
-          "Unable to load the staff attendance register. Check the server terminal.",
+          "Unable to load the staff attendance register. Please try again. If the problem continues, contact the Owner.",
       },
       { status: 500 },
     );
@@ -730,7 +730,7 @@ export async function POST(request: Request) {
       {
         success: false,
         message:
-          "Staff attendance could not be saved. Check the server terminal.",
+          "Staff attendance could not be saved. Please try again. If the problem continues, contact the Owner.",
       },
       { status: 500 },
     );

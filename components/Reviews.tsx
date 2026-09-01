@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import ParentReelPlayer from "@/components/Gallery/ParentReelPlayer";
+import ExternalMediaEmbed from "@/components/Gallery/ExternalMediaEmbed";
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
 import { getPublishedGalleryAlbums } from "@/lib/sanity/gallery";
@@ -166,7 +167,13 @@ export default async function Reviews() {
       album.media
         .filter(
           (item) =>
-            item.mediaType === "VIDEO" && Boolean(item.videoUrl),
+            item.mediaType === "VIDEO" &&
+            Boolean(
+              item.videoUrl ||
+                (item.embedProvider &&
+                  item.embedUrl &&
+                  item.embedPlayerUrl),
+            ),
         )
         .map((video) => ({ album, video })),
     )
@@ -227,21 +234,46 @@ export default async function Reviews() {
           </Button>
         </div>
 
-        {featuredStory?.video.videoUrl ? (
+        {featuredStory ? (
           <div className="mt-10 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
             <article className="grid overflow-hidden rounded-[30px] bg-[#281034] text-white shadow-[0_26px_76px_rgba(40,16,52,0.22)] sm:grid-cols-[minmax(250px,340px)_1fr]">
               <div className="mx-auto w-full max-w-[340px] p-3 sm:mx-0 sm:p-4">
-                <ParentReelPlayer
-                  src={featuredStory.video.videoUrl}
-                  poster={featuredStory.album.cover?.imageUrl ?? undefined}
-                  title={
-                    featuredStory.video.altText ||
-                    featuredStory.video.caption ||
-                    featuredStory.album.title
-                  }
-                  analyticsName="homepage_parent_story_video"
-                  className="max-h-[570px]"
-                />
+                {featuredStory.video.embedProvider &&
+                featuredStory.video.embedUrl &&
+                featuredStory.video.embedPlayerUrl ? (
+                  <ExternalMediaEmbed
+                    provider={featuredStory.video.embedProvider}
+                    embedUrl={featuredStory.video.embedPlayerUrl}
+                    publicUrl={featuredStory.video.embedUrl}
+                    poster={
+                      featuredStory.video.thumbnailUrl ??
+                      featuredStory.video.imageUrl ??
+                      undefined
+                    }
+                    title={
+                      featuredStory.video.altText ||
+                      featuredStory.video.caption ||
+                      featuredStory.album.title
+                    }
+                  />
+                ) : featuredStory.video.videoUrl ? (
+                  <ParentReelPlayer
+                    src={featuredStory.video.videoUrl}
+                    poster={
+                      featuredStory.video.thumbnailUrl ??
+                      featuredStory.video.imageUrl ??
+                      featuredStory.album.cover?.imageUrl ??
+                      undefined
+                    }
+                    title={
+                      featuredStory.video.altText ||
+                      featuredStory.video.caption ||
+                      featuredStory.album.title
+                    }
+                    analyticsName="homepage_parent_story_video"
+                    className="max-h-[570px]"
+                  />
+                ) : null}
               </div>
 
               <div className="flex flex-col justify-center p-5 pt-2 sm:p-7">

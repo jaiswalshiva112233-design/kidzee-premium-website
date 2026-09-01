@@ -499,7 +499,7 @@ export async function POST(request: Request) {
     return noStoreJson(
       {
         success: false,
-        message: "The article could not be saved. Check the server terminal.",
+        message: "The article could not be saved. Please try again. If the problem continues, contact the Owner.",
       },
       500,
     );

@@ -3,7 +3,9 @@ import PDFDocument from "pdfkit";
 import { NextResponse } from "next/server";
 
 import { getAdminSession } from "@/lib/admin/auth";
+import { formatCentreAddress } from "@/lib/centreAddress";
 import { prisma } from "@/lib/prisma";
+import { site } from "@/lib/site";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -201,16 +203,7 @@ async function getSchoolProfile():
   const value = isRecord(setting?.value)
     ? setting.value
     : {};
-  const address = [
-    getJsonText(value, "addressLine1"),
-    getJsonText(value, "addressLine2"),
-    getJsonText(value, "locality"),
-    getJsonText(value, "city"),
-    getJsonText(value, "state"),
-    getJsonText(value, "postalCode"),
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const address = formatCentreAddress(value);
 
   return {
     schoolName:
@@ -221,7 +214,7 @@ async function getSchoolProfile():
       "Kidzee Sector 12, Dwarka",
     address:
       address ||
-      "Plot No. 19, Block B, Sector 12B, Dwarka, New Delhi",
+      site.address,
     phone:
       getJsonText(value, "phone") ||
       "9667038673",
@@ -977,7 +970,7 @@ export async function GET(
       {
         success: false,
         message:
-          "The salary slip could not be generated. Check the server terminal.",
+          "The salary slip could not be generated. Please try again. If the problem continues, contact the Owner.",
       },
       { status: 500 },
     );
