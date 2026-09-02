@@ -81,14 +81,25 @@ env:
     secret: BILLING_CRON_SECRET
     availability: [RUNTIME]
 
-  # Trial launch: provider integrations stay disabled until the Owner completes
-  # their production credentials and separately approves activation.
+  # Production launch: provider integrations enabled
   - variable: WEBSITE_ANALYTICS_ENABLED
-    value: "false"
+    value: "true"
     availability: [BUILD, RUNTIME]
   - variable: WEBSITE_ADVERTISING_ENABLED
-    value: "false"
+    value: "true"
     availability: [BUILD, RUNTIME]
   - variable: WEBSITE_META_PIXEL_ENABLED
-    value: "false"
+    value: "true"
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_GA_MEASUREMENT_ID
+    value: G-035S95BK3W
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_GOOGLE_ADS_ID
+    value: AW-1791741525
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_GOOGLE_ADS_LEAD_LABEL
+    value: 0G5ZCKb6gZwBENW-2t0C
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_META_PIXEL_ID
+    value: "1677317359571765"
     availability: [BUILD, RUNTIME]
