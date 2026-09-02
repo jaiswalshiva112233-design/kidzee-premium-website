@@ -437,18 +437,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const requestUrl = new URL(request.url);
-    const origin = request.headers.get("origin");
 
-    if (origin && origin !== requestUrl.origin) {
-      return noStoreJson(
-        {
-          success: false,
-          message:
-            "This enquiry could not be submitted.",
-        },
-        403,
-      );
+    const origin = request.headers.get("origin");
+    if (origin) {
+      let isAllowed = false;
+      try {
+        const originUrl = new URL(origin);
+        const hostname = originUrl.hostname.toLowerCase();
+        if (
+          hostname === "kidzeedwarka.com" ||
+          hostname.endsWith(".kidzeedwarka.com") ||
+          hostname.endsWith(".hosted.app") ||
+          hostname === "localhost" ||
+          hostname === "127.0.0.1"
+        ) {
+          isAllowed = true;
+        }
+      } catch {
+        isAllowed = false;
+      }
+
+      if (!isAllowed) {
+        return noStoreJson(
+          {
+            success: false,
+            message: "This enquiry could not be submitted.",
+          },
+          403,
+        );
+      }
     }
 
     const contentLength = Number(
