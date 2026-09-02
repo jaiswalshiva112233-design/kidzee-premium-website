@@ -3,7 +3,7 @@ import "server-only";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
 
 if (!databaseUrl) {
   throw new Error(
@@ -52,14 +52,7 @@ function supportsCurrentSchema(
 const cachedPrisma = globalForPrisma.prisma;
 
 function createPrismaClient() {
-  const configuredDatabaseUrl = databaseUrl as string;
-  if (configuredDatabaseUrl.startsWith("prisma+postgres://") || configuredDatabaseUrl.startsWith("prisma://")) {
-    return new PrismaClient({
-      accelerateUrl: configuredDatabaseUrl,
-      log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
-    });
-  }
-
+  const configuredDatabaseUrl = (process.env.DIRECT_URL || process.env.DATABASE_URL) as string;
   return new PrismaClient({
     adapter: new PrismaPg({ connectionString: configuredDatabaseUrl }),
     log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
