@@ -363,7 +363,7 @@ export default function LandingPageExperience({
           <span>🎉</span>
           <span>
             {content.offerText ||
-              "Limited Time Offer: Flat 30% Off Annual Fee on Playgroup & Nursery Admissions (2026–27) | Free 3-Day Trial"}
+              "Limited Time Offer: Flat 30% Off Annual Fee on Playgroup & Nursery Admissions (2026–27) | Complimentary 3-Day Trial"}
           </span>
         </span>
       </div>
@@ -505,7 +505,7 @@ export default function LandingPageExperience({
                 title="Book Campus Visit & Claim 30% Off"
                 subtitle="Experience classrooms, meet educators, and claim 30% off annual fee."
                 badgeText="Admissions Desk 2026–27"
-                submitButtonText="Claim 30% Off & Book Free Visit"
+                submitButtonText="Book Campus Visit & Claim 30% Off"
                 initialProgramme={
                   content.programme || (page.pageType === "DAYCARE" ? "DAYCARE" : "")
                 }
