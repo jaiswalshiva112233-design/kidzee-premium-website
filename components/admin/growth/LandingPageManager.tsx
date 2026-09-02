@@ -540,8 +540,36 @@ export default function LandingPageManager() {
               />
             </div>
             {form.reviewVideoUrl ? (
-              <div className="mt-3 rounded-xl bg-white p-2 border border-purple-100">
-                <p className="text-[10px] font-bold text-emerald-700">✓ Video Attached: {form.reviewVideoUrl.slice(0, 60)}...</p>
+              <div className="mt-3 rounded-xl bg-white p-3 border border-purple-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-black text-emerald-700">✓ Video Connected & Ready:</p>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, reviewVideoUrl: "", reviewVideoTitle: "" })}
+                    className="text-[10px] font-bold text-red-600 hover:underline"
+                  >
+                    Remove Video
+                  </button>
+                </div>
+                <p className="text-[10px] font-mono text-gray-500 truncate">{form.reviewVideoUrl}</p>
+                {form.reviewVideoUrl.includes("instagram.com") ? (
+                  <div className="rounded-lg bg-purple-50 p-2 text-[11px] font-bold text-[#5B2A86]">
+                    📸 Instagram Reel Embed Detected
+                  </div>
+                ) : form.reviewVideoUrl.includes("youtube.com") || form.reviewVideoUrl.includes("youtu.be") ? (
+                  <div className="rounded-lg bg-red-50 p-2 text-[11px] font-bold text-red-700">
+                    ▶️ YouTube Video Detected
+                  </div>
+                ) : (
+                  <div className="max-w-xs overflow-hidden rounded-lg border border-gray-200 bg-black">
+                    <video
+                      src={form.reviewVideoUrl}
+                      controls
+                      playsInline
+                      className="max-h-48 w-full object-contain"
+                    />
+                  </div>
+                )}
               </div>
             ) : null}
           </div>

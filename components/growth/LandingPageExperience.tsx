@@ -340,14 +340,20 @@ export default function LandingPageExperience({
 
   const content = selected.content?.heading ? selected.content : page.content;
   const activePhotos = content.campusPhotos && content.campusPhotos.length > 0 ? content.campusPhotos : campusPhotos;
-  const instagramShortcode = getInstagramShortcode(content.reviewVideoUrl || "");
-  const embedUrl = getYouTubeEmbedUrl(content.reviewVideoUrl || "");
+  const videoUrl = content.reviewVideoUrl ?? "";
+  const instagramShortcode = getInstagramShortcode(videoUrl);
+  const embedUrl = getYouTubeEmbedUrl(videoUrl);
   const isDirectVideo =
-    content.reviewVideoUrl &&
-    (content.reviewVideoUrl.endsWith(".mp4") ||
-      content.reviewVideoUrl.endsWith(".webm") ||
-      content.reviewVideoUrl.includes("/api/") ||
-      content.reviewVideoUrl.startsWith("http"));
+    Boolean(videoUrl) &&
+    !instagramShortcode &&
+    !embedUrl &&
+    (videoUrl.includes(".mp4") ||
+      videoUrl.includes(".webm") ||
+      videoUrl.includes("firebasestorage") ||
+      videoUrl.includes("storage.googleapis.com") ||
+      videoUrl.includes("/uploads/") ||
+      videoUrl.startsWith("http") ||
+      videoUrl.startsWith("/"));
 
   return (
     <div className="min-h-screen bg-[#FAF7FC] text-[#281034] font-sans antialiased selection:bg-[#5B2A86] selection:text-white">
@@ -733,7 +739,9 @@ export default function LandingPageExperience({
               <video
                 src={content.reviewVideoUrl}
                 controls
-                className="aspect-16/9 w-full object-cover"
+                playsInline
+                preload="metadata"
+                className="aspect-16/9 w-full object-contain bg-black"
                 poster="/images/hero/hero-main.jpg"
               />
             ) : (
