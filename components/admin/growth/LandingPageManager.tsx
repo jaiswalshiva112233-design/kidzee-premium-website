@@ -730,24 +730,56 @@ export default function LandingPageManager() {
             value={form.expectedImpact}
             set={(v) => setForm({ ...form, expectedImpact: v })}
           />
-          <div className="md:col-span-2 flex flex-wrap gap-2">
-            <button
-              disabled={busy}
-              onClick={() =>
-                void action({
-                  action: selectedId ? "create-version" : "create-page",
-                  ...basePayload,
-                })
-              }
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#5B2A86] px-5 text-xs font-black text-white disabled:opacity-50"
-            >
-              {busy ? (
-                <LoaderCircle size={15} className="animate-spin" />
-              ) : (
-                <Save size={15} />
-              )}{" "}
-              {selectedId ? "Save as preview version" : "Create draft page"}
-            </button>
+          <div className="md:col-span-2 flex flex-wrap gap-3 pt-2">
+            {selectedId ? (
+              <>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() =>
+                    void action({
+                      ...basePayload,
+                      action: "save-and-publish",
+                      makeLive: true,
+                    })
+                  }
+                  className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-[#5B2A86] px-6 text-sm font-black text-white shadow-md transition hover:bg-[#471E6C] disabled:opacity-50"
+                >
+                  {busy ? <LoaderCircle size={16} className="animate-spin" /> : <Save size={16} />}
+                  🚀 Save & Publish Live Changes
+                </button>
+
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() =>
+                    void action({
+                      ...basePayload,
+                      action: "save-and-publish",
+                      makeLive: false,
+                    })
+                  }
+                  className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-gray-300 bg-white px-5 text-xs font-bold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+                >
+                  💾 Save as Draft (Keep Hidden)
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() =>
+                  void action({
+                    action: "create-page",
+                    ...basePayload,
+                  })
+                }
+                className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-[#5B2A86] px-6 text-sm font-black text-white shadow-md transition hover:bg-[#471E6C] disabled:opacity-50"
+              >
+                {busy ? <LoaderCircle size={16} className="animate-spin" /> : <Save size={16} />}
+                Create New Landing Page
+              </button>
+            )}
             {selected && selected.variants.length < 2 ? (
               <button
                 disabled={busy}

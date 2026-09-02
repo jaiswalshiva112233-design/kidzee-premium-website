@@ -239,6 +239,53 @@ export async function POST(request: Request) {
     const action = text(body.action, 50);
     const pageId = text(body.pageId, 100);
 
+    if (action === "save-and-publish") {
+      const existing = await prisma.landingPage.findUnique({
+        where: { id: pageId },
+      });
+      if (!existing) throw new LandingPageRequestError("Landing page not found.");
+      const pageContent = content(body.content);
+      const seoTitle = text(body.seoTitle, 70) || existing.seoTitle;
+      const metaDescription = text(body.metaDescription, 180) || existing.metaDescription;
+      const name = text(body.name, 120) || existing.name;
+
+      await prisma.$transaction([
+        prisma.landingPage.update({
+          where: { id: pageId },
+          data: {
+            name,
+            seoTitle,
+            metaDescription,
+            content: pageContent,
+            status: body.makeLive === false ? "DRAFT" : "PUBLISHED",
+            updatedById: session.userId,
+            updatedAt: new Date(),
+          },
+        }),
+        prisma.landingPageVariant.updateMany({
+          where: { landingPageId: pageId, variantKey: "A" },
+          data: {
+            name,
+            content: pageContent,
+            updatedAt: new Date(),
+          },
+        }),
+        prisma.activityLog.create({
+          data: {
+            adminUserId: session.userId,
+            action: "UPDATED",
+            entityType: "LandingPage",
+            entityId: pageId,
+            description: `${name} was directly updated.`,
+          },
+        }),
+      ]);
+      return NextResponse.json({
+        success: true,
+        message: body.makeLive === false ? "Landing page saved as Draft (Hidden)!" : "Landing page saved and published live!",
+      });
+    }
+
     if (action === "create-page") {
       const pageSlug = slug(body.slug || body.name);
       const requestedPageType = pageType(body.pageType);
