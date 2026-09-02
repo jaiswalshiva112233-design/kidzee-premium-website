@@ -698,10 +698,10 @@ export default function LandingPageExperience({
         </div>
       </section>
 
-      {/* Parent Review Video Player Section */}
+      {/* Dual Parent Review Video Reels Showcase */}
       <section className="bg-white py-12 sm:py-16">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <div className="text-center max-w-xl mx-auto mb-8">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="text-center max-w-xl mx-auto mb-10">
             <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#5B2A86]">
               <Video size={15} />
               Parent Video Stories
@@ -710,61 +710,68 @@ export default function LandingPageExperience({
               Hear Directly From Our Parents
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Watch real experiences of Dwarka families who chose Kidzee Sector 12 for early education.
+              Watch authentic video experiences of Dwarka families who chose Kidzee Sector 12.
             </p>
           </div>
 
-          <div className="overflow-hidden rounded-3xl border-2 border-purple-200 bg-[#281034] shadow-xl flex justify-center items-center">
-            {instagramShortcode ? (
-              <div className="relative w-full max-w-[420px] aspect-[9/16] sm:aspect-[9/14] my-2">
-                <iframe
-                  src={`https://www.instagram.com/reel/${instagramShortcode}/embed/`}
-                  title={content.reviewVideoTitle || "Kidzee Sector 12 Dwarka Parent Review Reel"}
-                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="h-full w-full border-0 rounded-2xl bg-[#180822]"
+          <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
+            {/* Reel 1: Aashvi's Mother */}
+            <div className="flex flex-col overflow-hidden rounded-3xl border-2 border-purple-200 bg-[#281034] shadow-xl">
+              <div className="p-4 pb-2 border-b border-purple-900/60 bg-gradient-to-r from-[#3B174F] to-[#281034]">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#F6C84B] px-2.5 py-0.5 text-[10px] font-black text-[#281034]">
+                    ❤️ Nursery Review
+                  </span>
+                  <div className="flex text-amber-400">
+                    <Star size={12} className="fill-amber-400" />
+                    <Star size={12} className="fill-amber-400" />
+                    <Star size={12} className="fill-amber-400" />
+                    <Star size={12} className="fill-amber-400" />
+                    <Star size={12} className="fill-amber-400" />
+                  </div>
+                </div>
+                <h3 className="mt-2 text-base font-bold text-white">Voices of Our Parents: Aashvi</h3>
+                <p className="text-xs text-purple-200">Teacher care, daily learning & happiness</p>
+              </div>
+              <div className="relative aspect-[9/14] sm:aspect-[9/13] w-full bg-black flex items-center justify-center">
+                <video
+                  src="/videos/aashvi-nursery-review.mp4"
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="h-full w-full object-contain"
                 />
               </div>
-            ) : embedUrl ? (
-              <div className="relative aspect-16/9 w-full">
-                <iframe
-                  src={embedUrl}
-                  title={content.reviewVideoTitle || "Kidzee Sector 12 Dwarka Parent Review"}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="h-full w-full border-0"
+            </div>
+
+            {/* Reel 2: Playschool Search & Safety */}
+            <div className="flex flex-col overflow-hidden rounded-3xl border-2 border-purple-200 bg-[#281034] shadow-xl">
+              <div className="p-4 pb-2 border-b border-purple-900/60 bg-gradient-to-r from-[#3B174F] to-[#281034]">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#F6C84B] px-2.5 py-0.5 text-[10px] font-black text-[#281034]">
+                    🔒 Safety & Progress
+                  </span>
+                  <div className="flex text-amber-400">
+                    <Star size={12} className="fill-amber-400" />
+                    <Star size={12} className="fill-amber-400" />
+                    <Star size={12} className="fill-amber-400" />
+                    <Star size={12} className="fill-amber-400" />
+                    <Star size={12} className="fill-amber-400" />
+                  </div>
+                </div>
+                <h3 className="mt-2 text-base font-bold text-white">Why We Chose Kidzee Sector 12</h3>
+                <p className="text-xs text-purple-200">Playschool search, safety & 1-month progress</p>
+              </div>
+              <div className="relative aspect-[9/14] sm:aspect-[9/13] w-full bg-black flex items-center justify-center">
+                <video
+                  src="/videos/playschool-security-review.mp4"
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="h-full w-full object-contain"
                 />
               </div>
-            ) : isDirectVideo ? (
-              <video
-                src={content.reviewVideoUrl}
-                controls
-                playsInline
-                preload="metadata"
-                className="aspect-16/9 w-full object-contain bg-black"
-                poster="/images/hero/hero-main.jpg"
-              />
-            ) : (
-              <div className="relative aspect-16/9 flex flex-col items-center justify-center p-6 text-center text-white bg-gradient-to-br from-[#3B174F] to-[#281034]">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#F6C84B] text-[#281034] shadow-lg mb-4">
-                  <Play size={24} className="ml-1 fill-[#281034]" />
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold">
-                  {content.reviewVideoTitle || "Real Parent Review & Campus Experience"}
-                </h3>
-                <p className="mt-2 text-xs sm:text-sm text-purple-200 max-w-md">
-                  Experience why local Dwarka parents trust our caring teachers, 1:8 ratio, and safe classrooms.
-                </p>
-                <div className="mt-4 flex items-center gap-1 text-amber-400">
-                  <Star size={16} className="fill-amber-400" />
-                  <Star size={16} className="fill-amber-400" />
-                  <Star size={16} className="fill-amber-400" />
-                  <Star size={16} className="fill-amber-400" />
-                  <Star size={16} className="fill-amber-400" />
-                  <span className="ml-2 text-xs font-bold text-white">5.0 Parent Rating</span>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </section>
