@@ -504,7 +504,12 @@ export default function LandingPageManager() {
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    setMessage("Uploading video: " + file.name + " (" + Math.round(file.size / 1024 / 1024 * 10) / 10 + " MB)...");
+                    const sizeMb = Math.round(file.size / 1024 / 1024 * 10) / 10;
+                    if (sizeMb > 25) {
+                      setMessage("⚠️ Video is " + sizeMb + " MB (large). Cloud limit is 25 MB. Please use a compressed MP4 or paste your Instagram Reel / YouTube link.");
+                    } else {
+                      setMessage("Uploading video: " + file.name + " (" + sizeMb + " MB)...");
+                    }
                     try {
                       const formData = new FormData();
                       formData.append("file", file);
@@ -512,15 +517,24 @@ export default function LandingPageManager() {
                         method: "POST",
                         body: formData,
                       });
-                      const json = await res.json();
+                      const rawText = await res.text();
+                      let json;
+                      try {
+                        json = JSON.parse(rawText);
+                      } catch {
+                        if (res.status === 413 || sizeMb > 25) {
+                          throw new Error("File is too large (" + sizeMb + " MB) for direct cloud upload. Please compress to under 25 MB or paste the Instagram Reel / YouTube link directly.");
+                        }
+                        throw new Error("Upload failed (HTTP " + res.status + "). Please try again or paste video link.");
+                      }
                       if (json.url) {
                         setForm((f) => ({ ...f, reviewVideoUrl: json.url }));
                         setMessage("✓ Video uploaded successfully! Click 'Save & Publish Live Changes'.");
                       } else {
-                        setMessage("Upload failed: " + (json.message || "Please check file size"));
+                        setMessage("Upload failed: " + (json.message || "Please check file format"));
                       }
                     } catch (err) {
-                      setMessage("Upload error: " + String(err));
+                      setMessage("Upload Notice: " + (err instanceof Error ? err.message : String(err)));
                     }
                   }}
                   className="w-full rounded-xl border border-dashed border-purple-300 bg-purple-50/50 px-3 py-1.5 text-xs text-purple-900 file:mr-2 file:rounded-lg file:border-0 file:bg-[#5B2A86] file:px-3 file:py-1 file:text-xs file:font-bold file:text-white"
