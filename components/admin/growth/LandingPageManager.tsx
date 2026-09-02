@@ -506,13 +506,11 @@ export default function LandingPageManager() {
                     if (!file) return;
                     setMessage("Uploading " + file.name + "...");
                     try {
-                      const res = await fetch("/api/admin/gallery", {
+                      const res = await fetch("/api/admin/media/upload", {
                         method: "POST",
                         headers: {
                           "Content-Type": file.type || "video/mp4",
-                          "X-Gallery-Action": "uploadMedia",
-                          "X-Gallery-Consent": "true",
-                          "X-Gallery-Filename": encodeURIComponent(file.name),
+                          "X-Filename": encodeURIComponent(file.name),
                         },
                         body: file,
                       });
@@ -575,13 +573,11 @@ export default function LandingPageManager() {
                     if (!file) return;
                     setMessage("Uploading " + file.name + "...");
                     try {
-                      const res = await fetch("/api/admin/gallery", {
+                      const res = await fetch("/api/admin/media/upload", {
                         method: "POST",
                         headers: {
                           "Content-Type": file.type || "image/jpeg",
-                          "X-Gallery-Action": "uploadMedia",
-                          "X-Gallery-Consent": "true",
-                          "X-Gallery-Filename": encodeURIComponent(file.name),
+                          "X-Filename": encodeURIComponent(file.name),
                         },
                         body: file,
                       });

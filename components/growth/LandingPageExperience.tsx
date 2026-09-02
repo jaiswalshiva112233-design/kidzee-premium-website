@@ -219,21 +219,21 @@ function getYouTubeEmbedUrl(url: string) {
     if (url.includes("youtube.com/embed/")) return url;
     if (url.includes("youtu.be/")) {
       const id = url.split("youtu.be/")[1]?.split("?")[0];
-      return `https://www.youtube.com/embed/${id}`;
+      return id ? `https://www.youtube.com/embed/${id}` : "";
     }
     if (url.includes("youtube.com/shorts/")) {
       const id = url.split("youtube.com/shorts/")[1]?.split("?")[0];
-      return `https://www.youtube.com/embed/${id}`;
+      return id ? `https://www.youtube.com/embed/${id}` : "";
     }
     if (url.includes("youtube.com/watch")) {
       const urlObj = new URL(url);
       const id = urlObj.searchParams.get("v");
-      return id ? `https://www.youtube.com/embed/${id}` : url;
+      return id ? `https://www.youtube.com/embed/${id}` : "";
     }
   } catch {
-    return url;
+    return "";
   }
-  return url;
+  return "";
 }
 
 function anonymousBucket(key: string) {
