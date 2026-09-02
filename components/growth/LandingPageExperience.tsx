@@ -409,9 +409,9 @@ export default function LandingPageExperience({
 
             {/* Admissions 2026-27 Trust Highlights */}
             <div className="flex flex-wrap items-center gap-2 pt-1 text-xs font-bold text-[#5B2A86]">
-              <span className="rounded-full bg-purple-50 border border-purple-200 px-3 py-1">✓ Playgroup (1.5 - 2.5 yrs)</span>
-              <span className="rounded-full bg-purple-50 border border-purple-200 px-3 py-1">✓ Nursery (2.5 - 3.5 yrs)</span>
-              <span className="rounded-full bg-purple-50 border border-purple-200 px-3 py-1">✓ Kindergarten & Daycare</span>
+              <span className="rounded-full bg-purple-50 border border-purple-200 px-3 py-1">✓ Playgroup (2 – 3 Years)</span>
+              <span className="rounded-full bg-purple-50 border border-purple-200 px-3 py-1">✓ Nursery (3 – 4 Years)</span>
+              <span className="rounded-full bg-purple-50 border border-purple-200 px-3 py-1">✓ Junior & Senior KG (4 – 6 Years)</span>
             </div>
 
             {/* 4 Distinct Value Cards */}
