@@ -34,9 +34,9 @@ export async function generateMetadata(): Promise<Metadata> {
       "daycare in Sector 12 Dwarka",
       "preschool admissions in Dwarka",
     ],
-    socialImage: "/images/hero/hero-main.jpg",
+    socialImage: "/images/landing/kidzee-creative-learning.jpg",
     socialImageAlt:
-      "Children learning with their teacher at Kidzee Preschool Sector 12 Dwarka",
+      "Children learning through creative craft at Kidzee Preschool Sector 12 Dwarka",
   });
 }
 

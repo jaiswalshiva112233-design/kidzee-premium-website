@@ -20,7 +20,7 @@ function createDefaultDescription(academicYear: string) {
   return `Kidzee Preschool and daycare in Sector 12B, Dwarka for children aged ${site.ageRange.display}. Explore Playgroup to Senior KG, daycare until 7 PM and admissions for ${academicYear}.`;
 }
 
-const socialImage = "/images/hero/hero-main.jpg";
+const socialImage = "/images/landing/kidzee-creative-learning.jpg";
 
 function createMetadata(titleValue: string, defaultDescription: string): Metadata {
   return {
@@ -194,14 +194,15 @@ export default async function RootLayout({
           url: `${site.url}/images/kidzee-logo.png`,
         },
         image: [
-          `${site.url}/images/hero/hero-main.jpg`,
-          `${site.url}/images/hero/hero-building.jpg`,
-          `${site.url}/images/hero/hero-classroom.jpg`,
+          `${site.url}/images/landing/kidzee-creative-learning.jpg`,
+          `${site.url}/images/landing/kidzee-indoor-turf-arena.jpg`,
+          `${site.url}/images/landing/kidzee-sensory-ball-pool.jpg`,
+          `${site.url}/images/landing/kidzee-modern-classroom.jpg`,
         ],
         primaryImageOfPage: {
           "@type": "ImageObject",
-          url: `${site.url}/images/hero/hero-main.jpg`,
-          caption: "Kidzee Preschool and Daycare in Sector 12B Dwarka",
+          url: `${site.url}/images/landing/kidzee-creative-learning.jpg`,
+          caption: "Children learning and exploring at Kidzee Preschool Sector 12 Dwarka",
         },
         telephone: contact.phone,
         email: contact.email,
