@@ -25,5 +25,39 @@ export default async function ManagedLandingPage({ params }: { params: Promise<{
   const { slug } = await params;
   const page = await pageData(slug);
   if (!page) notFound();
-  return <PageShell><LandingPageExperience page={{ id: page.id, slug: page.slug, name: page.name, pageType: page.pageType, content: page.content as Record<string, unknown> }} variants={page.variants.map((item) => ({ id: item.id, variantKey: item.variantKey, name: item.name, content: item.content as Record<string, unknown>, allocation: item.allocation }))} experiment={page.experiments[0] ? { id: page.experiments[0].id, variants: page.experiments[0].variants.map((item) => ({ allocation: item.allocation, variant: { id: item.variant.id, variantKey: item.variant.variantKey, name: item.variant.name, content: item.variant.content as Record<string, unknown>, allocation: item.variant.allocation } })) } : null}/></PageShell>;
+  return (
+    <LandingPageExperience
+      page={{
+        id: page.id,
+        slug: page.slug,
+        name: page.name,
+        pageType: page.pageType,
+        content: page.content as Record<string, unknown>,
+      }}
+      variants={page.variants.map((item) => ({
+        id: item.id,
+        variantKey: item.variantKey,
+        name: item.name,
+        content: item.content as Record<string, unknown>,
+        allocation: item.allocation,
+      }))}
+      experiment={
+        page.experiments[0]
+          ? {
+              id: page.experiments[0].id,
+              variants: page.experiments[0].variants.map((item) => ({
+                allocation: item.allocation,
+                variant: {
+                  id: item.variant.id,
+                  variantKey: item.variant.variantKey,
+                  name: item.variant.name,
+                  content: item.variant.content as Record<string, unknown>,
+                  allocation: item.variant.allocation,
+                },
+              })),
+            }
+          : null
+      }
+    />
+  );
 }
