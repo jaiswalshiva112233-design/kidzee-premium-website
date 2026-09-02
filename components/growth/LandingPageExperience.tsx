@@ -168,25 +168,25 @@ const comparisonPillars = [
 
 const parentTestimonials = [
   {
-    name: "Pooja Sharma",
-    child: "Mother of Aarav (Nursery)",
+    name: "Shailja Singh",
+    child: "Verified Google Review ★★★★★",
     rating: 5,
     quote:
-      "The 1:8 teacher-student ratio makes a huge difference. Aarav receives personalized love and attention every day. His confidence and speech have improved tremendously!",
+      "I am fully satisfied with the school in every manner—learning, communication and safety. All the teachers treat children very nicely, and my daughter is growing here.",
   },
   {
-    name: "Rohit Malhotra",
-    child: "Father of Ananya (Daycare & Playgroup)",
+    name: "Komal Gahlot",
+    child: "Verified Google Review ★★★★★",
     rating: 5,
     quote:
-      "As working parents in Dwarka, the extended daycare till 7 PM with fresh warm meals is a lifesaver. The hygiene standards and loving care from the teachers are unmatched.",
+      "The preschool is trustworthy. The teachers share weekly feedback and regularly update parents about activities.",
   },
   {
-    name: "Deepika Verma",
-    child: "Mother of Vihaan (Junior KG)",
+    name: "Ritu Singh",
+    child: "Verified Google Review ★★★★★",
     rating: 5,
     quote:
-      "The iLLUME curriculum is truly experiential. Vihaan loves coming to school every single morning. Best preschool in Sector 12!",
+      "Children learn through the play-way method. The environment is clean, the staff are friendly, and I am very happy to send my child to this school.",
   },
 ];
 
