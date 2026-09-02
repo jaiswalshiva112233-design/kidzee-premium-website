@@ -246,7 +246,22 @@ function eventScope(
 function getAllowedOrigins(request: NextRequest) {
   const origins = new Set<string>([
     request.nextUrl.origin,
+    "https://kidzeedwarka.com",
+    "https://www.kidzeedwarka.com",
+    "http://localhost:3000",
   ]);
+
+  const host = request.headers.get("host");
+  if (host) {
+    origins.add(`https://${host}`);
+    origins.add(`http://${host}`);
+  }
+
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  if (forwardedHost) {
+    origins.add(`https://${forwardedHost}`);
+    origins.add(`http://${forwardedHost}`);
+  }
 
   try {
     origins.add(new URL(site.url).origin);
@@ -265,7 +280,28 @@ function hasAllowedOrigin(request: NextRequest) {
     return true;
   }
 
-  return getAllowedOrigins(request).has(origin);
+  const allowed = getAllowedOrigins(request);
+  if (allowed.has(origin)) {
+    return true;
+  }
+
+  try {
+    const originUrl = new URL(origin);
+    const hostname = originUrl.hostname.toLowerCase();
+    if (
+      hostname === "kidzeedwarka.com" ||
+      hostname.endsWith(".kidzeedwarka.com") ||
+      hostname.endsWith(".hosted.app") ||
+      hostname === "localhost" ||
+      hostname === "127.0.0.1"
+    ) {
+      return true;
+    }
+  } catch {
+    // invalid URL format
+  }
+
+  return false;
 }
 
 function describeEvent(
