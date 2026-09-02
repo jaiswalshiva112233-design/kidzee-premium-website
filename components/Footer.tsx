@@ -11,7 +11,7 @@ import {
   Phone,
   Star,
 } from "lucide-react";
-import { FaFacebookF, FaInstagram, FaWhatsapp } from "react-icons/fa6";
+import { FaFacebookF, FaInstagram, FaWhatsapp, FaYoutube } from "react-icons/fa6";
 
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
@@ -133,6 +133,22 @@ export default function Footer() {
                   <FaFacebookF
                     aria-hidden="true"
                     size={19}
+                    className="transition-transform duration-200 group-hover:scale-105"
+                  />
+                </a>
+              )}
+
+              {site.youtube && (
+                <a
+                  href={site.youtube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Visit Kidzee Sector 12 Dwarka on YouTube"
+                  className={socialLinkClass}
+                >
+                  <FaYoutube
+                    aria-hidden="true"
+                    size={20}
                     className="transition-transform duration-200 group-hover:scale-105"
                   />
                 </a>

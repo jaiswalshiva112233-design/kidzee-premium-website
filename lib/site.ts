@@ -76,9 +76,9 @@ export const site = {
     "Hello Kidzee Sector 12, Dwarka. I would like to know more about the preschool meal plan.",
   ),
 
-  instagram: "https://www.instagram.com/kidz.eedwarka" as string,
-  facebook: null,
-  youtube: null,
+  instagram: "https://www.instagram.com/kidz.eedwarka/",
+  facebook: "https://www.facebook.com/profile.php?id=61585752427387",
+  youtube: "https://www.youtube.com/@KidzeePreschoolsec12Dwarka",
 
   preschoolHours: {
     days: "Monday to Friday",
