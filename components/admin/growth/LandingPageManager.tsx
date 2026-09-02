@@ -504,28 +504,23 @@ export default function LandingPageManager() {
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    setMessage("Uploading " + file.name + "...");
+                    setMessage("Uploading video: " + file.name + " (" + Math.round(file.size / 1024 / 1024 * 10) / 10 + " MB)...");
                     try {
+                      const formData = new FormData();
+                      formData.append("file", file);
                       const res = await fetch("/api/admin/media/upload", {
                         method: "POST",
-                        headers: {
-                          "Content-Type": file.type || "video/mp4",
-                          "X-Filename": encodeURIComponent(file.name),
-                        },
-                        body: file,
+                        body: formData,
                       });
                       const json = await res.json();
-                      if (json.item?.url || json.url) {
-                        setForm((f) => ({ ...f, reviewVideoUrl: json.item?.url || json.url }));
-                        setMessage("Video uploaded successfully!");
+                      if (json.url) {
+                        setForm((f) => ({ ...f, reviewVideoUrl: json.url }));
+                        setMessage("✓ Video uploaded successfully! Click 'Save & Publish Live Changes'.");
                       } else {
-                        // Fallback using blob URL for immediate preview
-                        const blobUrl = URL.createObjectURL(file);
-                        setForm((f) => ({ ...f, reviewVideoUrl: blobUrl }));
-                        setMessage("Video selected! Click Save Page.");
+                        setMessage("Upload failed: " + (json.message || "Please check file size"));
                       }
                     } catch (err) {
-                      setMessage("Video uploaded. Please save.");
+                      setMessage("Upload error: " + String(err));
                     }
                   }}
                   className="w-full rounded-xl border border-dashed border-purple-300 bg-purple-50/50 px-3 py-1.5 text-xs text-purple-900 file:mr-2 file:rounded-lg file:border-0 file:bg-[#5B2A86] file:px-3 file:py-1 file:text-xs file:font-bold file:text-white"
