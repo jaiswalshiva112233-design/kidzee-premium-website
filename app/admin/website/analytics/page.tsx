@@ -351,7 +351,11 @@ export default async function WebsiteAnalyticsPage({
       (event) =>
         event.data.eventScope !== "RECRUITMENT" &&
         event.data.leadType !== "recruitment" &&
-        event.data.isBot !== true,
+        event.data.isBot !== true &&
+        event.data.isInternal !== true &&
+        event.data.trafficClass !== "INTERNAL" &&
+        !event.data.pagePath?.startsWith("/admin") &&
+        !event.data.pagePath?.startsWith("/api"),
     );
 
   const visitors = new Set(

@@ -368,9 +368,11 @@ function alreadyRecordedPageView(
 
 export default function WebsiteAnalytics() {
   const pathname = usePathname();
+  const isExcludedRoute = pathname.startsWith("/admin") || pathname.startsWith("/api");
 
   const reportWebVital = useCallback(
     (metric: { name: string; value: number; delta: number; rating: string }) => {
+      if (isExcludedRoute) return;
       sendWebsiteEvent("WEB_VITAL", {
         eventName: metric.name,
         metricValue: metric.value,
@@ -378,12 +380,13 @@ export default function WebsiteAnalytics() {
         metricRating: metric.rating,
       });
     },
-    [],
+    [isExcludedRoute],
   );
 
   useReportWebVitals(reportWebVital);
 
   useEffect(() => {
+    if (isExcludedRoute) return;
     const pagePath =
       `${window.location.pathname}` +
       `${window.location.search}`;
@@ -408,9 +411,10 @@ export default function WebsiteAnalytics() {
         eventName: "page_view",
       });
     }
-  }, [pathname]);
+  }, [pathname, isExcludedRoute]);
 
   useEffect(() => {
+    if (isExcludedRoute) return;
     const startedForms =
       new WeakSet<HTMLFormElement>();
 
@@ -665,9 +669,10 @@ export default function WebsiteAnalytics() {
         handleCustomWebsiteEvent,
       );
     };
-  }, []);
+  }, [isExcludedRoute]);
 
   useEffect(() => {
+    if (isExcludedRoute) return;
     const startedAt = Date.now();
     const sentDepths = new Set<number>();
     const handleScroll = () => {
@@ -695,7 +700,7 @@ export default function WebsiteAnalytics() {
       window.removeEventListener("pagehide", sendDuration);
       document.removeEventListener("error", handleError, true);
     };
-  }, [pathname]);
+  }, [pathname, isExcludedRoute]);
 
   return null;
 }
