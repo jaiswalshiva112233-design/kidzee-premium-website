@@ -474,24 +474,24 @@ export default function LandingPageExperience({
               </div>
             </div>
 
-            {/* Direct Action Row */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+            {/* Direct Action Row with Equal 50/50 Balanced Width */}
+            <div className="grid grid-cols-2 gap-3 pt-2">
               <a
                 href={site.whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-[#1FAF38] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#19922F]"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1FAF38] py-3.5 px-3 text-xs sm:text-sm font-bold text-white shadow-sm transition duration-150 hover:bg-[#19922F] hover:shadow-md text-center"
               >
-                <FaWhatsapp size={18} />
-                <span>Chat on WhatsApp</span>
+                <FaWhatsapp size={18} className="shrink-0" />
+                <span className="truncate">Chat on WhatsApp</span>
               </a>
 
               <a
                 href={`tel:${site.phone}`}
-                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-xs sm:text-sm font-bold text-[#5B2A86] border border-purple-200 shadow-xs transition hover:bg-purple-50"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-3.5 px-3 text-xs sm:text-sm font-bold text-[#5B2A86] border-2 border-purple-200 shadow-2xs transition duration-150 hover:bg-purple-50 hover:border-purple-300 hover:shadow-sm text-center"
               >
-                <Phone size={16} />
-                <span>Call Admissions</span>
+                <Phone size={16} className="shrink-0" />
+                <span className="truncate">Call Admissions</span>
               </a>
             </div>
           </div>
