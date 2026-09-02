@@ -213,6 +213,16 @@ const faqs = [
   },
 ];
 
+function getInstagramShortcode(url: string) {
+  if (!url) return "";
+  try {
+    const match = url.match(/\/(?:reel|reels|p)\/([A-Za-z0-9_-]+)/);
+    return match ? match[1] : "";
+  } catch {
+    return "";
+  }
+}
+
 function getYouTubeEmbedUrl(url: string) {
   if (!url) return "";
   try {
@@ -330,6 +340,7 @@ export default function LandingPageExperience({
 
   const content = selected.content?.heading ? selected.content : page.content;
   const activePhotos = content.campusPhotos && content.campusPhotos.length > 0 ? content.campusPhotos : campusPhotos;
+  const instagramShortcode = getInstagramShortcode(content.reviewVideoUrl || "");
   const embedUrl = getYouTubeEmbedUrl(content.reviewVideoUrl || "");
   const isDirectVideo =
     content.reviewVideoUrl &&
@@ -697,8 +708,18 @@ export default function LandingPageExperience({
             </p>
           </div>
 
-          <div className="overflow-hidden rounded-3xl border-2 border-purple-200 bg-[#281034] shadow-xl">
-            {embedUrl ? (
+          <div className="overflow-hidden rounded-3xl border-2 border-purple-200 bg-[#281034] shadow-xl flex justify-center items-center">
+            {instagramShortcode ? (
+              <div className="relative w-full max-w-[420px] aspect-[9/16] sm:aspect-[9/14] my-2">
+                <iframe
+                  src={`https://www.instagram.com/reel/${instagramShortcode}/embed/`}
+                  title={content.reviewVideoTitle || "Kidzee Sector 12 Dwarka Parent Review Reel"}
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="h-full w-full border-0 rounded-2xl bg-[#180822]"
+                />
+              </div>
+            ) : embedUrl ? (
               <div className="relative aspect-16/9 w-full">
                 <iframe
                   src={embedUrl}
