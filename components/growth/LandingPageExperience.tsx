@@ -390,7 +390,7 @@ export default function LandingPageExperience({
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200">
               <Star size={14} className="fill-amber-400 text-amber-400" />
-              <span>4.9 / 5 Google Reviews</span>
+              <span>4.8 / 5 Google Reviews</span>
             </div>
 
             <a
@@ -1016,7 +1016,7 @@ export default function LandingPageExperience({
           {/* Compliance & Location Footer */}
           <div className="mt-10 border-t border-white/10 pt-6 text-xs text-purple-300 space-y-2">
             <p className="font-semibold text-purple-200">
-              Kidzee Preschool & Daycare — Plot 16, Pocket 2, Sector 12B, Dwarka, New Delhi 110078
+              Kidzee Preschool & Daycare — Building No. 19, Sector 12B, Dwarka, New Delhi 110078
             </p>
             <p className="text-[11px] text-purple-400">
               *Flat 30% discount applies to annual fees for Playgroup & Nursery admissions for Academic Session 2026–27.
