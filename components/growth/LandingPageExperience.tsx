@@ -3,15 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  Award,
+  BookOpen,
   Check,
   CheckCircle2,
   Clock3,
+  GraduationCap,
+  HeartHandshake,
   HelpCircle,
+  Medal,
   Phone,
   Play,
   ShieldCheck,
   Sparkles,
   Star,
+  Trophy,
   Users,
   Utensils,
   Video,
@@ -51,6 +57,48 @@ type Experiment = {
   variants: Array<{ allocation: number; variant: Variant }>;
 } | null;
 
+const nationalStats = [
+  {
+    icon: Trophy,
+    number: "2,000+",
+    label: "Centres Across India",
+    sub: "750+ Cities Nationwide",
+  },
+  {
+    icon: GraduationCap,
+    number: "20+ Lakh",
+    label: "Children Nurtured",
+    sub: "India's #1 Preschool Network",
+  },
+  {
+    icon: Award,
+    number: "20+ Years",
+    label: "Of Proven Excellence",
+    sub: "Pioneering Early Education",
+  },
+  {
+    icon: BookOpen,
+    number: "Péntemind",
+    label: "Proprietary Pedagogy",
+    sub: "8-Domain Brain Development",
+  },
+];
+
+const awards = [
+  {
+    title: "India's Most Trusted Preschool Brand",
+    org: "The Brand Trust Report — India Study",
+  },
+  {
+    title: "Best Early Childhood Education Chain",
+    org: "National Education Excellence Awards",
+  },
+  {
+    title: "Franchisor of the Year (Preschools)",
+    org: "Franchise India & Zee Learn Legacy",
+  },
+];
+
 const campusPhotos = [
   {
     src: "/images/hero/hero-classroom.jpg",
@@ -71,6 +119,11 @@ const campusPhotos = [
 
 const comparisonPillars = [
   {
+    feature: "Brand Heritage & Pedagogy",
+    kidzee: "India's #1 Network (2,000+ Centres) & Péntemind Curriculum",
+    others: "Unrecognized local playschool with no structured syllabus",
+  },
+  {
     feature: "Teacher-Student Ratio",
     kidzee: "Low 1:8 Ratio (Playgroup/Nursery) — Dedicated Attention",
     others: "Overcrowded 1:20+ ratio with minimal supervision",
@@ -79,11 +132,6 @@ const comparisonPillars = [
     feature: "Admission Fee Offer",
     kidzee: "Flat 30% Off on Annual Fees for Playgroup & Nursery",
     others: "Full rigid fees with non-refundable charges",
-  },
-  {
-    feature: "Curriculum & Methodology",
-    kidzee: "Proprietary Péntemind & iLLUME (Penta-Sensory Learning)",
-    others: "Basic informal rote memorization",
   },
   {
     feature: "Safety & Premises",
@@ -128,6 +176,10 @@ const parentTestimonials = [
 
 const faqs = [
   {
+    q: "Why choose Kidzee Sector 12 Dwarka over local play schools?",
+    a: "You get the best of both worlds: The national credibility and research-backed Péntemind curriculum of India's largest preschool network (2,000+ centres), combined with our Sector 12 centre's attentive 1:8 teacher ratio, 24/7 CCTV, and extended daycare till 7 PM.",
+  },
+  {
     q: "What is the 30% Annual Fee Offer for Playgroup and Nursery?",
     a: "For the academic session 2026–27, we are offering a flat 30% discount on the annual fee for Playgroup and Nursery admissions when you book a campus visit through this page.",
   },
@@ -142,10 +194,6 @@ const faqs = [
   {
     q: "Is there a trial period available before final admission?",
     a: "Yes! We offer a complimentary 3-day preschool trial experience so your child can settle in comfortably and you can experience our teaching methodology firsthand.",
-  },
-  {
-    q: "How safe is the centre and what security measures are in place?",
-    a: "Our entire campus in Sector 12B is under 24/7 CCTV surveillance with controlled entry access, background-verified staff, child-safe soft furniture, sanitized washrooms, and emergency medical tie-up.",
   },
 ];
 
@@ -326,10 +374,10 @@ export default function LandingPageExperience({
 
             <p className="text-base sm:text-lg leading-relaxed text-gray-700 font-medium">
               {content.description ||
-                "Nurturing early childhood education with a low 1:8 teacher-student ratio, Péntemind curriculum, air-conditioned classrooms, and extended daycare till 7:00 PM with fresh warm meals."}
+                "Combining India's #1 preschool curriculum with our dedicated 1:8 teacher-student ratio, air-conditioned activity rooms, and extended daycare till 7:00 PM with fresh warm meals."}
             </p>
 
-            {/* 4 Distinct Value Cards (No Repetitions) */}
+            {/* 4 Distinct Value Cards */}
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="flex items-start gap-3 rounded-2xl bg-white p-3.5 border border-purple-100 shadow-2xs">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-[#5B2A86]">
@@ -420,8 +468,56 @@ export default function LandingPageExperience({
         </div>
       </section>
 
+      {/* National Network Credibility & Legacy Ribbon */}
+      <section className="border-y border-purple-100 bg-[#5B2A86] py-10 text-white">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-8">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-purple-200 backdrop-blur-sm">
+              <Medal size={14} className="text-amber-400" />
+              India's #1 & Largest Preschool Network
+            </span>
+            <h2 className="mt-2 text-2xl sm:text-3xl font-black text-white">
+              The Power of Kidzee's National Legacy
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {nationalStats.map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <div
+                  key={stat.label}
+                  className="flex flex-col items-center justify-center rounded-2xl bg-white/10 p-5 text-center backdrop-blur-sm border border-white/10"
+                >
+                  <Icon size={26} className="text-[#F6C84B] mb-2" />
+                  <p className="text-2xl sm:text-3xl font-black text-white">{stat.number}</p>
+                  <p className="mt-1 text-xs sm:text-sm font-bold text-purple-100">{stat.label}</p>
+                  <p className="text-[11px] text-purple-300">{stat.sub}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* National Awards Bar */}
+          <div className="mt-8 rounded-2xl bg-white/5 p-4 border border-white/10">
+            <div className="grid gap-4 sm:grid-cols-3 text-center">
+              {awards.map((award) => (
+                <div key={award.title} className="p-2">
+                  <div className="flex items-center justify-center gap-1.5 text-[#F6C84B] text-xs font-black">
+                    <Trophy size={14} />
+                    <span>AWARD WINNER</span>
+                  </div>
+                  <h4 className="mt-1 text-xs sm:text-sm font-bold text-white">{award.title}</h4>
+                  <p className="text-[10px] text-purple-200 mt-0.5">{award.org}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Parent Review Video Player Section */}
-      <section className="border-t border-purple-100 bg-white py-12 sm:py-16">
+      <section className="border-b border-purple-100 bg-white py-12 sm:py-16">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="text-center max-w-xl mx-auto mb-8">
             <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#5B2A86]">
@@ -480,7 +576,7 @@ export default function LandingPageExperience({
       </section>
 
       {/* Real Campus Facility Photo Grid */}
-      <section className="border-t border-gray-100 bg-[#FAF7FC] py-12 sm:py-16">
+      <section className="bg-[#FAF7FC] py-12 sm:py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <span className="text-xs font-black uppercase tracking-wider text-[#5B2A86]">
