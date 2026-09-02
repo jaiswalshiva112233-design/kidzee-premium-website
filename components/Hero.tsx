@@ -78,33 +78,33 @@ export default async function Hero() {
     {
       id: "home.hero.main",
       media: mainMedia,
-      fallbackPath: "/images/hero/hero-main.jpg",
+      fallbackPath: "/images/landing/kidzee-creative-learning.jpg",
       fallbackAlt:
-        "Children taking part in a group activity at Kidzee Sector 12, Dwarka.",
+        "Children engaged in creative craft learning at Kidzee Sector 12, Dwarka.",
       required: true,
     },
     {
       id: "home.hero.classroom",
       media: classroomMedia,
-      fallbackPath: null,
+      fallbackPath: "/images/landing/kidzee-modern-classroom.jpg",
       fallbackAlt:
-        "Children learning together through a hands-on classroom activity.",
+        "Modern air-conditioned activity classrooms at Kidzee Sector 12, Dwarka.",
       required: false,
     },
     {
-      id: "home.hero.teacher",
+      id: "home.hero.play",
       media: teacherMedia,
-      fallbackPath: null,
+      fallbackPath: "/images/landing/kidzee-indoor-turf-arena.jpg",
       fallbackAlt:
-        "A teacher guiding children during an activity at the preschool.",
+        "Indoor turf play area with slides and trampoline at Kidzee Sector 12, Dwarka.",
       required: false,
     },
     {
-      id: "home.hero.building",
+      id: "home.hero.sensory",
       media: centreMedia,
-      fallbackPath: null,
+      fallbackPath: "/images/landing/kidzee-sensory-ball-pool.jpg",
       fallbackAlt:
-        "Children enjoying a happy moment at Kidzee Sector 12, Dwarka.",
+        "Toddlers enjoying the hygienic soft ball pool sensory zone at Kidzee Sector 12, Dwarka.",
       required: false,
     },
   ];
