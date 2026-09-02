@@ -8,14 +8,11 @@ import {
   Clock3,
   HelpCircle,
   MapPin,
-  MessageCircle,
   Phone,
   ShieldCheck,
   Sparkles,
   Star,
-  Users,
   Utensils,
-  Video,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
 import { useEffect, useMemo, useState } from "react";
@@ -75,9 +72,9 @@ const comparisonPillars = [
     others: "Basic informal rote learning",
   },
   {
-    feature: "Safety & Surveillance",
-    kidzee: "100% CCTV Monitored Premises + Verified Staff",
-    others: "Limited or no live parent surveillance",
+    feature: "Safety & Premises",
+    kidzee: "24/7 CCTV Monitored Secure Premises + Verified Staff",
+    others: "Unmonitored shared residential areas",
   },
   {
     feature: "Daycare & Meals",
@@ -90,9 +87,9 @@ const comparisonPillars = [
     others: "Direct admission with no trial period",
   },
   {
-    feature: "Location & Infrastructure",
-    kidzee: "Sanitized building in Sector 12B Dwarka with emergency medical tie-up",
-    others: "Conjusted residential basements",
+    feature: "Location & Hygiene",
+    kidzee: "Sanitized building in Sector 12B Dwarka with emergency medical protocol",
+    others: "Congested residential basements",
   },
 ];
 
@@ -102,7 +99,7 @@ const parentTestimonials = [
     child: "Mother of Aarav (Nursery)",
     rating: 5,
     quote:
-      "Kidzee Sector 12 Dwarka has been a second home for Aarav. His confidence and speech have improved tremendously. The CCTV access and warm teachers give us complete peace of mind!",
+      "Kidzee Sector 12 Dwarka has been a second home for Aarav. His confidence and speech have improved tremendously. The attentive teachers and safe environment give us complete peace of mind!",
   },
   {
     name: "Rohit Malhotra",
@@ -131,11 +128,11 @@ const faqs = [
   },
   {
     q: "How safe is the centre and what security measures are in place?",
-    a: "Our entire campus in Sector 12B is under 24/7 CCTV surveillance with secure entry access, background-verified staff, child-safe soft furniture, sanitized washrooms, and on-call medical support.",
+    a: "Our entire campus in Sector 12B is under 24/7 CCTV surveillance with secure entry access, background-verified staff, child-safe soft furniture, sanitized washrooms, and emergency medical support.",
   },
   {
     q: "What is the admission process for 2026–27?",
-    a: "You can book a guided campus visit using the form on this page. Our admissions counselor will walk you through the classroom, explain the curriculum, and assist with document verification and fee waiver offers.",
+    a: "You can book a guided campus visit using the form on this page. Our admissions team will walk you through the classroom, explain the curriculum, and assist with document verification.",
   },
 ];
 
@@ -221,11 +218,11 @@ export default function LandingPageExperience({
   const content = selected.content?.heading ? selected.content : page.content;
 
   const defaultBullets = [
-    "100% CCTV Live Surveillance for Parents",
-    "Fresh, Nutritious Warm Meals Prepared In-House",
+    "24/7 CCTV Monitored Secure Premises",
+    "Fresh, Nutritious Warm Meals Prepared Daily",
     "Extended Daycare Available until 7:00 PM",
     "India's Proven iLLUME Multiple-Intelligence Curriculum",
-    "Air-Conditioned, Child-Safe Soft Play Classrooms",
+    "Air-Conditioned, Child-Safe Activity Classrooms",
     "3-Day Free Preschool Trial Experience",
   ];
 
@@ -233,13 +230,13 @@ export default function LandingPageExperience({
 
   return (
     <div className="min-h-screen bg-[#FAF7FC] text-[#281034]">
-      {/* Top Urgency Offer Strip */}
+      {/* Top Admissions Announcement Strip */}
       <div className="bg-gradient-to-r from-[#5B2A86] via-[#7B3FA2] to-[#5B2A86] px-4 py-2.5 text-center text-xs sm:text-sm font-bold text-white shadow-sm">
         <span className="inline-flex items-center gap-2">
-          <span>⏳</span>
+          <span>✨</span>
           <span>
             {content.offerText ||
-              "Limited Time Offer: Admissions Open 2026–27 | Free 3-Day Trial + 100% Admission Fee Waiver on Visit"}
+              "Admissions Open for Academic Year 2026–27 | Book a Guided Campus Walkthrough & 3-Day Trial"}
           </span>
         </span>
       </div>
@@ -297,14 +294,14 @@ export default function LandingPageExperience({
 
             <p className="text-base sm:text-lg leading-relaxed text-gray-700 font-medium">
               {content.description ||
-                "Nurturing early childhood education with playgroup, nursery, kindergarten, and full-day daycare till 7:00 PM. Air-conditioned classrooms, fresh warm meals, and CCTV access for complete peace of mind."}
+                "Nurturing early childhood education with playgroup, nursery, kindergarten, and full-day daycare till 7:00 PM. Air-conditioned classrooms, fresh warm meals, and CCTV monitored premises for complete peace of mind."}
             </p>
 
             {/* Trust Pill Tags */}
             <div className="flex flex-wrap gap-2 pt-1">
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-[#5B2A86] border border-purple-100 shadow-2xs">
                 <ShieldCheck size={14} className="text-emerald-600" />
-                100% CCTV Access
+                24/7 CCTV Monitored
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-[#5B2A86] border border-purple-100 shadow-2xs">
                 <Utensils size={14} className="text-amber-600" />
@@ -364,10 +361,10 @@ export default function LandingPageExperience({
                   <span>Admissions Desk 2026–27</span>
                 </div>
                 <h2 className="mt-1 text-xl sm:text-2xl font-black text-gray-900">
-                  Book a Free Campus Visit
+                  Book a Campus Visit
                 </h2>
                 <p className="mt-1 text-xs text-gray-600">
-                  Experience classrooms, meet educators, and claim 100% admission fee waiver.
+                  Experience classrooms, meet educators, and explore our 3-day preschool trial.
                 </p>
               </div>
 
@@ -543,14 +540,14 @@ export default function LandingPageExperience({
             Give Your Child the Kidzee Advantage in Dwarka
           </h2>
           <p className="mt-2 text-sm text-purple-200 max-w-xl mx-auto">
-            Book your free guided school walkthrough and claim the 100% admission fee waiver today.
+            Book your guided school walkthrough and 3-day preschool trial today.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-4">
             <a
               href="#ad-enquiry"
               className="rounded-full bg-[#F6C84B] px-7 py-3 text-sm font-black text-[#281034] shadow-lg transition hover:bg-[#ebd532]"
             >
-              Book Free School Visit
+              Book Campus Visit
             </a>
             <a
               href={`tel:${site.phone}`}
@@ -577,7 +574,7 @@ export default function LandingPageExperience({
           href="#ad-enquiry"
           className="flex flex-2 items-center justify-center gap-1.5 rounded-xl bg-[#5B2A86] py-3 text-xs font-extrabold text-white shadow-sm"
         >
-          <span>Book Free Visit (100% Waiver)</span>
+          <span>Book Campus Visit</span>
         </a>
       </div>
     </div>
