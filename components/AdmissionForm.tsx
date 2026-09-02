@@ -504,9 +504,9 @@ export default function AdmissionForm({
         noValidate
         aria-label="Admission enquiry form"
         data-analytics-name="admission_enquiry_form"
-        className="space-y-5 px-6 py-7 sm:px-8 sm:py-8"
+        className="space-y-4 px-5 py-6 sm:px-6 sm:py-6"
       >
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-3.5 sm:grid-cols-2">
           <FormField
             id="parentName"
             label="Parent's name"
@@ -559,7 +559,7 @@ export default function AdmissionForm({
           </FormField>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-3.5 sm:grid-cols-2">
           <FormField id="childName" label="Child's name (optional)">
             <input
               id="childName"
@@ -594,7 +594,7 @@ export default function AdmissionForm({
           </FormField>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-3.5 sm:grid-cols-2">
           <FormField
             id="enquiryType"
             label="How can we help?"
@@ -679,11 +679,11 @@ export default function AdmissionForm({
           </div>
         ) : null}
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="space-y-3 pt-1">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex min-h-[54px] flex-1 items-center justify-center gap-2 rounded-full bg-[#5B2A86] px-7 text-base font-black text-white shadow-[0_14px_34px_rgba(91,42,134,0.24)] transition hover:-translate-y-0.5 hover:bg-[#4A2070] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/70 focus-visible:ring-offset-2"
+            className="w-full inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#5B2A86] px-6 text-base font-black text-white shadow-[0_12px_28px_rgba(91,42,134,0.28)] transition hover:-translate-y-0.5 hover:bg-[#4A2070] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/70"
           >
             {isSubmitting ? (
               <>
@@ -696,19 +696,22 @@ export default function AdmissionForm({
               </>
             ) : (
               <>
-                {submitButtonText || "Send Enquiry"}
-                <ArrowRight aria-hidden="true" size={19} />
+                <span>{submitButtonText || "Send Enquiry"}</span>
+                <ArrowRight aria-hidden="true" size={18} />
               </>
             )}
           </button>
 
-          <a
-            href={`tel:${site.phone}`}
-            className="inline-flex min-h-[54px] items-center justify-center gap-2 rounded-full border border-[#E0D1E8] bg-white px-6 text-base font-black text-[#5B2A86] transition hover:-translate-y-0.5 hover:bg-[#F8F3FC] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/70 focus-visible:ring-offset-2"
-          >
-            <Phone aria-hidden="true" size={18} />
-            Call {site.phoneDisplay}
-          </a>
+          <div className="flex items-center justify-center gap-2 text-xs font-bold text-gray-600">
+            <span>Prefer to call?</span>
+            <a
+              href={`tel:${site.phone}`}
+              className="inline-flex items-center gap-1 text-[#5B2A86] underline font-extrabold hover:text-[#471E6C]"
+            >
+              <Phone size={13} />
+              <span>Call Admissions: {site.phoneDisplay}</span>
+            </a>
+          </div>
         </div>
 
         <p className="text-center text-xs font-semibold leading-5 text-[#6F6474]">

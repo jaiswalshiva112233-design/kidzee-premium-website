@@ -7,6 +7,7 @@ import {
   BookOpen,
   Check,
   CheckCircle2,
+  ChevronDown,
   Clock3,
   GraduationCap,
   HelpCircle,
@@ -288,6 +289,7 @@ export default function LandingPageExperience({
 
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [isPhotoPaused, setIsPhotoPaused] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   // Fast auto-playing slideshow: transitions every 2.5 seconds
   useEffect(() => {
@@ -402,8 +404,15 @@ export default function LandingPageExperience({
 
             <p className="text-base sm:text-lg leading-relaxed text-gray-700 font-medium">
               {content.description ||
-                "Combining India's #1 preschool curriculum with our dedicated 1:8 teacher-student ratio, air-conditioned activity rooms, and extended daycare till 7:00 PM with fresh warm meals."}
+                "Admissions open for Playgroup, Nursery, Junior KG & Senior KG (2026–27). Low 1:8 teacher-student ratio, air-conditioned activity rooms, and extended daycare till 7:00 PM with fresh warm meals."}
             </p>
+
+            {/* Admissions 2026-27 Trust Highlights */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs font-bold text-[#5B2A86]">
+              <span className="rounded-full bg-purple-50 border border-purple-200 px-3 py-1">✓ Playgroup (1.5 - 2.5 yrs)</span>
+              <span className="rounded-full bg-purple-50 border border-purple-200 px-3 py-1">✓ Nursery (2.5 - 3.5 yrs)</span>
+              <span className="rounded-full bg-purple-50 border border-purple-200 px-3 py-1">✓ Kindergarten & Daycare</span>
+            </div>
 
             {/* 4 Distinct Value Cards */}
             <div className="grid gap-3 sm:grid-cols-2">
@@ -805,33 +814,48 @@ export default function LandingPageExperience({
         </div>
       </section>
 
-      {/* FAQ Accordion Section */}
-      <section className="bg-[#FAF4FF] py-12 sm:py-16 border-t border-purple-100">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
-          <div className="text-center max-w-xl mx-auto mb-10">
+      {/* Minimized / Collapsible FAQ Accordion Section */}
+      <section className="bg-[#FAF4FF] py-10 sm:py-14 border-t border-purple-100">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <div className="text-center max-w-xl mx-auto mb-8">
             <span className="text-xs font-black uppercase tracking-wider text-[#5B2A86]">
               Got Questions?
             </span>
-            <h2 className="mt-2 text-2xl sm:text-3xl font-black text-[#281034]">
+            <h2 className="mt-1 text-2xl sm:text-3xl font-black text-[#281034]">
               Frequently Asked Questions
             </h2>
+            <p className="mt-1 text-xs text-gray-500">Tap on any question below to expand the answer</p>
           </div>
 
-          <div className="space-y-4">
-            {faqs.map((faq) => (
-              <div
-                key={faq.q}
-                className="rounded-2xl border border-purple-200/60 bg-white p-5 shadow-xs"
-              >
-                <h3 className="text-base font-bold text-gray-900 flex items-start gap-2">
-                  <HelpCircle size={18} className="text-[#5B2A86] shrink-0 mt-0.5" />
-                  <span>{faq.q}</span>
-                </h3>
-                <p className="mt-2 pl-6 text-xs sm:text-sm leading-relaxed text-gray-600">
-                  {faq.a}
-                </p>
-              </div>
-            ))}
+          <div className="space-y-3">
+            {faqs.map((faq, idx) => {
+              const isOpen = openFaq === idx;
+              return (
+                <div
+                  key={faq.q}
+                  className="rounded-2xl border border-purple-200/70 bg-white overflow-hidden shadow-2xs transition"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(isOpen ? null : idx)}
+                    className="flex w-full items-center justify-between p-4 sm:p-5 text-left transition hover:bg-purple-50/50"
+                  >
+                    <span className="text-xs sm:text-sm font-bold text-gray-900 pr-4 flex items-center gap-2.5">
+                      <HelpCircle size={16} className="text-[#5B2A86] shrink-0" />
+                      {faq.q}
+                    </span>
+                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-purple-100 text-[#5B2A86] transition-transform duration-200 ${isOpen ? "rotate-180 bg-[#5B2A86] text-white" : ""}`}>
+                      <ChevronDown size={15} />
+                    </span>
+                  </button>
+                  {isOpen ? (
+                    <div className="border-t border-purple-100 bg-[#FAF7FC] px-5 py-4 text-xs sm:text-sm leading-relaxed text-gray-700">
+                      {faq.a}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
