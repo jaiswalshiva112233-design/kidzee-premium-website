@@ -68,6 +68,17 @@ function content(value: unknown): Prisma.InputJsonObject {
       ? source.conversionEvents.map((item) => text(item, 80)).filter(Boolean).slice(0, 12)
       : ["admission_lead_submitted", "admission_visit_booked"],
     indexable: source.indexable === true,
+    reviewVideoUrl: text(source.reviewVideoUrl, 500),
+    reviewVideoTitle: text(source.reviewVideoTitle, 160),
+    offerText: text(source.offerText, 250),
+    campusPhotos: Array.isArray(source.campusPhotos)
+      ? (source.campusPhotos as Array<Record<string, unknown>>).map((p) => ({
+          src: text(p.src, 500),
+          title: text(p.title, 120),
+          subtitle: text(p.subtitle, 200),
+          tag: text(p.tag, 60),
+        }))
+      : [],
   };
 }
 

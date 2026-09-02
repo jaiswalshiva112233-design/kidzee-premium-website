@@ -41,6 +41,7 @@ type Content = {
   offerText?: string;
   reviewVideoUrl?: string;
   reviewVideoTitle?: string;
+  campusPhotos?: Array<{ src: string; title: string; subtitle?: string; tag?: string }>;
 };
 
 type Variant = {
@@ -292,7 +293,7 @@ export default function LandingPageExperience({
   useEffect(() => {
     if (isPhotoPaused) return;
     const interval = setInterval(() => {
-      setActivePhotoIndex((prev) => (prev + 1) % campusPhotos.length);
+      setActivePhotoIndex((prev) => (prev + 1) % activePhotos.length);
     }, 2500);
     return () => clearInterval(interval);
   }, [isPhotoPaused]);
@@ -326,6 +327,7 @@ export default function LandingPageExperience({
   }, [experiment?.id, page.id, page.slug, selected.id, selected.variantKey]);
 
   const content = selected.content?.heading ? selected.content : page.content;
+  const activePhotos = content.campusPhotos && content.campusPhotos.length > 0 ? content.campusPhotos : campusPhotos;
   const embedUrl = getYouTubeEmbedUrl(content.reviewVideoUrl || "");
   const isDirectVideo =
     content.reviewVideoUrl &&
@@ -566,7 +568,7 @@ export default function LandingPageExperience({
           >
             {/* Active Slide Image */}
             <div className="relative aspect-16/10 sm:aspect-16/9 w-full overflow-hidden bg-gray-900">
-              {campusPhotos.map((photo, idx) => (
+              {activePhotos.map((photo, idx) => (
                 <div
                   key={photo.title}
                   className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
@@ -608,7 +610,7 @@ export default function LandingPageExperience({
               type="button"
               onClick={() =>
                 setActivePhotoIndex(
-                  (prev) => (prev - 1 + campusPhotos.length) % campusPhotos.length,
+                  (prev) => (prev - 1 + activePhotos.length) % activePhotos.length,
                 )
               }
               className="absolute left-3 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-white/80 text-[#5B2A86] shadow-lg backdrop-blur-md transition hover:bg-white hover:scale-110 focus:outline-none"
@@ -619,7 +621,7 @@ export default function LandingPageExperience({
             <button
               type="button"
               onClick={() =>
-                setActivePhotoIndex((prev) => (prev + 1) % campusPhotos.length)
+                setActivePhotoIndex((prev) => (prev + 1) % activePhotos.length)
               }
               className="absolute right-3 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-white/80 text-[#5B2A86] shadow-lg backdrop-blur-md transition hover:bg-white hover:scale-110 focus:outline-none"
               aria-label="Next photograph"
@@ -629,7 +631,7 @@ export default function LandingPageExperience({
 
             {/* Progress Dots */}
             <div className="absolute bottom-3 right-4 sm:bottom-4 sm:right-6 z-30 flex items-center gap-2">
-              {campusPhotos.map((_, dotIdx) => (
+              {activePhotos.map((_, dotIdx) => (
                 <button
                   key={dotIdx}
                   type="button"
@@ -647,7 +649,7 @@ export default function LandingPageExperience({
 
           {/* Interactive Thumbnail Bar */}
           <div className="mt-4 grid grid-cols-5 gap-2 sm:gap-3">
-            {campusPhotos.map((thumb, tIdx) => (
+            {activePhotos.map((thumb, tIdx) => (
               <button
                 key={thumb.title}
                 type="button"

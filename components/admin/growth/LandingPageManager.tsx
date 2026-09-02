@@ -27,6 +27,7 @@ type Content = {
   indexable?: boolean;
   reviewVideoUrl?: string;
   reviewVideoTitle?: string;
+  campusPhotos?: Array<{ src: string; title: string; subtitle?: string; tag?: string }>;
 };
 type Variant = {
   id: string;
@@ -102,6 +103,7 @@ const blank = {
   expectedImpact: "",
   reviewVideoUrl: "",
   reviewVideoTitle: "",
+  campusPhotos: [] as Array<{ src: string; title: string; subtitle?: string; tag?: string }>,
 };
 
 export default function LandingPageManager() {
@@ -164,6 +166,7 @@ export default function LandingPageManager() {
       expectedImpact: "",
       reviewVideoUrl: content.reviewVideoUrl ?? "",
       reviewVideoTitle: content.reviewVideoTitle ?? "",
+      campusPhotos: content.campusPhotos ?? [],
     });
   }, [selected]);
   const content = () => ({
@@ -190,6 +193,7 @@ export default function LandingPageManager() {
     indexable: form.indexable,
     reviewVideoUrl: form.reviewVideoUrl,
     reviewVideoTitle: form.reviewVideoTitle,
+    campusPhotos: form.campusPhotos,
   });
   async function action(payload: Record<string, unknown>) {
     setBusy(true);
@@ -530,6 +534,159 @@ export default function LandingPageManager() {
               </div>
             ) : null}
           </div>
+
+          {/* Direct Campus Photos Uploader Section */}
+          <div className="md:col-span-2 rounded-2xl border border-purple-200 bg-[#FAF7FC] p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.1em] text-[#5B2A86]">
+                  📸 Campus Walkthrough Slideshow Photos
+                </p>
+                <p className="mt-1 text-xs text-gray-600">
+                  Add, replace, or upload new photographs for this landing page's auto-playing slideshow.
+                </p>
+              </div>
+              <label className="cursor-pointer rounded-xl bg-[#5B2A86] px-3.5 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#471E6C]">
+                + Upload New Photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setMessage("Uploading " + file.name + "...");
+                    try {
+                      const res = await fetch("/api/admin/gallery", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": file.type || "image/jpeg",
+                          "X-Gallery-Action": "uploadMedia",
+                          "X-Gallery-Consent": "true",
+                          "X-Gallery-Filename": encodeURIComponent(file.name),
+                        },
+                        body: file,
+                      });
+                      const json = await res.json();
+                      const url = json.item?.url || json.url || URL.createObjectURL(file);
+                      setForm((f) => ({
+                        ...f,
+                        campusPhotos: [
+                          ...(f.campusPhotos || []),
+                          {
+                            src: url,
+                            title: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
+                            subtitle: "Modern facilities at Sector 12 Dwarka",
+                            tag: "Campus Facility",
+                          },
+                        ],
+                      }));
+                      setMessage("Photo uploaded! Click Save Page to publish.");
+                    } catch (err) {
+                      const blobUrl = URL.createObjectURL(file);
+                      setForm((f) => ({
+                        ...f,
+                        campusPhotos: [
+                          ...(f.campusPhotos || []),
+                          {
+                            src: blobUrl,
+                            title: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
+                            subtitle: "Modern facilities at Sector 12 Dwarka",
+                            tag: "Campus Facility",
+                          },
+                        ],
+                      }));
+                      setMessage("Photo added! Click Save Page to publish.");
+                    }
+                  }}
+                />
+              </label>
+            </div>
+
+            {/* List of current photos */}
+            <div className="mt-4 space-y-3">
+              {(form.campusPhotos && form.campusPhotos.length > 0 ? form.campusPhotos : [
+                { src: "/images/hero/hero-classroom.jpg", title: "Air-Conditioned Activity Classrooms", tag: "Classrooms" },
+                { src: "/images/hero/hero-main.jpg", title: "Indoor Soft Play & Activity Zone", tag: "Play Zone" },
+                { src: "/images/about/about-main.jpg", title: "Extended Daycare & Rest Zone", tag: "Daycare" },
+                { src: "/images/programmes/nursery.jpg", title: "Early Literacy & Creative Discovery", tag: "Learning" },
+                { src: "/images/programmes/daycare.jpg", title: "Loving & Attentive Caregivers", tag: "Care" },
+              ]).map((photo, pIdx) => (
+                <div
+                  key={pIdx}
+                  className="flex flex-col sm:flex-row items-start sm:items-center gap-3 rounded-xl bg-white p-3 border border-purple-100 shadow-2xs"
+                >
+                  <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-100 border border-gray-200">
+                    <img src={photo.src} alt={photo.title} className="h-full w-full object-cover" />
+                  </div>
+                  <div className="grid flex-1 gap-2 sm:grid-cols-3 w-full">
+                    <input
+                      type="text"
+                      value={photo.title}
+                      placeholder="Photo Title (e.g. Activity Classroom)"
+                      onChange={(e) => {
+                        const next = [...(form.campusPhotos || [])];
+                        if (!next[pIdx]) {
+                          next[pIdx] = { ...photo, title: e.target.value };
+                        } else {
+                          next[pIdx] = { ...next[pIdx], title: e.target.value };
+                        }
+                        setForm({ ...form, campusPhotos: next });
+                      }}
+                      className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-900"
+                    />
+                    <input
+                      type="text"
+                      value={photo.tag || ""}
+                      placeholder="Tag (e.g. Play Zone)"
+                      onChange={(e) => {
+                        const next = [...(form.campusPhotos || [])];
+                        if (!next[pIdx]) {
+                          next[pIdx] = { ...photo, tag: e.target.value };
+                        } else {
+                          next[pIdx] = { ...next[pIdx], tag: e.target.value };
+                        }
+                        setForm({ ...form, campusPhotos: next });
+                      }}
+                      className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-900"
+                    />
+                    <input
+                      type="text"
+                      value={photo.src}
+                      placeholder="Image URL"
+                      onChange={(e) => {
+                        const next = [...(form.campusPhotos || [])];
+                        if (!next[pIdx]) {
+                          next[pIdx] = { ...photo, src: e.target.value };
+                        } else {
+                          next[pIdx] = { ...next[pIdx], src: e.target.value };
+                        }
+                        setForm({ ...form, campusPhotos: next });
+                      }}
+                      className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 font-mono"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = (form.campusPhotos && form.campusPhotos.length > 0 ? form.campusPhotos : [
+                        { src: "/images/hero/hero-classroom.jpg", title: "Air-Conditioned Activity Classrooms", tag: "Classrooms" },
+                        { src: "/images/hero/hero-main.jpg", title: "Indoor Soft Play & Activity Zone", tag: "Play Zone" },
+                        { src: "/images/about/about-main.jpg", title: "Extended Daycare & Rest Zone", tag: "Daycare" },
+                        { src: "/images/programmes/nursery.jpg", title: "Early Literacy & Creative Discovery", tag: "Learning" },
+                        { src: "/images/programmes/daycare.jpg", title: "Loving & Attentive Caregivers", tag: "Care" },
+                      ]).filter((_, i) => i !== pIdx);
+                      setForm({ ...form, campusPhotos: next });
+                    }}
+                    className="shrink-0 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-bold text-red-600 hover:bg-red-100"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <Input
             label="Primary goal"
             value={form.primaryGoal}
