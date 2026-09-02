@@ -860,6 +860,28 @@ export default function LandingPageExperience({
               <span>Call: {site.phoneDisplay}</span>
             </a>
           </div>
+
+          {/* Compliance & Location Footer */}
+          <div className="mt-10 border-t border-white/10 pt-6 text-xs text-purple-300 space-y-2">
+            <p className="font-semibold text-purple-200">
+              Kidzee Preschool & Daycare — Plot 16, Pocket 2, Sector 12B, Dwarka, New Delhi 110078
+            </p>
+            <p className="text-[11px] text-purple-400">
+              *Flat 30% discount applies to annual fees for Playgroup & Nursery admissions for Academic Session 2026–27.
+            </p>
+            <div className="flex justify-center gap-4 pt-2 text-[11px] text-purple-300">
+              <Link href="/privacy-policy" className="underline hover:text-white">
+                Privacy Policy
+              </Link>
+              <span>•</span>
+              <Link href="/terms" className="underline hover:text-white">
+                Terms of Service
+              </Link>
+            </div>
+            <p className="text-[10px] text-purple-400 pt-2">
+              © {new Date().getFullYear()} Kidzee Sector 12 Dwarka. All rights reserved.
+            </p>
+          </div>
         </div>
       </section>
 
