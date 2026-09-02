@@ -13,47 +13,66 @@ export const dynamic = "force-dynamic";
 
 export default async function MarketingControlCentrePage() {
   if (!(await getAdminSession())) redirect("/admin/login");
-  const [data, google, meta, organic] = await Promise.all([
-    buildGrowthSnapshot(30),
-    buildMarketingControlData("GOOGLE"),
-    buildMarketingControlData("META"),
-    buildMarketingControlData("ORGANIC"),
-  ]);
-  const admissionRevenue = google.totals.revenue + meta.totals.revenue + organic.totals.revenue;
+
+  let data: any = null;
+  let google: any = null;
+  let meta: any = null;
+  let organic: any = null;
+
+  try {
+    const results = await Promise.all([
+      buildGrowthSnapshot(30).catch(() => null),
+      buildMarketingControlData("GOOGLE").catch(() => null),
+      buildMarketingControlData("META").catch(() => null),
+      buildMarketingControlData("ORGANIC").catch(() => null),
+    ]);
+    data = results[0];
+    google = results[1];
+    meta = results[2];
+    organic = results[3];
+  } catch (err) {
+    console.error("Marketing Control fetch error:", err);
+  }
+
+  const admissionRevenue =
+    Number(google?.totals?.revenue ?? 0) +
+    Number(meta?.totals?.revenue ?? 0) +
+    Number(organic?.totals?.revenue ?? 0);
+
   const cards = [
     [
       "Google Ads",
       "/admin/marketing/google-ads",
-      `${data.ads.google.leads} attributed leads`,
+      `${data?.ads?.google?.leads ?? 0} attributed leads`,
       Target,
     ],
     [
       "Meta Ads",
       "/admin/marketing/meta-ads",
-      `${data.ads.meta.leads} attributed leads`,
+      `${data?.ads?.meta?.leads ?? 0} attributed leads`,
       BarChart3,
     ],
     [
       "Organic SEO",
       "/admin/marketing/organic-seo",
-      `${data.content.organicLeads} organic leads`,
+      `${data?.content?.organicLeads ?? 0} organic leads`,
       Search,
     ],
     [
       "Landing Pages",
       "/admin/marketing/landing-pages",
-      `${data.breakdowns.landingPerformance.length} measured pages`,
+      `${data?.breakdowns?.landingPerformance?.length ?? 0} measured pages`,
       FileStack,
     ],
     [
       "Conversion Centre",
       "/admin/marketing/conversions",
-      `${data.metrics.admissions} admissions in the funnel`,
+      `${data?.metrics?.admissions ?? 0} admissions in the funnel`,
       Send,
     ],
     ["Campaign URL Builder", "/admin/marketing/campaign-urls", "Purpose-safe ad and referral URLs", Link2],
-    ["Website Analytics", "/admin/website/analytics", `${data.metrics.pageViews} measured page views`, Activity],
-    ["AI Recommendations", "/admin/growth", `${data.findings.length} evidence-based findings`, BrainCircuit],
+    ["Website Analytics", "/admin/website/analytics", `${data?.metrics?.pageViews ?? 0} measured page views`, Activity],
+    ["AI Recommendations", "/admin/growth", `${data?.findings?.length ?? 0} evidence-based findings`, BrainCircuit],
     ["Internal Traffic", "/admin/settings/integrations", "Owner-managed device exclusions", ShieldCheck],
   ] as const;
   return (
@@ -84,13 +103,13 @@ export default async function MarketingControlCentrePage() {
         </section>
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            ["Visitors", data.metrics.genuineVisitors],
-            ["Leads", data.metrics.leads],
-            ["Visits", data.metrics.visits],
-            ["Admissions", data.metrics.admissions],
-            ["Calls", data.metrics.callClicks],
-            ["WhatsApp clicks", data.metrics.whatsappClicks],
-            ["Lead to visit", `${data.metrics.leadToVisit}%`],
+            ["Visitors", data?.metrics?.genuineVisitors ?? 0],
+            ["Leads", data?.metrics?.leads ?? 0],
+            ["Visits", data?.metrics?.visits ?? 0],
+            ["Admissions", data?.metrics?.admissions ?? 0],
+            ["Calls", data?.metrics?.callClicks ?? 0],
+            ["WhatsApp clicks", data?.metrics?.whatsappClicks ?? 0],
+            ["Lead to visit", `${data?.metrics?.leadToVisit ?? 0}%`],
             ["Admission revenue", `₹${Math.round(admissionRevenue).toLocaleString("en-IN")}`],
           ].map(([label, value]) => (
             <article

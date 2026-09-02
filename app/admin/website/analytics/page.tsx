@@ -1,4 +1,4 @@
-import type { Prisma } from "@/generated/prisma/client";
+import type { $Enums, Prisma } from "@/generated/prisma/client";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -154,15 +154,22 @@ function formatPercentage(value: number) {
   return `${value.toFixed(value >= 10 ? 0 : 1)}%`;
 }
 
-function formatDateTime(date: Date) {
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Asia/Kolkata",
-  }).format(date);
+function formatDateTime(date: Date | string | null | undefined) {
+  if (!date) return "N/A";
+  try {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "N/A";
+    return new Intl.DateTimeFormat("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Asia/Kolkata",
+    }).format(d);
+  } catch {
+    return "N/A";
+  }
 }
 
 function getTrafficSource(data: AnalyticsEventData) {
@@ -260,57 +267,80 @@ export default async function WebsiteAnalyticsPage({
           ),
         );
 
-  const [eventLogs, websiteEnquiries] = await Promise.all([
-    prisma.activityLog.findMany({
-      where: {
-        entityType: "WEBSITE_ANALYTICS_EVENT",
-        createdAt: fromDate
-          ? {
-              gte: fromDate,
-            }
-          : undefined,
-      },
-      select: {
-        id: true,
-        description: true,
-        newData: true,
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: 25_000,
-    }),
+  let eventLogs: Array<{
+    id: string;
+    description: string;
+    newData: Prisma.JsonValue | null;
+    createdAt: Date;
+  }> = [];
 
-    prisma.enquiry.findMany({
-      where: {
-        source: {
-          in: [...websiteEnquirySources],
+  let websiteEnquiries: Array<{
+    id: string;
+    enquiryNumber: string;
+    parentName: string;
+    programme: $Enums.Programme | null;
+    source: $Enums.EnquirySource;
+    status: $Enums.EnquiryStatus;
+    createdAt: Date;
+  }> = [];
+
+  try {
+    const results = await Promise.all([
+      prisma.activityLog.findMany({
+        where: {
+          entityType: "WEBSITE_ANALYTICS_EVENT",
+          createdAt: fromDate
+            ? {
+                gte: fromDate,
+              }
+            : undefined,
         },
-        OR: [
-          { latestTrafficClass: null },
-          { latestTrafficClass: "GENUINE" },
-        ],
-        createdAt: fromDate
-          ? {
-              gte: fromDate,
-            }
-          : undefined,
-      },
-      select: {
-        id: true,
-        enquiryNumber: true,
-        parentName: true,
-        programme: true,
-        source: true,
-        status: true,
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    }),
-  ]);
+        select: {
+          id: true,
+          description: true,
+          newData: true,
+          createdAt: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 25_000,
+      }),
+
+      prisma.enquiry.findMany({
+        where: {
+          source: {
+            in: [...websiteEnquirySources],
+          },
+          OR: [
+            { latestTrafficClass: null },
+            { latestTrafficClass: "GENUINE" },
+          ],
+          createdAt: fromDate
+            ? {
+                gte: fromDate,
+              }
+            : undefined,
+        },
+        select: {
+          id: true,
+          enquiryNumber: true,
+          parentName: true,
+          programme: true,
+          source: true,
+          status: true,
+          createdAt: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      }),
+    ]);
+    eventLogs = results[0] ?? [];
+    websiteEnquiries = results[1] ?? [];
+  } catch (queryError) {
+    console.error("Website Analytics query error:", queryError);
+  }
 
   const events = eventLogs
     .map((log) => ({
