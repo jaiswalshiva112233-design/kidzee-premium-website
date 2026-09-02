@@ -102,34 +102,34 @@ const awards = [
 
 const campusPhotos = [
   {
-    src: "/images/hero/hero-classroom.jpg",
-    title: "Air-Conditioned Activity Classrooms",
-    subtitle: "Low 1:8 teacher-student ratio with child-safe soft furniture & sensory learning tools",
-    tag: "Activity Classrooms",
+    src: "/images/landing/kidzee-creative-learning.jpg",
+    tag: "Creative Learning",
+    title: "Early Literacy & Hands-on Craft Discovery",
+    subtitle: "Low 1:8 teacher guidance with proprietary Péntemind curriculum in Sector 12 Dwarka",
   },
   {
-    src: "/images/hero/hero-main.jpg",
-    title: "Indoor Soft Play & Activity Zone",
-    subtitle: "Ball pool, gross motor skill development toys & safe padded activity flooring",
+    src: "/images/landing/kidzee-indoor-turf-arena.jpg",
     tag: "Indoor Play Zone",
+    title: "Spacious Indoor Turf Play Zone & Trampoline",
+    subtitle: "Safe, weather-proof indoor grass play area with slides, trampolines and toddler ride-ons",
   },
   {
-    src: "/images/about/about-main.jpg",
-    title: "Extended Daycare & Rest Zone",
-    subtitle: "Clean, hygienic nap spaces & daily freshly cooked warm meals till 7:00 PM",
-    tag: "Daycare & Nap Rooms",
+    src: "/images/landing/kidzee-sensory-ball-pool.jpg",
+    tag: "Sensory Play",
+    title: "Hygienic Soft Ball Pool & Sensory Zone",
+    subtitle: "Cushioned sensory play areas designed for joyful motor development and active exploration",
   },
   {
-    src: "/images/programmes/nursery.jpg",
-    title: "Early Literacy & Creative Discovery",
-    subtitle: "Interactive storytelling, phonics, color discovery & foundational Péntemind skills",
-    tag: "Experiential Learning",
+    src: "/images/landing/kidzee-modern-classroom.jpg",
+    tag: "AC Classrooms",
+    title: "Modern Air-Conditioned Activity Classrooms",
+    subtitle: "Child-safe ergonomic seating, interactive smart boards, book library and animal murals",
   },
   {
-    src: "/images/programmes/daycare.jpg",
-    title: "Loving & Attentive Caregivers",
-    subtitle: "Dedicated, background-verified teachers and warm support staff for toddlers",
-    tag: "Safety & Warmth",
+    src: "/images/landing/kidzee-concept-learning.jpg",
+    tag: "Phonics & Math",
+    title: "Interactive Storytelling & Concept Learning",
+    subtitle: "Engaging activity tables where children develop speech clarity, focus and confidence",
   },
 ];
 
