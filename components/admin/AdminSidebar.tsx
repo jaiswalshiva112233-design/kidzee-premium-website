@@ -9,6 +9,7 @@ import {
   ChevronRight,
   ShieldCheck,
 } from "lucide-react";
+import { Suspense } from "react";
 
 import {
   adminNavigationSections,
@@ -100,7 +101,7 @@ function getInitials(name: string) {
   return initials || "A";
 }
 
-export default function AdminSidebar({
+function AdminSidebarContent({
   user,
 }: AdminSidebarProps) {
   const pathname = usePathname();
@@ -274,5 +275,15 @@ export default function AdminSidebar({
         </div>
       </div>
     </aside>
+  );
+}
+
+export default function AdminSidebar({
+  user,
+}: AdminSidebarProps) {
+  return (
+    <Suspense fallback={null}>
+      <AdminSidebarContent user={user} />
+    </Suspense>
   );
 }

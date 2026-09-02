@@ -239,9 +239,9 @@ export default async function WebsiteAnalyticsPage({
     redirect("/admin");
   }
 
-  const resolvedSearchParams = await searchParams;
+  const resolvedSearchParams = (await searchParams) || {};
   const requestedRange = firstQueryValue(
-    resolvedSearchParams.range,
+    resolvedSearchParams?.range,
   );
 
   const selectedRange =

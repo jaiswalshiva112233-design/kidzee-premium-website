@@ -8,6 +8,7 @@ import {
 } from "next/navigation";
 import type { ReactNode } from "react";
 import {
+  Suspense,
   useEffect,
   useMemo,
   useState,
@@ -94,13 +95,13 @@ function getInitials(name: string) {
   return initials || "A";
 }
 
-export default function AdminLayout({
+function AdminLayoutContent({
   children,
 }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentQuery = searchParams.toString();
+  const currentQuery = searchParams?.toString() ?? "";
 
   const [mobileMenuOpen, setMobileMenuOpen] =
     useState(false);
@@ -465,5 +466,15 @@ export default function AdminLayout({
         </div>
       ) : null}
     </div>
+  );
+}
+
+export default function AdminLayout({
+  children,
+}: AdminLayoutProps) {
+  return (
+    <Suspense fallback={null}>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </Suspense>
   );
 }
