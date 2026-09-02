@@ -112,6 +112,10 @@ function createMetadata(titleValue: string, defaultDescription: string): Metadat
       "max-video-preview": -1,
     },
   },
+
+  other: {
+    thumbnail: `${site.url}/images/hero/hero-main.jpg`,
+  },
   };
 }
 
@@ -194,6 +198,11 @@ export default async function RootLayout({
           `${site.url}/images/hero/hero-building.jpg`,
           `${site.url}/images/hero/hero-classroom.jpg`,
         ],
+        primaryImageOfPage: {
+          "@type": "ImageObject",
+          url: `${site.url}/images/hero/hero-main.jpg`,
+          caption: "Kidzee Preschool and Daycare in Sector 12B Dwarka",
+        },
         telephone: contact.phone,
         email: contact.email,
         description:

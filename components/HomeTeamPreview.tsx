@@ -53,10 +53,12 @@ export default function HomeTeamPreview({
           </Link>
         </div>
 
-        <HomeTeamCarousel
-          members={members}
-          movementSpeed={movementSpeed}
-        />
+        <div data-nosnippet="true">
+          <HomeTeamCarousel
+            members={members}
+            movementSpeed={movementSpeed}
+          />
+        </div>
       </div>
     </section>
   );
