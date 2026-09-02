@@ -349,11 +349,8 @@ export default async function WebsiteAnalyticsPage({
     }))
     .filter(
       (event) =>
-        (!event.data.trafficClass || event.data.trafficClass === "GENUINE") &&
         event.data.eventScope !== "RECRUITMENT" &&
         event.data.leadType !== "recruitment" &&
-        event.data.isInternal !== true &&
-        event.data.isTest !== true &&
         event.data.isBot !== true,
     );
 
