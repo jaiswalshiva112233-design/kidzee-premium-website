@@ -58,8 +58,26 @@ function jsonField(form: FormData, key: string): Prisma.InputJsonValue | undefin
 export async function POST(request: NextRequest) {
   try {
     const origin = request.headers.get("origin");
-    if (origin && origin !== request.nextUrl.origin) {
-      return NextResponse.json({ success: false, message: "This application is not allowed." }, { status: 403 });
+    if (origin) {
+      let isAllowed = false;
+      try {
+        const originUrl = new URL(origin);
+        const hostname = originUrl.hostname.toLowerCase();
+        if (
+          hostname === "kidzeedwarka.com" ||
+          hostname.endsWith(".kidzeedwarka.com") ||
+          hostname.endsWith(".hosted.app") ||
+          hostname === "localhost" ||
+          hostname === "127.0.0.1"
+        ) {
+          isAllowed = true;
+        }
+      } catch {
+        isAllowed = false;
+      }
+      if (!isAllowed) {
+        return NextResponse.json({ success: false, message: "This application is not allowed." }, { status: 403 });
+      }
     }
 
     if (Number(request.headers.get("content-length") ?? 0) > MAX_RESUME_BYTES + 100_000) {

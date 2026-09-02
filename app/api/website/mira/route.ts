@@ -46,8 +46,26 @@ export async function POST(request: NextRequest) {
     return json({ success: false, message: "Content-Type must be application/json." }, 415);
   }
   const origin = request.headers.get("origin");
-  if (origin && origin !== request.nextUrl.origin) {
-    return json({ success: false, message: "This request is not allowed." }, 403);
+  if (origin) {
+    let isAllowed = false;
+    try {
+      const originUrl = new URL(origin);
+      const hostname = originUrl.hostname.toLowerCase();
+      if (
+        hostname === "kidzeedwarka.com" ||
+        hostname.endsWith(".kidzeedwarka.com") ||
+        hostname.endsWith(".hosted.app") ||
+        hostname === "localhost" ||
+        hostname === "127.0.0.1"
+      ) {
+        isAllowed = true;
+      }
+    } catch {
+      isAllowed = false;
+    }
+    if (!isAllowed) {
+      return json({ success: false, message: "This request is not allowed." }, 403);
+    }
   }
   if (Number(request.headers.get("content-length") ?? 0) > 4_000) {
     return json({ success: false, message: "This message is too large." }, 413);
