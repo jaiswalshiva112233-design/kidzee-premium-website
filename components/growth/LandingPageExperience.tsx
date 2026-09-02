@@ -11,7 +11,9 @@ import {
   Clock3,
   GraduationCap,
   HelpCircle,
+  MapPin,
   Medal,
+  Navigation,
   Phone,
   Play,
   ShieldCheck,
@@ -892,6 +894,96 @@ export default function LandingPageExperience({
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Campus Location & Google Maps Directions */}
+      <section className="bg-white py-12 sm:py-16 border-t border-purple-100">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="text-center max-w-xl mx-auto mb-10">
+            <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#5B2A86]">
+              <MapPin size={15} />
+              Visit Our Campus
+            </span>
+            <h2 className="mt-2 text-2xl sm:text-3xl font-black text-[#281034]">
+              Conveniently Located in Sector 12B, Dwarka
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Easily accessible for families living in Sector 12, Sector 11, Sector 4, Sector 13 & surrounding Dwarka societies.
+            </p>
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-12 items-stretch rounded-3xl border-2 border-purple-100 bg-[#FAF7FC] p-6 sm:p-8 shadow-sm">
+            {/* Left: Location & Key Info */}
+            <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-purple-100 text-[#5B2A86]">
+                    <MapPin size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900">Campus Address</h3>
+                    <p className="mt-1 text-xs text-gray-600 leading-relaxed">
+                      {site.address}
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-[#5B2A86]">
+                      Near Sector 12 Metro Station & City Centre Mall
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+                    <Clock3 size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900">Admissions & Visit Hours</h3>
+                    <p className="mt-1 text-xs text-gray-600">
+                      Monday to Saturday: <span className="font-bold text-gray-900">8:30 AM – 6:30 PM</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                    <Phone size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900">Direct Helpline</h3>
+                    <a
+                      href={`tel:${site.phone}`}
+                      className="mt-1 inline-block text-xs font-bold text-[#5B2A86] hover:underline"
+                    >
+                      {site.phoneDisplay}
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <a
+                  href={site.map}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#5B2A86] py-3.5 px-5 text-xs sm:text-sm font-bold text-white shadow-md transition duration-150 hover:bg-[#471E6C] hover:shadow-lg"
+                >
+                  <Navigation size={16} />
+                  <span>Get Google Maps Directions</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Right: Embedded Interactive Map Frame */}
+            <div className="lg:col-span-7 min-h-[280px] overflow-hidden rounded-2xl border border-purple-200 shadow-inner bg-gray-100 relative">
+              <iframe
+                src={site.mapEmbed}
+                title="Kidzee Sector 12 Dwarka Location Map"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="h-full w-full min-h-[300px] border-0"
+              />
+            </div>
           </div>
         </div>
       </section>
