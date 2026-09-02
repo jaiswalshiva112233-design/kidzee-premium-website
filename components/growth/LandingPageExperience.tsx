@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Sparkles,
   Star,
+  Users,
   Utensils,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
@@ -51,7 +52,7 @@ const campusPhotos = [
   {
     src: "/images/hero/hero-classroom.jpg",
     title: "Air-Conditioned Activity Classrooms",
-    subtitle: "Child-safe ergonomic furniture & sensory learning tools",
+    subtitle: "Low 1:8 student-teacher ratio & sensory learning tools",
   },
   {
     src: "/images/hero/hero-main.jpg",
@@ -67,29 +68,34 @@ const campusPhotos = [
 
 const comparisonPillars = [
   {
-    feature: "Curriculum & Learning",
-    kidzee: "Proprietary iLLUME (Penta-Sensory & Multiple Intelligence)",
-    others: "Basic informal rote learning",
+    feature: "Teacher-Student Ratio",
+    kidzee: "Low 1:8 Ratio (Playgroup/Nursery) — Dedicated Attention",
+    others: "Overcrowded 1:20+ ratio with minimal supervision",
+  },
+  {
+    feature: "Admission Fee Offer",
+    kidzee: "Flat 30% Off on Annual Fees for Playgroup & Nursery",
+    others: "Full rigid fees with non-refundable charges",
+  },
+  {
+    feature: "Curriculum & Methodology",
+    kidzee: "Proprietary Péntemind & iLLUME (Penta-Sensory Learning)",
+    others: "Basic informal rote memorization",
   },
   {
     feature: "Safety & Premises",
     kidzee: "24/7 CCTV Monitored Secure Premises + Verified Staff",
-    others: "Unmonitored shared residential areas",
+    others: "Unmonitored shared residential basements",
   },
   {
-    feature: "Daycare & Meals",
-    kidzee: "Extended till 7:00 PM with fresh, warm, hygienic meals",
-    others: "Closes early (2-4 PM), outside packed food",
+    feature: "Extended Daycare & Meals",
+    kidzee: "Open till 7:00 PM with fresh, warm, hygienic meals daily",
+    others: "Closes early (2-4 PM), packed or cold food",
   },
   {
-    feature: "Trial & Transition",
-    kidzee: "Complimentary 3-Day Parent Transition & Trial",
-    others: "Direct admission with no trial period",
-  },
-  {
-    feature: "Location & Hygiene",
-    kidzee: "Sanitized building in Sector 12B Dwarka with emergency medical protocol",
-    others: "Congested residential basements",
+    feature: "Trial Experience",
+    kidzee: "Complimentary 3-Day Preschool Trial & Transition",
+    others: "Direct admission with zero transition support",
   },
 ];
 
@@ -99,14 +105,14 @@ const parentTestimonials = [
     child: "Mother of Aarav (Nursery)",
     rating: 5,
     quote:
-      "Kidzee Sector 12 Dwarka has been a second home for Aarav. His confidence and speech have improved tremendously. The attentive teachers and safe environment give us complete peace of mind!",
+      "The 1:8 teacher-student ratio makes a huge difference. Aarav receives personalized love and attention every day. His confidence and speech have improved tremendously!",
   },
   {
     name: "Rohit Malhotra",
     child: "Father of Ananya (Daycare & Playgroup)",
     rating: 5,
     quote:
-      "As working parents in Dwarka, the extended daycare till 7 PM with fresh warm meals is a lifesaver. The hygiene standards and loving care from the staff are unmatched.",
+      "As working parents in Dwarka, the extended daycare till 7 PM with fresh warm meals is a lifesaver. The hygiene standards and loving care from the teachers are unmatched.",
   },
   {
     name: "Deepika Verma",
@@ -119,20 +125,24 @@ const parentTestimonials = [
 
 const faqs = [
   {
-    q: "What are the school and daycare timings in Sector 12 Dwarka?",
-    a: "Preschool operates from 8:30 AM to 1:00 PM (Monday to Friday). Extended daycare operates from 12:30 PM to 7:00 PM (Monday to Saturday) with warm nutritious meals and dedicated rest areas.",
+    q: "What is the 30% Annual Fee Offer for Playgroup and Nursery?",
+    a: "For the academic session 2026–27, we are offering a flat 30% discount on the annual fee for Playgroup and Nursery admissions when you book a campus visit through this page.",
+  },
+  {
+    q: "What is the Teacher-Student ratio at Kidzee Sector 12 Dwarka?",
+    a: "We maintain a low 1:8 ratio for Playgroup & Nursery (1 teacher for every 8 children) and 1:10 for Kindergarten, ensuring every child receives attentive, individualized care and guidance.",
+  },
+  {
+    q: "What are the school and daycare timings?",
+    a: "Preschool operates from 8:30 AM to 1:00 PM (Monday to Friday). Extended daycare operates from 12:30 PM to 7:00 PM (Monday to Saturday) with freshly cooked warm meals and dedicated rest areas.",
   },
   {
     q: "Is there a trial period available before final admission?",
-    a: "Yes! We offer a 3-day preschool trial experience so your child can settle in comfortably and you can experience our teaching methodology firsthand.",
+    a: "Yes! We offer a complimentary 3-day preschool trial experience so your child can settle in comfortably and you can experience our teaching methodology firsthand.",
   },
   {
     q: "How safe is the centre and what security measures are in place?",
-    a: "Our entire campus in Sector 12B is under 24/7 CCTV surveillance with secure entry access, background-verified staff, child-safe soft furniture, sanitized washrooms, and emergency medical support.",
-  },
-  {
-    q: "What is the admission process for 2026–27?",
-    a: "You can book a guided campus visit using the form on this page. Our admissions team will walk you through the classroom, explain the curriculum, and assist with document verification.",
+    a: "Our entire campus in Sector 12B is under 24/7 CCTV surveillance with controlled entry access, background-verified staff, child-safe soft furniture, sanitized washrooms, and emergency medical tie-up.",
   },
 ];
 
@@ -218,25 +228,25 @@ export default function LandingPageExperience({
   const content = selected.content?.heading ? selected.content : page.content;
 
   const defaultBullets = [
-    "24/7 CCTV Monitored Secure Premises",
-    "Fresh, Nutritious Warm Meals Prepared Daily",
-    "Extended Daycare Available until 7:00 PM",
-    "India's Proven iLLUME Multiple-Intelligence Curriculum",
-    "Air-Conditioned, Child-Safe Activity Classrooms",
-    "3-Day Free Preschool Trial Experience",
+    "Flat 30% Off Annual Fee on Playgroup & Nursery (2026–27)",
+    "Low 1:8 Teacher-Student Ratio for Personalized Care",
+    "24/7 CCTV Monitored Secure Premises & Verified Staff",
+    "Extended Daycare Available until 7:00 PM with Warm Meals",
+    "Proprietary Péntemind & iLLUME Multi-Sensory Curriculum",
+    "Complimentary 3-Day Preschool Trial Experience",
   ];
 
   const bullets = content.bullets && content.bullets.length > 0 ? content.bullets : defaultBullets;
 
   return (
     <div className="min-h-screen bg-[#FAF7FC] text-[#281034]">
-      {/* Top Admissions Announcement Strip */}
+      {/* Top Special Offer Strip */}
       <div className="bg-gradient-to-r from-[#5B2A86] via-[#7B3FA2] to-[#5B2A86] px-4 py-2.5 text-center text-xs sm:text-sm font-bold text-white shadow-sm">
         <span className="inline-flex items-center gap-2">
-          <span>✨</span>
+          <span>🎉</span>
           <span>
             {content.offerText ||
-              "Admissions Open for Academic Year 2026–27 | Book a Guided Campus Walkthrough & 3-Day Trial"}
+              "Limited Time Offer: Flat 30% Off Annual Fee on Playgroup & Nursery Admissions (2026–27) | Free 3-Day Trial"}
           </span>
         </span>
       </div>
@@ -294,26 +304,29 @@ export default function LandingPageExperience({
 
             <p className="text-base sm:text-lg leading-relaxed text-gray-700 font-medium">
               {content.description ||
-                "Nurturing early childhood education with playgroup, nursery, kindergarten, and full-day daycare till 7:00 PM. Air-conditioned classrooms, fresh warm meals, and CCTV monitored premises for complete peace of mind."}
+                "Nurturing early childhood education with a low 1:8 teacher-student ratio, Péntemind curriculum, air-conditioned classrooms, and extended daycare till 7:00 PM with fresh warm meals."}
             </p>
 
             {/* Trust Pill Tags */}
             <div className="flex flex-wrap gap-2 pt-1">
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-black text-amber-800 border border-amber-200 shadow-2xs">
+                🏷️ 30% Off Annual Fee (Playgroup & Nursery)
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-purple-50 px-3 py-1.5 text-xs font-bold text-[#5B2A86] border border-purple-200 shadow-2xs">
+                <Users size={14} className="text-[#5B2A86]" />
+                Low 1:8 Teacher-Student Ratio
+              </span>
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-[#5B2A86] border border-purple-100 shadow-2xs">
                 <ShieldCheck size={14} className="text-emerald-600" />
                 24/7 CCTV Monitored
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-[#5B2A86] border border-purple-100 shadow-2xs">
-                <Utensils size={14} className="text-amber-600" />
-                Fresh Meals Included
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-[#5B2A86] border border-purple-100 shadow-2xs">
                 <Clock3 size={14} className="text-blue-600" />
                 Daycare Till 7 PM
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-[#5B2A86] border border-purple-100 shadow-2xs">
-                <MapPin size={14} className="text-rose-600" />
-                Pocket 8, Sec 12B
+                <Utensils size={14} className="text-amber-600" />
+                Fresh Meals Included
               </span>
             </div>
 
@@ -361,10 +374,10 @@ export default function LandingPageExperience({
                   <span>Admissions Desk 2026–27</span>
                 </div>
                 <h2 className="mt-1 text-xl sm:text-2xl font-black text-gray-900">
-                  Book a Campus Visit
+                  Book Campus Visit & Claim 30% Off
                 </h2>
                 <p className="mt-1 text-xs text-gray-600">
-                  Experience classrooms, meet educators, and explore our 3-day preschool trial.
+                  Experience classrooms, meet educators, and claim the 30% annual fee offer.
                 </p>
               </div>
 
@@ -400,7 +413,7 @@ export default function LandingPageExperience({
               Safe, Joyous & Inspiring Spaces
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Take a look inside our Sector 12B Dwarka campus designed specifically for toddlers and young learners.
+              Take a look inside our Sector 12B Dwarka campus with low 1:8 ratios and dedicated play areas.
             </p>
           </div>
 
@@ -540,14 +553,14 @@ export default function LandingPageExperience({
             Give Your Child the Kidzee Advantage in Dwarka
           </h2>
           <p className="mt-2 text-sm text-purple-200 max-w-xl mx-auto">
-            Book your guided school walkthrough and 3-day preschool trial today.
+            Book your guided school walkthrough and claim your 30% annual fee offer today.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-4">
             <a
               href="#ad-enquiry"
               className="rounded-full bg-[#F6C84B] px-7 py-3 text-sm font-black text-[#281034] shadow-lg transition hover:bg-[#ebd532]"
             >
-              Book Campus Visit
+              Book Campus Visit & Claim 30% Off
             </a>
             <a
               href={`tel:${site.phone}`}
@@ -574,7 +587,7 @@ export default function LandingPageExperience({
           href="#ad-enquiry"
           className="flex flex-2 items-center justify-center gap-1.5 rounded-xl bg-[#5B2A86] py-3 text-xs font-extrabold text-white shadow-sm"
         >
-          <span>Book Campus Visit</span>
+          <span>Claim 30% Off & Book Visit</span>
         </a>
       </div>
     </div>
