@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Clock3,
   HelpCircle,
-  MapPin,
   Phone,
   Play,
   ShieldCheck,
@@ -253,23 +252,18 @@ export default function LandingPageExperience({
   }, [experiment?.id, page.id, page.slug, selected.id, selected.variantKey]);
 
   const content = selected.content?.heading ? selected.content : page.content;
-
-  const defaultBullets = [
-    "Flat 30% Off Annual Fee on Playgroup & Nursery (2026–27)",
-    "Low 1:8 Teacher-Student Ratio for Personalized Care",
-    "24/7 CCTV Monitored Secure Premises & Verified Staff",
-    "Extended Daycare Available until 7:00 PM with Warm Meals",
-    "Proprietary Péntemind & iLLUME Multi-Sensory Curriculum",
-    "Complimentary 3-Day Preschool Trial Experience",
-  ];
-
-  const bullets = content.bullets && content.bullets.length > 0 ? content.bullets : defaultBullets;
   const embedUrl = getYouTubeEmbedUrl(content.reviewVideoUrl || "");
+  const isDirectVideo =
+    content.reviewVideoUrl &&
+    (content.reviewVideoUrl.endsWith(".mp4") ||
+      content.reviewVideoUrl.endsWith(".webm") ||
+      content.reviewVideoUrl.includes("/api/") ||
+      content.reviewVideoUrl.startsWith("http"));
 
   return (
-    <div className="min-h-screen bg-[#FAF7FC] text-[#281034]">
-      {/* Top Special Offer Strip */}
-      <div className="bg-gradient-to-r from-[#5B2A86] via-[#7B3FA2] to-[#5B2A86] px-4 py-2.5 text-center text-xs sm:text-sm font-bold text-white shadow-sm">
+    <div className="min-h-screen bg-[#FAF7FC] text-[#281034] font-sans antialiased selection:bg-[#5B2A86] selection:text-white">
+      {/* Top Special Offer Banner */}
+      <div className="bg-gradient-to-r from-[#5B2A86] via-[#7B3FA2] to-[#5B2A86] px-4 py-2 text-center text-xs sm:text-sm font-bold text-white shadow-sm">
         <span className="inline-flex items-center gap-2">
           <span>🎉</span>
           <span>
@@ -280,26 +274,26 @@ export default function LandingPageExperience({
       </div>
 
       {/* Floating Trust Header */}
-      <header className="sticky top-0 z-40 border-b border-gray-100 bg-white/95 backdrop-blur-md shadow-xs">
+      <header className="sticky top-0 z-40 border-b border-purple-100 bg-white/95 backdrop-blur-md shadow-xs">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-2.5">
             <Image
               src="/images/kidzee-logo.png"
               alt="Kidzee Sector 12 Dwarka"
-              width={130}
-              height={45}
+              width={125}
+              height={42}
               className="h-9 w-auto object-contain"
               priority
             />
-            <span className="hidden sm:inline-block rounded-full bg-[#FAF4FF] px-2.5 py-1 text-[11px] font-bold text-[#5B2A86]">
+            <span className="rounded-full bg-[#FAF4FF] px-2.5 py-1 text-[11px] font-bold text-[#5B2A86] border border-purple-100">
               Sector 12, Dwarka
             </span>
           </Link>
 
           <div className="flex items-center gap-2 sm:gap-4">
-            <div className="hidden md:flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200">
+            <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200">
               <Star size={14} className="fill-amber-400 text-amber-400" />
-              <span>4.9 / 5 (Google Verified Reviews)</span>
+              <span>4.9 / 5 Google Reviews</span>
             </div>
 
             <a
@@ -307,17 +301,17 @@ export default function LandingPageExperience({
               className="inline-flex items-center gap-1.5 rounded-full bg-[#5B2A86] px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#471E6C]"
             >
               <Phone size={14} />
-              <span className="hidden xs:inline">Call:</span> {site.phoneDisplay}
+              <span>{site.phoneDisplay}</span>
             </a>
           </div>
         </div>
       </header>
 
-      {/* Hero Section with Clean Lead Form */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#FAF4FF] via-white to-[#FAF7FC] py-8 sm:py-14">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#FAF4FF] via-white to-[#FAF7FC] py-8 sm:py-12">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:items-start">
           {/* Left Column: Value Prop */}
-          <div className="space-y-5">
+          <div className="space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#E5D7EB] bg-white px-3.5 py-1.5 text-xs font-black text-[#5B2A86] shadow-xs">
               <Sparkles size={14} className="text-amber-500" />
               <span>{content.badge || "India's #1 Preschool Network — Sector 12 Dwarka"}</span>
@@ -335,49 +329,56 @@ export default function LandingPageExperience({
                 "Nurturing early childhood education with a low 1:8 teacher-student ratio, Péntemind curriculum, air-conditioned classrooms, and extended daycare till 7:00 PM with fresh warm meals."}
             </p>
 
-            {/* Trust Pill Tags */}
-            <div className="flex flex-wrap gap-2 pt-1">
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-black text-amber-800 border border-amber-200 shadow-2xs">
-                🏷️ 30% Off Annual Fee (Playgroup & Nursery)
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-purple-50 px-3 py-1.5 text-xs font-bold text-[#5B2A86] border border-purple-200 shadow-2xs">
-                <Users size={14} className="text-[#5B2A86]" />
-                Low 1:8 Teacher-Student Ratio
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-[#5B2A86] border border-purple-100 shadow-2xs">
-                <ShieldCheck size={14} className="text-emerald-600" />
-                24/7 CCTV Monitored
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-[#5B2A86] border border-purple-100 shadow-2xs">
-                <Clock3 size={14} className="text-blue-600" />
-                Daycare Till 7 PM
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-[#5B2A86] border border-purple-100 shadow-2xs">
-                <Utensils size={14} className="text-amber-600" />
-                Fresh Meals Included
-              </span>
+            {/* 4 Distinct Value Cards (No Repetitions) */}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="flex items-start gap-3 rounded-2xl bg-white p-3.5 border border-purple-100 shadow-2xs">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-[#5B2A86]">
+                  <Users size={18} />
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-gray-900">Low 1:8 Ratio</h3>
+                  <p className="text-[11px] sm:text-xs text-gray-500">Dedicated individual care & milestone tracking</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 rounded-2xl bg-white p-3.5 border border-purple-100 shadow-2xs">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                  <ShieldCheck size={18} />
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-gray-900">24/7 CCTV Monitored</h3>
+                  <p className="text-[11px] sm:text-xs text-gray-500">Secure premises & verified caregivers</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 rounded-2xl bg-white p-3.5 border border-purple-100 shadow-2xs">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                  <Clock3 size={18} />
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-gray-900">Daycare Till 7 PM</h3>
+                  <p className="text-[11px] sm:text-xs text-gray-500">Fresh warm meals & quiet nap rooms</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 rounded-2xl bg-white p-3.5 border border-purple-100 shadow-2xs">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                  <Utensils size={18} />
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-gray-900">AC Activity Rooms</h3>
+                  <p className="text-[11px] sm:text-xs text-gray-500">Péntemind sensory play & soft toys</p>
+                </div>
+              </div>
             </div>
 
-            {/* Bullet Highlights Grid */}
-            <ul className="grid gap-2.5 sm:grid-cols-2 pt-2">
-              {bullets.map((item) => (
-                <li
-                  key={item}
-                  className="flex items-start gap-2.5 rounded-xl bg-white p-3 text-xs sm:text-sm font-semibold text-gray-800 border border-gray-100 shadow-2xs"
-                >
-                  <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-600" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-
-            {/* Direct Instant Action Row */}
-            <div className="flex flex-wrap items-center gap-3 pt-3">
+            {/* Direct Action Row */}
+            <div className="flex flex-wrap items-center gap-3 pt-2">
               <a
                 href={site.whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-[#1FAF38] px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#19922F]"
+                className="inline-flex items-center gap-2 rounded-full bg-[#1FAF38] px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#19922F]"
               >
                 <FaWhatsapp size={18} />
                 <span>Chat on WhatsApp</span>
@@ -385,7 +386,7 @@ export default function LandingPageExperience({
 
               <a
                 href={`tel:${site.phone}`}
-                className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-xs sm:text-sm font-bold text-[#5B2A86] border border-purple-200 shadow-xs transition hover:bg-purple-50"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-xs sm:text-sm font-bold text-[#5B2A86] border border-purple-200 shadow-xs transition hover:bg-purple-50"
               >
                 <Phone size={16} />
                 <span>Call Admissions</span>
@@ -393,7 +394,7 @@ export default function LandingPageExperience({
             </div>
           </div>
 
-          {/* Right Column: Clean Streamlined Admission Form */}
+          {/* Right Column: Admission Lead Form */}
           <div id="ad-enquiry" className="scroll-mt-24">
             {page.pageType === "RECRUITMENT" ? (
               <CareerApplicationForm />
@@ -421,8 +422,8 @@ export default function LandingPageExperience({
 
       {/* Parent Review Video Player Section */}
       <section className="border-t border-purple-100 bg-white py-12 sm:py-16">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-8">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          <div className="text-center max-w-xl mx-auto mb-8">
             <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#5B2A86]">
               <Video size={15} />
               Parent Video Stories
@@ -435,7 +436,7 @@ export default function LandingPageExperience({
             </p>
           </div>
 
-          <div className="mx-auto max-w-3xl overflow-hidden rounded-3xl border-2 border-purple-200 bg-[#281034] shadow-xl">
+          <div className="overflow-hidden rounded-3xl border-2 border-purple-200 bg-[#281034] shadow-xl">
             {embedUrl ? (
               <div className="relative aspect-16/9 w-full">
                 <iframe
@@ -446,7 +447,7 @@ export default function LandingPageExperience({
                   className="h-full w-full border-0"
                 />
               </div>
-            ) : content.reviewVideoUrl ? (
+            ) : isDirectVideo ? (
               <video
                 src={content.reviewVideoUrl}
                 controls
@@ -458,7 +459,7 @@ export default function LandingPageExperience({
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#F6C84B] text-[#281034] shadow-lg mb-4">
                   <Play size={24} className="ml-1 fill-[#281034]" />
                 </div>
-                <h3 className="text-xl font-bold">
+                <h3 className="text-lg sm:text-xl font-bold">
                   {content.reviewVideoTitle || "Real Parent Review & Campus Experience"}
                 </h3>
                 <p className="mt-2 text-xs sm:text-sm text-purple-200 max-w-md">
@@ -497,7 +498,7 @@ export default function LandingPageExperience({
             {campusPhotos.map((photo) => (
               <div
                 key={photo.title}
-                className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md"
+                className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xs transition hover:shadow-md"
               >
                 <div className="relative aspect-4/3 overflow-hidden bg-gray-100">
                   <Image
@@ -508,8 +509,8 @@ export default function LandingPageExperience({
                   />
                 </div>
                 <div className="p-4">
-                  <h3 className="text-base font-bold text-gray-900">{photo.title}</h3>
-                  <p className="mt-1 text-xs text-gray-600">{photo.subtitle}</p>
+                  <h3 className="text-sm font-bold text-gray-900">{photo.title}</h3>
+                  <p className="mt-1 text-xs text-gray-500">{photo.subtitle}</p>
                 </div>
               </div>
             ))}
@@ -517,7 +518,7 @@ export default function LandingPageExperience({
         </div>
       </section>
 
-      {/* Why Kidzee Sector 12 vs Other Local Playschools */}
+      {/* Why Kidzee Sector 12 Advantage */}
       <section className="bg-[#FAF4FF] py-12 sm:py-16 border-t border-purple-100">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto mb-10">
@@ -538,7 +539,7 @@ export default function LandingPageExperience({
 
             <div className="divide-y divide-gray-100">
               {comparisonPillars.map((row) => (
-                <div key={row.feature} className="grid grid-cols-3 p-4 text-xs sm:text-sm">
+                <div key={row.feature} className="grid grid-cols-3 p-4 text-xs sm:text-sm items-center">
                   <div className="font-bold text-gray-900 pr-2">{row.feature}</div>
                   <div className="font-semibold text-[#5B2A86] pr-2 flex items-start gap-1.5">
                     <Check size={16} className="text-emerald-600 shrink-0 mt-0.5" />

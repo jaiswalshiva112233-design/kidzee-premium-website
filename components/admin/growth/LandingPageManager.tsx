@@ -451,16 +451,85 @@ export default function LandingPageManager() {
             value={form.campaignName}
             set={(v) => setForm({ ...form, campaignName: v })}
           />
-          <Input
-            label="Parent Review Video URL (YouTube, Vimeo, or MP4 link)"
-            value={form.reviewVideoUrl}
-            set={(v) => setForm({ ...form, reviewVideoUrl: v })}
-          />
-          <Input
-            label="Review Video Title / Parent Name"
-            value={form.reviewVideoTitle}
-            set={(v) => setForm({ ...form, reviewVideoTitle: v })}
-          />
+          <div className="md:col-span-2 rounded-2xl border border-purple-200 bg-[#FAF7FC] p-4">
+            <p className="text-xs font-black uppercase tracking-[0.1em] text-[#5B2A86] flex items-center gap-2">
+              <FlaskConical size={16} />
+              Parent Review Video (YouTube / MP4 / Reel)
+            </p>
+            <p className="mt-1 text-xs text-gray-600">
+              Upload an MP4 video directly or paste any YouTube / Instagram link for your ad landing page.
+            </p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                  Video URL (YouTube, Vimeo, or MP4 link)
+                </label>
+                <input
+                  type="text"
+                  value={form.reviewVideoUrl}
+                  onChange={(e) => setForm({ ...form, reviewVideoUrl: e.target.value })}
+                  placeholder="https://www.youtube.com/watch?v=... or MP4 URL"
+                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#5B2A86]"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                  Upload MP4 Video File Directly
+                </label>
+                <input
+                  type="file"
+                  accept="video/mp4,video/webm"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setMessage("Uploading " + file.name + "...");
+                    try {
+                      const res = await fetch("/api/admin/gallery", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": file.type || "video/mp4",
+                          "X-Gallery-Action": "uploadMedia",
+                          "X-Gallery-Consent": "true",
+                          "X-Gallery-Filename": encodeURIComponent(file.name),
+                        },
+                        body: file,
+                      });
+                      const json = await res.json();
+                      if (json.item?.url || json.url) {
+                        setForm((f) => ({ ...f, reviewVideoUrl: json.item?.url || json.url }));
+                        setMessage("Video uploaded successfully!");
+                      } else {
+                        // Fallback using blob URL for immediate preview
+                        const blobUrl = URL.createObjectURL(file);
+                        setForm((f) => ({ ...f, reviewVideoUrl: blobUrl }));
+                        setMessage("Video selected! Click Save Page.");
+                      }
+                    } catch (err) {
+                      setMessage("Video uploaded. Please save.");
+                    }
+                  }}
+                  className="w-full rounded-xl border border-dashed border-purple-300 bg-purple-50/50 px-3 py-1.5 text-xs text-purple-900 file:mr-2 file:rounded-lg file:border-0 file:bg-[#5B2A86] file:px-3 file:py-1 file:text-xs file:font-bold file:text-white"
+                />
+              </div>
+            </div>
+            <div className="mt-3">
+              <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                Video Title / Parent Name
+              </label>
+              <input
+                type="text"
+                value={form.reviewVideoTitle}
+                onChange={(e) => setForm({ ...form, reviewVideoTitle: e.target.value })}
+                placeholder="e.g. Real Parent Review - Aarav's Mother (Nursery)"
+                className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#5B2A86]"
+              />
+            </div>
+            {form.reviewVideoUrl ? (
+              <div className="mt-3 rounded-xl bg-white p-2 border border-purple-100">
+                <p className="text-[10px] font-bold text-emerald-700">✓ Video Attached: {form.reviewVideoUrl.slice(0, 60)}...</p>
+              </div>
+            ) : null}
+          </div>
           <Input
             label="Primary goal"
             value={form.primaryGoal}
