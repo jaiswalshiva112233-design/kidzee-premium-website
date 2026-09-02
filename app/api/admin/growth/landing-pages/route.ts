@@ -416,6 +416,41 @@ export async function POST(request: Request) {
           },
         });
       });
+    } else if (action === "delete-page") {
+      const existing = await prisma.landingPage.findUnique({
+        where: { id: pageId },
+      });
+      if (!existing) throw new LandingPageRequestError("Landing page not found.");
+      await prisma.$transaction([
+        prisma.growthExperimentVariant.deleteMany({
+          where: { experiment: { landingPageId: pageId } },
+        }),
+        prisma.growthExperiment.deleteMany({
+          where: { landingPageId: pageId },
+        }),
+        prisma.landingPageVariant.deleteMany({
+          where: { landingPageId: pageId },
+        }),
+        prisma.landingPageVersion.deleteMany({
+          where: { landingPageId: pageId },
+        }),
+        prisma.landingPage.delete({
+          where: { id: pageId },
+        }),
+        prisma.activityLog.create({
+          data: {
+            adminUserId: session.userId,
+            action: "DELETED",
+            entityType: "LandingPage",
+            entityId: pageId,
+            description: `${existing.name} was permanently deleted.`,
+          },
+        }),
+      ]);
+      return NextResponse.json({
+        success: true,
+        message: `${existing.name} was permanently deleted.`,
+      });
     } else if (action === "unpublish-page") {
       const existing = await prisma.landingPage.findUnique({
         where: { id: pageId },

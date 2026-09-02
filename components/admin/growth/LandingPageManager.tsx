@@ -340,11 +340,29 @@ export default function LandingPageManager() {
                       pageId: selected.id,
                     })
                   }
-                  className="rounded-xl border border-amber-200 px-4 py-2 text-xs font-black text-amber-800"
+                  className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-black text-amber-800 hover:bg-amber-100"
                 >
-                  Unpublish
+                  Unpublish (Hide)
                 </button>
               ) : null}
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => {
+                  if (typeof window !== "undefined" && window.confirm(`Are you sure you want to permanently delete "${selected.name}"?`)) {
+                    void action({
+                      action: "delete-page",
+                      pageId: selected.id,
+                    }).then(() => {
+                      setSelectedId("");
+                      setForm(blank);
+                    });
+                  }
+                }}
+                className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs font-black text-red-600 hover:bg-red-100"
+              >
+                🗑️ Delete Page Permanently
+              </button>
             </div>
           ) : null}
         </>
