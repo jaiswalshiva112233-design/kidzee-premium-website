@@ -10,6 +10,8 @@ import { buildSiteContact } from "@/lib/siteContact";
 import MiraLauncher from "@/components/mira/MiraLauncher";
 import SiteContactProvider from "@/components/SiteContactProvider";
 import SiteMotionManager from "@/components/SiteMotionManager";
+import WebsiteAnalytics from "@/components/WebsiteAnalytics";
+import MarketingConsent from "@/components/MarketingConsent";
 import { getWebsiteOperationalSettings } from "@/lib/website/operationalSettings";
 
 const defaultTitle = "Kidzee Preschool & Daycare in Sector 12 Dwarka";
@@ -352,6 +354,8 @@ export default async function RootLayout({
 
         <SiteContactProvider settings={contactSettings}>
           <SiteMotionManager />
+          <WebsiteAnalytics />
+          <MarketingConsent settings={trackingSettings} />
           {children}
           <MiraLauncher />
         </SiteContactProvider>
