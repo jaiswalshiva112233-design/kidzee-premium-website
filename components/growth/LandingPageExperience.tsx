@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   Clock3,
   GraduationCap,
-  HeartHandshake,
   HelpCircle,
   Medal,
   Phone,
@@ -103,17 +102,32 @@ const campusPhotos = [
   {
     src: "/images/hero/hero-classroom.jpg",
     title: "Air-Conditioned Activity Classrooms",
-    subtitle: "Low 1:8 student-teacher ratio & sensory learning tools",
+    subtitle: "Low 1:8 teacher-student ratio with child-safe soft furniture & sensory learning tools",
+    tag: "Activity Classrooms",
   },
   {
     src: "/images/hero/hero-main.jpg",
-    title: "Soft Play & Indoor Activity Zone",
-    subtitle: "Ball pool, motor skill development & safe play areas",
+    title: "Indoor Soft Play & Activity Zone",
+    subtitle: "Ball pool, gross motor skill development toys & safe padded activity flooring",
+    tag: "Indoor Play Zone",
   },
   {
     src: "/images/about/about-main.jpg",
-    title: "Dedicated Extended Daycare & Learning",
-    subtitle: "Hygienic nap rooms & nutritious warm meals till 7:00 PM",
+    title: "Extended Daycare & Rest Zone",
+    subtitle: "Clean, hygienic nap spaces & daily freshly cooked warm meals till 7:00 PM",
+    tag: "Daycare & Nap Rooms",
+  },
+  {
+    src: "/images/programmes/nursery.jpg",
+    title: "Early Literacy & Creative Discovery",
+    subtitle: "Interactive storytelling, phonics, color discovery & foundational Péntemind skills",
+    tag: "Experiential Learning",
+  },
+  {
+    src: "/images/programmes/daycare.jpg",
+    title: "Loving & Attentive Caregivers",
+    subtitle: "Dedicated, background-verified teachers and warm support staff for toddlers",
+    tag: "Safety & Warmth",
   },
 ];
 
@@ -270,6 +284,18 @@ export default function LandingPageExperience({
         allocation: 100,
       },
   );
+
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  const [isPhotoPaused, setIsPhotoPaused] = useState(false);
+
+  // Fast auto-playing slideshow: transitions every 2.5 seconds
+  useEffect(() => {
+    if (isPhotoPaused) return;
+    const interval = setInterval(() => {
+      setActivePhotoIndex((prev) => (prev + 1) % campusPhotos.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [isPhotoPaused]);
 
   useEffect(() => {
     const bucket = anonymousBucket(
@@ -516,8 +542,136 @@ export default function LandingPageExperience({
         </div>
       </section>
 
+      {/* Auto-Playing Dynamic Campus Photo Slideshow */}
+      <section className="bg-[#FAF7FC] py-12 sm:py-16 border-b border-purple-100">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-8">
+            <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#5B2A86]">
+              <Sparkles size={14} className="text-amber-500" />
+              Live Campus Walkthrough
+            </span>
+            <h2 className="mt-2 text-2xl sm:text-3xl font-black text-[#281034]">
+              Safe, Joyous & Inspiring Spaces
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Watch our Sector 12B Dwarka campus facilities designed specifically for early toddler discovery.
+            </p>
+          </div>
+
+          {/* Main Slideshow Container */}
+          <div
+            className="relative overflow-hidden rounded-3xl border-2 border-purple-200 bg-[#281034] shadow-2xl transition duration-500"
+            onMouseEnter={() => setIsPhotoPaused(true)}
+            onMouseLeave={() => setIsPhotoPaused(false)}
+          >
+            {/* Active Slide Image */}
+            <div className="relative aspect-16/10 sm:aspect-16/9 w-full overflow-hidden bg-gray-900">
+              {campusPhotos.map((photo, idx) => (
+                <div
+                  key={photo.title}
+                  className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                    idx === activePhotoIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                  }`}
+                >
+                  <Image
+                    src={photo.src}
+                    alt={photo.title}
+                    fill
+                    priority={idx === 0}
+                    className="object-cover"
+                  />
+                  {/* Subtle Dark Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#180822]/90 via-[#180822]/25 to-transparent" />
+                  
+                  {/* Tag Badge */}
+                  <div className="absolute top-4 left-4 z-20">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-black text-[#5B2A86] shadow-md backdrop-blur-sm">
+                      📍 {photo.tag}
+                    </span>
+                  </div>
+
+                  {/* Caption Box */}
+                  <div className="absolute bottom-0 left-0 right-0 z-20 p-5 sm:p-8 text-white">
+                    <h3 className="text-lg sm:text-2xl font-black tracking-tight drop-shadow-md">
+                      {photo.title}
+                    </h3>
+                    <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-purple-100 max-w-2xl font-medium drop-shadow-sm">
+                      {photo.subtitle}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Prev / Next Arrows */}
+            <button
+              type="button"
+              onClick={() =>
+                setActivePhotoIndex(
+                  (prev) => (prev - 1 + campusPhotos.length) % campusPhotos.length,
+                )
+              }
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-white/80 text-[#5B2A86] shadow-lg backdrop-blur-md transition hover:bg-white hover:scale-110 focus:outline-none"
+              aria-label="Previous photograph"
+            >
+              ❮
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setActivePhotoIndex((prev) => (prev + 1) % campusPhotos.length)
+              }
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-white/80 text-[#5B2A86] shadow-lg backdrop-blur-md transition hover:bg-white hover:scale-110 focus:outline-none"
+              aria-label="Next photograph"
+            >
+              ❯
+            </button>
+
+            {/* Progress Dots */}
+            <div className="absolute bottom-3 right-4 sm:bottom-4 sm:right-6 z-30 flex items-center gap-2">
+              {campusPhotos.map((_, dotIdx) => (
+                <button
+                  key={dotIdx}
+                  type="button"
+                  onClick={() => setActivePhotoIndex(dotIdx)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    dotIdx === activePhotoIndex
+                      ? "w-8 bg-[#F6C84B]"
+                      : "w-2 bg-white/50 hover:bg-white/80"
+                  }`}
+                  aria-label={`Go to slide ${dotIdx + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Interactive Thumbnail Bar */}
+          <div className="mt-4 grid grid-cols-5 gap-2 sm:gap-3">
+            {campusPhotos.map((thumb, tIdx) => (
+              <button
+                key={thumb.title}
+                type="button"
+                onClick={() => setActivePhotoIndex(tIdx)}
+                className={`relative aspect-16/10 overflow-hidden rounded-xl border-2 transition duration-200 ${
+                  tIdx === activePhotoIndex
+                    ? "border-[#5B2A86] scale-102 shadow-md ring-2 ring-[#F6C84B]"
+                    : "border-transparent opacity-60 hover:opacity-100"
+                }`}
+              >
+                <Image
+                  src={thumb.src}
+                  alt={thumb.title}
+                  fill
+                  className="object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Parent Review Video Player Section */}
-      <section className="border-b border-purple-100 bg-white py-12 sm:py-16">
+      <section className="bg-white py-12 sm:py-16">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="text-center max-w-xl mx-auto mb-8">
             <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#5B2A86]">
@@ -571,45 +725,6 @@ export default function LandingPageExperience({
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      </section>
-
-      {/* Real Campus Facility Photo Grid */}
-      <section className="bg-[#FAF7FC] py-12 sm:py-16">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="text-xs font-black uppercase tracking-wider text-[#5B2A86]">
-              Campus Walkthrough
-            </span>
-            <h2 className="mt-2 text-2xl sm:text-3xl font-black text-[#281034]">
-              Safe, Joyous & Inspiring Spaces
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Take a look inside our Sector 12B Dwarka campus with low 1:8 ratios and dedicated play areas.
-            </p>
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-3">
-            {campusPhotos.map((photo) => (
-              <div
-                key={photo.title}
-                className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xs transition hover:shadow-md"
-              >
-                <div className="relative aspect-4/3 overflow-hidden bg-gray-100">
-                  <Image
-                    src={photo.src}
-                    alt={photo.title}
-                    fill
-                    className="object-cover transition duration-300 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="text-sm font-bold text-gray-900">{photo.title}</h3>
-                  <p className="mt-1 text-xs text-gray-500">{photo.subtitle}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
