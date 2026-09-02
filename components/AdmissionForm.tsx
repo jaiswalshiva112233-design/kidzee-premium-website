@@ -78,6 +78,10 @@ type AdmissionFormProps = {
   landingPageId?: string;
   landingVariantId?: string;
   growthExperimentId?: string;
+  title?: string;
+  subtitle?: string;
+  badgeText?: string;
+  submitButtonText?: string;
 };
 
 function createSubmissionId() {
@@ -170,6 +174,10 @@ export default function AdmissionForm({
   landingPageId = "",
   landingVariantId = "",
   growthExperimentId = "",
+  title,
+  subtitle,
+  badgeText,
+  submitButtonText,
 }: AdmissionFormProps) {
   const site = useSiteContact();
   const [formData, setFormData] =
@@ -475,17 +483,17 @@ export default function AdmissionForm({
           </span>
           <div>
             <p className="text-xs font-black uppercase tracking-[0.15em] text-[#5B2A86]">
-              Quick admission enquiry
+              {badgeText || "Quick admission enquiry"}
             </p>
             <h2
               id="admission-form-heading"
               className="mt-1 text-2xl font-black tracking-[-0.025em] text-[#2C1735] sm:text-3xl"
             >
-              How can we help your family?
+              {title || "How can we help your family?"}
             </h2>
             <p className="mt-2 text-sm leading-6 text-[#5F5F6D] sm:text-base">
-              Your enquiry goes directly to the centre panel so our team can
-              follow up with you.
+              {subtitle ||
+                "Your enquiry goes directly to the centre panel so our team can follow up with you."}
             </p>
           </div>
         </div>
@@ -688,7 +696,7 @@ export default function AdmissionForm({
               </>
             ) : (
               <>
-                Send Enquiry
+                {submitButtonText || "Send Enquiry"}
                 <ArrowRight aria-hidden="true" size={19} />
               </>
             )}

@@ -25,6 +25,8 @@ type Content = {
   secondaryGoal?: string;
   conversionEvents?: string[];
   indexable?: boolean;
+  reviewVideoUrl?: string;
+  reviewVideoTitle?: string;
 };
 type Variant = {
   id: string;
@@ -98,6 +100,8 @@ const blank = {
   indexable: false,
   reason: "",
   expectedImpact: "",
+  reviewVideoUrl: "",
+  reviewVideoTitle: "",
 };
 
 export default function LandingPageManager() {
@@ -158,6 +162,8 @@ export default function LandingPageManager() {
       indexable: content.indexable === true,
       reason: "",
       expectedImpact: "",
+      reviewVideoUrl: content.reviewVideoUrl ?? "",
+      reviewVideoTitle: content.reviewVideoTitle ?? "",
     });
   }, [selected]);
   const content = () => ({
@@ -182,6 +188,8 @@ export default function LandingPageManager() {
       .map((item) => item.trim())
       .filter(Boolean),
     indexable: form.indexable,
+    reviewVideoUrl: form.reviewVideoUrl,
+    reviewVideoTitle: form.reviewVideoTitle,
   });
   async function action(payload: Record<string, unknown>) {
     setBusy(true);
@@ -442,6 +450,16 @@ export default function LandingPageManager() {
             label="Campaign name (optional)"
             value={form.campaignName}
             set={(v) => setForm({ ...form, campaignName: v })}
+          />
+          <Input
+            label="Parent Review Video URL (YouTube, Vimeo, or MP4 link)"
+            value={form.reviewVideoUrl}
+            set={(v) => setForm({ ...form, reviewVideoUrl: v })}
+          />
+          <Input
+            label="Review Video Title / Parent Name"
+            value={form.reviewVideoTitle}
+            set={(v) => setForm({ ...form, reviewVideoTitle: v })}
           />
           <Input
             label="Primary goal"

@@ -9,11 +9,13 @@ import {
   HelpCircle,
   MapPin,
   Phone,
+  Play,
   ShieldCheck,
   Sparkles,
   Star,
   Users,
   Utensils,
+  Video,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
 import { useEffect, useMemo, useState } from "react";
@@ -33,6 +35,8 @@ type Content = {
   programme?: string;
   enquiryType?: string;
   offerText?: string;
+  reviewVideoUrl?: string;
+  reviewVideoTitle?: string;
 };
 
 type Variant = {
@@ -60,8 +64,8 @@ const campusPhotos = [
     subtitle: "Ball pool, motor skill development & safe play areas",
   },
   {
-    src: "/images/hero/hero-building.jpg",
-    title: "Dedicated Extended Daycare",
+    src: "/images/about/about-main.jpg",
+    title: "Dedicated Extended Daycare & Learning",
     subtitle: "Hygienic nap rooms & nutritious warm meals till 7:00 PM",
   },
 ];
@@ -145,6 +149,29 @@ const faqs = [
     a: "Our entire campus in Sector 12B is under 24/7 CCTV surveillance with controlled entry access, background-verified staff, child-safe soft furniture, sanitized washrooms, and emergency medical tie-up.",
   },
 ];
+
+function getYouTubeEmbedUrl(url: string) {
+  if (!url) return "";
+  try {
+    if (url.includes("youtube.com/embed/")) return url;
+    if (url.includes("youtu.be/")) {
+      const id = url.split("youtu.be/")[1]?.split("?")[0];
+      return `https://www.youtube.com/embed/${id}`;
+    }
+    if (url.includes("youtube.com/shorts/")) {
+      const id = url.split("youtube.com/shorts/")[1]?.split("?")[0];
+      return `https://www.youtube.com/embed/${id}`;
+    }
+    if (url.includes("youtube.com/watch")) {
+      const urlObj = new URL(url);
+      const id = urlObj.searchParams.get("v");
+      return id ? `https://www.youtube.com/embed/${id}` : url;
+    }
+  } catch {
+    return url;
+  }
+  return url;
+}
 
 function anonymousBucket(key: string) {
   let id = "";
@@ -237,6 +264,7 @@ export default function LandingPageExperience({
   ];
 
   const bullets = content.bullets && content.bullets.length > 0 ? content.bullets : defaultBullets;
+  const embedUrl = getYouTubeEmbedUrl(content.reviewVideoUrl || "");
 
   return (
     <div className="min-h-screen bg-[#FAF7FC] text-[#281034]">
@@ -285,7 +313,7 @@ export default function LandingPageExperience({
         </div>
       </header>
 
-      {/* Hero Section with Sticky Lead Form */}
+      {/* Hero Section with Clean Lead Form */}
       <section className="relative overflow-hidden bg-gradient-to-b from-[#FAF4FF] via-white to-[#FAF7FC] py-8 sm:py-14">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:items-start">
           {/* Left Column: Value Prop */}
@@ -365,45 +393,93 @@ export default function LandingPageExperience({
             </div>
           </div>
 
-          {/* Right Column: Sticky Lead Capture Form */}
+          {/* Right Column: Clean Streamlined Admission Form */}
           <div id="ad-enquiry" className="scroll-mt-24">
-            <div className="rounded-3xl border-2 border-[#5B2A86]/20 bg-white p-5 sm:p-7 shadow-xl ring-1 ring-purple-500/5">
-              <div className="mb-5 border-b border-gray-100 pb-4">
-                <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-[#5B2A86]">
-                  <Sparkles size={14} className="text-amber-500" />
-                  <span>Admissions Desk 2026–27</span>
-                </div>
-                <h2 className="mt-1 text-xl sm:text-2xl font-black text-gray-900">
-                  Book Campus Visit & Claim 30% Off
-                </h2>
-                <p className="mt-1 text-xs text-gray-600">
-                  Experience classrooms, meet educators, and claim the 30% annual fee offer.
-                </p>
-              </div>
+            {page.pageType === "RECRUITMENT" ? (
+              <CareerApplicationForm />
+            ) : (
+              <AdmissionForm
+                title="Book Campus Visit & Claim 30% Off"
+                subtitle="Experience classrooms, meet educators, and claim 30% off annual fee."
+                badgeText="Admissions Desk 2026–27"
+                submitButtonText="Claim 30% Off & Book Free Visit"
+                initialProgramme={
+                  content.programme || (page.pageType === "DAYCARE" ? "DAYCARE" : "")
+                }
+                initialEnquiryType={
+                  content.enquiryType ||
+                  (page.pageType === "DAYCARE" ? "DAYCARE" : "SCHOOL_VISIT")
+                }
+                landingPageId={page.id}
+                landingVariantId={selected.id}
+                growthExperimentId={experiment?.id ?? ""}
+              />
+            )}
+          </div>
+        </div>
+      </section>
 
-              {page.pageType === "RECRUITMENT" ? (
-                <CareerApplicationForm />
-              ) : (
-                <AdmissionForm
-                  initialProgramme={
-                    content.programme || (page.pageType === "DAYCARE" ? "DAYCARE" : "")
-                  }
-                  initialEnquiryType={
-                    content.enquiryType ||
-                    (page.pageType === "DAYCARE" ? "DAYCARE" : "SCHOOL_VISIT")
-                  }
-                  landingPageId={page.id}
-                  landingVariantId={selected.id}
-                  growthExperimentId={experiment?.id ?? ""}
+      {/* Parent Review Video Player Section */}
+      <section className="border-t border-purple-100 bg-white py-12 sm:py-16">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-8">
+            <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#5B2A86]">
+              <Video size={15} />
+              Parent Video Stories
+            </span>
+            <h2 className="mt-2 text-2xl sm:text-3xl font-black text-[#281034]">
+              Hear Directly From Our Parents
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Watch real experiences of Dwarka families who chose Kidzee Sector 12 for early education.
+            </p>
+          </div>
+
+          <div className="mx-auto max-w-3xl overflow-hidden rounded-3xl border-2 border-purple-200 bg-[#281034] shadow-xl">
+            {embedUrl ? (
+              <div className="relative aspect-16/9 w-full">
+                <iframe
+                  src={embedUrl}
+                  title={content.reviewVideoTitle || "Kidzee Sector 12 Dwarka Parent Review"}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="h-full w-full border-0"
                 />
-              )}
-            </div>
+              </div>
+            ) : content.reviewVideoUrl ? (
+              <video
+                src={content.reviewVideoUrl}
+                controls
+                className="aspect-16/9 w-full object-cover"
+                poster="/images/hero/hero-main.jpg"
+              />
+            ) : (
+              <div className="relative aspect-16/9 flex flex-col items-center justify-center p-6 text-center text-white bg-gradient-to-br from-[#3B174F] to-[#281034]">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#F6C84B] text-[#281034] shadow-lg mb-4">
+                  <Play size={24} className="ml-1 fill-[#281034]" />
+                </div>
+                <h3 className="text-xl font-bold">
+                  {content.reviewVideoTitle || "Real Parent Review & Campus Experience"}
+                </h3>
+                <p className="mt-2 text-xs sm:text-sm text-purple-200 max-w-md">
+                  Experience why local Dwarka parents trust our caring teachers, 1:8 ratio, and safe classrooms.
+                </p>
+                <div className="mt-4 flex items-center gap-1 text-amber-400">
+                  <Star size={16} className="fill-amber-400" />
+                  <Star size={16} className="fill-amber-400" />
+                  <Star size={16} className="fill-amber-400" />
+                  <Star size={16} className="fill-amber-400" />
+                  <Star size={16} className="fill-amber-400" />
+                  <span className="ml-2 text-xs font-bold text-white">5.0 Parent Rating</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
       {/* Real Campus Facility Photo Grid */}
-      <section className="border-t border-gray-100 bg-white py-12 sm:py-16">
+      <section className="border-t border-gray-100 bg-[#FAF7FC] py-12 sm:py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <span className="text-xs font-black uppercase tracking-wider text-[#5B2A86]">
