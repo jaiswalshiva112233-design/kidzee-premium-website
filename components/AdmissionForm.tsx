@@ -351,7 +351,7 @@ export default function AdmissionForm({
             currency: "INR",
           });
           (window as unknown as { gtag: Function }).gtag("event", "conversion", {
-            send_to: "AW-17974378144",
+            send_to: "AW-17974378144/Fc3TCOPwkaEcEKD97PpC",
             value: 1.0,
             currency: "INR",
           });

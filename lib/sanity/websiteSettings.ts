@@ -73,7 +73,7 @@ function prepareSettings(
     30,
   );
   const googleAdsConversionLabel = validatedValue(
-    source.googleAdsConversionLabel || process.env.NEXT_PUBLIC_GOOGLE_ADS_LEAD_LABEL,
+    source.googleAdsConversionLabel || process.env.NEXT_PUBLIC_GOOGLE_ADS_LEAD_LABEL || "Fc3TCOPwkaEcEKD97PpC",
     /^[A-Za-z0-9_-]{1,100}$/,
     100,
   );
