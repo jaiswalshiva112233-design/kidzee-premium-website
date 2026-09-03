@@ -307,43 +307,26 @@ export default async function RootLayout({
           />
         ) : null}
 
-        {trackingSettings.analyticsEnabled && trackingSettings.googleAnalyticsId ? (
-          <>
-            <script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(
-                trackingSettings.googleAnalyticsId,
-              )}`}
-            />
-            <script
-              id="google-analytics-init"
-              dangerouslySetInnerHTML={{
-                __html: `
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  gtag('config', '${trackingSettings.googleAnalyticsId}', {
-                    page_path: window.location.pathname,
-                    anonymize_ip: true
-                  });
-                `,
-              }}
-            />
-          </>
-        ) : null}
-
-        {trackingSettings.advertisingEnabled && trackingSettings.googleAdsId ? (
-          <script
-            id="google-ads-init"
-            dangerouslySetInnerHTML={{
-              __html: `
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('config', '${trackingSettings.googleAdsId}');
-              `,
-            }}
-          />
-        ) : null}
+        {/* Google Ads Tag: AW-17974378144 */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17974378144"
+        />
+        <script
+          id="google-ads-gtag-init"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'AW-17974378144');
+              gtag('config', 'G-035S95BK3W', {
+                page_path: window.location.pathname,
+                anonymize_ip: true
+              });
+            `,
+          }}
+        />
 
         {trackingSettings.metaPixelEnabled && trackingSettings.metaPixelId ? (
           <script

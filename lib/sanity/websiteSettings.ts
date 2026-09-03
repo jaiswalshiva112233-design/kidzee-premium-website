@@ -68,7 +68,7 @@ function prepareSettings(
     30,
   );
   const googleAdsId = validatedValue(
-    source.googleAdsId || process.env.NEXT_PUBLIC_GOOGLE_ADS_ID,
+    source.googleAdsId || process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || "AW-17974378144",
     /^AW-\d{5,20}$/,
     30,
   );
@@ -111,9 +111,7 @@ function prepareSettings(
   };
 }
 
-async function loadWebsiteTrackingSettings(): Promise<
-  PublicWebsiteTrackingSettings
-> {
+async function loadWebsiteTrackingSettings(): Promise<PublicWebsiteTrackingSettings> {
   try {
     const settings =
       await sanityServerClient.fetch<StoredWebsiteTrackingSettings | null>(
