@@ -91,17 +91,6 @@ export default async function AboutPage() {
   const structuredData = JSON.stringify([
     aboutPageSchema,
     breadcrumbSchema,
-    ...teamMembers.map((member) => ({
-      "@context": "https://schema.org",
-      "@type": "Person",
-      name: member.name,
-      jobTitle: member.role,
-      description: member.introduction,
-      image: member.imageUrl,
-      worksFor: {
-        "@id": `${site.url}/#preschool`,
-      },
-    })),
   ]).replace(/</g, "\\u003c");
 
   return (
@@ -126,7 +115,9 @@ export default async function AboutPage() {
 
         <AboutKidzee />
 
-        <Team members={teamMembers} />
+        <div data-nosnippet="true">
+          <Team members={teamMembers} />
+        </div>
 
         <AboutEnvironment
           mainImageUrl={

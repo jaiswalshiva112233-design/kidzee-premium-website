@@ -291,6 +291,8 @@ export default async function RootLayout({
   return (
     <html lang="en-IN" data-scroll-behavior="smooth">
       <head>
+        {/* Tell Google explicitly which image to use as the search result thumbnail */}
+        <meta name="thumbnail" content={`${site.url}/images/landing/kidzee-creative-learning.jpg`} />
         {trackingSettings.googleSearchConsoleVerification ? (
           <meta
             name="google-site-verification"

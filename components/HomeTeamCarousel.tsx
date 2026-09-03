@@ -30,6 +30,7 @@ function TeamCard({ member }: { member: WebsiteTeamMember }) {
             src={member.imageUrl}
             alt={member.photoAlt || `${member.name}, ${member.role}`}
             fill
+            loading="lazy"
             sizes="(max-width: 640px) 72vw, (max-width: 1024px) 42vw, 22vw"
             className="object-cover transition-transform duration-700 motion-reduce:transition-none group-hover:scale-[1.018] motion-reduce:group-hover:scale-100"
           />

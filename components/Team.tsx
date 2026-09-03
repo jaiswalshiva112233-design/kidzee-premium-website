@@ -66,6 +66,7 @@ export default function Team({ members }: TeamProps) {
                     src={member.imageUrl}
                     alt={member.photoAlt || `${member.name}, ${member.role}`}
                     fill
+                    loading="lazy"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover transition-transform duration-700 motion-reduce:transition-none group-hover:scale-[1.018] motion-reduce:group-hover:scale-100"
                   />
