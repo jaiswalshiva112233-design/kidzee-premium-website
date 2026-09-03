@@ -23,6 +23,7 @@ import {
 
 import AdminSidebar, { type AdminSessionUser } from "./AdminSidebar";
 import AdminGlobalSearch from "./AdminGlobalSearch";
+import AdminBrowserControls from "./AdminBrowserControls";
 import CentreHeadGuide from "./CentreHeadGuide";
 import NotificationBell from "./notifications/NotificationBell";
 import {
@@ -232,6 +233,10 @@ function AdminLayoutContent({
                   <p className="truncate text-xs font-semibold text-[#817684] sm:text-sm">
                     Sector 12, Dwarka
                   </p>
+                </div>
+
+                <div className="hidden sm:flex items-center ml-2">
+                  <AdminBrowserControls />
                 </div>
               </div>
 
