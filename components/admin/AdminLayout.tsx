@@ -237,7 +237,6 @@ function AdminLayoutContent({
 
               <div className="flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-3">
                 <AdminGlobalSearch />
-                <CentreHeadGuide />
                 <NotificationBell />
                 <Link
                   href="/admin/settings/security"
@@ -295,6 +294,8 @@ function AdminLayoutContent({
           </main>
         </div>
       </div>
+
+      <CentreHeadGuide />
 
       {mobileMenuOpen ? (
         <div className="fixed inset-0 z-[100] lg:hidden">

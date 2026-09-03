@@ -1,17 +1,16 @@
 "use client";
 
-import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
-  BookOpen,
   CalendarCheck,
   CheckCircle2,
   ChevronRight,
   FileCheck2,
   FileSpreadsheet,
-  Globe,
+  GripHorizontal,
   GraduationCap,
   HelpCircle,
   Lightbulb,
@@ -394,6 +393,12 @@ export default function CentreHeadGuide() {
   const [activeWorkflow, setActiveWorkflow] = useState<GuideWorkflow | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
+  // Draggable state for the floating widget
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ startX: 0, startY: 0, initialX: 0, initialY: 0 });
+  const hasMovedRef = useRef(false);
+
   const categories = ["ALL", "Admissions", "Fees & Billing", "Daily Ops", "Staff & Expense", "Safety & Records"];
 
   const filteredWorkflows = useMemo(() => {
@@ -432,65 +437,122 @@ export default function CentreHeadGuide() {
     router.push(href);
   };
 
+  // Dragging handlers
+  const handlePointerDown = (e: React.PointerEvent) => {
+    setIsDragging(true);
+    hasMovedRef.current = false;
+    dragStartRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initialX: position.x,
+      initialY: position.y,
+    };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    const deltaX = e.clientX - dragStartRef.current.startX;
+    const deltaY = e.clientY - dragStartRef.current.startY;
+    if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+      hasMovedRef.current = true;
+    }
+    setPosition({
+      x: dragStartRef.current.initialX + deltaX,
+      y: dragStartRef.current.initialY + deltaY,
+    });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    setIsDragging(false);
+    try {
+      (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {
+      // safe
+    }
+  };
+
+  const handleClick = () => {
+    if (!hasMovedRef.current) {
+      setIsOpen((prev) => !prev);
+    }
+  };
+
   return (
     <>
-      {/* 1. Header Trigger Button */}
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        aria-label="Open Centre Head Guide"
-        className="group relative flex h-10 items-center gap-2 rounded-xl border border-[#D9C4EA] bg-[#FBF8FD] px-3 text-xs font-black text-[#5B2A86] shadow-sm transition hover:border-[#B483D6] hover:bg-[#F3EBF9] sm:h-11 sm:px-3.5 sm:text-sm"
+      {/* 1. Movable / Draggable Sticky Floating Widget (Like Mira) */}
+      <div
+        style={{
+          transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+        }}
+        className="fixed bottom-6 right-6 z-[9990] flex flex-col items-center select-none touch-none"
       >
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#5B2A86] text-[11px] font-black text-white group-hover:scale-105 transition">
-          ?
-        </span>
-        <span className="hidden sm:inline">Centre Guide</span>
-        <span className="inline sm:hidden">Guide</span>
-        <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-      </button>
-
-      {/* 2. Floating Quick Trigger */}
-      <div className="fixed bottom-6 right-6 z-40 hidden sm:block">
-        <button
-          type="button"
-          onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2.5 rounded-full bg-gradient-to-r from-[#5B2A86] to-[#7B37B2] px-4 py-3 text-xs font-black text-white shadow-[0_8px_30px_rgba(91,42,134,0.35)] transition hover:scale-105 hover:shadow-[0_12px_35px_rgba(91,42,134,0.45)] focus:outline-none"
+        <div
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onClick={handleClick}
+          className="group relative flex cursor-grab active:cursor-grabbing items-center justify-center rounded-full border-2 border-white bg-gradient-to-tr from-[#2D1736] via-[#5B2A86] to-[#7E38B7] p-1 text-white shadow-[0_12px_35px_rgba(45,23,54,0.35)] transition-transform hover:scale-105 hover:shadow-[0_16px_40px_rgba(45,23,54,0.45)]"
         >
-          <BookOpen size={16} className="text-amber-300" />
-          <span>Centre Head Guide</span>
-          <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] font-bold">SOP</span>
-        </button>
+          {/* Subtle Drag Handle Indicator */}
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-white/90 px-1.5 py-0.2 text-[9px] font-bold text-[#5B2A86] shadow-sm flex items-center gap-0.5">
+            <GripHorizontal size={10} />
+            <span>Move</span>
+          </div>
+
+          <div className="h-13 w-13 rounded-full overflow-hidden border border-white/40 bg-[#5B2A86] flex items-center justify-center">
+            <Image
+              src="/images/mira/mira-centre-guide.png"
+              alt="Centre Head Guide"
+              width={52}
+              height={52}
+              className="h-full w-full object-cover pointer-events-none"
+            />
+          </div>
+
+          <span className="absolute -bottom-1 -right-1 flex h-4 w-4">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white" />
+          </span>
+        </div>
+
+        <span className="mt-1 rounded-full bg-white/95 px-2.5 py-0.5 text-[11px] font-black text-[#4C285C] shadow-[0_4px_14px_rgba(45,23,54,0.16)] border border-[#E6DBEE]">
+          Centre Guide
+        </span>
       </div>
 
-      {/* 3. The Guide Drawer (Slide-Over from Right) */}
+      {/* 2. Full-Height Slide-Over Drawer on the Right Screen */}
       {isOpen && (
         <div className="fixed inset-0 z-[9999] flex justify-end">
+          {/* Backdrop */}
           <div
             className="fixed inset-0 bg-[#1E0B2B]/40 backdrop-blur-xs transition-opacity"
             onClick={() => setIsOpen(false)}
           />
 
-          <div className="relative z-10 flex h-full w-full max-w-2xl flex-col bg-white shadow-[-20px_0_50px_rgba(30,11,43,0.25)] border-l border-[#EBE3F2] overflow-hidden">
+          {/* Drawer Container (Attached to Root, Full Height, 100% Unclipped) */}
+          <div className="relative z-10 flex h-full w-full max-w-xl flex-col bg-white shadow-[-25px_0_60px_rgba(30,11,43,0.3)] border-l border-[#EBE3F2] overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-[#F0E8F6] bg-gradient-to-r from-[#FAF5FD] to-white px-5 py-4 sm:px-6">
+            <div className="flex items-center justify-between border-b border-[#F0E8F6] bg-gradient-to-r from-[#FAF5FD] to-white px-5 py-4 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#5B2A86] text-white shadow-md">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#5B2A86] text-white shadow-md">
                   <Sparkles size={22} className="text-amber-300" />
                 </div>
-                <div>
-                  <h2 className="text-base font-black text-[#2D1736] sm:text-lg flex items-center gap-2">
-                    Centre Head SOP Guide
+                <div className="min-w-0">
+                  <h2 className="text-base font-black text-[#2D1736] flex items-center gap-2">
+                    <span>Centre Head SOP Guide</span>
                     <span className="rounded-md bg-[#5B2A86]/10 px-2 py-0.5 text-[10px] font-black text-[#5B2A86] uppercase tracking-wider">
                       Zero-Mistake
                     </span>
                   </h2>
-                  <p className="text-xs text-[#7A6E82]">
-                    Step-by-step point-to-point walkthroughs for all school operations
+                  <p className="text-xs text-[#7A6E82] truncate">
+                    Point-to-point walkthroughs for all school operations
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2.5">
+              {/* Language Switcher & Close */}
+              <div className="flex items-center gap-2">
                 <div className="flex rounded-xl border border-[#E6DBEE] bg-white p-0.5 shadow-sm">
                   <button
                     type="button"
@@ -499,7 +561,7 @@ export default function CentreHeadGuide() {
                       language === "EN" ? "bg-[#5B2A86] text-white shadow" : "text-[#7A6E82] hover:bg-[#FAF6FC]"
                     }`}
                   >
-                    English
+                    EN
                   </button>
                   <button
                     type="button"
@@ -508,7 +570,7 @@ export default function CentreHeadGuide() {
                       language === "HI" ? "bg-[#5B2A86] text-white shadow" : "text-[#7A6E82] hover:bg-[#FAF6FC]"
                     }`}
                   >
-                    हिंदी / Hinglish
+                    हिंदी
                   </button>
                 </div>
 
@@ -522,39 +584,40 @@ export default function CentreHeadGuide() {
               </div>
             </div>
 
-            {/* Content Area */}
+            {/* Body: Either Step Wizard OR Directory List */}
             {activeWorkflow ? (
+              /* DETAIL VIEW: Interactive Point-to-Point Steps */
               <div className="flex flex-1 flex-col overflow-y-auto">
-                <div className="border-b border-[#F0E8F6] bg-[#FAF7FC] p-4 sm:p-6">
-                  <div className="flex items-start justify-between gap-4">
+                <div className="border-b border-[#F0E8F6] bg-[#FAF7FC] p-4 sm:p-5 shrink-0">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <span className="inline-block rounded-md bg-[#5B2A86]/10 px-2 py-0.5 text-[11px] font-black text-[#5B2A86] mb-1.5">
+                      <span className="inline-block rounded-md bg-[#5B2A86]/10 px-2 py-0.5 text-[11px] font-black text-[#5B2A86] mb-1">
                         {activeWorkflow.category} • {activeWorkflow.estimatedMinutes}
                       </span>
-                      <h3 className="text-base font-black text-[#2D1736] sm:text-xl">
+                      <h3 className="text-base font-black text-[#2D1736]">
                         {language === "HI" ? activeWorkflow.titleHi : activeWorkflow.title}
                       </h3>
                     </div>
                     <button
                       type="button"
                       onClick={closeWorkflow}
-                      className="rounded-xl border border-[#E6DBEE] bg-white px-3 py-1.5 text-xs font-bold text-[#5B2A86] hover:bg-[#FAF6FC]"
+                      className="shrink-0 rounded-xl border border-[#E6DBEE] bg-white px-2.5 py-1 text-xs font-bold text-[#5B2A86] hover:bg-[#FAF6FC]"
                     >
-                      ← Back to All Guides
+                      ← Back
                     </button>
                   </div>
 
                   {activeWorkflow.criticalWarning && (
-                    <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-medium text-amber-900">
-                      <ShieldAlert size={16} className="mt-0.5 shrink-0 text-amber-600" />
+                    <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-2.5 text-xs font-medium text-amber-900">
+                      <ShieldAlert size={15} className="mt-0.5 shrink-0 text-amber-600" />
                       <span>
-                        <strong className="font-black">Important Rule: </strong>
+                        <strong className="font-black">Safety Rule: </strong>
                         {activeWorkflow.criticalWarning}
                       </span>
                     </div>
                   )}
 
-                  <div className="mt-4 flex items-center gap-2">
+                  <div className="mt-3 flex items-center gap-2">
                     <span className="text-xs font-bold text-[#7A6E82]">
                       Step {currentStepIndex + 1} of {activeWorkflow.steps.length}
                     </span>
@@ -572,7 +635,7 @@ export default function CentreHeadGuide() {
                   </div>
                 </div>
 
-                <div className="flex-1 p-4 sm:p-6 space-y-3.5">
+                <div className="flex-1 p-4 sm:p-5 space-y-3 overflow-y-auto">
                   {activeWorkflow.steps.map((step, idx) => {
                     const isCurrent = idx === currentStepIndex;
                     const isDone = idx < currentStepIndex;
@@ -581,7 +644,7 @@ export default function CentreHeadGuide() {
                       <div
                         key={step.title}
                         onClick={() => setCurrentStepIndex(idx)}
-                        className={`cursor-pointer rounded-2xl border p-4 transition ${
+                        className={`cursor-pointer rounded-2xl border p-3.5 transition ${
                           isCurrent
                             ? "border-[#5B2A86] bg-[#FAF5FD] shadow-md ring-2 ring-[#5B2A86]/20"
                             : isDone
@@ -591,7 +654,7 @@ export default function CentreHeadGuide() {
                       >
                         <div className="flex items-start gap-3">
                           <div
-                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-black ${
+                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-xl text-xs font-black ${
                               isCurrent
                                 ? "bg-[#5B2A86] text-white shadow"
                                 : isDone
@@ -599,12 +662,12 @@ export default function CentreHeadGuide() {
                                   : "bg-[#EADBEE] text-[#5B2A86]"
                             }`}
                           >
-                            {isDone ? <CheckCircle2 size={16} /> : idx + 1}
+                            {isDone ? <CheckCircle2 size={15} /> : idx + 1}
                           </div>
 
                           <div className="flex-1 min-w-0">
                             <h4
-                              className={`text-sm font-black ${
+                              className={`text-xs sm:text-sm font-black ${
                                 isCurrent ? "text-[#5B2A86]" : isDone ? "text-emerald-900" : "text-[#2D1736]"
                               }`}
                             >
@@ -615,15 +678,15 @@ export default function CentreHeadGuide() {
                             </p>
 
                             {step.highlight && (
-                              <div className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1 text-[11px] font-bold text-[#5B2A86] border border-[#EADBEE] shadow-sm">
-                                <Lightbulb size={13} className="text-amber-500" />
+                              <div className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-white px-2 py-0.5 text-[10px] font-bold text-[#5B2A86] border border-[#EADBEE] shadow-sm">
+                                <Lightbulb size={12} className="text-amber-500" />
                                 <span>Look for: {step.highlight}</span>
                               </div>
                             )}
 
                             {step.warning && (
-                              <p className="mt-2 text-[11px] font-semibold text-rose-600 flex items-center gap-1">
-                                <ShieldAlert size={13} /> {step.warning}
+                              <p className="mt-1.5 text-[11px] font-semibold text-rose-600 flex items-center gap-1">
+                                <ShieldAlert size={12} /> {step.warning}
                               </p>
                             )}
                           </div>
@@ -633,24 +696,24 @@ export default function CentreHeadGuide() {
                   })}
                 </div>
 
-                <div className="border-t border-[#F0E8F6] bg-white p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="border-t border-[#F0E8F6] bg-white p-4 flex items-center justify-between gap-2 shrink-0">
                   <button
                     type="button"
                     onClick={() => navigateToScreen(activeWorkflow.targetHref)}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-black text-white shadow-md transition hover:bg-emerald-700"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-black text-white shadow transition hover:bg-emerald-700"
                   >
                     <span>🚀 {activeWorkflow.targetLabel}</span>
-                    <ArrowRight size={14} />
+                    <ArrowRight size={13} />
                   </button>
 
-                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
                       disabled={currentStepIndex === 0}
                       onClick={() => setCurrentStepIndex((prev) => Math.max(0, prev - 1))}
-                      className="rounded-xl border border-[#E6DBEE] bg-white px-3 py-2 text-xs font-bold text-[#5B2A86] disabled:opacity-40"
+                      className="rounded-xl border border-[#E6DBEE] bg-white px-3 py-1.5 text-xs font-bold text-[#5B2A86] disabled:opacity-40"
                     >
-                      Previous
+                      Prev
                     </button>
                     <button
                       type="button"
@@ -658,19 +721,20 @@ export default function CentreHeadGuide() {
                       onClick={() =>
                         setCurrentStepIndex((prev) => Math.min(activeWorkflow.steps.length - 1, prev + 1))
                       }
-                      className="rounded-xl bg-[#5B2A86] px-4 py-2 text-xs font-black text-white shadow transition hover:bg-[#4E2373] disabled:opacity-40"
+                      className="rounded-xl bg-[#5B2A86] px-3.5 py-1.5 text-xs font-black text-white shadow transition hover:bg-[#4E2373] disabled:opacity-40"
                     >
-                      Next Step →
+                      Next →
                     </button>
                   </div>
                 </div>
               </div>
             ) : (
+              /* DIRECTORY VIEW */
               <div className="flex flex-1 flex-col overflow-y-auto">
-                <div className="p-4 sm:p-5 border-b border-[#F0E8F6] bg-[#FAF7FC]">
+                <div className="p-4 border-b border-[#F0E8F6] bg-[#FAF7FC] shrink-0">
                   <div className="relative">
                     <Search
-                      size={18}
+                      size={16}
                       className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8F7D9B]"
                     />
                     <input
@@ -679,29 +743,29 @@ export default function CentreHeadGuide() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder={
                         language === "HI"
-                          ? "Aapko kya karna hai? (e.g. fees receipt, naya admission, chhutti, kharcha...)"
-                          : "What would you like to do? (e.g. cash fee receipt, new enquiry, attendance...)"
+                          ? "Fees, admission, receipt, chhutti, kharcha..."
+                          : "Search fees, admission, receipt, attendance..."
                       }
-                      className="w-full rounded-2xl border border-[#E2D5EA] bg-white pl-10 pr-4 py-3 text-xs sm:text-sm font-medium text-[#2D1736] placeholder-[#9E8EAA] shadow-sm transition focus:border-[#5B2A86] focus:outline-none focus:ring-4 focus:ring-[#5B2A86]/10"
+                      className="w-full rounded-2xl border border-[#E2D5EA] bg-white pl-9 pr-4 py-2.5 text-xs sm:text-sm font-medium text-[#2D1736] placeholder-[#9E8EAA] shadow-sm transition focus:border-[#5B2A86] focus:outline-none"
                     />
                     {searchQuery && (
                       <button
                         type="button"
                         onClick={() => setSearchQuery("")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#8F7D9B] hover:text-[#5B2A86]"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#8F7D9B]"
                       >
                         Clear
                       </button>
                     )}
                   </div>
 
-                  <div className="mt-3 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                  <div className="mt-2.5 flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
                     {categories.map((cat) => (
                       <button
                         key={cat}
                         type="button"
                         onClick={() => setSelectedCategory(cat)}
-                        className={`whitespace-nowrap rounded-xl px-3 py-1.5 text-xs font-black transition ${
+                        className={`whitespace-nowrap rounded-xl px-2.5 py-1 text-xs font-black transition ${
                           selectedCategory === cat
                             ? "bg-[#5B2A86] text-white shadow"
                             : "border border-[#EADBEE] bg-white text-[#6F5F78] hover:bg-[#F8F2FB]"
@@ -713,50 +777,46 @@ export default function CentreHeadGuide() {
                   </div>
                 </div>
 
-                <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
+                <div className="flex-1 p-4 space-y-2.5 overflow-y-auto">
                   {filteredWorkflows.length === 0 ? (
                     <div className="p-8 text-center">
-                      <HelpCircle size={36} className="mx-auto text-[#9E8EAA]" />
-                      <p className="mt-2 text-sm font-bold text-[#2D1736]">No guide matches your search</p>
+                      <HelpCircle size={32} className="mx-auto text-[#9E8EAA]" />
+                      <p className="mt-2 text-sm font-bold text-[#2D1736]">No guide found</p>
                       <p className="mt-1 text-xs text-[#7A6E82]">
-                        Try searching simpler terms like "fees", "admission", "receipt", or "attendance".
+                        Try searching "fees", "admission", "receipt" or "attendance".
                       </p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      {filteredWorkflows.map((wf) => {
-                        const Icon = wf.icon;
-                        return (
-                          <div
-                            key={wf.id}
-                            onClick={() => openWorkflow(wf)}
-                            className="group cursor-pointer flex flex-col justify-between rounded-2xl border border-[#EDE2F3] bg-white p-4 shadow-sm transition hover:border-[#5B2A86] hover:bg-[#FAF5FD] hover:shadow-md"
-                          >
-                            <div>
-                              <div className="flex items-center justify-between">
-                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F6EEFA] text-[#5B2A86] group-hover:bg-[#5B2A86] group-hover:text-white transition">
-                                  <Icon size={18} />
-                                </div>
-                                <span className="rounded-md bg-[#F4EEF8] px-2 py-0.5 text-[10px] font-black text-[#6F5F78]">
-                                  {wf.steps.length} Steps
-                                </span>
+                    filteredWorkflows.map((wf) => {
+                      const Icon = wf.icon;
+                      return (
+                        <div
+                          key={wf.id}
+                          onClick={() => openWorkflow(wf)}
+                          className="group cursor-pointer rounded-2xl border border-[#EDE2F3] bg-white p-3.5 shadow-sm transition hover:border-[#5B2A86] hover:bg-[#FAF5FD]"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#F6EEFA] text-[#5B2A86] group-hover:bg-[#5B2A86] group-hover:text-white transition">
+                                <Icon size={16} />
                               </div>
-
-                              <h4 className="mt-3 text-sm font-black text-[#2D1736] group-hover:text-[#5B2A86] transition line-clamp-2">
-                                {language === "HI" ? wf.titleHi : wf.title}
-                              </h4>
+                              <span className="text-[11px] font-bold text-[#7A6E82]">{wf.category}</span>
                             </div>
-
-                            <div className="mt-3 flex items-center justify-between border-t border-[#F5EDF9] pt-2.5 text-[11px] font-bold text-[#7A6E82]">
-                              <span>{wf.category}</span>
-                              <span className="flex items-center gap-1 text-[#5B2A86] font-black group-hover:translate-x-0.5 transition">
-                                Start Guide <ChevronRight size={13} />
-                              </span>
-                            </div>
+                            <span className="rounded-md bg-[#F4EEF8] px-2 py-0.5 text-[10px] font-black text-[#6F5F78]">
+                              {wf.steps.length} Steps
+                            </span>
                           </div>
-                        );
-                      })}
-                    </div>
+
+                          <h4 className="mt-2 text-xs sm:text-sm font-black text-[#2D1736] group-hover:text-[#5B2A86] transition">
+                            {language === "HI" ? wf.titleHi : wf.title}
+                          </h4>
+
+                          <div className="mt-2 flex items-center justify-end text-[11px] font-black text-[#5B2A86]">
+                            <span>Start Guide →</span>
+                          </div>
+                        </div>
+                      );
+                    })
                   )}
                 </div>
               </div>
