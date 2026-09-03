@@ -342,19 +342,35 @@ export default function AdmissionForm({
       );
 
       // Google Ads & Analytics Conversion Signal
-      if (typeof window !== "undefined" && typeof (window as unknown as { gtag?: Function }).gtag === "function") {
+      if (typeof window !== "undefined") {
         try {
-          (window as unknown as { gtag: Function }).gtag("event", "generate_lead", {
-            event_category: "Admissions",
-            event_label: savedEnquiryNumber,
-            value: 1.0,
-            currency: "INR",
-          });
-          (window as unknown as { gtag: Function }).gtag("event", "conversion", {
-            send_to: "AW-17974378144/Fc3TCOPwkaEcEKD97PpC",
-            value: 1.0,
-            currency: "INR",
-          });
+          const w = window as unknown as { gtag?: Function; dataLayer?: unknown[] };
+          w.dataLayer = w.dataLayer || [];
+          
+          // Fire generate_lead
+          if (typeof w.gtag === "function") {
+            w.gtag("event", "generate_lead", {
+              event_category: "Admissions",
+              event_label: savedEnquiryNumber,
+              value: 1.0,
+              currency: "INR",
+            });
+            w.gtag("event", "conversion", {
+              send_to: "AW-17974378144/Fc3TCOPwkaEcEKD97PpC",
+              value: 1.0,
+              currency: "INR",
+            });
+          } else {
+            w.dataLayer.push([
+              "event",
+              "conversion",
+              {
+                send_to: "AW-17974378144/Fc3TCOPwkaEcEKD97PpC",
+                value: 1.0,
+                currency: "INR",
+              },
+            ]);
+          }
         } catch {
           // non-blocking
         }
