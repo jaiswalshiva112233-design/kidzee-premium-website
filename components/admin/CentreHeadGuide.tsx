@@ -464,13 +464,13 @@ export default function CentreHeadGuide() {
 
       {/* 3. The Guide Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
+        <div className="fixed inset-0 z-50 overflow-y-auto p-2.5 sm:p-6 flex min-h-full items-start sm:items-center justify-center">
           <div
             className="fixed inset-0 bg-[#1E0B2B]/60 backdrop-blur-sm transition-opacity"
             onClick={() => setIsOpen(false)}
           />
 
-          <div className="relative flex max-h-[90vh] w-full max-w-3xl flex-col rounded-3xl bg-white shadow-[0_25px_60px_rgba(30,11,43,0.3)] overflow-hidden border border-[#EBE3F2]">
+          <div className="relative my-auto flex max-h-[88vh] h-[620px] w-full max-w-3xl flex-col rounded-3xl bg-white shadow-[0_25px_60px_rgba(30,11,43,0.3)] overflow-hidden border border-[#EBE3F2] z-10">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-[#F0E8F6] bg-gradient-to-r from-[#FAF5FD] to-white px-5 py-4 sm:px-6">
               <div className="flex items-center gap-3">
