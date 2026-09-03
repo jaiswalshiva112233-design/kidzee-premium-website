@@ -52,8 +52,8 @@ type AboutWelcomeProps = {
 };
 
 export default function AboutWelcome({
-  imageUrl = "/images/hero/hero-teacher-class.jpg",
-  imageAlt = "Teacher engaging with children at Kidzee Sector 12, Dwarka",
+  imageUrl = "/images/landing/kidzee-creative-learning.jpg",
+  imageAlt = "Children engaged in hands-on learning at Kidzee Sector 12, Dwarka",
 }: AboutWelcomeProps) {
   return (
     <section
