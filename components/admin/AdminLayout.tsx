@@ -23,6 +23,7 @@ import {
 
 import AdminSidebar, { type AdminSessionUser } from "./AdminSidebar";
 import AdminGlobalSearch from "./AdminGlobalSearch";
+import CentreHeadGuide from "./CentreHeadGuide";
 import NotificationBell from "./notifications/NotificationBell";
 import {
   exactAdminNavigationRoutes,
@@ -236,6 +237,7 @@ function AdminLayoutContent({
 
               <div className="flex min-w-0 flex-1 items-center justify-end gap-2 sm:gap-3">
                 <AdminGlobalSearch />
+                <CentreHeadGuide />
                 <NotificationBell />
                 <Link
                   href="/admin/settings/security"
