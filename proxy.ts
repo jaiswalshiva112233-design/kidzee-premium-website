@@ -74,23 +74,19 @@ function apiErrorResponse(
 export function proxy(
   request: NextRequest,
 ) {
-  const pathname =
-    request.nextUrl.pathname;
-
-  const isAdminApi =
-    pathname.startsWith("/api/admin");
+  const pathname = request.nextUrl.pathname;
+  const isAdminApi = pathname.startsWith("/api/admin");
 
   if (
     isAdminApi &&
-    publicApiPaths.has(pathname)
+    (publicApiPaths.has(pathname) ||
+      (pathname === "/api/admin/marketing/snapshot" &&
+        Boolean(request.headers.get("authorization")?.startsWith("Bearer "))))
   ) {
     return NextResponse.next();
   }
 
-  const sessionToken =
-    request.cookies.get(
-      adminSession.cookieName,
-    )?.value;
+  const sessionToken = request.cookies.get(adminSession.cookieName)?.value;
 
   // Proxy performs only an optimistic, signed-cookie check. Database-backed
   // session validation still happens inside the destination page or route.
