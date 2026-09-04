@@ -95,7 +95,17 @@ export async function executeGrowthAi(options: {
     logServerWarning("Growth AI route contains an invalid secret environment-variable name.", new Error("InvalidEnvironmentVariableName"));
     return { text: null, provider: route.provider, model: route.model, disabled: false };
   }
-  const apiKey = process.env[route.apiKeyEnvVar]?.trim();
+  let apiKey = process.env[route.apiKeyEnvVar]?.trim();
+  if (!apiKey) {
+    const setting = await prisma.centreSetting.findUnique({
+      where: { key: `SECRET_${route.apiKeyEnvVar}` },
+    });
+    const val = setting?.value;
+    if (val && typeof val === "object" && !Array.isArray(val) && "secret" in val) {
+      apiKey = String((val as { secret?: unknown }).secret || "").trim();
+    }
+  }
+
   if (!apiKey || !(await reserveCall(route.id, route.monthlyCallLimit))) {
     return { text: null, provider: route.provider, model: route.model, disabled: false };
   }
