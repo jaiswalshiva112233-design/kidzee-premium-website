@@ -126,13 +126,25 @@ export async function executeGrowthAi(options: {
     : { model: route.model, instructions: options.instructions, input: options.input, max_output_tokens: route.maxOutputTokens };
 
   try {
-    const response = await fetch(endpoint, {
+    let response = await fetch(endpoint, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify(body),
       cache: "no-store",
-      signal: AbortSignal.timeout(12_000),
+      signal: AbortSignal.timeout(50_000),
     });
+
+    if (!response.ok && route.model !== "gemini-3.1-flash-lite" && baseUrl.hostname.includes("googleapis.com")) {
+      const fallbackBody = { ...body, model: "gemini-3.1-flash-lite" };
+      response = await fetch(endpoint, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify(fallbackBody),
+        cache: "no-store",
+        signal: AbortSignal.timeout(30_000),
+      });
+    }
+
     if (!response.ok) {
       logServerWarning("Configured growth AI provider rejected the request.", new Error(`ProviderStatus${response.status}`));
       return { text: null, provider: route.provider, model: route.model, disabled: false };
@@ -140,6 +152,26 @@ export async function executeGrowthAi(options: {
     const text = responseText(await response.json());
     return { text: text || null, provider: route.provider, model: route.model, disabled: false };
   } catch (error) {
+    if (route.model !== "gemini-3.1-flash-lite" && baseUrl.hostname.includes("googleapis.com")) {
+      try {
+        const fallbackBody = { ...body, model: "gemini-3.1-flash-lite" };
+        const fallbackRes = await fetch(endpoint, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify(fallbackBody),
+          cache: "no-store",
+          signal: AbortSignal.timeout(30_000),
+        });
+        if (fallbackRes.ok) {
+          const fallbackText = responseText(await fallbackRes.json());
+          if (fallbackText) {
+            return { text: fallbackText, provider: route.provider, model: "gemini-3.1-flash-lite", disabled: false };
+          }
+        }
+      } catch {
+        // Fall through to error logging
+      }
+    }
     logServerError("Configured growth AI request failed.", error);
     return { text: null, provider: route.provider, model: route.model, disabled: false };
   }

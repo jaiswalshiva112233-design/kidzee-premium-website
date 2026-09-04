@@ -5,6 +5,9 @@ import { buildGrowthSnapshot } from "@/lib/growth/analysis";
 import { executeGrowthAi } from "@/lib/growth/aiControl";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAdmin();
