@@ -8,6 +8,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import CampaignSnapshotSyncModal from "./CampaignSnapshotSyncModal";
 
 import type { buildMarketingControlData } from "@/lib/growth/marketingControl";
 
@@ -145,28 +146,39 @@ export default function ChannelDashboard({ data }: { data: Data }) {
   return (
     <div className="space-y-5">
       <div
-        className={`flex items-center gap-3 rounded-2xl border p-4 ${
+        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border p-4 ${
           data.sourceStatus === "CONNECTED"
             ? "border-green-200 bg-green-50 text-green-800"
             : "border-amber-200 bg-amber-50 text-amber-900"
         }`}
       >
-        {data.sourceStatus === "CONNECTED" ? (
-          <CheckCircle2 size={19} />
-        ) : (
-          <AlertCircle size={19} />
-        )}
-        <div>
-          <p className="text-sm font-black">
-            {data.sourceStatus === "CONNECTED"
-              ? "Provider evidence connected"
-              : "Provider evidence awaiting its first sync"}
-          </p>
-          <p className="text-xs font-semibold opacity-80">
-            {data.latestSnapshotAt
-              ? `Latest snapshot ${new Date(data.latestSnapshotAt).toLocaleString("en-IN")}`
-              : "CentreOS still shows its own verified lead and admission attribution."}
-          </p>
+        <div className="flex items-center gap-3">
+          {data.sourceStatus === "CONNECTED" ? (
+            <CheckCircle2 size={19} />
+          ) : (
+            <AlertCircle size={19} />
+          )}
+          <div>
+            <p className="text-sm font-black">
+              {data.sourceStatus === "CONNECTED"
+                ? "Provider evidence connected"
+                : "Provider evidence awaiting its first sync"}
+            </p>
+            <p className="text-xs font-semibold opacity-80">
+              {data.latestSnapshotAt
+                ? `Latest snapshot ${new Date(data.latestSnapshotAt).toLocaleString("en-IN")}`
+                : "CentreOS still shows its own verified lead and admission attribution."}
+            </p>
+          </div>
+        </div>
+
+        <div className="shrink-0">
+          <CampaignSnapshotSyncModal
+            channel={data.channel}
+            defaultSpend={data.totals.spend || 13.81}
+            defaultClicks={data.totals.clicks || 2}
+            defaultBudget={data.totals.budget || 500}
+          />
         </div>
       </div>
 
