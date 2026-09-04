@@ -131,7 +131,7 @@ export async function executeGrowthAi(options: {
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify(body),
       cache: "no-store",
-      signal: AbortSignal.timeout(50_000),
+      signal: AbortSignal.timeout(600_000),
     });
 
     if (!response.ok && route.model !== "gemini-3.1-flash-lite" && baseUrl.hostname.includes("googleapis.com")) {
@@ -141,7 +141,7 @@ export async function executeGrowthAi(options: {
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify(fallbackBody),
         cache: "no-store",
-        signal: AbortSignal.timeout(30_000),
+        signal: AbortSignal.timeout(600_000),
       });
     }
 
@@ -160,7 +160,7 @@ export async function executeGrowthAi(options: {
           headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
           body: JSON.stringify(fallbackBody),
           cache: "no-store",
-          signal: AbortSignal.timeout(30_000),
+          signal: AbortSignal.timeout(600_000),
         });
         if (fallbackRes.ok) {
           const fallbackText = responseText(await fallbackRes.json());
