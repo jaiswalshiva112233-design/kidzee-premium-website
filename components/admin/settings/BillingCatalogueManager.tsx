@@ -1444,6 +1444,42 @@ export default function BillingCatalogueManager() {
               ) : null}
             </div>
           </div>
+          <div className="mt-8 space-y-6">
+            <div>
+              <h4 className="mb-3 text-xs font-black uppercase tracking-[0.14em] text-[#817684]">
+                Meal Packages & Combinations ({catalogue.mealCombinations.length})
+              </h4>
+              <HistoryCards
+                items={catalogue.mealCombinations.map((item) => ({
+                  id: item.id,
+                  title: item.name,
+                  status: item.status,
+                  detail:
+                    item.items.map((entry) => entry.meal.name).join(" + ") ||
+                    "No items",
+                  version: currentVersion(item.priceVersions)
+                    ? money(currentVersion(item.priceVersions)?.price)
+                    : "No price",
+                }))}
+              />
+            </div>
+            <div>
+              <h4 className="mb-3 text-xs font-black uppercase tracking-[0.14em] text-[#817684]">
+                Individual Meals / Menu Items ({catalogue.meals.length})
+              </h4>
+              <HistoryCards
+                items={catalogue.meals.map((item) => ({
+                  id: item.id,
+                  title: item.name,
+                  status: item.status,
+                  detail: item.description || item.code,
+                  version: currentVersion(item.priceVersions)
+                    ? money(currentVersion(item.priceVersions)?.price)
+                    : "No price",
+                }))}
+              />
+            </div>
+          </div>
         </Section>
       ) : null}
 
