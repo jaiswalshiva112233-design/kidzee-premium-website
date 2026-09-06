@@ -103,15 +103,22 @@ export async function findPossibleDuplicateStudent(
           {
             firstName: { equals: input.firstName.trim(), mode: "insensitive" },
             dateOfBirth: input.dateOfBirth,
-            guardians: {
-              some: {
-                OR: [
-                  { phone: { endsWith: phoneDigits } },
-                  ...(email ? [{ email: { equals: email, mode: "insensitive" as const } }] : []),
-                ],
-              },
-            },
           },
+          ...(phoneDigits || email
+            ? [
+                {
+                  firstName: { equals: input.firstName.trim(), mode: "insensitive" as const },
+                  guardians: {
+                    some: {
+                      OR: [
+                        ...(phoneDigits ? [{ phone: { endsWith: phoneDigits } }] : []),
+                        ...(email ? [{ email: { equals: email, mode: "insensitive" as const } }] : []),
+                      ],
+                    },
+                  },
+                },
+              ]
+            : []),
         ],
       },
       select: {
