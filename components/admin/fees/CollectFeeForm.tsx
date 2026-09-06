@@ -2082,17 +2082,31 @@ export default function CollectFeeForm({
         ) : null}
 
         <section className="border-t border-[#EEE8F1] pt-8">
-          <SectionTitle
-            icon={
-              CircleDollarSign
-            }
-            title="Prepared bill"
-            description={
-              selectedInvoice
-                ? `Payment will be recorded against ${selectedInvoice.invoiceNumber}.`
-                : "Programme, daycare, meals and approved charges are calculated from the child's financial contract."
-            }
-          />
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <SectionTitle
+              icon={
+                CircleDollarSign
+              }
+              title="Prepared bill"
+              description={
+                selectedInvoice
+                  ? `Payment will be recorded against ${selectedInvoice.invoiceNumber}.`
+                  : "Programme, daycare, meals and approved charges are calculated from the child's financial contract."
+              }
+            />
+
+            {selectedInvoice && Number(selectedInvoice.paidAmount) === 0 ? (
+              <button
+                type="button"
+                disabled={cancellingInvoiceId === selectedInvoice.id || submitting}
+                onClick={() => handleCancelInvoice(selectedInvoice)}
+                className="inline-flex items-center gap-2 rounded-xl border border-rose-300 bg-rose-50 px-4 py-2.5 text-xs font-black text-rose-700 shadow-sm transition hover:bg-rose-100 hover:border-rose-400 active:scale-95 cursor-pointer"
+              >
+                <Trash2 size={15} />
+                <span>{cancellingInvoiceId === selectedInvoice.id ? "Cancelling..." : `Cancel & Delete Bill (${selectedInvoice.invoiceNumber})`}</span>
+              </button>
+            ) : null}
+          </div>
 
           <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <label className="hidden">
