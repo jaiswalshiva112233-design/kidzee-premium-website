@@ -1662,30 +1662,34 @@ export default async function ReceiptDetailsPage({
           </header>
 
           {/* Contact Pill */}
-          <div className="mx-auto mt-4 w-full rounded-2xl md:rounded-full border border-[#25163E] bg-[#F1F6FB] px-4 py-2.5 text-xs font-bold text-[#25163E] shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-[1.5fr_auto_1fr_auto_1.2fr] items-center gap-2 text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start gap-1.5 min-w-0">
-                <MapPin className="w-4 h-4 shrink-0 text-[#25163E]" />
-                <span className="truncate text-[11px] leading-tight">
+          <div className="mx-auto mt-4 w-full rounded-2xl border border-[#25163E] bg-[#F1F6FB] px-4 py-3 text-xs font-bold text-[#25163E] shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-[2fr_auto_1fr_auto_1.3fr] items-center gap-3 text-center md:text-left">
+              {/* Full Address */}
+              <div className="flex items-start justify-center md:justify-start gap-2 min-w-0">
+                <MapPin className="w-4 h-4 shrink-0 text-[#25163E] mt-0.5" />
+                <span className="text-[11px] leading-snug font-bold text-[#25163E] text-left break-words">
                   {schoolProfile.address}
                 </span>
               </div>
-              <div className="hidden md:block w-px h-4 bg-[#25163E]/30" />
-              <div className="flex items-center justify-center gap-1.5">
+              <div className="hidden md:block w-px self-stretch bg-[#25163E]/25 min-h-[32px]" />
+              {/* Phone */}
+              <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
                 <Phone className="w-4 h-4 shrink-0 text-[#25163E]" />
                 <span className="text-[11px] font-black">
                   +91 {schoolProfile.phone}
                 </span>
               </div>
-              <div className="hidden md:block w-px h-4 bg-[#25163E]/30" />
+              <div className="hidden md:block w-px self-stretch bg-[#25163E]/25 min-h-[32px]" />
+              {/* Email */}
               <div className="flex items-center justify-center md:justify-end gap-1.5 min-w-0">
                 <Mail className="w-4 h-4 shrink-0 text-[#25163E]" />
-                <span className="truncate text-[11px]">
+                <span className="text-[11px] font-bold text-[#25163E] break-all">
                   {schoolProfile.email}
                 </span>
               </div>
             </div>
-            <div className="mt-1 flex items-center justify-center gap-3 border-t border-[#25163E]/15 pt-1 text-[10px] font-extrabold text-[#25163E]/85">
+            {/* Centre Code & GSTIN */}
+            <div className="mt-2 flex items-center justify-center gap-3 border-t border-[#25163E]/15 pt-1.5 text-[10px] font-extrabold text-[#25163E]/85">
               <span>Centre Code: <strong>{schoolProfile.schoolCode || "7206"}</strong></span>
               <span>•</span>
               <span>GSTIN: <strong>{schoolProfile.gstNumber || "07CIHPV5007K1ZW"}</strong></span>

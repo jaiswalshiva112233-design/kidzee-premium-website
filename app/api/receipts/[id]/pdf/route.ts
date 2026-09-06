@@ -1,6 +1,7 @@
 import PDFDocument from "pdfkit";
 import { NextResponse } from "next/server";
 
+import { formatCentreAddress } from "@/lib/centreAddress";
 import { prisma } from "@/lib/prisma";
 import { site } from "@/lib/site";
 import { verifyReceiptDocumentSignature } from "@/lib/whatsapp/receiptLink";
@@ -60,10 +61,7 @@ function normaliseSchoolProfile(value: unknown): SchoolProfile {
     schoolName: cleanText(value.schoolName) || defaultSchoolProfile.schoolName,
     centreName: cleanText(value.centreName) || defaultSchoolProfile.centreName,
     schoolCode: cleanText(value.schoolCode) || defaultSchoolProfile.schoolCode,
-    address:
-      [cleanText(value.addressLine1), cleanText(value.addressLine2), cleanText(value.city), cleanText(value.postalCode)]
-        .filter(Boolean)
-        .join(", ") || defaultSchoolProfile.address,
+    address: (isRecord(value) ? formatCentreAddress(value) : "") || defaultSchoolProfile.address,
     phone: cleanText(value.phone) || defaultSchoolProfile.phone,
     email: cleanText(value.email) || defaultSchoolProfile.email,
     gstNumber: cleanText(value.gstNumber) || defaultSchoolProfile.gstNumber,
@@ -258,18 +256,37 @@ async function pdfBuffer(
   doc.fontSize(11).font("Helvetica-Bold").fillColor(purpleDark).text(schoolProfile.centreName.toUpperCase(), 100, 96, { align: "center", width: 345 });
 
   // 5. Contact Pill
+  const pillY = 114;
+  const pillH = 38;
   doc.save();
-  doc.roundedRect(36, 114, 523, 30, 15).fillColor(bluePillBg).strokeColor(boxBorder).lineWidth(0.8).fillAndStroke();
-  doc.fontSize(7.2).fillColor(purpleDark).font("Helvetica")
-     .text(schoolProfile.address, 44, 120, { width: 225 })
-     .text(`+91 ${schoolProfile.phone}`, 275, 120, { width: 85 })
-     .text(schoolProfile.email, 368, 120, { width: 180 })
-     .fontSize(6.8).font("Helvetica-Bold")
-     .text(`Centre Code: ${schoolProfile.schoolCode}   ·   GSTIN: ${schoolProfile.gstNumber}`, 44, 132, { width: 507, align: "center" });
+  doc.roundedRect(36, pillY, 523, pillH, 8).fillColor(bluePillBg).strokeColor(boxBorder).lineWidth(0.8).fillAndStroke();
+
+  // Dividers
+  doc.moveTo(270, pillY + 4).lineTo(270, pillY + 25).lineWidth(0.5).strokeColor("#B8C6DA").stroke();
+  doc.moveTo(375, pillY + 4).lineTo(375, pillY + 25).lineWidth(0.5).strokeColor("#B8C6DA").stroke();
+
+  // Address (left)
+  doc.fontSize(6.5).fillColor(purpleDark).font("Helvetica")
+     .text(schoolProfile.address, 42, pillY + 4, { width: 224, lineGap: 0.8 });
+
+  // Phone (middle)
+  doc.fontSize(7.5).font("Helvetica-Bold").fillColor(purpleDark)
+     .text(`+91 ${schoolProfile.phone}`, 274, pillY + 10, { width: 98, align: "center" });
+
+  // Email (right)
+  doc.fontSize(6.8).font("Helvetica").fillColor(purpleDark)
+     .text(schoolProfile.email, 378, pillY + 10, { width: 176, align: "center" });
+
+  // Divider line before statutory codes
+  doc.moveTo(44, pillY + 27).lineTo(550, pillY + 27).lineWidth(0.5).strokeColor("#D5E0ED").stroke();
+
+  // Statutory line (bottom)
+  doc.fontSize(6.5).font("Helvetica-Bold").fillColor("#4B3B68")
+     .text(`Centre Code: ${schoolProfile.schoolCode}   ·   GSTIN: ${schoolProfile.gstNumber}`, 44, pillY + 29, { width: 507, align: "center" });
   doc.restore();
 
   // 6. Student & Parent Particulars (2 columns)
-  const partTop = 152;
+  const partTop = 158;
   const partHeight = 98;
   doc.roundedRect(36, partTop, 523, partHeight, 8).lineWidth(0.8).strokeColor(boxBorder).stroke();
   doc.moveTo(297, partTop).lineTo(297, partTop + partHeight).dash(3, { space: 2 }).strokeColor(boxBorder).stroke();
@@ -306,7 +323,7 @@ async function pdfBuffer(
   });
 
   // 7. Total Amount Received Bar
-  const totTop = 258;
+  const totTop = 264;
   doc.save();
   doc.roundedRect(36, totTop, 523, 34, 6).fillColor("#EBE4F0").strokeColor(boxBorder).lineWidth(0.8).fillAndStroke();
   doc.fontSize(8.5).font("Helvetica-Bold").fillColor(purpleDark)
@@ -317,7 +334,7 @@ async function pdfBuffer(
   doc.restore();
 
   // 8. Payment Mode & Received By Row
-  const payTop = 300;
+  const payTop = 306;
   const payHeight = 64;
   doc.roundedRect(36, payTop, 523, payHeight, 6).lineWidth(0.8).strokeColor(boxBorder).stroke();
   doc.moveTo(335, payTop).lineTo(335, payTop + payHeight).lineWidth(0.6).strokeColor("#C5BED0").stroke();
@@ -355,7 +372,7 @@ async function pdfBuffer(
   doc.fontSize(7.5).font("Helvetica-Oblique").fillColor("#5B2A86").text("Authorised Signature", 345, payTop + 52, { align: "right", width: 200 });
 
   // 9. Fee Breakdown Section
-  const feeTop = 372;
+  const feeTop = 378;
   const invoiceItems = receipt.payment.invoice?.items ?? [];
   doc.roundedRect(36, feeTop, 523, 90, 6).lineWidth(0.6).strokeColor("#D0C6D8").stroke();
   doc.rect(36, feeTop, 523, 18).fillColor("#F5EEF8").fill();
@@ -395,7 +412,7 @@ async function pdfBuffer(
      .text("Inclusive of GST. The amounts above are the final parent-facing amounts.", 46, feeTop + 82);
 
   // 10. Terms & Conditions
-  const termsTop = 470;
+  const termsTop = 476;
   doc.save();
   doc.roundedRect(36, termsTop, 523, 86, 6).fillColor("#FAFAFC").strokeColor("#D8D0DF").lineWidth(0.6).fillAndStroke();
   doc.fontSize(7.8).font("Helvetica-Bold").fillColor("#5B2A86").text("TERMS & CONDITIONS", 44, termsTop + 6);
