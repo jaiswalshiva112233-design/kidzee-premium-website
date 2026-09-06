@@ -972,28 +972,18 @@ details[open] summary {
     position: absolute !important;
     inset: 0 auto auto 0 !important;
     box-sizing: border-box !important;
-    width: 300mm !important;
-    max-width: 300mm !important;
-    margin: 0 !important;
-    padding: 8mm !important;
+    width: 210mm !important;
+    max-width: 210mm !important;
+    margin: 0 auto !important;
+    padding: 4mm 6mm !important;
     overflow: visible !important;
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     background: #ffffff !important;
-    zoom: 0.66;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
     break-inside: avoid-page;
     page-break-inside: avoid;
-  }
-
-  #fee-receipt-print header {
-    padding-top: 12px !important;
-    padding-bottom: 16px !important;
-  }
-
-  #fee-receipt-print > div:last-child {
-    row-gap: 16px !important;
-    padding-top: 16px !important;
-    padding-bottom: 0 !important;
   }
 }
