@@ -322,8 +322,39 @@ async function pdfBuffer(
     doc.moveTo(416, y + 10).lineTo(547, y + 10).lineWidth(0.5).strokeColor("#C5BED0").stroke();
   });
 
-  // 7. Total Amount Received Bar
-  const totTop = 264;
+  // 7. Fee Breakdown Section
+  const feeTop = 264;
+  const invoiceItems = receipt.payment.invoice?.items ?? [];
+  doc.roundedRect(36, feeTop, 523, 76, 6).lineWidth(0.6).strokeColor("#D0C6D8").stroke();
+  doc.rect(36, feeTop, 523, 18).fillColor("#F5EEF8").fill();
+  doc.fontSize(7.8).font("Helvetica-Bold").fillColor(purpleDark)
+     .text("Fee Particulars", 46, feeTop + 5)
+     .text("Amount", 480, feeTop + 5, { align: "right", width: 65 });
+
+  let curY = feeTop + 23;
+  if (invoiceItems.length > 0) {
+    for (const item of invoiceItems.slice(0, 2)) {
+      doc.fontSize(7.5).font("Helvetica").fillColor("#2C1F3A")
+         .text(`${item.title}${item.gstApplicable ? " (GST inclusive)" : ""}`, 46, curY, { width: 400 })
+         .font("Helvetica-Bold").text(money(item.totalAmount), 480, curY, { align: "right", width: 65 });
+      curY += 12;
+    }
+  } else {
+    doc.fontSize(7.5).font("Helvetica").fillColor("#2C1F3A")
+       .text(`Fee Payment (${className}) (GST inclusive)`, 46, curY, { width: 400 })
+       .font("Helvetica-Bold").text(money(totalAmount), 480, curY, { align: "right", width: 65 });
+  }
+
+  doc.moveTo(36, feeTop + 48).lineTo(559, feeTop + 48).lineWidth(0.5).strokeColor("#E0D8E6").stroke();
+  doc.fontSize(7.5).font("Helvetica-Bold").fillColor(purpleDark)
+     .text("Total Payable", 46, feeTop + 52)
+     .text(money(totalAmount), 480, feeTop + 52, { align: "right", width: 65 });
+
+  doc.fontSize(6.5).font("Helvetica-Oblique").fillColor("#6A5D75")
+     .text("Inclusive of GST. The amounts above are the final parent-facing amounts.", 46, feeTop + 64);
+
+  // 8. Total Amount Received Bar
+  const totTop = 348;
   doc.save();
   doc.roundedRect(36, totTop, 523, 34, 6).fillColor("#EBE4F0").strokeColor(boxBorder).lineWidth(0.8).fillAndStroke();
   doc.fontSize(8.5).font("Helvetica-Bold").fillColor(purpleDark)
@@ -333,8 +364,8 @@ async function pdfBuffer(
      .text(`Amount in words: ${numberToWords(amountReceived)}`, 46, totTop + 21);
   doc.restore();
 
-  // 8. Payment Mode & Received By Row
-  const payTop = 306;
+  // 9. Payment Mode & Received By Row
+  const payTop = 390;
   const payHeight = 64;
   doc.roundedRect(36, payTop, 523, payHeight, 6).lineWidth(0.8).strokeColor(boxBorder).stroke();
   doc.moveTo(335, payTop).lineTo(335, payTop + payHeight).lineWidth(0.6).strokeColor("#C5BED0").stroke();
@@ -371,48 +402,8 @@ async function pdfBuffer(
   }
   doc.fontSize(7.5).font("Helvetica-Oblique").fillColor("#5B2A86").text("Authorised Signature", 345, payTop + 52, { align: "right", width: 200 });
 
-  // 9. Fee Breakdown Section
-  const feeTop = 378;
-  const invoiceItems = receipt.payment.invoice?.items ?? [];
-  doc.roundedRect(36, feeTop, 523, 90, 6).lineWidth(0.6).strokeColor("#D0C6D8").stroke();
-  doc.rect(36, feeTop, 523, 18).fillColor("#F5EEF8").fill();
-  doc.fontSize(7.8).font("Helvetica-Bold").fillColor(purpleDark)
-     .text("Fee Particulars", 46, feeTop + 5)
-     .text("Amount", 480, feeTop + 5, { align: "right", width: 65 });
-
-  let curY = feeTop + 24;
-  if (invoiceItems.length > 0) {
-    for (const item of invoiceItems.slice(0, 2)) {
-      doc.fontSize(7.5).font("Helvetica").fillColor("#2C1F3A")
-         .text(`${item.title}${item.gstApplicable ? " (GST inclusive)" : ""}`, 46, curY, { width: 400 })
-         .font("Helvetica-Bold").text(money(item.totalAmount), 480, curY, { align: "right", width: 65 });
-      curY += 13;
-    }
-  } else {
-    doc.fontSize(7.5).font("Helvetica").fillColor("#2C1F3A")
-       .text(`Fee Payment (${className}) (GST inclusive)`, 46, curY, { width: 400 })
-       .font("Helvetica-Bold").text(money(totalAmount), 480, curY, { align: "right", width: 65 });
-  }
-
-  doc.moveTo(36, feeTop + 54).lineTo(559, feeTop + 54).lineWidth(0.5).strokeColor("#E0D8E6").stroke();
-  doc.fontSize(7.5).font("Helvetica-Bold").fillColor(purpleDark)
-     .text("Total Payable", 46, feeTop + 58)
-     .text(money(totalAmount), 480, feeTop + 58, { align: "right", width: 65 });
-
-  doc.fontSize(7.8).font("Helvetica-Bold").fillColor("#107B48")
-     .text("Amount Received", 46, feeTop + 70)
-     .text(money(amountReceived), 480, feeTop + 70, { align: "right", width: 65 });
-
-  if (pendingAmount > 0) {
-    doc.fontSize(7.5).font("Helvetica-Bold").fillColor("#B45309")
-       .text(`Balance Pending: ${money(pendingAmount)}`, 200, feeTop + 70, { align: "center", width: 200 });
-  }
-
-  doc.fontSize(6.8).font("Helvetica-Oblique").fillColor("#6A5D75")
-     .text("Inclusive of GST. The amounts above are the final parent-facing amounts.", 46, feeTop + 82);
-
   // 10. Terms & Conditions
-  const termsTop = 476;
+  const termsTop = 462;
   doc.save();
   doc.roundedRect(36, termsTop, 523, 86, 6).fillColor("#FAFAFC").strokeColor("#D8D0DF").lineWidth(0.6).fillAndStroke();
   doc.fontSize(7.8).font("Helvetica-Bold").fillColor("#5B2A86").text("TERMS & CONDITIONS", 44, termsTop + 6);

@@ -1717,6 +1717,75 @@ export default async function ReceiptDetailsPage({
             </div>
           </section>
 
+          {/* Itemized Fee Breakdown & Balance Details */}
+          <section className="mt-3 overflow-hidden rounded-xl border border-[#25163E]/20 bg-white">
+            <div className="grid grid-cols-[1fr_auto] bg-[#F5EFF8] px-4 py-2 text-xs font-black uppercase tracking-wider text-[#25163E]">
+              <span>Fee Particulars</span>
+              <span>Amount</span>
+            </div>
+
+            {showFullInvoiceItems ? (
+              invoiceItems.map((item) => (
+                <div key={item.id} className="grid grid-cols-[1fr_auto] border-t border-[#25163E]/10 px-4 py-2 text-xs font-semibold text-[#302042]">
+                  <span>
+                    {item.title}
+                    {item.detail ? ` - ${item.detail}` : ""}
+                    {item.gstApplicable ? " (GST inclusive)" : ""}
+                  </span>
+                  <span className="font-bold">{formatCurrency(Number(item.totalAmount))}</span>
+                </div>
+              ))
+            ) : (
+              <div className="grid grid-cols-[1fr_auto] border-t border-[#25163E]/10 px-4 py-2 text-xs font-semibold text-[#302042]">
+                <span>
+                  {receipt.payment.invoice
+                    ? `Payment against ${receipt.payment.invoice.invoiceNumber}`
+                    : feeCategoryLabels[receipt.payment.category] ?? receipt.payment.category}
+                  {receipt.payment.gstApplicable ? " (GST inclusive)" : ""}
+                </span>
+                <span className="font-bold">{formatCurrency(feeAmountOnReceipt)}</span>
+              </div>
+            )}
+
+            {discountAmount > 0 ? (
+              <div className="grid grid-cols-[1fr_auto] border-t border-[#25163E]/10 px-4 py-1.5 text-xs font-semibold text-emerald-700">
+                <span>Discount applied</span>
+                <span className="font-bold">− {formatCurrency(discountAmount)}</span>
+              </div>
+            ) : null}
+
+            {lateFeeAmount > 0 ? (
+              <div className="grid grid-cols-[1fr_auto] border-t border-[#25163E]/10 px-4 py-1.5 text-xs font-semibold text-amber-700">
+                <span>Late fee</span>
+                <span className="font-bold">{formatCurrency(lateFeeAmount)}</span>
+              </div>
+            ) : null}
+
+            <div className="grid grid-cols-[1fr_auto] border-t border-[#25163E]/20 bg-[#FAF7FC] px-4 py-2 text-xs font-bold text-[#25163E]">
+              <span>Total Payable</span>
+              <span className="font-black text-[#5B2A86]">{formatCurrency(totalAmount)}</span>
+            </div>
+
+            {paymentPendingAmount > 0 ? (
+              <div className="grid grid-cols-[1fr_auto] border-t border-amber-200 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-800">
+                <span>{receipt.status === "ISSUED" ? "Balance Pending After This Payment" : "Restored Invoice Balance"}</span>
+                <span className="font-black text-amber-900">{formatCurrency(paymentPendingAmount)}</span>
+              </div>
+            ) : null}
+
+            {receipt.payment.gstApplicable ? (
+              <div className="border-t border-emerald-200 bg-emerald-50 px-4 py-2">
+                <p className="text-[10px] font-black uppercase tracking-[0.08em] text-emerald-800">
+                  GST included wherever applicable
+                </p>
+                <p className="mt-0.5 text-[10px] font-semibold leading-4 text-emerald-700">
+                  The amounts above are the final parent-facing amounts.
+                  Statutory tax values remain recorded internally for accounts and CA reports.
+                </p>
+              </div>
+            ) : null}
+          </section>
+
           {/* TOTAL AMOUNT RECEIVED Bar */}
           <div className="mt-3 rounded-xl border border-[#25163E] bg-[#ECE5F2] px-4 py-2.5">
             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
@@ -1803,75 +1872,6 @@ export default async function ReceiptDetailsPage({
                 </p>
               </div>
             </div>
-          </section>
-
-          {/* Itemized Fee Breakdown & Balance Details */}
-          <section className="mt-3 overflow-hidden rounded-xl border border-[#25163E]/20 bg-white">
-            <div className="grid grid-cols-[1fr_auto] bg-[#F5EFF8] px-4 py-2 text-xs font-black uppercase tracking-wider text-[#25163E]">
-              <span>Fee Particulars</span>
-              <span>Amount</span>
-            </div>
-
-            {showFullInvoiceItems ? (
-              invoiceItems.map((item) => (
-                <div key={item.id} className="grid grid-cols-[1fr_auto] border-t border-[#25163E]/10 px-4 py-2 text-xs font-semibold text-[#302042]">
-                  <span>
-                    {item.title}
-                    {item.detail ? ` - ${item.detail}` : ""}
-                    {item.gstApplicable ? " (GST inclusive)" : ""}
-                  </span>
-                  <span className="font-bold">{formatCurrency(Number(item.totalAmount))}</span>
-                </div>
-              ))
-            ) : (
-              <div className="grid grid-cols-[1fr_auto] border-t border-[#25163E]/10 px-4 py-2 text-xs font-semibold text-[#302042]">
-                <span>
-                  {receipt.payment.invoice
-                    ? `Payment against ${receipt.payment.invoice.invoiceNumber}`
-                    : feeCategoryLabels[receipt.payment.category] ?? receipt.payment.category}
-                  {receipt.payment.gstApplicable ? " (GST inclusive)" : ""}
-                </span>
-                <span className="font-bold">{formatCurrency(feeAmountOnReceipt)}</span>
-              </div>
-            )}
-
-            {discountAmount > 0 ? (
-              <div className="grid grid-cols-[1fr_auto] border-t border-[#25163E]/10 px-4 py-1.5 text-xs font-semibold text-emerald-700">
-                <span>Discount applied</span>
-                <span className="font-bold">− {formatCurrency(discountAmount)}</span>
-              </div>
-            ) : null}
-
-            {lateFeeAmount > 0 ? (
-              <div className="grid grid-cols-[1fr_auto] border-t border-[#25163E]/10 px-4 py-1.5 text-xs font-semibold text-amber-700">
-                <span>Late fee</span>
-                <span className="font-bold">{formatCurrency(lateFeeAmount)}</span>
-              </div>
-            ) : null}
-
-            <div className="grid grid-cols-[1fr_auto] border-t border-[#25163E]/20 bg-[#FAF7FC] px-4 py-2 text-xs font-bold text-[#25163E]">
-              <span>Total Payable</span>
-              <span className="font-black text-[#5B2A86]">{formatCurrency(totalAmount)}</span>
-            </div>
-
-            {paymentPendingAmount > 0 ? (
-              <div className="grid grid-cols-[1fr_auto] border-t border-amber-200 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-800">
-                <span>{receipt.status === "ISSUED" ? "Balance Pending After This Payment" : "Restored Invoice Balance"}</span>
-                <span className="font-black text-amber-900">{formatCurrency(paymentPendingAmount)}</span>
-              </div>
-            ) : null}
-
-            {receipt.payment.gstApplicable ? (
-              <div className="border-t border-emerald-200 bg-emerald-50 px-4 py-2">
-                <p className="text-[10px] font-black uppercase tracking-[0.08em] text-emerald-800">
-                  GST included wherever applicable
-                </p>
-                <p className="mt-0.5 text-[10px] font-semibold leading-4 text-emerald-700">
-                  The amounts above are the final parent-facing amounts.
-                  Statutory tax values remain recorded internally for accounts and CA reports.
-                </p>
-              </div>
-            ) : null}
           </section>
 
           {/* Bank Details (if enabled in settings) */}
