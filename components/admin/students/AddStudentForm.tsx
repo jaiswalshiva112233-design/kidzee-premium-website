@@ -560,24 +560,10 @@ export default function AddStudentForm({
     event: ChangeEvent<HTMLInputElement>,
   ) {
     const value = event.target.value;
-    const age = calculateAge(value);
 
     setFormData((current) => ({
       ...current,
       dateOfBirth: value,
-      programme:
-        age && suggestProgramme(age.totalMonths)
-          ? (suggestProgramme(
-              age.totalMonths,
-            ) as Programme)
-          : current.programme,
-      programmeDefinitionId:
-        age
-          ? programmeDefinitions.find((programme) =>
-              (programme.ageMinimumMonths == null || age.totalMonths >= programme.ageMinimumMonths) &&
-              (programme.ageMaximumMonths == null || age.totalMonths <= programme.ageMaximumMonths),
-            )?.id ?? current.programmeDefinitionId
-          : current.programmeDefinitionId,
     }));
 
     setError("");
@@ -1089,12 +1075,32 @@ export default function AddStudentForm({
                 </p>
 
                 {suggestedProgramme ? (
-                  <p className="mt-2 text-sm font-bold text-[#5B2A86]">
-                    Suggested:{" "}
-                    {programmeLabel(
-                      suggestedProgramme,
-                    )}
-                  </p>
+                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-bold text-[#5B2A86]">
+                      Suggested:{" "}
+                      {programmeLabel(
+                        suggestedProgramme,
+                      )}
+                    </p>
+                    {formData.programme !== suggestedProgramme ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const matching = programmeDefinitions.find(
+                            (p) => legacyProgrammeForCode(p.code) === suggestedProgramme,
+                          );
+                          setFormData((prev) => ({
+                            ...prev,
+                            programme: suggestedProgramme,
+                            programmeDefinitionId: matching?.id ?? prev.programmeDefinitionId,
+                          }));
+                        }}
+                        className="text-xs font-semibold text-purple-600 hover:text-purple-800 underline"
+                      >
+                        Apply suggestion
+                      </button>
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
             ) : null}

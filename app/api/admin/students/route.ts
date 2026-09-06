@@ -505,20 +505,6 @@ export async function POST(request: Request) {
 
     if (programmeDefinition) {
       programmeValue = legacyProgrammeForCode(programmeDefinition.code);
-      const ageMonths = Math.max(
-        0,
-        (joiningDate.getFullYear() - dateOfBirth.getFullYear()) * 12 +
-          joiningDate.getMonth() - dateOfBirth.getMonth(),
-      );
-      if (
-        (programmeDefinition.ageMinimumMonths != null && ageMonths < programmeDefinition.ageMinimumMonths) ||
-        (programmeDefinition.ageMaximumMonths != null && ageMonths > programmeDefinition.ageMaximumMonths)
-      ) {
-        return NextResponse.json(
-          { success: false, message: `The child is outside the configured age range for ${programmeDefinition.name}.` },
-          { status: 400 },
-        );
-      }
       if (
         programmeDefinition.capacity != null &&
         programmeDefinition._count.students >= programmeDefinition.capacity
