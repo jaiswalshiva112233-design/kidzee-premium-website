@@ -1026,38 +1026,31 @@ export async function POST(request: Request) {
           const meal = id
             ? await tx.mealDefinition.update({ where: { id }, data: mealData })
             : await tx.mealDefinition.create({ data: mealData });
-          const sameDate = await tx.mealPriceVersion.findFirst({
-            where: { mealId: meal.id, effectiveFrom },
+          const activeVersion = await tx.mealPriceVersion.findFirst({
+            where: { mealId: meal.id, active: true },
+            orderBy: [{ effectiveTo: "desc" }, { effectiveFrom: "desc" }],
           });
-          if (sameDate)
+          if (activeVersion) {
             await tx.mealPriceVersion.update({
-              where: { id: sameDate.id },
+              where: { id: activeVersion.id },
               data: {
                 price,
                 gstApplicable,
                 gstRate: gstApplicable ? gstRate : null,
                 priceType,
+                effectiveFrom,
+                effectiveTo: null,
                 active: true,
               },
-            });
-          else {
-            const nextVersion = await tx.mealPriceVersion.findFirst({
-              where: { mealId: meal.id, effectiveFrom: { gt: effectiveFrom } },
-              orderBy: { effectiveFrom: "asc" },
-              select: { effectiveFrom: true },
             });
             await tx.mealPriceVersion.updateMany({
-              where: {
-                mealId: meal.id,
-                active: true,
-                effectiveFrom: { lt: effectiveFrom },
-                OR: [
-                  { effectiveTo: null },
-                  { effectiveTo: { gte: effectiveFrom } },
-                ],
+              where: { mealId: meal.id, id: { not: activeVersion.id } },
+              data: {
+                active: false,
+                effectiveTo: new Date(effectiveFrom.getTime() - 1),
               },
-              data: { effectiveTo: new Date(effectiveFrom.getTime() - 1) },
             });
+          } else {
             await tx.mealPriceVersion.create({
               data: {
                 mealId: meal.id,
@@ -1066,9 +1059,90 @@ export async function POST(request: Request) {
                 gstRate: gstApplicable ? gstRate : null,
                 priceType,
                 effectiveFrom,
-                effectiveTo: nextVersion
-                  ? new Date(nextVersion.effectiveFrom.getTime() - 1)
-                  : null,
+                effectiveTo: null,
+                active: true,
+              },
+            });
+          }
+
+          // Auto-sync matching single-item MealCombination so it is ALWAYS available in Add Student and Daycare
+          const singleCombo = await tx.mealCombination.findFirst({
+            where: {
+              OR: [
+                { code: `MEAL_${meal.code}` },
+                { code: meal.code },
+                { items: { some: { mealId: meal.id } } },
+              ],
+            },
+            include: { items: true },
+          });
+          if (singleCombo && singleCombo.items.length === 1) {
+            await tx.mealCombination.update({
+              where: { id: singleCombo.id },
+              data: {
+                name: `${meal.name} (Single Meal)`,
+                status: booleanValue(body.active) ? "ACTIVE" : "INACTIVE",
+              },
+            });
+            const comboPv = await tx.mealCombinationPriceVersion.findFirst({
+              where: { combinationId: singleCombo.id, active: true },
+              orderBy: [{ effectiveTo: "desc" }, { effectiveFrom: "desc" }],
+            });
+            if (comboPv) {
+              await tx.mealCombinationPriceVersion.update({
+                where: { id: comboPv.id },
+                data: {
+                  price,
+                  gstApplicable,
+                  gstRate: gstApplicable ? gstRate : null,
+                  priceType,
+                  effectiveFrom,
+                  effectiveTo: null,
+                  active: true,
+                },
+              });
+            } else {
+              await tx.mealCombinationPriceVersion.create({
+                data: {
+                  combinationId: singleCombo.id,
+                  price,
+                  gstApplicable,
+                  gstRate: gstApplicable ? gstRate : null,
+                  priceType,
+                  effectiveFrom,
+                  effectiveTo: null,
+                  active: true,
+                },
+              });
+            }
+          } else if (!singleCombo) {
+            const newCombo = await tx.mealCombination.create({
+              data: {
+                code: `MEAL_${meal.code}`,
+                name: `${meal.name} (Single Meal)`,
+                description: meal.description,
+                status: booleanValue(body.active) ? "ACTIVE" : "INACTIVE",
+                displayOrder: meal.displayOrder + 2,
+              },
+            });
+            await tx.mealCombinationItem.create({
+              data: {
+                id: `item-${newCombo.id}-${meal.id}`,
+                combinationId: newCombo.id,
+                mealId: meal.id,
+                quantity: 1,
+              },
+            });
+            await tx.mealCombinationPriceVersion.create({
+              data: {
+                combinationId: newCombo.id,
+                price,
+                gstApplicable,
+                gstRate: gstApplicable ? gstRate : null,
+                priceType,
+                effectiveFrom,
+                effectiveTo: null,
+                active: true,
               },
             });
           }
@@ -1148,41 +1222,34 @@ export async function POST(request: Request) {
               quantity: 1,
             })),
           });
-          const sameDate = await tx.mealCombinationPriceVersion.findFirst({
-            where: { combinationId: combination.id, effectiveFrom },
+          const activeComboVersion = await tx.mealCombinationPriceVersion.findFirst({
+            where: { combinationId: combination.id, active: true },
+            orderBy: [{ effectiveTo: "desc" }, { effectiveFrom: "desc" }],
           });
-          if (sameDate)
+          if (activeComboVersion) {
             await tx.mealCombinationPriceVersion.update({
-              where: { id: sameDate.id },
+              where: { id: activeComboVersion.id },
               data: {
                 price,
                 gstApplicable,
                 gstRate: gstApplicable ? gstRate : null,
                 priceType,
+                effectiveFrom,
+                effectiveTo: null,
                 active: true,
               },
-            });
-          else {
-            const nextVersion = await tx.mealCombinationPriceVersion.findFirst({
-              where: {
-                combinationId: combination.id,
-                effectiveFrom: { gt: effectiveFrom },
-              },
-              orderBy: { effectiveFrom: "asc" },
-              select: { effectiveFrom: true },
             });
             await tx.mealCombinationPriceVersion.updateMany({
               where: {
                 combinationId: combination.id,
-                active: true,
-                effectiveFrom: { lt: effectiveFrom },
-                OR: [
-                  { effectiveTo: null },
-                  { effectiveTo: { gte: effectiveFrom } },
-                ],
+                id: { not: activeComboVersion.id },
               },
-              data: { effectiveTo: new Date(effectiveFrom.getTime() - 1) },
+              data: {
+                active: false,
+                effectiveTo: new Date(effectiveFrom.getTime() - 1),
+              },
             });
+          } else {
             await tx.mealCombinationPriceVersion.create({
               data: {
                 combinationId: combination.id,
@@ -1191,9 +1258,8 @@ export async function POST(request: Request) {
                 gstRate: gstApplicable ? gstRate : null,
                 priceType,
                 effectiveFrom,
-                effectiveTo: nextVersion
-                  ? new Date(nextVersion.effectiveFrom.getTime() - 1)
-                  : null,
+                effectiveTo: null,
+                active: true,
               },
             });
           }

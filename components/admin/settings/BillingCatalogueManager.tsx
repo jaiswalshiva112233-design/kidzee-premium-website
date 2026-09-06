@@ -1450,6 +1450,28 @@ export default function BillingCatalogueManager() {
                 Meal Packages & Combinations ({catalogue.mealCombinations.length})
               </h4>
               <HistoryCards
+                onSelect={(id) => {
+                  const item = catalogue.mealCombinations.find(
+                    (entry) => entry.id === id,
+                  );
+                  if (!item) return;
+                  const version = currentVersion(item.priceVersions);
+                  setCombo({
+                    id: item.id,
+                    code: item.code,
+                    name: item.name,
+                    description: item.description ?? "",
+                    active: item.status === "ACTIVE",
+                    displayOrder: item.displayOrder.toString(),
+                    price: String(version?.price ?? 0),
+                    gstApplicable: version?.gstApplicable ?? false,
+                    gstRate: version?.gstRate?.toString() ?? "",
+                    priceType: version?.priceType ?? "GST_INCLUSIVE",
+                    effectiveFrom: dateInput(version?.effectiveFrom),
+                    mealIds: item.items.map((entry) => entry.mealId),
+                  });
+                  window.scrollTo({ top: 350, behavior: "smooth" });
+                }}
                 items={catalogue.mealCombinations.map((item) => ({
                   id: item.id,
                   title: item.name,
@@ -1468,6 +1490,25 @@ export default function BillingCatalogueManager() {
                 Individual Meals / Menu Items ({catalogue.meals.length})
               </h4>
               <HistoryCards
+                onSelect={(id) => {
+                  const item = catalogue.meals.find((entry) => entry.id === id);
+                  if (!item) return;
+                  const version = currentVersion(item.priceVersions);
+                  setMeal({
+                    id: item.id,
+                    code: item.code,
+                    name: item.name,
+                    description: item.description ?? "",
+                    active: item.status === "ACTIVE",
+                    displayOrder: item.displayOrder.toString(),
+                    price: String(version?.price ?? 0),
+                    gstApplicable: version?.gstApplicable ?? false,
+                    gstRate: version?.gstRate?.toString() ?? "",
+                    priceType: version?.priceType ?? "GST_INCLUSIVE",
+                    effectiveFrom: dateInput(version?.effectiveFrom),
+                  });
+                  window.scrollTo({ top: 350, behavior: "smooth" });
+                }}
                 items={catalogue.meals.map((item) => ({
                   id: item.id,
                   title: item.name,
@@ -2130,6 +2171,7 @@ function CatalogueActions({
 }
 function HistoryCards({
   items,
+  onSelect,
 }: {
   items: Array<{
     id: string;
@@ -2138,13 +2180,19 @@ function HistoryCards({
     detail: string;
     version: string;
   }>;
+  onSelect?: (id: string) => void;
 }) {
   return (
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
       {items.map((item) => (
         <article
           key={item.id}
-          className="rounded-2xl border border-[#ECE5EF] bg-[#FCFBFD] p-4"
+          onClick={() => onSelect?.(item.id)}
+          className={`rounded-2xl border border-[#ECE5EF] bg-[#FCFBFD] p-4 transition ${
+            onSelect
+              ? "cursor-pointer hover:border-[#6A328F] hover:bg-purple-50/20 hover:shadow-md active:scale-[0.99]"
+              : ""
+          }`}
         >
           <div className="flex items-start justify-between gap-3">
             <strong className="text-[#2D1736]">{item.title}</strong>
@@ -2157,7 +2205,14 @@ function HistoryCards({
           <p className="mt-2 text-xs font-semibold text-[#817684]">
             {item.detail}
           </p>
-          <p className="mt-3 font-black text-[#6A328F]">{item.version}</p>
+          <div className="mt-3 flex items-center justify-between">
+            <p className="font-black text-[#6A328F]">{item.version}</p>
+            {onSelect ? (
+              <span className="text-[11px] font-bold text-[#6A328F] opacity-70 hover:opacity-100">
+                Click to edit →
+              </span>
+            ) : null}
+          </div>
         </article>
       ))}
     </div>
