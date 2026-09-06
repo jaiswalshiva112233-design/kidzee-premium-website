@@ -138,6 +138,7 @@ const today = new Intl.DateTimeFormat("en-CA", {
   month: "2-digit",
   day: "2-digit",
 }).format(new Date());
+const sessionStartDefault = "2026-01-01";
 const blankProgramme = {
   id: "",
   code: "",
@@ -166,7 +167,7 @@ const blankProgramme = {
   monthlyGstApplicable: false,
   monthlyGstRate: "",
   monthlyPriceType: "GST_INCLUSIVE" as PriceType,
-  effectiveFrom: today,
+  effectiveFrom: sessionStartDefault,
 };
 const blankPlan = {
   id: "",
@@ -187,7 +188,7 @@ const blankPlan = {
   gstApplicable: false,
   gstRate: "",
   priceType: "GST_INCLUSIVE" as PriceType,
-  effectiveFrom: today,
+  effectiveFrom: sessionStartDefault,
 };
 const blankMeal = {
   id: "",
@@ -200,7 +201,7 @@ const blankMeal = {
   gstApplicable: false,
   gstRate: "",
   priceType: "GST_INCLUSIVE" as PriceType,
-  effectiveFrom: today,
+  effectiveFrom: sessionStartDefault,
 };
 const blankCombo = { ...blankMeal, mealIds: [] as string[] };
 const blankCharge = {

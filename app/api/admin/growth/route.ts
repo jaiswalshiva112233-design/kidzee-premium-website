@@ -8,6 +8,37 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
+export async function GET() {
+  try {
+    const session = await requireAdmin();
+    if (session.role !== "OWNER") {
+      return NextResponse.json(
+        { success: false, message: "Owner access is required." },
+        { status: 403 },
+      );
+    }
+    const latestRun = await prisma.growthAnalysisRun.findFirst({
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        scope: true,
+        status: true,
+        question: true,
+        answer: true,
+        provider: true,
+        model: true,
+        insufficientData: true,
+        completedAt: true,
+        createdAt: true,
+      },
+    });
+    return NextResponse.json({ success: true, latestRun });
+  } catch (error) {
+    const status = error instanceof Error && error.message === "UNAUTHENTICATED" ? 401 : 500;
+    return NextResponse.json({ success: false, message: "Growth data is temporarily unavailable." }, { status });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAdmin();

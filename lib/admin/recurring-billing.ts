@@ -181,7 +181,7 @@ export async function generateRecurringInvoices(
             include: {
               services: {
                 where: {
-                  status: "ACTIVE",
+                  status: { in: ["ACTIVE", "DRAFT"] },
                   recurring: true,
                   frequency: "MONTHLY",
                   effectiveFrom: { lte: end },
@@ -322,7 +322,7 @@ export async function generateRecurringInvoices(
     const contract = student.enrollmentContract;
     const contractIsEffective = Boolean(
       contract &&
-        contract.status === "ACTIVE" &&
+        (contract.status === "ACTIVE" || contract.status === "DRAFT") &&
         contract.startDate <= end &&
         (!contract.endDate || contract.endDate >= start),
     );
@@ -345,7 +345,7 @@ export async function generateRecurringInvoices(
           contractServiceId: service.id,
         });
       }
-    } else {
+    } else if (!contract) {
     const programme = student.programmeDefinition;
     const programmeServiceDate = student.joiningDate > start ? student.joiningDate : start;
     const feeVersion = programme

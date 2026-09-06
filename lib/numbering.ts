@@ -90,7 +90,9 @@ export async function getNextSequence(
   );
 
   const formattedNumber = sequence.prefix
-    ? `${sequence.prefix}-${serialText}`
+    ? sequence.prefix.endsWith("-") || sequence.prefix.endsWith("/")
+      ? `${sequence.prefix}${serialText}`
+      : `${sequence.prefix}-${serialText}`
     : serialText;
 
   return {

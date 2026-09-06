@@ -54,7 +54,9 @@ function buildPreview(
   );
 
   return prefix
-    ? `${prefix}-${serialText}`
+    ? prefix.endsWith("-") || prefix.endsWith("/")
+      ? `${prefix}${serialText}`
+      : `${prefix}-${serialText}`
     : serialText;
 }
 

@@ -1827,6 +1827,88 @@ export async function POST(
       });
     }
 
+    if (action === "cancel-invoice" || action === "delete-invoice") {
+      const invoiceId = cleanText(body.invoiceId);
+      if (!invoiceId) {
+        throw new FeeRequestError("Invoice ID is required.", 400);
+      }
+
+      const invoice = await prisma.feeInvoice.findUnique({
+        where: { id: invoiceId },
+        include: {
+          payments: true,
+        },
+      });
+
+      if (!invoice) {
+        throw new FeeRequestError("Invoice not found.", 404);
+      }
+
+      if (Number(invoice.paidAmount) > 0 || invoice.payments.length > 0) {
+        throw new FeeRequestError(
+          "Cannot cancel an invoice that already has recorded payments.",
+          400,
+        );
+      }
+
+      if (invoice.status === "CANCELLED") {
+        return NextResponse.json({
+          success: true,
+          message: "Invoice is already cancelled.",
+        });
+      }
+
+      await prisma.$transaction(async (tx) => {
+        // Unlink any daycare sessions that were tied to this invoice
+        await tx.daycareSession.updateMany({
+          where: { feeInvoiceId: invoice.id },
+          data: {
+            feeInvoiceId: null,
+            status: "COMPLETED",
+          },
+        });
+
+        // Unlink any student charges tied to this invoice
+        await tx.studentCharge.updateMany({
+          where: { feeInvoiceId: invoice.id },
+          data: {
+            feeInvoiceId: null,
+            status: "PENDING",
+          },
+        });
+
+        // Mark invoice cancelled
+        await tx.feeInvoice.update({
+          where: { id: invoice.id },
+          data: {
+            status: "CANCELLED",
+            notes: [
+              invoice.notes,
+              `Cancelled by Admin on ${new Date().toISOString()}`,
+            ]
+              .filter(Boolean)
+              .join(" · "),
+          },
+        });
+
+        // Activity log
+        await tx.activityLog.create({
+          data: {
+            adminUserId: session.userId,
+            action: "DELETED",
+            entityType: "FeeInvoice",
+            entityId: invoice.id,
+            description: `Cancelled fee bill ${invoice.invoiceNumber} (${invoice.feePeriodLabel}, ₹${invoice.totalAmount}) for student ${invoice.studentId}.`,
+          },
+        });
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Bill ${invoice.invoiceNumber} cancelled successfully.`,
+      });
+    }
+
     requestIdempotencyKey = cleanText(
       request.headers.get("idempotency-key") ?? body.idempotencyKey,
     ).slice(0, 128);

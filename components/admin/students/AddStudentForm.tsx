@@ -91,6 +91,7 @@ type StudentFormData = {
   billingDay: string;
   dueDay: string;
   documentsComplete: boolean;
+  firstBillMode: "CURRENT_MONTH" | "NONE" | "JOINING_DATE";
   duplicateOverrideStudentId: string;
   duplicateOverrideReason: string;
 
@@ -257,7 +258,8 @@ const initialFormData: StudentFormData = {
   approvedDiscount: "0",
   billingDay: "1",
   dueDay: "5",
-  documentsComplete: false,
+  documentsComplete: true,
+  firstBillMode: "CURRENT_MONTH",
   duplicateOverrideStudentId: "",
   duplicateOverrideReason: "",
 
@@ -738,6 +740,7 @@ export default function AddStudentForm({
               approvedDiscount: canOverridePrice ? Number(formData.approvedDiscount) || 0 : 0,
               billingDay: Number(formData.billingDay),
               dueDay: Number(formData.dueDay),
+              firstBillMode: formData.firstBillMode,
             },
           }),
         },
@@ -1525,6 +1528,58 @@ export default function AddStudentForm({
                 </div>
                 {canOverridePrice ? <InputField label="Owner-approved bill discount" type="number" value={formData.approvedDiscount} disabled={submitting} onChange={(value) => updateField("approvedDiscount", value)} /> : null}
                 <label className="mt-5 flex items-start gap-3 rounded-2xl bg-[#F3EAF8] p-4 text-sm font-black text-[#2D1736]"><input type="checkbox" checked={formData.documentsComplete} disabled={submitting} onChange={(event) => updateField("documentsComplete", event.target.checked)} className="mt-0.5 h-5 w-5 accent-[#5B2A86]" /><span>Documents and admission checks are complete.<span className="mt-1 block text-xs font-semibold leading-5 text-[#817684]">If left unchecked, the contract and bill stay draft and the enquiry is not marked admitted.</span></span></label>
+
+                <div className="mt-5 rounded-2xl border border-[#E4D9E9] bg-[#FAF8FC] p-4">
+                  <p className="text-sm font-black text-[#2D1736]">Initial Bill Generation</p>
+                  <p className="mt-0.5 text-xs font-semibold text-[#817684]">Control how CentreOS generates the initial invoice:</p>
+                  <div className="mt-3 space-y-2">
+                    <label className={`flex items-start gap-3 rounded-xl border p-3 text-sm cursor-pointer transition ${formData.firstBillMode === "CURRENT_MONTH" ? "border-[#5B2A86] bg-[#F5EEF9]" : "border-[#E6DDEB] bg-white hover:bg-slate-50"}`}>
+                      <input
+                        type="radio"
+                        name="firstBillMode"
+                        value="CURRENT_MONTH"
+                        checked={formData.firstBillMode === "CURRENT_MONTH"}
+                        disabled={submitting}
+                        onChange={() => updateField("firstBillMode", "CURRENT_MONTH")}
+                        className="mt-1 h-4 w-4 accent-[#5B2A86]"
+                      />
+                      <div>
+                        <strong className="block font-black text-[#2D1736]">Generate 1 bill for active month ({new Intl.DateTimeFormat("en-IN", { month: "long", year: "numeric" }).format(new Date())})</strong>
+                        <span className="text-xs font-bold text-[#5B2A86]">Recommended · Generates exactly 1 single bill for the current month.</span>
+                      </div>
+                    </label>
+                    <label className={`flex items-start gap-3 rounded-xl border p-3 text-sm cursor-pointer transition ${formData.firstBillMode === "NONE" ? "border-[#5B2A86] bg-[#F5EEF9]" : "border-[#E6DDEB] bg-white hover:bg-slate-50"}`}>
+                      <input
+                        type="radio"
+                        name="firstBillMode"
+                        value="NONE"
+                        checked={formData.firstBillMode === "NONE"}
+                        disabled={submitting}
+                        onChange={() => updateField("firstBillMode", "NONE")}
+                        className="mt-1 h-4 w-4 accent-[#5B2A86]"
+                      />
+                      <div>
+                        <strong className="block font-black text-[#2D1736]">Do not generate initial bill now</strong>
+                        <span className="text-xs font-semibold text-[#817684]">Enrolls student with ₹0 dues. Use for existing students whose past dues are already cleared.</span>
+                      </div>
+                    </label>
+                    <label className={`flex items-start gap-3 rounded-xl border p-3 text-sm cursor-pointer transition ${formData.firstBillMode === "JOINING_DATE" ? "border-[#5B2A86] bg-[#F5EEF9]" : "border-[#E6DDEB] bg-white hover:bg-slate-50"}`}>
+                      <input
+                        type="radio"
+                        name="firstBillMode"
+                        value="JOINING_DATE"
+                        checked={formData.firstBillMode === "JOINING_DATE"}
+                        disabled={submitting}
+                        onChange={() => updateField("firstBillMode", "JOINING_DATE")}
+                        className="mt-1 h-4 w-4 accent-[#5B2A86]"
+                      />
+                      <div>
+                        <strong className="block font-black text-[#2D1736]">Bill from joining date</strong>
+                        <span className="text-xs font-semibold text-[#817684]">Drafts bill starting from the original joining month.</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
           </section>

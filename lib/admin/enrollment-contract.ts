@@ -31,6 +31,7 @@ export type EnrollmentContractSelection = {
   approvedDiscount: number;
   billingDay: number;
   dueDay: number;
+  firstBillMode?: "CURRENT_MONTH" | "NONE" | "JOINING_DATE";
 };
 
 type LineDraft = {
@@ -216,7 +217,14 @@ export async function createEnrollmentContractAndDraftInvoice(
         },
       })
     : null;
-  if (selection.preschoolEnabled && (!programme || !programme.feeVersions[0])) {
+  let fee = programme?.feeVersions[0] ?? null;
+  if (selection.preschoolEnabled && !fee && programme) {
+    fee = (await transaction.programmeFeeVersion.findFirst({
+      where: { programmeId: programme.id, active: true },
+      orderBy: [{ effectiveFrom: "asc" }, { createdAt: "asc" }],
+    })) ?? null;
+  }
+  if (selection.preschoolEnabled && (!programme || !fee)) {
     throw new Error("The selected preschool programme does not have an active fee version for the joining date.");
   }
 
@@ -236,6 +244,17 @@ export async function createEnrollmentContractAndDraftInvoice(
         },
       })
     : [];
+  for (const plan of daycareDefinitions) {
+    if (!plan.priceVersions[0]) {
+      const fallbackPrice = await transaction.daycarePlanPriceVersion.findFirst({
+        where: { planId: plan.id, active: true },
+        orderBy: [{ effectiveFrom: "asc" }, { createdAt: "asc" }],
+      });
+      if (fallbackPrice) {
+        plan.priceVersions = [fallbackPrice];
+      }
+    }
+  }
   if (daycareDefinitions.length !== requestedPlanIds.length || daycareDefinitions.some((plan) => !plan.priceVersions[0])) {
     throw new Error("One or more selected daycare plans do not have an active price for the joining date.");
   }
@@ -256,6 +275,15 @@ export async function createEnrollmentContractAndDraftInvoice(
         },
       })
     : null;
+  if (selection.mealCombinationId && mealCombination && !mealCombination.priceVersions[0]) {
+    const fallbackPrice = await transaction.mealCombinationPriceVersion.findFirst({
+      where: { combinationId: mealCombination.id, active: true },
+      orderBy: [{ effectiveFrom: "asc" }, { createdAt: "asc" }],
+    });
+    if (fallbackPrice) {
+      mealCombination.priceVersions = [fallbackPrice];
+    }
+  }
   if (selection.mealCombinationId && (!mealCombination || !mealCombination.priceVersions[0])) {
     throw new Error("The selected meal plan does not have an active price for the joining date.");
   }
@@ -273,7 +301,6 @@ export async function createEnrollmentContractAndDraftInvoice(
     throw new Error("One or more selected other charges are no longer active.");
   }
 
-  const fee = programme?.feeVersions[0] ?? null;
   const lines: LineDraft[] = [];
   const addProgrammeLine = (
     serviceType: $Enums.ContractServiceType,
@@ -451,7 +478,10 @@ export async function createEnrollmentContractAndDraftInvoice(
       preschoolClass: input.programmeClass,
       daycareEnabled: selection.daycareSelections.length > 0,
       mealsEnabled: Boolean(mealCombination),
-      annualKitEnabled: selection.includeAnnualFee || selection.includeKitFee,
+      annualKitEnabled: Boolean(
+        (selection.includeAnnualFee && Number(fee?.annualFee ?? 0) > 0) ||
+        (selection.includeKitFee && Number(fee?.kitFee ?? 0) > 0),
+      ),
       annualKitSkipReason: selection.annualKitSkipReason,
       billingDay: selection.billingDay,
       dueDay: selection.dueDay,
@@ -552,12 +582,34 @@ export async function createEnrollmentContractAndDraftInvoice(
         Number.EPSILON) *
         100,
     ) / 100;
+  if (selection.firstBillMode === "NONE") {
+    await transaction.activityLog.create({
+      data: {
+        adminUserId: input.createdById,
+        action: "CREATED",
+        entityType: "StudentEnrollmentContract",
+        entityId: contract.id,
+        description: `Created enrollment contract ${contract.contractNumber} without an initial bill.`,
+      },
+    });
+    return { contract, invoice: null, services };
+  }
+
   const sequence = await transaction.numberSequence.findUnique({ where: { key: "INVOICE" } });
   const invoiceSequence = await getNextSequence(transaction, {
     key: "INVOICE",
     prefix: sequence?.prefix ?? "KZ-INV",
     minimumWidth: sequence?.minimumWidth ?? 2,
   });
+  const now = new Date();
+  const currentMonthKey = monthKey(now);
+  const joiningMonthKey = monthKey(input.joiningDate);
+  const isHistoricalJoining = joiningMonthKey < currentMonthKey;
+  const billingPeriodDate =
+    selection.firstBillMode === "JOINING_DATE"
+      ? input.joiningDate
+      : now;
+
   const invoice = await transaction.feeInvoice.create({
     data: {
       invoiceNumber: invoiceSequence.formattedNumber,
@@ -569,10 +621,10 @@ export async function createEnrollmentContractAndDraftInvoice(
         : billable.some((service) => service.serviceType === "DAYCARE")
           ? "DAYCARE_FEE"
           : billable[0].category,
-      feePeriodKey: monthKey(referenceDate),
-      feePeriodLabel: `Admission contract · ${monthLabel(referenceDate)}`,
+      feePeriodKey: monthKey(billingPeriodDate),
+      feePeriodLabel: `Admission contract · ${monthLabel(billingPeriodDate)}`,
       issueDate: new Date(),
-      dueDate: dueDateFor(referenceDate, selection.dueDay),
+      dueDate: dueDateFor(billingPeriodDate, selection.dueDay),
       amountBeforeTax: billable.reduce((sum, service) => sum + Number(service.taxableValue), 0),
       discountAmount: approvedDiscount,
       lateFeeAmount: 0,
@@ -605,7 +657,7 @@ export async function createEnrollmentContractAndDraftInvoice(
           totalAmount: service.total,
           sortOrder: index,
           chargeKey: service.recurring
-            ? `contract-service:${service.id}:${monthKey(referenceDate)}`
+            ? `contract-service:${service.id}:${monthKey(billingPeriodDate)}`
             : `contract-onetime:${service.id}`,
           sourceType: "ContractService",
           sourceId: service.id,

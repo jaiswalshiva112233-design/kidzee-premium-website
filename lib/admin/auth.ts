@@ -956,13 +956,9 @@ export function getAdminSessionClaimsFromToken(
   }
 
   if (!payload.userId) {
-    return {
-      role: "OWNER",
-      permissions: ["*"],
-      mustChangePassword: false,
-      expiresAt: payload.expiresAt,
-      source: "legacy",
-    };
+    // Legacy session tokens without an explicit userId are rejected to ensure
+    // all administrative access is strictly tied to an active, verifiable user.
+    return null;
   }
 
   if (!payload.adminRole) {

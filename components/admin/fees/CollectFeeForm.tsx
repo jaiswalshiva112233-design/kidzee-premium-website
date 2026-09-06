@@ -11,6 +11,7 @@ import {
   RefreshCw,
   ReceiptText,
   Search,
+  Trash2,
   UserRound,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -760,6 +761,11 @@ export default function CollectFeeForm({
   ] = useState("");
 
   const [
+    cancellingInvoiceId,
+    setCancellingInvoiceId,
+  ] = useState<string | null>(null);
+
+  const [
     receipt,
     setReceipt,
   ] =
@@ -1259,6 +1265,51 @@ export default function CollectFeeForm({
     setError("");
     setSuccess("");
     setReceipt(null);
+  }
+
+  async function handleCancelInvoice(invoice: OpenInvoice) {
+    if (Number(invoice.paidAmount) > 0) {
+      alert("Cannot cancel a bill that already has recorded payments.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to cancel and delete bill ${invoice.invoiceNumber} (${invoice.feePeriodLabel})? This will immediately remove it from the student's dues.`
+    );
+    if (!confirmed) return;
+
+    setCancellingInvoiceId(invoice.id);
+    setError("");
+    try {
+      const response = await fetch("/api/admin/fees", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "cancel-invoice",
+          invoiceId: invoice.id,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Failed to cancel bill.");
+      }
+
+      setSuccess(`Bill ${invoice.invoiceNumber} was successfully cancelled.`);
+      if (formData.invoiceId === invoice.id) {
+        setFormData((current) => ({
+          ...current,
+          invoiceId: "",
+        }));
+      }
+
+      await loadFeeData();
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to cancel bill.");
+    } finally {
+      setCancellingInvoiceId(null);
+    }
   }
 
   function selectStudent(
@@ -1877,21 +1928,25 @@ export default function CollectFeeForm({
                     formData.invoiceId;
 
                   return (
-                    <button
+                    <div
                       key={
                         invoice.id
                       }
-                      type="button"
-                      disabled={
-                        submitting
-                      }
+                      role="button"
+                      tabIndex={0}
                       onClick={() =>
                         applyInvoice(
                           invoice,
                         )
                       }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          applyInvoice(invoice);
+                        }
+                      }}
                       className={[
-                        "rounded-2xl border p-4 text-left transition",
+                        "relative rounded-2xl border p-4 text-left transition cursor-pointer select-none",
 
                         selected
                           ? "border-[#6A328F] bg-[#F5EDFA] ring-2 ring-[#6A328F]/10"
@@ -1932,14 +1987,31 @@ export default function CollectFeeForm({
                           </p>
                         </div>
 
-                        <span className="rounded-full bg-white px-3 py-1 text-[11px] font-black uppercase text-[#6A328F] shadow-sm">
-                          {
-                            invoiceStatusLabels[
-                              invoice
-                                .status
-                            ]
-                          }
-                        </span>
+                        <div className="flex flex-col items-end gap-2">
+                          <span className="rounded-full bg-white px-3 py-1 text-[11px] font-black uppercase text-[#6A328F] shadow-sm">
+                            {
+                              invoiceStatusLabels[
+                                invoice
+                                  .status
+                              ]
+                            }
+                          </span>
+                          {Number(invoice.paidAmount) === 0 ? (
+                            <button
+                              type="button"
+                              disabled={cancellingInvoiceId === invoice.id || submitting}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCancelInvoice(invoice);
+                              }}
+                              title="Delete / Cancel this bill"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-2.5 py-1 text-xs font-bold text-rose-600 shadow-sm transition hover:bg-rose-50 hover:border-rose-300 active:scale-95 cursor-pointer"
+                            >
+                              <Trash2 size={13} className="shrink-0" />
+                              <span>{cancellingInvoiceId === invoice.id ? "Cancelling..." : "Cancel bill"}</span>
+                            </button>
+                          ) : null}
+                        </div>
                       </div>
 
                       {invoice.items.length > 0 ? (
@@ -1992,7 +2064,7 @@ export default function CollectFeeForm({
                           )}
                         </p>
                       </div>
-                    </button>
+                    </div>
                   );
                 },
               )}

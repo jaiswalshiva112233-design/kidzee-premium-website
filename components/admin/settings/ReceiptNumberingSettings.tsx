@@ -67,7 +67,9 @@ function buildLocalPreview(formData: FormData) {
   const prefix = formData.prefix.trim();
 
   return prefix
-    ? `${prefix}-${serialText}`
+    ? prefix.endsWith("-") || prefix.endsWith("/")
+      ? `${prefix}${serialText}`
+      : `${prefix}-${serialText}`
     : serialText;
 }
 

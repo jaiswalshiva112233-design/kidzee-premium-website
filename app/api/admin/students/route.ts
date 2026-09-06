@@ -96,6 +96,7 @@ type RawContractSelection = {
   approvedDiscount?: unknown;
   billingDay?: unknown;
   dueDay?: unknown;
+  firstBillMode?: unknown;
 };
 
 function cleanText(value: unknown) {
@@ -1018,7 +1019,7 @@ export async function POST(request: Request) {
             enrollmentContractId:
               contractResult.contract.id,
             draftInvoiceId:
-              contractResult.invoice.id,
+              contractResult.invoice?.id ?? null,
           };
         },
         { isolationLevel: "Serializable" },
@@ -1054,11 +1055,15 @@ export async function POST(request: Request) {
       error,
     );
 
+    const message =
+      error instanceof Error && error.message && error.message.length > 5
+        ? error.message
+        : "The student could not be saved. Please try again. If the problem continues, contact the Owner.";
+
     return NextResponse.json(
       {
         success: false,
-        message:
-          "The student could not be saved. Please try again. If the problem continues, contact the Owner.",
+        message,
       },
       {
         status: 500,
@@ -1123,6 +1128,10 @@ function parseContractSelection(
     approvedDiscount,
     billingDay,
     dueDay,
+    firstBillMode:
+      raw.firstBillMode === "NONE" || raw.firstBillMode === "JOINING_DATE"
+        ? raw.firstBillMode
+        : "CURRENT_MONTH",
   };
 }
 

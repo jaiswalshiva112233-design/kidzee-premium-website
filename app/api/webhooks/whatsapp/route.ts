@@ -56,17 +56,21 @@ export async function POST(request: NextRequest) {
                 ? "FAILED"
                 : null;
         if (mapped) {
-          await prisma.whatsAppAutomationMessage.updateMany({
-            where: { providerMessageId: status.id },
-            data: {
-              status: mapped,
-              sentAt: mapped === "SENT" ? occurredAt : undefined,
-              deliveredAt: mapped === "DELIVERED" ? occurredAt : undefined,
-              readAt: mapped === "READ" ? occurredAt : undefined,
-              failedAt: mapped === "FAILED" ? occurredAt : undefined,
-              lastError: mapped === "FAILED" ? "WhatsApp reported delivery failure." : null,
-            },
-          });
+          try {
+            await prisma.whatsAppAutomationMessage.updateMany({
+              where: { providerMessageId: status.id },
+              data: {
+                status: mapped,
+                sentAt: mapped === "SENT" ? occurredAt : undefined,
+                deliveredAt: mapped === "DELIVERED" ? occurredAt : undefined,
+                readAt: mapped === "READ" ? occurredAt : undefined,
+                failedAt: mapped === "FAILED" ? occurredAt : undefined,
+                lastError: mapped === "FAILED" ? "WhatsApp reported delivery failure." : null,
+              },
+            });
+          } catch (dbError) {
+            console.error("WhatsApp status record update error:", dbError);
+          }
         }
       }
     }
