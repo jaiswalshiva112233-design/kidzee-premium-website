@@ -1,9 +1,19 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin/auth";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
+function isAuthorizedScript(request: NextRequest): boolean {
+  const authHeader = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim() ?? "";
+  const secret = process.env.GROWTH_SYNC_SECRET?.trim() || process.env.INTERNAL_DEVICE_SECRET?.trim() || "";
+  if (!secret || !authHeader) return false;
+  const authBuf = Buffer.from(authHeader);
+  const secretBuf = Buffer.from(secret);
+  return authBuf.length === secretBuf.length && timingSafeEqual(authBuf, secretBuf);
+}
 
 export async function GET() {
   const session = await getAdminSession();
@@ -20,11 +30,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  const isScriptAuth =
-    authHeader === "Bearer kidzee_growth_sync_2026_sec12" ||
-    (process.env.GROWTH_SYNC_SECRET && authHeader === `Bearer ${process.env.GROWTH_SYNC_SECRET}`);
-
+  const isScriptAuth = isAuthorizedScript(request);
   const session = await getAdminSession();
   if (!session && !isScriptAuth) {
     return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
