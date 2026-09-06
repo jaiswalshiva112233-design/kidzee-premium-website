@@ -301,6 +301,7 @@ export default async function RevenuePage() {
       where: {
         status: {
           in: [
+            "DRAFT",
             "DUE",
             "PARTIALLY_PAID",
             "OVERDUE",
@@ -317,6 +318,7 @@ export default async function RevenuePage() {
       where: {
         status: {
           in: [
+            "DRAFT",
             "DUE",
             "PARTIALLY_PAID",
             "OVERDUE",

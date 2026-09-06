@@ -637,7 +637,7 @@ export default async function StudentProfilePage({
 
   const totalPending = student.feeInvoices.reduce(
     (total, invoice) =>
-      ["DUE", "OVERDUE", "PARTIALLY_PAID"].includes(invoice.status)
+      ["DUE", "OVERDUE", "PARTIALLY_PAID", "DRAFT"].includes(invoice.status)
         ? total + Number(invoice.pendingAmount)
         : total,
     0,

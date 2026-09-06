@@ -375,6 +375,7 @@ export default async function ReportsPage({
 
         status: {
           in: [
+            "DRAFT",
             "DUE",
             "PARTIALLY_PAID",
             "OVERDUE",

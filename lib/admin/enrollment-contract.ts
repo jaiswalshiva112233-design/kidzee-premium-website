@@ -642,9 +642,11 @@ export async function createEnrollmentContractAndDraftInvoice(
       totalAmount,
       paidAmount: 0,
       pendingAmount: totalAmount,
-      status: "DRAFT",
+      status: input.documentsComplete
+        ? (now.getTime() > dueDateFor(billingPeriodDate, selection.dueDay).getTime() ? "OVERDUE" : "DUE")
+        : "DRAFT",
       createdById: input.createdById,
-      notes: "Combined first bill created atomically from the enrollment contract. Review before collecting payment.",
+      notes: "Combined first bill created atomically from the enrollment contract.",
       items: {
         create: billable.map((service, index) => ({
           contractServiceId: service.id,

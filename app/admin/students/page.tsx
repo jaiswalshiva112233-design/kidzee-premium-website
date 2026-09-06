@@ -220,7 +220,7 @@ export default async function AdminStudentsPage({
         feeInvoices: {
           where: {
             status: {
-              in: ["DUE", "OVERDUE", "PARTIALLY_PAID"],
+              in: ["DRAFT", "DUE", "OVERDUE", "PARTIALLY_PAID"],
             },
           },
           select: {
@@ -252,35 +252,55 @@ export default async function AdminStudentsPage({
     prisma.student.count({
       where: {
         status: "ACTIVE",
-        enrollmentContract: { is: { status: "ACTIVE", preschoolEnabled: true, preschoolClass: "Playgroup" } },
+        OR: [
+          { programme: "PLAYGROUP" },
+          { programmeDefinition: { is: { code: { in: ["PG", "PG_M_T"] } } } },
+          { enrollmentContract: { is: { preschoolClass: "Playgroup" } } },
+        ],
       },
     }),
 
     prisma.student.count({
       where: {
         status: "ACTIVE",
-        enrollmentContract: { is: { status: "ACTIVE", preschoolEnabled: true, preschoolClass: "Nursery" } },
+        OR: [
+          { programme: "NURSERY" },
+          { programmeDefinition: { is: { code: { in: ["NURSERY", "NUR_M_T"] } } } },
+          { enrollmentContract: { is: { preschoolClass: "Nursery" } } },
+        ],
       },
     }),
 
     prisma.student.count({
       where: {
         status: "ACTIVE",
-        enrollmentContract: { is: { status: "ACTIVE", preschoolEnabled: true, preschoolClass: { in: ["Junior KG", "LKG"] } } },
+        OR: [
+          { programme: "JUNIOR_KG" },
+          { programmeDefinition: { is: { code: { in: ["JUNIOR_KG", "JR_M_T", "LKG"] } } } },
+          { enrollmentContract: { is: { preschoolClass: { in: ["Junior KG", "LKG"] } } } },
+        ],
       },
     }),
 
     prisma.student.count({
       where: {
         status: "ACTIVE",
-        enrollmentContract: { is: { status: "ACTIVE", preschoolEnabled: true, preschoolClass: { in: ["Senior KG", "UKG"] } } },
+        OR: [
+          { programme: "SENIOR_KG" },
+          { programmeDefinition: { is: { code: { in: ["SENIOR_KG", "SR_M_T", "UKG"] } } } },
+          { enrollmentContract: { is: { preschoolClass: { in: ["Senior KG", "UKG"] } } } },
+        ],
       },
     }),
 
     prisma.student.count({
       where: {
         status: "ACTIVE",
-        enrollmentContract: { is: { status: "ACTIVE", daycareEnabled: true } },
+        OR: [
+          { programme: "DAYCARE" },
+          { programmeDefinition: { is: { code: { contains: "DAYCARE" } } } },
+          { enrollmentContract: { is: { daycareEnabled: true } } },
+        ],
       },
     }),
 
@@ -402,10 +422,14 @@ export default async function AdminStudentsPage({
 
   const configurableSummaryCards = programmeDefinitions.map((programme) => {
     const count = students.filter(
-      (student) => student.status === "ACTIVE" &&
-        student.enrollmentContract?.status === "ACTIVE" &&
-        student.enrollmentContract.preschoolEnabled &&
-        student.enrollmentContract.preschoolProgrammeId === programme.id,
+      (student) =>
+        student.status === "ACTIVE" &&
+        (student.programmeDefinitionId === programme.id ||
+          student.enrollmentContract?.preschoolProgrammeId === programme.id ||
+          (student.programme === "PLAYGROUP" && (programme.code === "PG" || programme.code === "PLAYGROUP")) ||
+          (student.programme === "NURSERY" && (programme.code === "NURSERY" || programme.code === "NUR")) ||
+          (student.programme === "JUNIOR_KG" && (programme.code === "JUNIOR_KG" || programme.code === "LKG")) ||
+          (student.programme === "SENIOR_KG" && (programme.code === "SENIOR_KG" || programme.code === "UKG"))),
     ).length;
     return {
       title: programme.name,
@@ -644,13 +668,16 @@ export default async function AdminStudentsPage({
             const guardian = student.guardians.find((item) => item.isPrimary) ?? student.guardians[0] ?? null;
             const activeContract = student.enrollmentContract?.status === "ACTIVE";
             const invoiceStatuses = student.feeInvoices.map((invoice) => invoice.status);
+            const totalOutstanding = student.feeInvoices.reduce((sum, invoice) => sum + Number(invoice.pendingAmount), 0);
             const feeStatus = invoiceStatuses.includes("OVERDUE")
               ? "OVERDUE"
               : invoiceStatuses.includes("PARTIALLY_PAID")
                 ? "PART_PAID"
-                : invoiceStatuses.length > 0
+                : invoiceStatuses.includes("DUE")
                   ? "PENDING"
-                  : "PAID";
+                  : totalOutstanding > 0
+                    ? "PENDING"
+                    : "PAID";
             return {
               id: student.id,
               studentNumber: student.studentNumber,
@@ -676,7 +703,7 @@ export default async function AdminStudentsPage({
                 student.admission?.status === "DOCUMENTS_PENDING"
               ),
               feeStatus,
-              outstanding: student.feeInvoices.reduce((sum, invoice) => sum + Number(invoice.pendingAmount), 0),
+              outstanding: totalOutstanding,
             };
           })} />
 

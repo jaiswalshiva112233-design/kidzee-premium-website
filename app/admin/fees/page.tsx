@@ -317,6 +317,7 @@ export default async function AdminFeesPage() {
       where: {
         status: {
           in: [
+            "DRAFT",
             "DUE",
             "PARTIALLY_PAID",
             "OVERDUE",
@@ -372,6 +373,7 @@ export default async function AdminFeesPage() {
       where: {
         status: {
           in: [
+            "DRAFT",
             "DUE",
             "PARTIALLY_PAID",
             "OVERDUE",

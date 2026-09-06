@@ -994,9 +994,10 @@ export async function DELETE(
 }
 
 function legacyProgrammeForCode(code: string): $Enums.Programme {
-  return isProgramme(code)
-    ? code
-    : code.includes("DAYCARE")
-      ? "DAYCARE"
-      : "NURSERY";
+  if (code === "PG" || code.startsWith("PG_") || code === "PLAYGROUP") return "PLAYGROUP";
+  if (code === "NURSERY" || code.startsWith("NUR_") || code.startsWith("NUR")) return "NURSERY";
+  if (code === "JUNIOR_KG" || code.startsWith("JR_") || code.startsWith("LKG") || code.includes("JUNIOR")) return "JUNIOR_KG";
+  if (code === "SENIOR_KG" || code.startsWith("SR_") || code.startsWith("UKG") || code.includes("SENIOR")) return "SENIOR_KG";
+  if (code.includes("DAYCARE")) return "DAYCARE";
+  return isProgramme(code) ? code : "PLAYGROUP";
 }

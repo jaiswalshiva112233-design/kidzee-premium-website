@@ -431,15 +431,16 @@ export default async function AdminDashboard() {
     }),
 
     prisma.feeInvoice.aggregate({
-  where: {
-    status: {
-      in: [
-        "DUE",
-        "PARTIALLY_PAID",
-        "OVERDUE",
-      ],
-    },
-  },
+      where: {
+        status: {
+          in: [
+            "DRAFT",
+            "DUE",
+            "PARTIALLY_PAID",
+            "OVERDUE",
+          ],
+        },
+      },
 
   _sum: {
     pendingAmount: true,
@@ -690,6 +691,7 @@ export default async function AdminDashboard() {
         },
         status: {
           in: [
+            "DRAFT",
             "DUE",
             "PARTIALLY_PAID",
             "OVERDUE",

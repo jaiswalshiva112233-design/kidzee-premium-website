@@ -66,7 +66,7 @@ export async function GET() {
       prisma.followUp.count({ where: { status: "PENDING", dueAt: { lte: tomorrow } } }),
       prisma.admission.count({ where: { status: { in: ["DRAFT", "DOCUMENTS_PENDING"] } } }),
       prisma.feeInvoice.aggregate({
-        where: { status: { in: ["DUE", "PARTIALLY_PAID", "OVERDUE"] } },
+        where: { status: { in: ["DRAFT", "DUE", "PARTIALLY_PAID", "OVERDUE"] } },
         _count: true,
         _sum: { pendingAmount: true },
       }),
