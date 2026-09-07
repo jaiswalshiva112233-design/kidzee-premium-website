@@ -471,14 +471,21 @@ export async function PATCH(
       );
     }
 
-    const incompatibleDaycarePlan =
-      existingStudent.daycarePlans.find(
-        (plan) =>
-          (plan.planType === "MONTHLY_DAYCARE_ONLY" &&
-            programmeValue !== "DAYCARE") ||
-          (plan.planType === "MONTHLY_PRESCHOOL_DAYCARE" &&
-            programmeValue === "DAYCARE"),
-      );
+    const programmeChanging =
+      programmeValue !== existingStudent.programme ||
+      (Boolean(programmeDefinitionId) &&
+        Boolean(existingStudent.programmeDefinitionId) &&
+        programmeDefinitionId !== existingStudent.programmeDefinitionId);
+
+    const incompatibleDaycarePlan = programmeChanging
+      ? existingStudent.daycarePlans.find(
+          (plan) =>
+            (plan.planType === "MONTHLY_DAYCARE_ONLY" &&
+              programmeValue !== "DAYCARE") ||
+            (plan.planType === "MONTHLY_PRESCHOOL_DAYCARE" &&
+              programmeValue === "DAYCARE"),
+        )
+      : null;
 
     if (incompatibleDaycarePlan) {
       return NextResponse.json(
@@ -1081,6 +1088,6 @@ function legacyProgrammeForCode(code: string): $Enums.Programme {
   if (code === "NURSERY" || code.startsWith("NUR_") || code.startsWith("NUR")) return "NURSERY";
   if (code === "JUNIOR_KG" || code.startsWith("JR_") || code.startsWith("LKG") || code.includes("JUNIOR")) return "JUNIOR_KG";
   if (code === "SENIOR_KG" || code.startsWith("SR_") || code.startsWith("UKG") || code.includes("SENIOR")) return "SENIOR_KG";
-  if (code.includes("DAYCARE")) return "DAYCARE";
+  if (code.includes("DAYCARE") || code.startsWith("DC_") || code.startsWith("DC") || code === "DAYCARE") return "DAYCARE";
   return isProgramme(code) ? code : "PLAYGROUP";
 }

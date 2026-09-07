@@ -451,7 +451,7 @@ function legacyProgrammeForCode(code: string): Programme {
   if (code === "NURSERY" || code.startsWith("NUR_") || code.startsWith("NUR")) return "NURSERY";
   if (code === "JUNIOR_KG" || code.startsWith("JR_") || code.startsWith("LKG") || code.includes("JUNIOR")) return "JUNIOR_KG";
   if (code === "SENIOR_KG" || code.startsWith("SR_") || code.startsWith("UKG") || code.includes("SENIOR")) return "SENIOR_KG";
-  if (code.includes("DAYCARE")) return "DAYCARE";
+  if (code.includes("DAYCARE") || code.startsWith("DC_") || code.startsWith("DC") || code === "DAYCARE") return "DAYCARE";
   return "PLAYGROUP";
 }
 
