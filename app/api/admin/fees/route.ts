@@ -2597,16 +2597,15 @@ export async function POST(
               invoice.paidAmount,
             ) <= 0
           ) {
-            const invoiceBaseAmount =
-              roundMoney(
-                Number(
-                  invoice.amountBeforeTax,
-                ),
-              );
+            const invoiceGrossAmount = roundMoney(
+              Number(invoice.totalAmount) +
+                Number(invoice.discountAmount) -
+                Number(invoice.lateFeeAmount),
+            );
 
             if (
               requestedDiscount >
-              invoiceBaseAmount
+              invoiceGrossAmount
             ) {
               throw new FeeRequestError(
                 "Discount cannot exceed the fee amount.",
@@ -2631,66 +2630,92 @@ export async function POST(
 
             const itemisedDiscountScale =
               invoiceIsItemised &&
-              invoiceBaseAmount > 0
+              invoiceGrossAmount > 0
                 ? Math.max(
-                    invoiceBaseAmount -
+                    invoiceGrossAmount -
                       requestedDiscount,
                     0,
                   ) /
-                  invoiceBaseAmount
+                  invoiceGrossAmount
                 : 1;
 
-            const revisedAmounts =
-              invoiceIsItemised
-                ? {
-                    amountBeforeTax:
-                      invoiceBaseAmount,
+            const revisedTotalAmount = roundMoney(
+              Math.max(
+                invoiceGrossAmount -
+                  requestedDiscount +
+                  requestedLateFee,
+                0,
+              ),
+            );
 
-                    discountAmount:
-                      requestedDiscount,
+            const revisedCgstAmount = invoiceIsItemised
+              ? roundMoney(
+                  Number(
+                    invoice.cgstAmount,
+                  ) *
+                    itemisedDiscountScale,
+                )
+              : invoiceGstApplicable && invoiceGstRate > 0
+                ? roundMoney(
+                    (revisedTotalAmount -
+                      revisedTotalAmount /
+                        (1 +
+                          invoiceGstRate /
+                            100)) /
+                      2,
+                  )
+                : 0;
 
-                    lateFeeAmount:
-                      requestedLateFee,
+            const revisedSgstAmount = invoiceIsItemised
+              ? roundMoney(
+                  Number(
+                    invoice.sgstAmount,
+                  ) *
+                    itemisedDiscountScale,
+                )
+              : invoiceGstApplicable && invoiceGstRate > 0
+                ? roundMoney(
+                    revisedTotalAmount -
+                      revisedTotalAmount /
+                        (1 +
+                          invoiceGstRate /
+                            100) -
+                      revisedCgstAmount,
+                  )
+                : 0;
 
-                    gstApplicable:
-                      invoiceGstApplicable,
+            const revisedAmountBeforeTax = roundMoney(
+              revisedTotalAmount -
+                revisedCgstAmount -
+                revisedSgstAmount -
+                requestedLateFee,
+            );
 
-                    gstRate:
-                      invoiceGstRate,
+            const revisedAmounts = {
+              amountBeforeTax:
+                revisedAmountBeforeTax,
 
-                    cgstAmount:
-                      roundMoney(
-                        Number(
-                          invoice.cgstAmount,
-                        ) *
-                          itemisedDiscountScale,
-                      ),
+              discountAmount:
+                requestedDiscount,
 
-                    sgstAmount:
-                      roundMoney(
-                        Number(
-                          invoice.sgstAmount,
-                        ) *
-                          itemisedDiscountScale,
-                      ),
+              lateFeeAmount:
+                requestedLateFee,
 
-                    totalAmount:
-                      roundMoney(
-                        Math.max(
-                          invoiceBaseAmount -
-                            requestedDiscount +
-                            requestedLateFee,
-                          0,
-                        ),
-                      ),
-                  }
-                : calculateInvoiceAmounts(
-                    invoiceBaseAmount,
-                    requestedDiscount,
-                    requestedLateFee,
-                    invoiceGstApplicable,
-                    invoiceGstRate,
-                  );
+              gstApplicable:
+                invoiceGstApplicable,
+
+              gstRate:
+                invoiceGstRate,
+
+              cgstAmount:
+                revisedCgstAmount,
+
+              sgstAmount:
+                revisedSgstAmount,
+
+              totalAmount:
+                revisedTotalAmount,
+            };
 
             invoice =
               await transaction.feeInvoice.update(

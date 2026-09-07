@@ -966,8 +966,16 @@ export default function CollectFeeForm({
 
       const baseAmount =
         selectedInvoice
-          ? parseAmount(
-              selectedInvoice.amountBeforeTax,
+          ? roundMoney(
+              parseAmount(
+                selectedInvoice.totalAmount,
+              ) +
+                parseAmount(
+                  selectedInvoice.discountAmount,
+                ) -
+                parseAmount(
+                  selectedInvoice.lateFeeAmount,
+                ),
             )
           : roundMoney(
               configuredAmount *
@@ -1229,7 +1237,11 @@ export default function CollectFeeForm({
         amountBeforeTax:
           String(
             Number(
-              invoice.amountBeforeTax,
+              roundMoney(
+                parseAmount(invoice.totalAmount) +
+                  parseAmount(invoice.discountAmount) -
+                  parseAmount(invoice.lateFeeAmount),
+              ),
             ),
           ),
 
