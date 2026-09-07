@@ -159,7 +159,7 @@ function parsePaymentDate(
     cleaned,
   )
     ? new Date(
-        `${cleaned}T00:00:00+05:30`,
+        `${cleaned}T12:00:00.000+05:30`,
       )
     : new Date(cleaned);
 
@@ -2930,7 +2930,7 @@ export async function POST(
                     updatedInvoice.category,
 
                   feePeriodLabel:
-                    updatedInvoice.feePeriodLabel,
+                    updatedInvoice.feePeriodLabel.replace(/^Admission contract\s*·\s*/i, "").trim(),
 
                   amountBeforeTax:
                     paymentSnapshot.totalAmount,

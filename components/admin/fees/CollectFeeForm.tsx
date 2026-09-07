@@ -445,13 +445,14 @@ function formatDate(
 function formatFeeMonth(
   value: string,
 ) {
+  const cleaned = value.replace(/^Admission contract\s*·\s*/i, "").trim();
   const match =
     /^(\d{4})-(\d{2})$/.exec(
-      value,
+      cleaned,
     );
 
   if (!match) {
-    return value.trim();
+    return cleaned;
   }
 
   return new Intl.DateTimeFormat(
@@ -1220,8 +1221,7 @@ export default function CollectFeeForm({
           invoice.category,
 
         feePeriodLabel:
-          invoice.feePeriodKey ??
-          invoice.feePeriodLabel,
+          (invoice.feePeriodKey ?? invoice.feePeriodLabel).replace(/^Admission contract\s*·\s*/i, "").trim(),
 
         daycareHours:
           "1",
@@ -1978,7 +1978,7 @@ export default function CollectFeeForm({
 
                           <p className="mt-1 text-xs font-semibold text-[#817684]">
                             {
-                              invoice.feePeriodLabel
+                              invoice.feePeriodLabel.replace(/^Admission contract\s*·\s*/i, "").trim()
                             }{" "}
                             · Due{" "}
                             {formatDate(

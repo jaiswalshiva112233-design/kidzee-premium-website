@@ -873,7 +873,7 @@ export default async function AdminFeesPage() {
                           <div className="mt-4 flex flex-col gap-3 border-t border-[#E9E2ED] pt-4 sm:flex-row sm:items-center sm:justify-between">
                             <p className="text-xs font-semibold text-[#817684]">
                               {payment.feePeriodLabel
-                                ? `Fee period: ${payment.feePeriodLabel}`
+                                ? `Fee period: ${payment.feePeriodLabel.replace(/^Admission contract\s*·\s*/i, "").trim()}`
                                 : "Fee period not specified"}
                             </p>
 
@@ -971,7 +971,7 @@ export default async function AdminFeesPage() {
 
                             <p className="mt-1 text-xs font-semibold text-[#817684]">
                               {formatDate(
-                                receipt.issuedAt,
+                                receipt.payment?.paymentDate || receipt.issuedAt,
                               )}
                             </p>
                           </div>

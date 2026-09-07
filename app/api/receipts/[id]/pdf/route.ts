@@ -191,7 +191,9 @@ async function pdfBuffer(
     receipt.student.guardians.find((g) => g.isPrimary) ?? receipt.student.guardians[0] ?? null;
   const parentName = primaryGuardian?.name || "Parent / Guardian";
   const contactNo = primaryGuardian?.phone ? `+91 ${primaryGuardian.phone.replace(/^\+?91/, "")}` : `+91 ${schoolProfile.phone}`;
-  const paymentMonth = receipt.payment.feePeriodLabel || receipt.payment.paymentDate.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+  const paymentMonth =
+    receipt.payment.feePeriodLabel?.replace(/^Admission contract\s*·\s*/i, "").trim() ||
+    receipt.payment.paymentDate.toLocaleDateString("en-IN", { month: "long", year: "numeric", timeZone: "Asia/Kolkata" });
   const academicYear =
     receipt.payment.invoice?.enrollmentContract?.academicSession ||
     receipt.student.enrollmentContract?.academicSession ||

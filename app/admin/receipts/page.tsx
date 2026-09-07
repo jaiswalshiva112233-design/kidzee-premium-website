@@ -451,7 +451,7 @@ export default async function AdminReceiptsPage() {
                       </p>
 
                       <p className="mt-1 text-xs font-semibold text-[#817684]">
-                        Issued {formatDateTime(receipt.issuedAt)}
+                        Receipt Date: {formatDate(receipt.payment?.paymentDate || receipt.issuedAt)}
                       </p>
                     </div>
 
@@ -511,7 +511,7 @@ export default async function AdminReceiptsPage() {
 
                     <span>
                       {receipt.payment.feePeriodLabel
-                        ? `Fee period: ${receipt.payment.feePeriodLabel}`
+                        ? `Fee period: ${receipt.payment.feePeriodLabel.replace(/^Admission contract\s*·\s*/i, "").trim()}`
                         : "Fee period not specified"}
                     </span>
                   </div>

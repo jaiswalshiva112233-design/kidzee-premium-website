@@ -550,6 +550,13 @@ export default async function StudentProfilePage({
         orderBy: {
           issuedAt: "desc",
         },
+        include: {
+          payment: {
+            select: {
+              paymentDate: true,
+            },
+          },
+        },
       },
 
       feeInvoices: {
@@ -1008,7 +1015,15 @@ type StudentProfileData = NonNullable<
               receipt: true;
             };
           };
-          receipts: true;
+          receipts: {
+            include: {
+              payment: {
+                select: {
+                  paymentDate: true;
+                };
+              };
+            };
+          };
           attendanceRecords: {
             include: {
               markedBy: {
@@ -1406,7 +1421,7 @@ function FeesTab({ student, totalReceived, totalPending }: FeesTabProps) {
 
                       {payment.feePeriodLabel ? (
                         <p className="mt-1 text-xs font-semibold text-[#817684]">
-                          Period: {payment.feePeriodLabel}
+                          Period: {payment.feePeriodLabel.replace(/^Admission contract\s*·\s*/i, "").trim()}
                         </p>
                       ) : null}
                     </div>
@@ -1501,7 +1516,7 @@ function FeesTab({ student, totalReceived, totalPending }: FeesTabProps) {
                 </p>
 
                 <p className="mt-1 text-xs font-semibold text-[#817684]">
-                  {formatDate(receipt.issuedAt)}
+                  {formatDate(receipt.payment?.paymentDate || receipt.issuedAt)}
                 </p>
               </Link>
             ))}

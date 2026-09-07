@@ -629,7 +629,7 @@ export async function createEnrollmentContractAndDraftInvoice(
           ? "DAYCARE_FEE"
           : billable[0].category,
       feePeriodKey: monthKey(billingPeriodDate),
-      feePeriodLabel: `Admission contract · ${monthLabel(billingPeriodDate)}`,
+      feePeriodLabel: monthLabel(billingPeriodDate),
       issueDate: new Date(),
       dueDate: dueDateFor(billingPeriodDate, selection.dueDay),
       amountBeforeTax: billable.reduce((sum, service) => sum + Number(service.taxableValue), 0),

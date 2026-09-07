@@ -1420,7 +1420,7 @@ export default async function ReceiptDetailsPage({
     primaryGuardian?.phone ?? schoolProfile.phone;
 
   const paymentMonth =
-    receipt.payment.feePeriodLabel ||
+    receipt.payment.feePeriodLabel?.replace(/^Admission contract\s*·\s*/i, "").trim() ||
     new Intl.DateTimeFormat("en-IN", {
       month: "long",
       year: "numeric",
