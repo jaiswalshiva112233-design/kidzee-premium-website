@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Download,
   MessageCircle,
   Printer,
 } from "lucide-react";
@@ -86,13 +87,23 @@ export default function ReceiptQuickActions({
     }
   }
 
+  function handlePrint() {
+    const cleanStudentName = studentName?.trim() || "Student";
+    const originalTitle = document.title;
+    document.title = `${cleanStudentName} Fee Receipt`;
+    window.print();
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 1500);
+  }
+
+  const downloadFilename = `${studentName?.trim() || "Student"} Fee Receipt.pdf`;
+
   return (
     <>
       <button
         type="button"
-        onClick={() =>
-          window.print()
-        }
+        onClick={handlePrint}
         className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#5B2A86] px-4 text-sm font-black text-white transition hover:bg-[#472067] focus:outline-none focus:ring-4 focus:ring-[#DCCFE4]"
       >
         <Printer
@@ -102,6 +113,20 @@ export default function ReceiptQuickActions({
 
         Print Receipt
       </button>
+
+      <a
+        href={`/api/receipts/${receiptId}/pdf?download=true`}
+        download={downloadFilename}
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-[#DCCFE4] bg-white px-4 text-sm font-black text-[#5B2A86] transition hover:bg-[#F3EAF8] focus:outline-none focus:ring-4 focus:ring-[#DCCFE4]"
+        title="Download fee receipt PDF directly"
+      >
+        <Download
+          aria-hidden="true"
+          size={17}
+        />
+
+        Download PDF
+      </a>
 
       {whatsappUrl ? (
         <button

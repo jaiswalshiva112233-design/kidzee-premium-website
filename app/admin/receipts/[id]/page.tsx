@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import type { Prisma } from "@/generated/prisma/client";
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
@@ -1274,6 +1275,38 @@ function ParticularRow({ label, value }: { label: string; value: string }) {
 
 export const dynamic =
   "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: ReceiptPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const receipt = await prisma.receipt.findUnique({
+    where: { id },
+    include: {
+      student: {
+        select: {
+          firstName: true,
+          middleName: true,
+          lastName: true,
+        },
+      },
+    },
+  });
+
+  if (!receipt) {
+    return {
+      title: "Fee Receipt",
+    };
+  }
+
+  const studentName = getStudentName(receipt.student).trim() || "Student";
+
+  return {
+    title: {
+      absolute: `${studentName} Fee Receipt`,
+    },
+  };
+}
 
 export default async function ReceiptDetailsPage({
   params,

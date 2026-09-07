@@ -1,6 +1,7 @@
 import PDFDocument from "pdfkit";
 import { NextResponse } from "next/server";
 
+import { getAdminSession } from "@/lib/admin/auth";
 import { formatCentreAddress } from "@/lib/centreAddress";
 import { prisma } from "@/lib/prisma";
 import { site } from "@/lib/site";
@@ -471,7 +472,15 @@ export async function GET(request: Request, context: RouteContext) {
   const { id } = await context.params;
   const url = new URL(request.url);
   try {
-    if (!verifyReceiptDocumentSignature(id, url.searchParams.get("expires"), url.searchParams.get("signature"))) {
+    const session = await getAdminSession();
+    const isAuthorizedAdmin = Boolean(session);
+    const isSignedUrl = verifyReceiptDocumentSignature(
+      id,
+      url.searchParams.get("expires"),
+      url.searchParams.get("signature"),
+    );
+
+    if (!isAuthorizedAdmin && !isSignedUrl) {
       return new NextResponse("Invalid or expired receipt link.", { status: 401 });
     }
     const [receipt, schoolSetting] = await Promise.all([
@@ -481,10 +490,21 @@ export async function GET(request: Request, context: RouteContext) {
     if (!receipt || receipt.status !== "ISSUED") return new NextResponse("Receipt not found.", { status: 404 });
     const profile = normaliseSchoolProfile(schoolSetting?.value ?? null);
     const buffer = await pdfBuffer(receipt, profile);
+
+    const studentName = [receipt.student.firstName, receipt.student.middleName, receipt.student.lastName]
+      .map((part) => (typeof part === "string" ? part.trim() : ""))
+      .filter(Boolean)
+      .join(" ") || "Student";
+    const cleanStudentName = studentName.replace(/[<>:"/\\|?*\x00-\x1F]/g, "").trim() || "Student";
+    const filename = `${cleanStudentName} Fee Receipt.pdf`;
+    const asciiFilename = `${cleanStudentName.replace(/[^\w\s.-]/g, "").trim() || "Student"} Fee Receipt.pdf`;
+    const isDownload = url.searchParams.get("download") === "true" || url.searchParams.get("download") === "1";
+    const dispositionType = isDownload ? "attachment" : "inline";
+
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="${receipt.receiptNumber}.pdf"`,
+        "Content-Disposition": `${dispositionType}; filename="${asciiFilename}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
         "Cache-Control": "private, no-store, max-age=0",
         "X-Robots-Tag": "noindex, nofollow, noarchive",
       },
