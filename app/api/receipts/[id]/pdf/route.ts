@@ -236,7 +236,7 @@ async function pdfBuffer(
      .text("Receipt No. :", 393, 41)
      .font("Helvetica").text(receipt.receiptNumber, 460, 41)
      .font("Helvetica-Bold").text("Receipt Date :", 393, 57)
-     .font("Helvetica").text(receipt.issuedAt.toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" }), 460, 57);
+     .font("Helvetica").text((receipt.payment?.paymentDate || receipt.issuedAt).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric", timeZone: "Asia/Kolkata" }), 460, 57);
 
   // 4. Center Kidzee Header
   if (logoBuf) {

@@ -1655,7 +1655,7 @@ export default async function ReceiptDetailsPage({
                   <span className="font-black text-[#25163E]">Receipt No.</span>
                   <span className="font-black text-[#25163E]">: <strong className="font-extrabold">{receipt.receiptNumber}</strong></span>
                   <span className="mt-1 font-black text-[#25163E]">Receipt Date</span>
-                  <span className="mt-1 font-black text-[#25163E]">: {formatDate(receipt.issuedAt)}</span>
+                  <span className="mt-1 font-black text-[#25163E]">: {formatDate(receipt.payment?.paymentDate || receipt.issuedAt)}</span>
                 </div>
               </div>
             </div>

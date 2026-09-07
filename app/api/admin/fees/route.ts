@@ -2993,8 +2993,7 @@ export async function POST(
 
                   status: "ISSUED",
 
-                  issuedAt:
-                    new Date(),
+                  issuedAt: paymentDate,
                 },
               },
             );
