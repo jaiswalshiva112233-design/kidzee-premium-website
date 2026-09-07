@@ -373,32 +373,32 @@ export default function LandingPageExperience({
       {/* Floating Trust Header */}
       <header className="sticky top-0 z-40 border-b border-purple-100 bg-white/95 backdrop-blur-md shadow-xs">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             <Image
               src="/images/kidzee-logo.png"
               alt="Kidzee Sector 12 Dwarka"
               width={125}
               height={42}
-              className="h-9 w-auto object-contain"
+              className="h-8 sm:h-9 w-auto object-contain"
               priority
             />
-            <span className="rounded-full bg-[#FAF4FF] px-2.5 py-1 text-[11px] font-bold text-[#5B2A86] border border-purple-100">
+            <span className="hidden sm:inline-block rounded-full bg-[#FAF4FF] px-2.5 py-1 text-[11px] font-bold text-[#5B2A86] border border-purple-100 whitespace-nowrap">
               Sector 12, Dwarka
             </span>
           </Link>
 
-          <div className="flex items-center gap-2 sm:gap-4">
-            <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+            <div className="hidden md:flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200 whitespace-nowrap shrink-0">
               <Star size={14} className="fill-amber-400 text-amber-400" />
               <span>4.8 / 5 Google Reviews</span>
             </div>
 
             <a
               href={`tel:${site.phone}`}
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#5B2A86] px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#471E6C]"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#5B2A86] px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-[#471E6C] whitespace-nowrap shrink-0"
             >
-              <Phone size={14} />
-              <span>{site.phoneDisplay}</span>
+              <Phone size={14} className="shrink-0" />
+              <span className="whitespace-nowrap">{site.phoneDisplay}</span>
             </a>
           </div>
         </div>
@@ -1006,10 +1006,10 @@ export default function LandingPageExperience({
             </a>
             <a
               href={`tel:${site.phone}`}
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur-sm transition hover:bg-white/20"
+              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur-sm transition hover:bg-white/20 whitespace-nowrap"
             >
               <Phone size={16} />
-              <span>Call: {site.phoneDisplay}</span>
+              <span className="whitespace-nowrap">Call: {site.phoneDisplay}</span>
             </a>
           </div>
 
