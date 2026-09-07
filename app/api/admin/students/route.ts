@@ -80,6 +80,7 @@ type CreateStudentBody = {
   contract?: unknown;
   duplicateOverrideStudentId?: unknown;
   duplicateOverrideReason?: unknown;
+  admissionNumber?: unknown;
 };
 
 type RawContractSelection = {
@@ -427,6 +428,55 @@ export async function POST(request: Request) {
       body.guardianEmail,
     );
 
+    const admissionNumber = cleanOptionalText(
+      body.admissionNumber,
+    );
+
+    if (admissionNumber) {
+      const existingAdmission = await prisma.admission.findUnique({
+        where: { admissionNumber },
+        select: {
+          id: true,
+          student: {
+            select: { firstName: true, lastName: true },
+          },
+        },
+      });
+
+      if (existingAdmission) {
+        const studentName = existingAdmission.student
+          ? `${existingAdmission.student.firstName} ${existingAdmission.student.lastName || ""}`.trim()
+          : "another student";
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Admission number "${admissionNumber}" is already in use by ${studentName}.`,
+          },
+          { status: 400 },
+        );
+      }
+
+      const existingStudent = await prisma.student.findUnique({
+        where: { studentNumber: admissionNumber },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+        },
+      });
+
+      if (existingStudent) {
+        const studentName = `${existingStudent.firstName} ${existingStudent.lastName || ""}`.trim();
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Student / Admission number "${admissionNumber}" is already in use by ${studentName}.`,
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     if (firstName.length < 2) {
       return NextResponse.json(
         {
@@ -765,7 +815,7 @@ export async function POST(request: Request) {
             await transaction.student.create({
               data: {
                 studentNumber:
-                  createStudentNumber(),
+                  admissionNumber || createStudentNumber(),
 
                 firstName,
                 middleName,
@@ -903,7 +953,7 @@ export async function POST(request: Request) {
 
               create: {
                 admissionNumber:
-                  createAdmissionNumber(),
+                  admissionNumber || createAdmissionNumber(),
                 enquiryId,
                 studentId: createdStudent.id,
                 status: admissionStatus,
@@ -919,6 +969,7 @@ export async function POST(request: Request) {
 
               update: {
                 studentId: createdStudent.id,
+                ...(admissionNumber ? { admissionNumber } : {}),
                 status: admissionStatus,
                 programme:
                   programmeValue as $Enums.Programme,
@@ -967,7 +1018,7 @@ export async function POST(request: Request) {
             savedAdmission = await transaction.admission.create({
               data: {
                 admissionNumber:
-                  createAdmissionNumber(),
+                  admissionNumber || createAdmissionNumber(),
                 studentId: createdStudent.id,
                 status: admissionStatus,
                 programme:

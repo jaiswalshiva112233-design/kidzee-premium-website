@@ -46,6 +46,7 @@ type UpdateStudentBody = {
   guardianOccupation?: unknown;
   guardianAddress?: unknown;
   authorisedPickup?: unknown;
+  admissionNumber?: unknown;
 };
 
 const PROGRAMMES = [
@@ -267,6 +268,7 @@ export async function PATCH(
           id,
         },
         include: {
+          admission: true,
           guardians: {
             orderBy: [
               {
@@ -644,6 +646,57 @@ export async function PATCH(
       body.guardianAddress,
     );
 
+    const admissionNumber =
+      body.admissionNumber !== undefined
+        ? cleanOptionalText(body.admissionNumber)
+        : undefined;
+
+    if (admissionNumber) {
+      const existingWithNumber = await prisma.admission.findUnique({
+        where: { admissionNumber },
+        select: {
+          id: true,
+          studentId: true,
+          student: {
+            select: { firstName: true, lastName: true },
+          },
+        },
+      });
+
+      if (existingWithNumber && existingWithNumber.studentId !== id) {
+        const studentName = existingWithNumber.student
+          ? `${existingWithNumber.student.firstName} ${existingWithNumber.student.lastName || ""}`.trim()
+          : "another student";
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Admission number "${admissionNumber}" is already assigned to ${studentName}.`,
+          },
+          { status: 400 },
+        );
+      }
+
+      const existingStudentWithNumber = await prisma.student.findUnique({
+        where: { studentNumber: admissionNumber },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+        },
+      });
+
+      if (existingStudentWithNumber && existingStudentWithNumber.id !== id) {
+        const studentName = `${existingStudentWithNumber.firstName} ${existingStudentWithNumber.lastName || ""}`.trim();
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Student number "${admissionNumber}" is already assigned to ${studentName}.`,
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     const student = await prisma.$transaction(
       async (transaction) => {
         const updatedStudent =
@@ -653,6 +706,7 @@ export async function PATCH(
             },
 
             data: {
+              ...(admissionNumber ? { studentNumber: admissionNumber } : {}),
               firstName,
 
               middleName: cleanOptionalText(
@@ -794,6 +848,35 @@ export async function PATCH(
                 "boolean"
                   ? body.authorisedPickup
                   : true,
+            },
+          });
+        }
+
+        if (admissionNumber !== undefined && admissionNumber !== null) {
+          if (existingStudent.admission) {
+            await transaction.admission.update({
+              where: { id: existingStudent.admission.id },
+              data: { admissionNumber },
+            });
+          } else {
+            await transaction.admission.create({
+              data: {
+                studentId: id,
+                admissionNumber,
+                status: "CONFIRMED",
+                programme: programmeValue as $Enums.Programme,
+                admissionDate: joiningDate,
+                joiningDate,
+                documentsComplete: true,
+                notes: "Added via student edit.",
+              },
+            });
+          }
+
+          await transaction.studentEnrollmentContract.updateMany({
+            where: { studentId: id },
+            data: {
+              contractNumber: `KZ-CON-${admissionNumber.replace(/\//g, "-")}`,
             },
           });
         }

@@ -744,7 +744,7 @@ export default async function StudentProfilePage({
 
                 <div className="min-w-0">
                   <p className="text-xs font-black uppercase tracking-[0.15em] text-[#F6C84B]">
-                    {student.studentNumber}
+                    {student.admission?.admissionNumber || student.studentNumber}
                   </p>
 
                   <h1 className="mt-2 break-words text-3xl font-black tracking-[-0.04em] sm:text-4xl lg:text-5xl">
@@ -1074,6 +1074,11 @@ function OverviewTab({
             <DetailItem
               label="Student status"
               value={statusLabels[student.status] ?? student.status}
+            />
+
+            <DetailItem
+              label="Admission number"
+              value={student.admission?.admissionNumber ?? "Not assigned"}
             />
 
             <DetailItem

@@ -55,6 +55,7 @@ type StudentFormData = {
   programmeDefinitionId: string;
   status: StudentStatus;
   joiningDate: string;
+  admissionNumber: string;
   bloodGroup: string;
   medicalNotes: string;
   allergies: string;
@@ -223,6 +224,7 @@ const initialFormData: StudentFormData = {
   programmeDefinitionId: "",
   status: "ACTIVE",
   joiningDate: today,
+  admissionNumber: "",
   bloodGroup: "",
   medicalNotes: "",
   allergies: "",
@@ -699,6 +701,7 @@ export default function AddStudentForm({
           },
           body: JSON.stringify({
             ...formData,
+            admissionNumber: formData.admissionNumber.trim() || undefined,
             enquiryId: enquiryId || undefined,
             documentsComplete: formData.documentsComplete,
             duplicateOverrideStudentId: formData.duplicateOverrideStudentId || undefined,
@@ -871,6 +874,31 @@ export default function AddStudentForm({
               title="Child details"
               description="Enter the student’s basic information."
             />
+
+            <div className="mt-6 rounded-2xl border-2 border-[#7A459C]/25 bg-[#FAF5FC] p-4 sm:p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <span className="text-xs font-black uppercase tracking-[0.1em] text-[#7A459C]">
+                    Admission Number (Academic Session)
+                  </span>
+                  <p className="mt-0.5 text-xs font-semibold leading-5 text-[#65596A]">
+                    Enter the permanent admission number (e.g. 2026-2027/21). You can edit this anytime later.
+                  </p>
+                </div>
+                <div className="w-full sm:w-64">
+                  <input
+                    type="text"
+                    value={formData.admissionNumber}
+                    disabled={submitting}
+                    placeholder="e.g. 2026-2027/21"
+                    onChange={(event) =>
+                      updateField("admissionNumber", event.target.value)
+                    }
+                    className="min-h-12 w-full rounded-xl border-2 border-[#7A459C] bg-white px-4 text-base font-black text-[#2D1736] outline-none shadow-sm focus:ring-4 focus:ring-[#7A459C]/20"
+                  />
+                </div>
+              </div>
+            </div>
 
             <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               <InputField
@@ -1055,6 +1083,7 @@ export default function AddStudentForm({
                   </option>
                 </select>
               </label>
+
             </div>
 
             {calculatedAge ? (

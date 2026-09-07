@@ -253,7 +253,7 @@ export default function StudentRegister({
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <p className="text-xs font-black uppercase tracking-[0.1em] text-[#7A459C]">
-                      {student.studentNumber}{student.admissionNumber ? ` · ${student.admissionNumber}` : ""}
+                      {student.admissionNumber || student.studentNumber}
                     </p>
                     <h3 className="mt-2 text-xl font-black text-[#2D1736]">{student.name}</h3>
                     <p className="mt-1 text-sm font-semibold text-[#817684]">{student.programme}</p>

@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import {
   type ChangeEvent,
   type FormEvent,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -56,6 +57,7 @@ export type EditStudentInitialData = {
   status: StudentStatus;
   joiningDate: string;
   leavingDate: string;
+  admissionNumber: string;
 
   bloodGroup: string;
   medicalNotes: string;
@@ -273,6 +275,14 @@ export default function EditStudentForm({
   const [formData, setFormData] =
     useState<EditStudentInitialData>(initialData);
 
+  useEffect(() => {
+    setFormData((current) => ({
+      ...current,
+      studentNumber: initialData.studentNumber,
+      admissionNumber: initialData.admissionNumber,
+    }));
+  }, [initialData.studentNumber, initialData.admissionNumber]);
+
   const [submitting, setSubmitting] =
     useState(false);
 
@@ -426,6 +436,13 @@ export default function EditStudentForm({
         "Student record updated successfully.",
       );
 
+      if (formData.admissionNumber) {
+        setFormData((current) => ({
+          ...current,
+          studentNumber: formData.admissionNumber,
+        }));
+      }
+
       router.refresh();
     } catch (submitError) {
       setError(
@@ -493,9 +510,25 @@ export default function EditStudentForm({
               </span>
 
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.12em] text-[#7A459C]">
-                  {formData.studentNumber}
-                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-black uppercase tracking-[0.12em] text-[#7A459C]">
+                    Admission No:
+                  </span>
+                  <input
+                    type="text"
+                    value={formData.admissionNumber}
+                    disabled={submitting || deleting}
+                    placeholder="e.g. 2026-2027/19"
+                    onChange={(event) => {
+                      updateField("admissionNumber", event.target.value);
+                      updateField("studentNumber", event.target.value);
+                    }}
+                    className="h-8 w-44 rounded-xl border-2 border-[#7A459C] bg-white px-3 text-xs font-black text-[#5B2A86] outline-none shadow-sm focus:border-[#5B2A86] focus:ring-2 focus:ring-[#5B2A86]/20"
+                  />
+                  <span className="rounded-md bg-[#7A459C]/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#7A459C]">
+                    Editable
+                  </span>
+                </div>
 
                 <h2 className="mt-1 text-xl font-black text-[#2D1736] sm:text-2xl">
                   Edit Student Record
@@ -549,6 +582,32 @@ export default function EditStudentForm({
             title="Student information"
             description="Basic identification, programme and admission dates."
           >
+            <div className="rounded-2xl border-2 border-[#7A459C]/25 bg-[#FAF5FC] p-4 sm:p-5 mb-5">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <span className="text-xs font-black uppercase tracking-[0.1em] text-[#7A459C]">
+                    Official Admission Number (Academic Session)
+                  </span>
+                  <p className="mt-0.5 text-xs font-semibold leading-5 text-[#65596A]">
+                    Edit this number anytime. Saving will automatically update receipts, attendance, and student cards.
+                  </p>
+                </div>
+                <div className="w-full sm:w-60">
+                  <input
+                    type="text"
+                    value={formData.admissionNumber}
+                    disabled={submitting || deleting}
+                    placeholder="e.g. 2026-2027/19"
+                    onChange={(event) => {
+                      updateField("admissionNumber", event.target.value);
+                      updateField("studentNumber", event.target.value);
+                    }}
+                    className="min-h-11 w-full rounded-xl border-2 border-[#7A459C] bg-white px-3.5 text-sm font-black text-[#2D1736] outline-none shadow-sm focus:border-[#5B2A86] focus:ring-2 focus:ring-[#5B2A86]/20"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               <InputField
                 label="First name *"
@@ -725,6 +784,7 @@ export default function EditStudentForm({
                   className={inputClassName}
                 />
               </label>
+
             </div>
 
             {calculatedAge ? (
@@ -1231,6 +1291,7 @@ type InputFieldProps = {
   label: string;
   value: string;
   type?: string;
+  placeholder?: string;
   disabled?: boolean;
   onChange: (value: string) => void;
 };
@@ -1239,6 +1300,7 @@ function InputField({
   label,
   value,
   type = "text",
+  placeholder,
   disabled,
   onChange,
 }: InputFieldProps) {
@@ -1251,6 +1313,7 @@ function InputField({
       <input
         type={type}
         value={value}
+        placeholder={placeholder}
         disabled={disabled}
         onChange={(event) =>
           onChange(event.target.value)

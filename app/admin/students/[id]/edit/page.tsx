@@ -54,6 +54,11 @@ export default async function EditStudentPage({
         guardians: {
           orderBy: [{ isPrimary: "desc" }, { createdAt: "asc" }],
         },
+        admission: {
+          select: {
+            admissionNumber: true,
+          },
+        },
       },
     }),
     prisma.programmeDefinition.findMany({
@@ -82,7 +87,7 @@ export default async function EditStudentPage({
 
   const initialData: EditStudentInitialData = {
     id: student.id,
-    studentNumber: student.studentNumber,
+    studentNumber: student.admission?.admissionNumber || student.studentNumber,
 
     firstName: student.firstName,
     middleName: student.middleName ?? "",
@@ -107,6 +112,8 @@ export default async function EditStudentPage({
     leavingDate: formatDateForInput(
       student.leavingDate,
     ),
+
+    admissionNumber: student.admission?.admissionNumber ?? "",
 
     bloodGroup: student.bloodGroup ?? "",
     medicalNotes: student.medicalNotes ?? "",
@@ -180,7 +187,7 @@ export default async function EditStudentPage({
 
                 <div className="min-w-0">
                   <p className="text-xs font-black uppercase tracking-[0.15em] text-[#F6C84B]">
-                    {student.studentNumber}
+                    {student.admission?.admissionNumber || student.studentNumber}
                   </p>
 
                   <h1 className="mt-2 break-words text-3xl font-black tracking-[-0.04em] sm:text-4xl lg:text-5xl">
