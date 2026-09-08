@@ -871,29 +871,65 @@ export default async function ProgrammePage({
     .toUpperCase()
     .replace("-", "_")}&enquiry=ADMISSION#admission-enquiry`;
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Course",
-    name: `${programme.title} Programme`,
-    description: programme.intro,
-    url: `${site.url}/programmes/${programme.slug}`,
-
-    provider: {
-      "@type": "Preschool",
-      name: site.name,
-      url: site.url,
-      telephone: contact.phone,
-
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: contact.address,
-        addressLocality: site.locality,
-        addressRegion: site.region,
-        postalCode: site.postalCode,
-        addressCountry: site.country,
+  const structuredData = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Course",
+      name: `${programme.title} Programme`,
+      description: programme.intro,
+      url: `${site.url}/programmes/${programme.slug}`,
+      provider: {
+        "@type": "Preschool",
+        name: site.name,
+        url: site.url,
+        telephone: contact.phone,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: contact.address,
+          addressLocality: site.locality,
+          addressRegion: site.region,
+          postalCode: site.postalCode,
+          addressCountry: site.country,
+        },
       },
     },
-  };
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: site.url,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Programmes",
+          item: `${site.url}/programmes`,
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: programme.title,
+          item: `${site.url}/programmes/${programme.slug}`,
+        },
+      ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: detail.faqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: faq.answer,
+        },
+      })),
+    },
+  ];
 
   return (
     <PageShell>
@@ -901,7 +937,7 @@ export default async function ProgrammePage({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(structuredData),
+            __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
           }}
         />
 
