@@ -63,12 +63,15 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
   }
 
   body {
     min-height: 100vh;
     margin: 0;
     overflow-x: hidden;
+    overscroll-behavior-x: none;
     background: var(--white);
     color: var(--ink);
     font-family: var(--font-sans), Arial, Helvetica, sans-serif;
@@ -511,11 +514,42 @@ body[data-mobile-menu-open="true"] .mobile-contact-bar {
     border-color 0.28s ease;
 }
 
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   .card-hover:hover {
     transform: translateY(-5px);
     border-color: #dfcfe8;
     box-shadow: var(--shadow-lg);
+  }
+}
+
+/* =========================================================
+   Mobile Touch & Scroll Optimization (No Touch-Zoom, No Lag)
+   ========================================================= */
+@media (hover: none), (pointer: coarse), (max-width: 768px) {
+  /* Prevent touch from triggering card lifts, image zooms, and hover scales */
+  .card-hover,
+  .card-hover:hover,
+  .card-hover:active,
+  .card-hover:focus,
+  article,
+  article:hover,
+  article:active,
+  article:focus,
+  .group:hover .group-hover\:scale-\[1\.035\],
+  .group:hover .group-hover\:scale-\[1\.018\],
+  .group:hover .group-hover\:scale-105,
+  .group:active .group-hover\:scale-\[1\.035\],
+  .group:active .group-hover\:scale-\[1\.018\],
+  .group:active .group-hover\:scale-105 {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Ensure horizontal touch scrolling does not trigger rubber-band page flicker */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
   }
 }
 
