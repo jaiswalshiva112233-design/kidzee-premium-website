@@ -47,8 +47,21 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
+    let ticking = false;
+
     function handleScroll() {
-      setIsScrolled(window.scrollY > 14);
+      if (ticking) return;
+      ticking = true;
+
+      window.requestAnimationFrame(() => {
+        const y = window.scrollY;
+        setIsScrolled((prev) => {
+          if (!prev && y > 32) return true;
+          if (prev && y < 8) return false;
+          return prev;
+        });
+        ticking = false;
+      });
     }
 
     handleScroll();

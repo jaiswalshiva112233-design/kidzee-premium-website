@@ -457,6 +457,9 @@ body[data-mobile-menu-open="true"] .mobile-contact-bar {
   width: max-content;
   gap: var(--team-marquee-gap);
   will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
   animation: team-marquee var(--team-marquee-duration, 34s) linear infinite;
 }
 
@@ -477,26 +480,28 @@ body[data-mobile-menu-open="true"] .mobile-contact-bar {
 
 /* Public-page reveal enhancement; content stays visible without JavaScript. */
 [data-site-reveal] {
-  opacity: 0;
-  transform: translate3d(0, 18px, 0);
-  transition:
-    opacity 560ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-[data-site-reveal="pending"] {
-  opacity: 0;
-  transform: translate3d(0, 18px, 0);
-}
-
-[data-site-reveal="visible"] {
   opacity: 1;
-  transform: translate3d(0, 0, 0);
+  transform: none;
 }
 
-[data-site-reveal="visible"] {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
+@media (min-width: 769px) {
+  [data-site-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    transition:
+      opacity 560ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  [data-site-reveal="pending"] {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+
+  [data-site-reveal="visible"] {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 .card-hover {
