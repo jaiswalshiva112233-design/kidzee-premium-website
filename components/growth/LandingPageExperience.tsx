@@ -431,6 +431,7 @@ export default function LandingPageExperience({
               <span className="rounded-full bg-purple-50 border border-purple-200 px-3 py-1">✓ Playgroup (2 – 3 Years)</span>
               <span className="rounded-full bg-purple-50 border border-purple-200 px-3 py-1">✓ Nursery (3 – 4 Years)</span>
               <span className="rounded-full bg-purple-50 border border-purple-200 px-3 py-1">✓ Junior & Senior KG (4 – 6 Years)</span>
+              <span className="rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-amber-900">✓ Daycare (Till 7 PM)</span>
             </div>
 
             {/* 4 Distinct Value Cards */}
@@ -813,6 +814,112 @@ export default function LandingPageExperience({
         </div>
       </section>
 
+      {/* Daycare & Extended Care Spotlight for Working Parents */}
+      <section className="bg-gradient-to-b from-white via-[#FAF7FC] to-white py-12 sm:py-16 border-t border-purple-100">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 border border-purple-200 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-[#5B2A86]">
+              <Clock3 size={14} className="text-amber-500" />
+              Daycare &amp; Extended Care (12:30 PM – 7:00 PM)
+            </span>
+            <h2 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-black text-[#281034]">
+              A Dependable Second Home for Working Parents
+            </h2>
+            <p className="mt-2 text-sm sm:text-base text-gray-600 font-medium">
+              We understand the busy schedules of Dwarka families. After morning preschool, children transition smoothly into a calm, nurturing afternoon routine without feeling rushed.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="flex flex-col justify-between rounded-2xl bg-white p-5 border border-purple-100 shadow-2xs hover:shadow-md transition">
+              <div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-800 mb-3">
+                  <Utensils size={20} />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Fresh Warm Meals</h3>
+                <p className="mt-1.5 text-xs text-gray-600 leading-relaxed">
+                  Nutritious, freshly prepared lunch and evening milk/snacks served in clean, hygienic dining areas.
+                </p>
+              </div>
+              <span className="mt-4 text-[11px] font-bold text-[#5B2A86] bg-purple-50 px-2.5 py-1 rounded-md w-fit">
+                ✓ Balanced Diet
+              </span>
+            </div>
+
+            <div className="flex flex-col justify-between rounded-2xl bg-white p-5 border border-purple-100 shadow-2xs hover:shadow-md transition">
+              <div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-800 mb-3">
+                  <Clock3 size={20} />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Peaceful Nap Rooms</h3>
+                <p className="mt-1.5 text-xs text-gray-600 leading-relaxed">
+                  Air-conditioned quiet rest rooms with sanitized individual bedding for restorative afternoon sleep.
+                </p>
+              </div>
+              <span className="mt-4 text-[11px] font-bold text-[#5B2A86] bg-purple-50 px-2.5 py-1 rounded-md w-fit">
+                ✓ Quiet Rest Space
+              </span>
+            </div>
+
+            <div className="flex flex-col justify-between rounded-2xl bg-white p-5 border border-purple-100 shadow-2xs hover:shadow-md transition">
+              <div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-[#5B2A86] mb-3">
+                  <BookOpen size={20} />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">Homework &amp; Guided Play</h3>
+                <p className="mt-1.5 text-xs text-gray-600 leading-relaxed">
+                  Teachers assist school-going kids with homework; younger children enjoy guided puzzles, stories, and indoor turf play.
+                </p>
+              </div>
+              <span className="mt-4 text-[11px] font-bold text-[#5B2A86] bg-purple-50 px-2.5 py-1 rounded-md w-fit">
+                ✓ Teacher Guidance
+              </span>
+            </div>
+
+            <div className="flex flex-col justify-between rounded-2xl bg-white p-5 border border-purple-100 shadow-2xs hover:shadow-md transition">
+              <div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800 mb-3">
+                  <ShieldCheck size={20} />
+                </div>
+                <h3 className="text-base font-bold text-gray-900">24/7 CCTV &amp; Safe Handover</h3>
+                <p className="mt-1.5 text-xs text-gray-600 leading-relaxed">
+                  Live camera monitored premises, verified female caregivers, and strict authorized parent handover.
+                </p>
+              </div>
+              <span className="mt-4 text-[11px] font-bold text-[#5B2A86] bg-purple-50 px-2.5 py-1 rounded-md w-fit">
+                ✓ Verified Caregivers
+              </span>
+            </div>
+          </div>
+
+          {/* Daycare Highlights & Action Strip */}
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl bg-[#5B2A86] p-5 sm:p-6 text-white shadow-md">
+            <div>
+              <p className="text-xs font-bold text-[#F6C84B] uppercase tracking-wider">Flexible Timings &amp; Plans</p>
+              <h3 className="text-lg sm:text-xl font-black mt-0.5">Need Daycare along with Preschool or After-School?</h3>
+              <p className="text-xs sm:text-sm text-purple-200 mt-1">Open Monday to Saturday • 12:30 PM to 7:00 PM • Monthly regular, selected days &amp; emergency care</p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto">
+              <a
+                href={site.whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-full bg-[#1FAF38] px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-[#19922F] transition whitespace-nowrap"
+              >
+                <FaWhatsapp size={16} />
+                <span>WhatsApp Enquiry</span>
+              </a>
+              <a
+                href="#ad-enquiry"
+                className="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-full bg-white px-5 py-3 text-xs sm:text-sm font-bold text-[#5B2A86] shadow-sm hover:bg-purple-50 transition whitespace-nowrap"
+              >
+                <span>Check Daycare Slots</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Verified Parent Reviews */}
       <section className="bg-white py-12 sm:py-16 border-t border-gray-100">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -1038,20 +1145,33 @@ export default function LandingPageExperience({
       </section>
 
       {/* Sticky Mobile Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between gap-2 border-t border-purple-200 bg-white p-3 shadow-2xl md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between gap-2 border-t border-purple-200 bg-white/95 backdrop-blur-md p-2.5 shadow-2xl md:hidden">
         <a
           href={`tel:${site.phone}`}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-purple-200 bg-purple-50 py-3 text-xs font-bold text-[#5B2A86]"
+          className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-purple-200 bg-purple-50 py-2.5 text-xs font-bold text-[#5B2A86]"
+          aria-label="Call Admissions"
         >
-          <Phone size={15} />
-          <span>Call Now</span>
+          <Phone size={14} className="shrink-0" />
+          <span>Call</span>
+        </a>
+
+        <a
+          href={site.whatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-[#1FAF38] py-2.5 text-xs font-bold text-white shadow-xs"
+          aria-label="Chat on WhatsApp"
+        >
+          <FaWhatsapp size={15} className="shrink-0" />
+          <span>WhatsApp</span>
         </a>
 
         <a
           href="#ad-enquiry"
-          className="flex flex-2 items-center justify-center gap-1.5 rounded-xl bg-[#5B2A86] py-3 text-xs font-extrabold text-white shadow-sm"
+          className="flex flex-1.5 items-center justify-center gap-1 rounded-xl bg-[#5B2A86] py-2.5 text-xs font-extrabold text-white shadow-sm"
+          aria-label="Book Visit"
         >
-          <span>Claim 30% Off & Book Visit</span>
+          <span>Book Visit</span>
         </a>
       </div>
     </div>

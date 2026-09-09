@@ -586,67 +586,75 @@ export default function MarketingConsent({
           role="dialog"
           aria-labelledby="cookie-banner-title"
           aria-describedby="cookie-banner-description"
-          className="fixed inset-x-3 bottom-3 z-[80] mx-auto max-w-5xl overflow-hidden rounded-[26px] border border-[#E3D9E8] bg-white shadow-[0_24px_80px_rgba(35,15,43,0.28)] sm:inset-x-5 sm:bottom-5"
+          className="fixed inset-x-0 bottom-0 z-[80] border-t border-[#E3D9E8] bg-white shadow-[0_-4px_24px_rgba(35,15,43,0.12)] sm:inset-x-3 sm:bottom-3 sm:rounded-2xl sm:border sm:shadow-[0_12px_40px_rgba(35,15,43,0.2)]"
         >
-          <div className="grid gap-0 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div className="flex items-start gap-4 p-5 sm:p-6">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F3EAF8] text-[#5B2A86]">
-                <Cookie aria-hidden="true" size={22} />
-              </span>
+          {/* ─── Mobile: slim single-row ribbon ─── */}
+          <div className="flex items-center gap-2 px-3 py-2.5 sm:hidden">
+            <p
+              id="cookie-banner-title"
+              className="mr-auto min-w-0 text-xs font-bold leading-tight text-[#4D4052]"
+            >
+              We use cookies to improve your experience.{" "}
+              <Link
+                href="/privacy-policy"
+                className="font-black text-[#5B2A86] underline"
+              >
+                Privacy
+              </Link>
+            </p>
+            <button
+              type="button"
+              onClick={() => applyChoice(true, true)}
+              className="shrink-0 rounded-xl bg-[#5B2A86] px-3.5 py-2 text-xs font-black text-white"
+            >
+              Accept
+            </button>
+            <button
+              type="button"
+              onClick={() => applyChoice(false, false)}
+              className="shrink-0 rounded-xl border border-[#D9CEDF] bg-white px-3 py-2 text-xs font-black text-[#4D4052]"
+            >
+              Decline
+            </button>
+          </div>
 
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.13em] text-[#7A459C]">
-                  Your privacy, your choice
-                </p>
-                <h2
-                  id="cookie-banner-title"
-                  className="mt-1 text-xl font-black tracking-[-0.02em] text-[#2D1736]"
-                >
-                  Help us understand what parents find useful
-                </h2>
-                <p
-                  id="cookie-banner-description"
-                  className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[#716576]"
-                >
-                  We use necessary technology to keep the website working. With
-                  your permission, we also use {serviceSummary} to measure visits
-                  and admission enquiries. You can change this choice anytime.
-                </p>
-
-                <Link
-                  href="/privacy-policy"
-                  className="mt-3 inline-flex items-center gap-1 text-xs font-black text-[#5B2A86] hover:underline"
-                >
-                  Read our Privacy Policy
-                  <ChevronRight aria-hidden="true" size={14} />
-                </Link>
-              </div>
-            </div>
-
-            <div className="grid gap-2 border-t border-[#EEE7F1] bg-[#FBF9FC] p-4 sm:grid-cols-3 lg:w-[260px] lg:grid-cols-1 lg:border-l lg:border-t-0">
+          {/* ─── Desktop / Tablet: compact horizontal bar ─── */}
+          <div className="mx-auto hidden max-w-5xl items-center gap-4 p-4 sm:flex">
+            <Cookie aria-hidden="true" size={18} className="shrink-0 text-[#5B2A86]" />
+            <p
+              id="cookie-banner-description"
+              className="mr-auto min-w-0 text-sm font-semibold leading-5 text-[#716576]"
+            >
+              We use {serviceSummary} to improve your experience and measure admission enquiries.{" "}
+              <Link
+                href="/privacy-policy"
+                className="font-black text-[#5B2A86] hover:underline"
+              >
+                Privacy Policy
+              </Link>
+            </p>
+            <div className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
                 onClick={() => applyChoice(true, true)}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#5B2A86] px-4 text-sm font-black text-white transition hover:bg-[#4B206F] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#5B2A86]/20"
+                className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-[#5B2A86] px-4 text-sm font-black text-white transition hover:bg-[#4B206F] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#5B2A86]/20"
               >
-                <Check aria-hidden="true" size={17} />
+                <Check aria-hidden="true" size={15} />
                 Accept all
               </button>
-
               <button
                 type="button"
                 onClick={() => applyChoice(false, false)}
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-[#D9CEDF] bg-white px-4 text-sm font-black text-[#4D4052] transition hover:border-[#BFAFC7] hover:text-[#5B2A86]"
+                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[#D9CEDF] bg-white px-4 text-sm font-black text-[#4D4052] transition hover:border-[#BFAFC7] hover:text-[#5B2A86]"
               >
                 Necessary only
               </button>
-
               <button
                 type="button"
                 onClick={openPreferences}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl px-4 text-sm font-black text-[#5B2A86] transition hover:bg-[#F2EAF6]"
+                className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl px-3 text-sm font-black text-[#5B2A86] transition hover:bg-[#F2EAF6]"
               >
-                <SlidersHorizontal aria-hidden="true" size={16} />
+                <SlidersHorizontal aria-hidden="true" size={14} />
                 Choose
               </button>
             </div>
