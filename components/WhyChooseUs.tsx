@@ -39,16 +39,16 @@ export default function WhyChooseUs() {
   return (
     <section
       aria-labelledby="learning-experiences-heading"
-      className="relative overflow-hidden bg-white py-14 sm:py-16 lg:py-20"
+      className="relative overflow-x-clip sm:overflow-hidden bg-white py-14 sm:py-16 lg:py-20"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-40 top-24 h-80 w-80 rounded-full bg-[#F6C84B]/14 blur-3xl"
+        className="pointer-events-none absolute -left-40 top-24 hidden h-80 w-80 rounded-full bg-[#F6C84B]/14 blur-3xl sm:block"
       />
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-44 bottom-10 h-96 w-96 rounded-full bg-[#EADDF1]/70 blur-3xl"
+        className="pointer-events-none absolute -right-44 bottom-10 hidden h-96 w-96 rounded-full bg-[#EADDF1]/70 blur-3xl sm:block"
       />
 
       <Container className="relative">
@@ -74,15 +74,14 @@ export default function WhyChooseUs() {
           </p>
         </div>
 
-        <div className="mt-10 grid grid-flow-col auto-cols-[78%] gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory overscroll-x-contain pb-4 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:mt-12 lg:grid-cols-4" style={{ WebkitOverflowScrolling: "touch" }}>
+        <div className="mt-10 grid grid-flow-col auto-cols-[78%] gap-4 overflow-x-auto no-scrollbar pb-4 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:mt-12 lg:grid-cols-4">
           {pentemindOfferings.map((offering, index) => {
             const Icon = offeringIcons[index];
 
             return (
               <article
                 key={offering.name}
-                className="group snap-start rounded-[26px] border border-[#E8DEEC] bg-white p-5 shadow-[0_12px_38px_rgba(40,16,52,0.055)] md:transition md:duration-300 md:hover:-translate-y-1 md:hover:border-[#D2BDDD] md:hover:shadow-[0_20px_52px_rgba(40,16,52,0.1)] sm:p-6"
-                style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", transform: "translateZ(0)" }}
+                className="group rounded-[26px] border border-[#E8DEEC] bg-white p-5 shadow-[0_12px_38px_rgba(40,16,52,0.055)] md:transition md:duration-300 md:hover:-translate-y-1 md:hover:border-[#D2BDDD] md:hover:shadow-[0_20px_52px_rgba(40,16,52,0.1)] sm:p-6"
               >
                 <div className="flex items-center justify-between gap-4">
                   <span

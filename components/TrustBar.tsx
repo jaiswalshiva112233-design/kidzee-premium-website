@@ -44,16 +44,16 @@ export default async function TrustBar() {
   return (
     <section
       aria-labelledby="trust-heading"
-      className="relative overflow-hidden bg-[#281034] py-10 text-white sm:py-12 lg:py-14"
+      className="relative overflow-x-clip sm:overflow-hidden bg-[#281034] py-10 text-white sm:py-12 lg:py-14"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-32 top-0 h-72 w-72 rounded-full bg-[#5B2A86]/45 blur-3xl"
+        className="pointer-events-none absolute -left-32 top-0 hidden h-72 w-72 rounded-full bg-[#5B2A86]/45 blur-3xl sm:block"
       />
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-28 bottom-0 h-64 w-64 rounded-full bg-[#F6C84B]/10 blur-3xl"
+        className="pointer-events-none absolute -right-28 bottom-0 hidden h-64 w-64 rounded-full bg-[#F6C84B]/10 blur-3xl sm:block"
       />
 
       <Container className="relative">
