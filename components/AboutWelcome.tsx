@@ -103,13 +103,13 @@ export default function AboutWelcome({
                 <div className="absolute inset-0 bg-gradient-to-t from-[#25112e]/70 via-transparent to-transparent" />
               </div>
 
-              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
-                <div className="rounded-[28px] border border-white/20 bg-white/92 p-5 shadow-xl backdrop-blur-md sm:p-6">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#702a96]">
+              <div className="p-4 sm:absolute sm:inset-x-0 sm:bottom-0 sm:p-7">
+                <div className="rounded-[22px] border border-purple-100 bg-[#FAF7FC] p-4 shadow-sm sm:rounded-[28px] sm:border-white/20 sm:bg-white/92 sm:p-6 sm:shadow-xl sm:backdrop-blur-md">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#702a96] sm:text-xs sm:tracking-[0.18em]">
                     A reassuring first school experience
                   </p>
 
-                  <p className="mt-2 text-xl font-extrabold leading-snug text-[#281036] sm:text-2xl">
+                  <p className="mt-1 text-base font-extrabold leading-snug text-[#281036] sm:mt-2 sm:text-2xl">
                     Children learn more confidently when they feel recognised,
                     comfortable and cared for.
                   </p>

@@ -153,8 +153,8 @@ export default function AboutSafety({
               className="absolute -inset-5 rotate-2 rounded-[44px] bg-purple-100/70"
             />
 
-            <div className="relative overflow-hidden rounded-[40px] border-[8px] border-white bg-white shadow-[0_30px_80px_rgba(55,22,70,0.18)]">
-              <div className="relative aspect-[4/3] min-h-0 sm:aspect-auto sm:min-h-[600px]">
+            <div className="relative overflow-hidden rounded-[36px] border-[6px] border-white bg-white shadow-[0_24px_70px_rgba(55,22,70,0.16)] sm:rounded-[40px] sm:border-[8px] sm:shadow-[0_30px_80px_rgba(55,22,70,0.18)]">
+              <div className="relative aspect-[4/3] min-h-[260px] sm:aspect-auto sm:min-h-[600px]">
                 <Image
                   src={imageUrl}
                   alt={imageAlt}
@@ -164,22 +164,23 @@ export default function AboutSafety({
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-[#281036]/75 via-[#281036]/5 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#281036]/60 via-transparent to-transparent sm:from-[#281036]/75 sm:via-[#281036]/5" />
               </div>
 
-              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-                <div className="rounded-[24px] border border-white/40 bg-white/95 p-5 shadow-lg backdrop-blur-md sm:p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-purple-100 text-[#702a96]">
-                      <HeartHandshake size={22} aria-hidden="true" />
+              {/* On mobile: neat bottom section so photo is 100% visible; On desktop: floating overlay card */}
+              <div className="p-4 sm:absolute sm:inset-x-0 sm:bottom-0 sm:p-6">
+                <div className="rounded-[22px] border border-purple-100 bg-[#FAF7FC] p-4 shadow-sm sm:border-white/40 sm:bg-white/95 sm:p-6 sm:shadow-lg sm:backdrop-blur-md">
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-purple-100 text-[#702a96] sm:h-12 sm:w-12 sm:rounded-[16px]">
+                      <HeartHandshake size={20} aria-hidden="true" className="sm:h-[22px] sm:w-[22px]" />
                     </div>
 
                     <div>
-                      <p className="text-xs font-extrabold uppercase tracking-[0.17em] text-[#702a96]">
+                      <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#702a96] sm:text-xs sm:tracking-[0.17em]">
                         Care children can feel
                       </p>
 
-                      <p className="mt-2 text-lg font-extrabold leading-snug text-[#281036] sm:text-xl">
+                      <p className="mt-1 text-base font-extrabold leading-snug text-[#281036] sm:mt-2 sm:text-xl">
                         A familiar adult, a calm response and consistent
                         routines can make a big difference to a young child’s
                         day.

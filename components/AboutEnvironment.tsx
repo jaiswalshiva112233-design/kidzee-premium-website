@@ -121,8 +121,8 @@ export default function AboutEnvironment({
             className="relative mx-auto w-full max-w-[780px]"
           >
             <div className="grid gap-5 sm:grid-cols-[1.15fr_0.85fr]">
-              <div className="relative overflow-hidden rounded-[34px] border-[7px] border-white bg-purple-50 shadow-[0_28px_75px_rgba(54,21,74,0.18)]">
-                <div className="relative aspect-[4/3] min-h-0 sm:aspect-auto sm:min-h-[650px]">
+              <div className="relative overflow-hidden rounded-[30px] border-[6px] border-white bg-white shadow-[0_24px_70px_rgba(54,21,74,0.16)] sm:rounded-[34px] sm:border-[7px] sm:shadow-[0_28px_75px_rgba(54,21,74,0.18)]">
+                <div className="relative aspect-[4/3] min-h-[260px] sm:aspect-auto sm:min-h-[650px]">
                   <Image
                     src={mainImageUrl}
                     alt={mainImageAlt}
@@ -135,13 +135,13 @@ export default function AboutEnvironment({
                   <div className="absolute inset-0 bg-gradient-to-t from-[#25112e]/55 via-transparent to-transparent" />
                 </div>
 
-                <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-                  <div className="rounded-[24px] border border-white/20 bg-white/92 p-5 shadow-lg backdrop-blur-md">
-                    <p className="text-xs font-extrabold uppercase tracking-[0.17em] text-[#702a96]">
+                <div className="p-4 sm:absolute sm:inset-x-0 sm:bottom-0 sm:p-6">
+                  <div className="rounded-[22px] border border-purple-100 bg-[#FAF7FC] p-4 shadow-sm sm:border-white/20 sm:bg-white/92 sm:p-5 sm:shadow-lg sm:backdrop-blur-md">
+                    <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#702a96] sm:text-xs sm:tracking-[0.17em]">
                       Thoughtfully arranged
                     </p>
 
-                    <p className="mt-2 text-xl font-extrabold leading-snug text-[#281036]">
+                    <p className="mt-1 text-base font-extrabold leading-snug text-[#281036] sm:mt-2 sm:text-xl">
                       Familiar spaces help children move through the day with
                       greater confidence.
                     </p>
