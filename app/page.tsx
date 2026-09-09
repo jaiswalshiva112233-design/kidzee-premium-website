@@ -48,7 +48,7 @@ export default async function HomePage() {
 
   return (
     <PageShell>
-      <main className="overflow-hidden">
+      <main>
         <Hero />
         <TrustBar />
         <Programs />

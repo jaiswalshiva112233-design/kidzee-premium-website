@@ -526,7 +526,13 @@ body[data-mobile-menu-open="true"] .mobile-contact-bar {
    Mobile Touch & Scroll Optimization (No Touch-Zoom, No Lag)
    ========================================================= */
 @media (hover: none), (pointer: coarse), (max-width: 768px) {
-  /* Prevent touch gestures from triggering card lifts, image zooms, and hover scales */
+  /* Strictly disable any card lifts, image zoom, or hover scales triggered by touch taps or drag */
+  *,
+  *::before,
+  *::after {
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
   .card-hover,
   .card-hover:hover,
   .card-hover:active,
@@ -542,6 +548,12 @@ body[data-mobile-menu-open="true"] .mobile-contact-bar {
   a:active img,
   .group:hover img,
   .group:active img,
+  #programmes article,
+  #programmes article:hover,
+  #programmes article:active,
+  #programmes article:focus,
+  #programmes article:hover img,
+  #programmes article:active img,
   [class*="hover:-translate"],
   [class*="group-hover:scale"],
   [class*="hover:scale"] {
@@ -549,13 +561,10 @@ body[data-mobile-menu-open="true"] .mobile-contact-bar {
     transition: none !important;
   }
 
-  /* Ensure horizontal touch scrolling does not trigger rubber-band page flicker */
-  .overflow-x-auto,
-  [class*="overflow-x"] {
+  /* Smooth momentum touch scrolling without gesture lock or snap jitter */
+  .overflow-x-auto {
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain !important;
-    overscroll-behavior-inline: contain !important;
-    touch-action: pan-x pan-y !important;
+    scrollbar-width: none;
   }
 }
 
