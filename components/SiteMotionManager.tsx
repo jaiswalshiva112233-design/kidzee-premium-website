@@ -53,8 +53,9 @@ export default function SiteMotionManager() {
     const sections = Array.from(
       document.querySelectorAll<HTMLElement>("[data-site-page] section"),
     );
+    const isMobile = window.innerWidth < 769;
 
-    if (reducedMotion || !("IntersectionObserver" in window)) {
+    if (isMobile || reducedMotion || !("IntersectionObserver" in window)) {
       sections.forEach((section) => {
         section.dataset.siteReveal = "visible";
       });
