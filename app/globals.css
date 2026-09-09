@@ -526,7 +526,7 @@ body[data-mobile-menu-open="true"] .mobile-contact-bar {
    Mobile Touch & Scroll Optimization (No Touch-Zoom, No Lag)
    ========================================================= */
 @media (hover: none), (pointer: coarse), (max-width: 768px) {
-  /* Prevent touch from triggering card lifts, image zooms, and hover scales */
+  /* Prevent touch gestures from triggering card lifts, image zooms, and hover scales */
   .card-hover,
   .card-hover:hover,
   .card-hover:active,
@@ -535,21 +535,27 @@ body[data-mobile-menu-open="true"] .mobile-contact-bar {
   article:hover,
   article:active,
   article:focus,
-  .group:hover .group-hover\:scale-\[1\.035\],
-  .group:hover .group-hover\:scale-\[1\.018\],
-  .group:hover .group-hover\:scale-105,
-  .group:active .group-hover\:scale-\[1\.035\],
-  .group:active .group-hover\:scale-\[1\.018\],
-  .group:active .group-hover\:scale-105 {
+  article:hover img,
+  article:active img,
+  article:focus img,
+  a:hover img,
+  a:active img,
+  .group:hover img,
+  .group:active img,
+  [class*="hover:-translate"],
+  [class*="group-hover:scale"],
+  [class*="hover:scale"] {
     transform: none !important;
     transition: none !important;
   }
 
   /* Ensure horizontal touch scrolling does not trigger rubber-band page flicker */
-  .overflow-x-auto {
+  .overflow-x-auto,
+  [class*="overflow-x"] {
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-    touch-action: pan-x pan-y;
+    overscroll-behavior-x: contain !important;
+    overscroll-behavior-inline: contain !important;
+    touch-action: pan-x pan-y !important;
   }
 }
 
@@ -908,8 +914,9 @@ details[open] summary {
 
   .team-marquee {
     --team-marquee-gap: 0.75rem;
-    margin-inline: -12px;
-    width: calc(100% + 24px);
+    margin-inline: 0;
+    width: 100%;
+    max-width: 100%;
   }
 
   .team-marquee-card {
