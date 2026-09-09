@@ -120,7 +120,7 @@ export default async function Daycare() {
               child&apos;s age, arrival time and length of stay.
             </p>
 
-            <div className="mt-7 grid grid-flow-col auto-cols-[82%] gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-3 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0">
+            <div className="mt-7 grid grid-flow-col auto-cols-[82%] gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory overscroll-x-contain pb-3 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0" style={{ WebkitOverflowScrolling: "touch" }}>
               {daycareFeatures.map(
                 ({ icon: Icon, title, text }) => (
                   <article

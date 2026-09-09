@@ -189,7 +189,7 @@ export default async function Gallery() {
           </Button>
         </div>
 
-        <div className="mt-10 grid grid-flow-col auto-cols-[84%] auto-rows-[250px] gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-3 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-12 lg:auto-rows-[230px]">
+        <div className="mt-10 grid grid-flow-col auto-cols-[84%] auto-rows-[250px] gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory overscroll-x-contain pb-3 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-12 lg:auto-rows-[230px]" style={{ WebkitOverflowScrolling: "touch" }}>
           {galleryItems.map((item, index) => (
             <Link
               key={item.key}
@@ -202,14 +202,15 @@ export default async function Gallery() {
                   : "homepage_gallery_open"
               }
               data-analytics-label={item.title}
-              className={`group relative snap-start overflow-hidden rounded-[28px] border-[4px] border-white bg-white shadow-[0_18px_54px_rgba(40,16,52,0.1)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_68px_rgba(40,16,52,0.15)] ${item.className}`}
+              className={`group relative snap-start overflow-hidden rounded-[28px] border-[4px] border-white bg-white shadow-[0_18px_54px_rgba(40,16,52,0.1)] md:transition md:duration-300 md:hover:-translate-y-1 md:hover:shadow-[0_26px_68px_rgba(40,16,52,0.15)] ${item.className}`}
+              style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", transform: "translateZ(0)" }}
             >
               <Image
                 src={item.src}
                 alt={item.alt}
                 fill
                 sizes={item.sizes}
-                className="object-cover transition-transform duration-700 group-hover:scale-[1.035]"
+                className="object-cover md:transition-transform md:duration-700 md:group-hover:scale-[1.035]"
               />
 
               <div

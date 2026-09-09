@@ -74,14 +74,15 @@ export default function WhyChooseUs() {
           </p>
         </div>
 
-        <div className="mt-10 grid grid-flow-col auto-cols-[78%] gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-4 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:mt-12 lg:grid-cols-4">
+        <div className="mt-10 grid grid-flow-col auto-cols-[78%] gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory overscroll-x-contain pb-4 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:mt-12 lg:grid-cols-4" style={{ WebkitOverflowScrolling: "touch" }}>
           {pentemindOfferings.map((offering, index) => {
             const Icon = offeringIcons[index];
 
             return (
               <article
                 key={offering.name}
-                className="group snap-start rounded-[26px] border border-[#E8DEEC] bg-white p-5 shadow-[0_12px_38px_rgba(40,16,52,0.055)] transition duration-300 hover:-translate-y-1 hover:border-[#D2BDDD] hover:shadow-[0_20px_52px_rgba(40,16,52,0.1)] sm:p-6"
+                className="group snap-start rounded-[26px] border border-[#E8DEEC] bg-white p-5 shadow-[0_12px_38px_rgba(40,16,52,0.055)] md:transition md:duration-300 md:hover:-translate-y-1 md:hover:border-[#D2BDDD] md:hover:shadow-[0_20px_52px_rgba(40,16,52,0.1)] sm:p-6"
+                style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", transform: "translateZ(0)" }}
               >
                 <div className="flex items-center justify-between gap-4">
                   <span

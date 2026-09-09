@@ -78,7 +78,7 @@ export default async function Programs() {
           </p>
         </div>
 
-        <div className="mt-10 grid grid-flow-col auto-cols-[84%] gap-5 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-4 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-4">
+        <div className="mt-10 grid grid-flow-col auto-cols-[84%] gap-5 overflow-x-auto no-scrollbar snap-x snap-mandatory overscroll-x-contain pb-4 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-4" style={{ WebkitOverflowScrolling: "touch" }}>
           {programmes.map((programme) => {
             const media =
               programmeMedia[
@@ -96,7 +96,8 @@ export default async function Programs() {
             return (
               <article
                 key={programme.slug}
-                className="group flex h-full snap-start flex-col overflow-hidden rounded-[28px] border border-[#E4D8EA] bg-white shadow-[0_16px_48px_rgba(52,20,68,0.07)] transition duration-300 hover:-translate-y-1 hover:border-[#CCB6D8] hover:shadow-[0_24px_65px_rgba(52,20,68,0.12)]"
+                className="group flex h-full snap-start flex-col overflow-hidden rounded-[28px] border border-[#E4D8EA] bg-white shadow-[0_16px_48px_rgba(52,20,68,0.07)] md:transition md:duration-300 md:hover:-translate-y-1 md:hover:border-[#CCB6D8] md:hover:shadow-[0_24px_65px_rgba(52,20,68,0.12)]"
+                style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", transform: "translateZ(0)" }}
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-[#EDE3F3]">
                   <Image
@@ -105,7 +106,7 @@ export default async function Programs() {
                     fill
                     unoptimized={imageSource.startsWith("http")}
                     sizes="(max-width: 640px) 100vw, (max-width: 1279px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.035]"
+                    className="object-cover md:transition-transform md:duration-500 md:group-hover:scale-[1.035]"
                   />
 
                   <div
@@ -113,7 +114,7 @@ export default async function Programs() {
                     className="absolute inset-0 bg-gradient-to-t from-[#281034]/58 via-transparent to-transparent"
                   />
 
-                  <span className="absolute bottom-4 left-4 rounded-full border border-white/70 bg-white/95 px-3.5 py-2 text-xs font-black text-[#5B2A86] shadow-lg backdrop-blur-sm">
+                  <span className="absolute bottom-4 left-4 rounded-full border border-white/70 bg-white/95 px-3.5 py-2 text-xs font-black text-[#5B2A86] shadow-sm">
                     {programme.age}
                   </span>
                 </div>
