@@ -42,16 +42,16 @@ export default async function Programs() {
     <section
       id="programmes"
       aria-labelledby="programmes-heading"
-      className="relative overflow-hidden bg-[#F8F4FC] py-14 sm:py-16 lg:py-20"
+      className="relative overflow-x-clip sm:overflow-hidden bg-[#F8F4FC] py-14 sm:py-16 lg:py-20"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-40 top-20 h-80 w-80 rounded-full bg-[#EADDF1]/80 blur-3xl"
+        className="pointer-events-none absolute -left-40 top-20 hidden h-80 w-80 rounded-full bg-[#EADDF1]/80 blur-3xl sm:block"
       />
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-40 bottom-16 h-80 w-80 rounded-full bg-[#F6C84B]/18 blur-3xl"
+        className="pointer-events-none absolute -right-40 bottom-16 hidden h-80 w-80 rounded-full bg-[#F6C84B]/18 blur-3xl sm:block"
       />
 
       <Container className="relative">
@@ -78,7 +78,7 @@ export default async function Programs() {
           </p>
         </div>
 
-        <div className="mt-10 grid grid-flow-col auto-cols-[84%] gap-5 overflow-x-auto no-scrollbar snap-x snap-mandatory overscroll-x-contain pb-4 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-4" style={{ WebkitOverflowScrolling: "touch" }}>
+        <div className="mt-10 grid grid-flow-col auto-cols-[84%] gap-5 overflow-x-auto no-scrollbar pb-4 sm:grid-flow-row sm:auto-cols-auto sm:grid-cols-2 sm:overflow-visible sm:pb-0 xl:grid-cols-4">
           {programmes.map((programme) => {
             const media =
               programmeMedia[
@@ -96,8 +96,7 @@ export default async function Programs() {
             return (
               <article
                 key={programme.slug}
-                className="group flex h-full snap-start flex-col overflow-hidden rounded-[28px] border border-[#E4D8EA] bg-white shadow-[0_16px_48px_rgba(52,20,68,0.07)] md:transition md:duration-300 md:hover:-translate-y-1 md:hover:border-[#CCB6D8] md:hover:shadow-[0_24px_65px_rgba(52,20,68,0.12)]"
-                style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", transform: "translateZ(0)" }}
+                className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-[#E4D8EA] bg-white shadow-[0_16px_48px_rgba(52,20,68,0.07)] md:transition md:duration-300 md:hover:-translate-y-1 md:hover:border-[#CCB6D8] md:hover:shadow-[0_24px_65px_rgba(52,20,68,0.12)]"
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-[#EDE3F3]">
                   <Image
