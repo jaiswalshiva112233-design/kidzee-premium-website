@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 
 type DashboardData = {
   generatedAt: string;
-  role: "OWNER" | "CENTRE_HEAD";
+  role: "OWNER" | "CENTRE_HEAD" | "TEACHER";
   operations: Record<string, number>;
   attendance: { students: Record<string, number>; staff: Record<string, number> };
   birthdays: Array<{ id: string; name: string; days: number }>;

@@ -1,6 +1,8 @@
 import type { ComponentType } from "react";
 import {
   BarChart3,
+  ClipboardCheck,
+  Layers,
   BrainCircuit,
   BriefcaseBusiness,
   CalendarCheck2,
@@ -54,6 +56,7 @@ export const adminNavigationSections: AdminNavigationSection[] = [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
       { label: "Admissions", href: "/admin/admissions", icon: UserRoundCheck },
       { label: "Leads & Follow-ups", href: "/admin/enquiries", icon: MessageSquareText },
+      { label: "Batches & Sections", href: "/admin/batches", icon: Layers },
       { label: "Students", href: "/admin/students", icon: UsersRound },
       { label: "Attendance", href: "/admin/attendance", icon: CalendarCheck2 },
       { label: "Daycare", href: "/admin/daycare", icon: CalendarClock },
@@ -66,6 +69,7 @@ export const adminNavigationSections: AdminNavigationSection[] = [
     items: [
       { label: "WhatsApp", href: "/admin/whatsapp", icon: MessageCircleMore },
       { label: "Centre Calendar", href: "/admin/calendar", icon: CalendarDays },
+      { label: "Teacher Reviews", href: "/admin/teacher-reviews", icon: ClipboardCheck },
       { label: "Staff & Payroll", href: "/admin/staff", icon: GraduationCap },
       { label: "Expenses", href: "/admin/expenses", icon: HandCoins },
       { label: "Careers", href: "/admin/careers", icon: BriefcaseBusiness },

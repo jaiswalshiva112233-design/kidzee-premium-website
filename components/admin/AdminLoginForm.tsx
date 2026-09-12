@@ -18,7 +18,7 @@ type LoginResponse = {
   user?: {
     name?: string | null;
     email?: string | null;
-    role?: "OWNER" | "CENTRE_HEAD" | null;
+    role?: "OWNER" | "CENTRE_HEAD" | "TEACHER" | null;
     mustChangePassword?: boolean;
   };
 };

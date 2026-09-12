@@ -1,4 +1,12 @@
-export type AdminRole = "OWNER" | "CENTRE_HEAD";
+export const DEFAULT_TEACHER_PERMISSIONS = [
+  "teacher.portal",
+  "students.view",
+  "attendance.manage",
+  "staff.self",
+  "security.self",
+] as const;
+
+export type AdminRole = "OWNER" | "CENTRE_HEAD" | "TEACHER";
 
 export type AdminPermissionRequirement =
   | string
@@ -15,6 +23,12 @@ type PermissionRule = {
 };
 
 export const ADMIN_PAGE_PERMISSION_RULES = [
+  { path: "/teacher", permission: "teacher.portal" },
+  { path: "/admin/batches", permission: "students.manage" },
+  {
+    path: "/admin/teacher-reviews",
+    permission: ["staff.view", "dashboard.view"],
+  },
   { path: "/admin/notifications", permission: "dashboard.view" },
   { path: "/admin/intelligence", permission: "owner.only" },
   { path: "/admin/marketing", permission: "owner.only" },
@@ -62,6 +76,16 @@ export const ADMIN_PAGE_PERMISSION_RULES = [
 ] as const satisfies readonly PermissionRule[];
 
 export const ADMIN_API_PERMISSION_RULES = [
+  { path: "/api/teacher", permission: "teacher.portal" },
+  { path: "/api/admin/batches", permission: "students.manage" },
+  {
+    path: "/api/admin/teacher-reviews",
+    permission: ["staff.view", "dashboard.view"],
+  },
+  {
+    path: "/api/admin/messages",
+    permission: ["messaging.use", "dashboard.view"],
+  },
   { path: "/api/admin/notifications", permission: "dashboard.view" },
   { path: "/api/admin/storage-health", permission: "owner.only" },
   { path: "/api/admin/backup-exports", permission: "owner.only" },

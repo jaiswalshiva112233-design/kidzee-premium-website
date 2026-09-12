@@ -278,8 +278,18 @@ export default function MarketingConsent({
   const [draftAnalytics, setDraftAnalytics] = useState(false);
   const [draftMarketing, setDraftMarketing] = useState(false);
   const [staffExcluded, setStaffExcluded] = useState<boolean | null>(null);
-  const lastGooglePage = useRef("");
-  const lastMetaPage = useRef("");
+  const lastGooglePage = useRef(
+    typeof document !== "undefined" &&
+      document.documentElement.dataset.kidzeeInitialGaPageTracked
+      ? document.documentElement.dataset.kidzeeInitialGaPageTracked
+      : "",
+  );
+  const lastMetaPage = useRef(
+    typeof document !== "undefined" &&
+      document.documentElement.dataset.kidzeeInitialMetaPageTracked
+      ? document.documentElement.dataset.kidzeeInitialMetaPageTracked
+      : "",
+  );
   const recordedConversions = useRef(new Set<string>());
 
   const analyticsAvailable = Boolean(
@@ -496,7 +506,7 @@ export default function MarketingConsent({
         return;
       }
 
-      const conversionKey = `admission-lead-${enquiryNumber}`;
+      const conversionKey = enquiryNumber;
 
       if (recordedConversions.current.has(conversionKey)) {
         return;

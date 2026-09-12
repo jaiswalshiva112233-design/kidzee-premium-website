@@ -22,7 +22,7 @@ export type AdminSessionUser = {
   id: string;
   name: string;
   email: string | null;
-  role: "OWNER" | "CENTRE_HEAD";
+  role: "OWNER" | "CENTRE_HEAD" | "TEACHER";
   permissions: string[];
   mustChangePassword: boolean;
 };

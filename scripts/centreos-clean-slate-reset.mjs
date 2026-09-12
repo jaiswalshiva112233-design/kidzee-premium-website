@@ -152,6 +152,11 @@ export const prismaResetMatrix = [
   reset("BusinessIntelligenceSnapshot", "Operational owner intelligence snapshots", 14, []),
   reset("SystemHealthCheck", "Operational health-check history", 17, []),
   reset("ScheduledJobHeartbeat", "Scheduler heartbeat history", 19, []),
+  reset("InternalMessage", "Internal operational staff messaging", 5, ["AdminUser"]),
+  reset("StudentBatchAssignment", "Batch student assignments", 24, ["Student", "Batch"]),
+  reset("StudentObservationReport", "Student observation records", 25, ["Student", "Batch", "Staff", "AdminUser"]),
+  reset("TeacherActivity", "Teacher weekly and daily activities", 26, ["Batch", "Staff", "AdminUser"]),
+  reset("Batch", "Preschool and daycare batches and sections", 39, ["Staff"]),
 ];
 
 export const externalResetMatrix = [

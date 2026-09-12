@@ -2,6 +2,7 @@ import PDFDocument from "pdfkit";
 import { NextResponse } from "next/server";
 
 import { getAdminSession } from "@/lib/admin/auth";
+import { hasAdminPermissionRequirement } from "@/lib/admin/permissions";
 import { formatCentreAddress } from "@/lib/centreAddress";
 import { prisma } from "@/lib/prisma";
 import { site } from "@/lib/site";
@@ -475,7 +476,9 @@ export async function GET(request: Request, context: RouteContext) {
   const url = new URL(request.url);
   try {
     const session = await getAdminSession();
-    const isAuthorizedAdmin = Boolean(session);
+    const isAuthorizedAdmin = Boolean(
+      session && hasAdminPermissionRequirement(session, "receipts.view"),
+    );
     const isSignedUrl = verifyReceiptDocumentSignature(
       id,
       url.searchParams.get("expires"),
@@ -483,7 +486,12 @@ export async function GET(request: Request, context: RouteContext) {
     );
 
     if (!isAuthorizedAdmin && !isSignedUrl) {
-      return new NextResponse("Invalid or expired receipt link.", { status: 401 });
+      return new NextResponse(
+        session
+          ? "You do not have permission to view receipts."
+          : "Invalid or expired receipt link.",
+        { status: session ? 403 : 401 },
+      );
     }
     const [receipt, schoolSetting] = await Promise.all([
       loadReceipt(id),

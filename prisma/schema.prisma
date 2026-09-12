@@ -10,6 +10,37 @@ datasource db {
 enum AdminRole {
   OWNER
   CENTRE_HEAD
+  TEACHER
+}
+
+enum LearningDomain {
+  GROSS_MOTOR
+  FINE_MOTOR
+  LANGUAGE_LITERACY
+  COGNITIVE_MATH
+  CREATIVE_ARTS
+  SOCIAL_EMOTIONAL
+  SENSORY_EXPLORATION
+  GENERAL_THEME
+}
+
+enum ActivityPlanStatus {
+  DRAFT
+  SUBMITTED
+  REVIEWED
+}
+
+enum ObservationReportStatus {
+  DRAFT
+  SUBMITTED
+  CHANGES_REQUESTED
+  APPROVED
+}
+
+enum BatchAssignmentStatus {
+  ACTIVE
+  TRANSFERRED
+  COMPLETED
 }
 
 enum EnquiryStatus {
@@ -563,6 +594,12 @@ model AdminUser {
   notifications                 AdminNotification[]        @relation("NotificationRecipient")
   pushDevices                   PushDevice[]
   notificationPreference        NotificationPreference?
+  staffId                       String?                    @unique
+  staff                         Staff?                     @relation("StaffAdminUser", fields: [staffId], references: [id], onDelete: SetNull)
+  messagesSent                  InternalMessage[]          @relation("MessageSender")
+  messagesReceived              InternalMessage[]          @relation("MessageRecipient")
+  activitiesReviewed            TeacherActivity[]          @relation("TeacherActivityReviewedBy")
+  observationReportsReviewed    StudentObservationReport[] @relation("ObservationReportReviewedBy")
 
   @@index([role])
   @@index([active])
@@ -915,6 +952,8 @@ model Student {
   financialCorrections FinancialCorrection[]
   programmeDefinition  ProgrammeDefinition?        @relation(fields: [programmeDefinitionId], references: [id], onDelete: SetNull)
   whatsappMessages     WhatsAppAutomationMessage[]
+  batchAssignments     StudentBatchAssignment[]
+  observationReports   StudentObservationReport[]
 
   @@index([programme])
   @@index([programmeDefinitionId])
@@ -1841,11 +1880,16 @@ model Staff {
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 
-  attendanceRecords StaffAttendance[]
-  substituteDuties  StaffExtraDuty[]    @relation("ExtraDutyCoveringStaff")
-  dutiesCovered     StaffExtraDuty[]    @relation("ExtraDutyAbsentStaff")
-  leaveRequests     StaffLeaveRequest[]
-  payrollRecords    StaffPayroll[]
+  attendanceRecords  StaffAttendance[]
+  substituteDuties   StaffExtraDuty[]           @relation("ExtraDutyCoveringStaff")
+  dutiesCovered      StaffExtraDuty[]           @relation("ExtraDutyAbsentStaff")
+  leaveRequests      StaffLeaveRequest[]
+  payrollRecords     StaffPayroll[]
+  adminUser          AdminUser?                 @relation("StaffAdminUser")
+  primaryBatches     Batch[]                    @relation("BatchPrimaryTeacher")
+  assistantBatches   Batch[]                    @relation("BatchAssistantTeacher")
+  activities         TeacherActivity[]
+  observationReports StudentObservationReport[]
 
   @@index([status])
   @@index([designation])
@@ -2576,4 +2620,134 @@ model ScheduledJobHeartbeat {
 
   @@index([status, updatedAt])
   @@index([lastSucceededAt])
+}
+
+model Batch {
+  id                 String          @id @default(cuid())
+  name               String
+  programme          Programme
+  academicYear       String          @default("2026-2027")
+  room               String?
+  capacity           Int             @default(8)
+  primaryTeacherId   String?
+  assistantTeacherId String?
+  status             CatalogueStatus @default(ACTIVE)
+  notes              String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  primaryTeacher     Staff?                     @relation("BatchPrimaryTeacher", fields: [primaryTeacherId], references: [id], onDelete: SetNull)
+  assistantTeacher   Staff?                     @relation("BatchAssistantTeacher", fields: [assistantTeacherId], references: [id], onDelete: SetNull)
+  studentAssignments StudentBatchAssignment[]
+  activities         TeacherActivity[]
+  observationReports StudentObservationReport[]
+
+  @@index([programme])
+  @@index([academicYear])
+  @@index([status])
+  @@index([primaryTeacherId])
+  @@index([assistantTeacherId])
+}
+
+model StudentBatchAssignment {
+  id         String                @id @default(cuid())
+  studentId  String
+  batchId    String
+  rollNumber String?
+  status     BatchAssignmentStatus @default(ACTIVE)
+  assignedAt DateTime              @default(now())
+  removedAt  DateTime?
+  notes      String?
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  batch   Batch   @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, batchId])
+  @@index([batchId, status])
+  @@index([studentId, status])
+}
+
+model TeacherActivity {
+  id              String             @id @default(cuid())
+  batchId         String
+  teacherId       String
+  activityDate    DateTime
+  weekStartDate   DateTime
+  title           String
+  domain          LearningDomain
+  description     String
+  learningOutcome String?
+  materialsNeeded String?
+  status          ActivityPlanStatus @default(SUBMITTED)
+  reviewNotes     String?
+  reviewedById    String?
+  reviewedAt      DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  batch      Batch      @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  teacher    Staff      @relation(fields: [teacherId], references: [id], onDelete: Restrict)
+  reviewedBy AdminUser? @relation("TeacherActivityReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([batchId, activityDate])
+  @@index([teacherId])
+  @@index([weekStartDate])
+  @@index([status])
+}
+
+model StudentObservationReport {
+  id                         String                  @id @default(cuid())
+  reportNumber               String                  @unique
+  studentId                  String
+  batchId                    String
+  teacherId                  String
+  term                       String
+  reportDate                 DateTime
+  strengths                  String
+  areasOfGrowth              String
+  socialEmotionalDevelopment String?
+  motorSkillsDevelopment     String?
+  languageCommunication      String?
+  cognitiveCuriosity         String?
+  generalObservations        String?
+  status                     ObservationReportStatus @default(DRAFT)
+  centreHeadFeedback         String?
+  reviewedById               String?
+  reviewedAt                 DateTime?
+  publishedToParent          Boolean                 @default(false)
+  createdAt                  DateTime                @default(now())
+  updatedAt                  DateTime                @updatedAt
+
+  student    Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  batch      Batch      @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  teacher    Staff      @relation(fields: [teacherId], references: [id], onDelete: Restrict)
+  reviewedBy AdminUser? @relation("ObservationReportReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([studentId])
+  @@index([batchId])
+  @@index([teacherId])
+  @@index([status])
+  @@index([reportDate])
+}
+
+model InternalMessage {
+  id          String    @id @default(cuid())
+  threadId    String
+  senderId    String
+  recipientId String?
+  subject     String?
+  body        String
+  isRead      Boolean   @default(false)
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  sender    AdminUser  @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient AdminUser? @relation("MessageRecipient", fields: [recipientId], references: [id], onDelete: SetNull)
+
+  @@index([threadId])
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([createdAt])
 }

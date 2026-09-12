@@ -41,9 +41,19 @@ export const DEFAULT_CENTRE_HEAD_PERMISSIONS =
     "staff.view",
   ] as const;
 
+export const DEFAULT_TEACHER_PERMISSIONS =
+  [
+    "teacher.portal",
+    "attendance.mark",
+    "learning.manage",
+    "leaves.apply",
+    "messaging.use",
+  ] as const;
+
 type AdminRoleValue =
   | "OWNER"
-  | "CENTRE_HEAD";
+  | "CENTRE_HEAD"
+  | "TEACHER";
 
 type AdminSessionSource =
   | "legacy"
@@ -61,6 +71,7 @@ type AdminSessionPayload = {
 
 export type AdminSessionClaims = {
   userId?: string;
+  staffId?: string | null;
   role: AdminRoleValue;
   permissions: string[];
   mustChangePassword: boolean;
@@ -70,6 +81,7 @@ export type AdminSessionClaims = {
 
 export type AdminSessionInfo = {
   userId: string;
+  staffId?: string | null;
   name: string;
   email: string | null;
   role: AdminRoleValue;
@@ -267,6 +279,24 @@ function normalisePermissions(
 ) {
   if (role === "OWNER") {
     return ["*"];
+  }
+
+  if (role === "TEACHER") {
+    if (!Array.isArray(value)) {
+      return [...DEFAULT_TEACHER_PERMISSIONS];
+    }
+
+    const permissions = value
+      .filter(
+        (item): item is string =>
+          typeof item === "string",
+      )
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    return permissions.length > 0
+      ? permissions
+      : [...DEFAULT_TEACHER_PERMISSIONS];
   }
 
   if (!Array.isArray(value)) {
@@ -830,7 +860,8 @@ function isAdminRoleValue(
 ): value is AdminRoleValue {
   return (
     value === "OWNER" ||
-    value === "CENTRE_HEAD"
+    value === "CENTRE_HEAD" ||
+    value === "TEACHER"
   );
 }
 
@@ -1075,6 +1106,7 @@ async function resolveAdminSessionToken(
 
     return {
       userId: user.id,
+      staffId: user.staffId,
       name: user.name,
       email: user.email,
       role: user.role,
@@ -1108,6 +1140,7 @@ async function resolveAdminSessionToken(
 
   return {
     userId: owner.id,
+    staffId: null,
     name: owner.name,
     email: owner.email,
     role: "OWNER",

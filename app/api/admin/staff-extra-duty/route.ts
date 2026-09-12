@@ -261,7 +261,7 @@ function createDutyNumber() {
 }
 
 function canManageAttendance(session: {
-  role: "OWNER" | "CENTRE_HEAD";
+  role: "OWNER" | "CENTRE_HEAD" | "TEACHER";
   permissions: string[];
 }) {
   return (

@@ -92,7 +92,11 @@ export async function POST(request: Request) {
       const response = NextResponse.json({
         success: true,
         message: "Login successful.",
-        redirectTo: user.mustChangePassword ? "/admin/settings/security?passwordChange=required" : "/admin",
+        redirectTo: user.mustChangePassword
+          ? "/admin/settings/security?passwordChange=required"
+          : user.role === "TEACHER"
+            ? "/teacher"
+            : "/admin",
         user: { name: user.name, email: user.email, role: user.role, mustChangePassword: user.mustChangePassword },
       });
       response.cookies.set({ name: adminSession.cookieName, value: sessionToken, httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict", path: "/", maxAge: adminSession.durationSeconds });
@@ -139,7 +143,9 @@ export async function POST(request: Request) {
 
     const redirectTo = verification.mustChangePassword
       ? "/admin/settings/security?passwordChange=required"
-      : "/admin";
+      : verification.role === "TEACHER"
+        ? "/teacher"
+        : "/admin";
 
     const response = NextResponse.json({
       success: true,

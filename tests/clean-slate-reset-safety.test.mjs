@@ -16,10 +16,10 @@ const source = fs.readFileSync(path.join(root, "scripts", "centreos-clean-slate-
 test("clean-slate matrix classifies every Prisma model exactly once", () => {
   const schemaModels = schemaModelNames();
   const coverage = validateResetMatrix(schemaModels);
-  assert.equal(schemaModels.length, 75);
-  assert.equal(prismaResetMatrix.length, 75);
-  assert.equal(new Set(prismaResetMatrix.map((entry) => entry.model)).size, 75);
-  assert.equal(coverage.totalModels, 75);
+  assert.equal(schemaModels.length, 80);
+  assert.equal(prismaResetMatrix.length, 80);
+  assert.equal(new Set(prismaResetMatrix.map((entry) => entry.model)).size, 80);
+  assert.equal(coverage.totalModels, 80);
 });
 
 test("Owner auth, centre settings and public website sources are preserved", () => {

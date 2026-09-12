@@ -384,6 +384,8 @@ export default function AdmissionForm({
             content_category: formData.programme || "Preschool",
             value: 1.0,
             currency: "INR",
+          }, {
+            eventID: savedEnquiryNumber,
           });
         } catch {
           // non-blocking

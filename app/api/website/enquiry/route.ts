@@ -1051,60 +1051,69 @@ export async function POST(request: NextRequest) {
       status: "NEW",
     });
 
-    await prisma.activityLog.create({
-      data: {
-        action: "CREATED",
-        entityType: "MARKETING_EVENT",
-        entityId: submissionId,
-        description: "Admission lead submitted from the public website.",
-        newData: {
-          eventName: "admission_lead_submitted",
-          eventScope: "ADMISSION",
-          leadType: "admission",
-          enquiryId: result.enquiryId,
-          enquiryNumber: result.enquiryNumber,
-          submissionId,
-          trafficClass: requestClassification.trafficClass,
-          isInternal: requestClassification.isInternal,
-          isTest: requestClassification.isTest,
-          landingPage: attribution.landingPage,
-          utmSource: attribution.utmSource,
-          utmMedium: attribution.utmMedium,
-          utmCampaign: attribution.utmCampaign,
+    // Post-commit side effects: must never fail the parent's successful enquiry response
+    try {
+      await prisma.activityLog.create({
+        data: {
+          action: "CREATED",
+          entityType: "MARKETING_EVENT",
+          entityId: submissionId,
+          description: "Admission lead submitted from the public website.",
+          newData: {
+            eventName: "admission_lead_submitted",
+            eventScope: "ADMISSION",
+            leadType: "admission",
+            enquiryId: result.enquiryId,
+            enquiryNumber: result.enquiryNumber,
+            submissionId,
+            trafficClass: requestClassification.trafficClass,
+            isInternal: requestClassification.isInternal,
+            isTest: requestClassification.isTest,
+            landingPage: attribution.landingPage,
+            utmSource: attribution.utmSource,
+            utmMedium: attribution.utmMedium,
+            utmCampaign: attribution.utmCampaign,
+          },
         },
-      },
-    });
+      }).catch((error) => logServerError("Admission activity log could not be saved.", error));
 
-    if (result.created && requestClassification.trafficClass === "GENUINE") {
-      await createAdminNotification({
-        category: "ADMISSION",
-        type: "NEW_ADMISSION_LEAD",
-        priority: "HIGH",
-        title: "New admission lead received",
-        body: "A new website admission enquiry is ready for follow-up.",
-        href: `/admin/enquiries/${result.enquiryId}`,
-        entityType: "ENQUIRY",
-        entityId: result.enquiryId,
-        eventKey: submissionId,
-        important: true,
-      }).catch((error) => logServerError("Admission notification could not be queued.", error));
-    }
+      if (result.created && requestClassification.trafficClass === "GENUINE") {
+        await createAdminNotification({
+          category: "ADMISSION",
+          type: "NEW_ADMISSION_LEAD",
+          priority: "HIGH",
+          title: "New admission lead received",
+          body: "A new website admission enquiry is ready for follow-up.",
+          href: `/admin/enquiries/${result.enquiryId}`,
+          entityType: "ENQUIRY",
+          entityId: result.enquiryId,
+          eventKey: submissionId,
+          important: true,
+        }).catch((error) => logServerError("Admission notification could not be queued.", error));
+      }
 
-    if (requestClassification.trafficClass === "GENUINE") {
-      const centreContact = buildSiteContact(await getWebsiteContactSettings());
-      await queueWhatsAppAutomation({
-        type: "ENQUIRY_NOTIFICATION",
-        deduplicationKey: `ENQUIRY_NOTIFICATION:${submissionId}`,
-        recipientPhone: centreContact.phone,
-        enquiryId: result.enquiryId,
-        messageText: `New website enquiry ${result.enquiryNumber} from ${parentName}.`,
-        payload: { parameters: [result.enquiryNumber, parentName, childName || "Child", phone.stored] },
-      });
-    }
+      if (requestClassification.trafficClass === "GENUINE") {
+        const centreContact = buildSiteContact(await getWebsiteContactSettings());
+        await queueWhatsAppAutomation({
+          type: "ENQUIRY_NOTIFICATION",
+          deduplicationKey: `ENQUIRY_NOTIFICATION:${submissionId}`,
+          recipientPhone: centreContact.phone,
+          enquiryId: result.enquiryId,
+          messageText: `New website enquiry ${result.enquiryNumber} from ${parentName}.`,
+          payload: { parameters: [result.enquiryNumber, parentName, childName || "Child", phone.stored] },
+        }).catch((error) => logServerError("Enquiry WhatsApp notification could not be queued.", error));
+      }
 
-    if (marketingConsent && requestClassification.trafficClass === "GENUINE") {
-      await enqueueLeadConversions(result.enquiryId);
-      await processAdmissionConversionQueue({ enquiryId: result.enquiryId, limit: 2 });
+      if (marketingConsent && requestClassification.trafficClass === "GENUINE") {
+        await enqueueLeadConversions(result.enquiryId).catch((error) =>
+          logServerError("Lead conversion enqueue failed.", error),
+        );
+        await processAdmissionConversionQueue({ enquiryId: result.enquiryId, limit: 2 }).catch((error) =>
+          logServerError("Admission conversion queue processing failed.", error),
+        );
+      }
+    } catch (sideEffectError) {
+      logServerError("Enquiry side effect processing encountered an error.", sideEffectError);
     }
 
     return noStoreJson(
