@@ -95,10 +95,16 @@ env:
     value: G-035S95BK3W
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_GOOGLE_ADS_ID
-    value: AW-1791741525
+    value: AW-17974378144
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_GOOGLE_ADS_LEAD_LABEL
-    value: 0G5ZCKb6gZwBENW-2t0C
+    value: Fc3TCOPwkaEcEKD97PpC
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_GOOGLE_ADS_PHONE_LABEL
+    value: qZFtCLTfkaEcEKD97PpC
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_GOOGLE_ADS_PHONE_NUMBER
+    value: "09667038673"
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_META_PIXEL_ID
     value: "1677317359571765"

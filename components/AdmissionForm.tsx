@@ -341,57 +341,6 @@ export default function AdmissionForm({
         }),
       );
 
-      // Google Ads & Analytics Conversion Signal
-      if (typeof window !== "undefined") {
-        try {
-          const w = window as unknown as { gtag?: Function; dataLayer?: unknown[] };
-          w.dataLayer = w.dataLayer || [];
-          
-          // Fire generate_lead
-          if (typeof w.gtag === "function") {
-            w.gtag("event", "generate_lead", {
-              event_category: "Admissions",
-              event_label: savedEnquiryNumber,
-              value: 1.0,
-              currency: "INR",
-            });
-            w.gtag("event", "conversion", {
-              send_to: "AW-17974378144/Fc3TCOPwkaEcEKD97PpC",
-              value: 1.0,
-              currency: "INR",
-            });
-          } else {
-            w.dataLayer.push([
-              "event",
-              "conversion",
-              {
-                send_to: "AW-17974378144/Fc3TCOPwkaEcEKD97PpC",
-                value: 1.0,
-                currency: "INR",
-              },
-            ]);
-          }
-        } catch {
-          // non-blocking
-        }
-      }
-
-      // Meta Pixel Lead Event
-      if (typeof window !== "undefined" && typeof (window as unknown as { fbq?: Function }).fbq === "function") {
-        try {
-          (window as unknown as { fbq: Function }).fbq("track", "Lead", {
-            content_name: "Preschool & Daycare Admission",
-            content_category: formData.programme || "Preschool",
-            value: 1.0,
-            currency: "INR",
-          }, {
-            eventID: savedEnquiryNumber,
-          });
-        } catch {
-          // non-blocking
-        }
-      }
-
       window.dispatchEvent(
         new CustomEvent("kidzee:website-event", {
           detail: {

@@ -115,6 +115,12 @@ if (enabled("WEBSITE_ADVERTISING_ENABLED")) {
   }
   match("NEXT_PUBLIC_GOOGLE_ADS_ID", /^AW-\d{5,20}$/, "is invalid");
   required("NEXT_PUBLIC_GOOGLE_ADS_LEAD_LABEL", 1);
+  required("NEXT_PUBLIC_GOOGLE_ADS_PHONE_LABEL", 1);
+  match(
+    "NEXT_PUBLIC_GOOGLE_ADS_PHONE_NUMBER",
+    /^[+0-9][0-9 +()-]{5,29}$/,
+    "is invalid",
+  );
   required("MARKETING_CRON_SECRET", 32);
 }
 

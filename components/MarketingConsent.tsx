@@ -19,26 +19,16 @@ import {
   useState,
 } from "react";
 
-type MarketingSettings = {
-  googleTagManagerId: string;
-  googleAnalyticsId: string;
-  googleAdsId: string;
-  googleAdsConversionLabel: string;
-  metaPixelId: string;
-  analyticsEnabled: boolean;
-  advertisingEnabled: boolean;
-  metaPixelEnabled: boolean;
-};
+import {
+  evaluateConsentState,
+  type ConsentChoice,
+  type MarketingSettings,
+} from "@/lib/marketing/consent";
+
+export { evaluateConsentState, type ConsentChoice, type MarketingSettings };
 
 type MarketingConsentProps = {
   settings: MarketingSettings;
-};
-
-type ConsentChoice = {
-  analytics: boolean;
-  marketing: boolean;
-  decidedAt: string;
-  version: 1;
 };
 
 type MetaPixelFunction = {
@@ -215,6 +205,7 @@ function updateGoogleConsent(choice: ConsentChoice) {
   });
 }
 
+
 function ToggleChoice({
   checked,
   disabled = false,
@@ -271,6 +262,9 @@ export default function MarketingConsent({
   settings,
 }: MarketingConsentProps) {
   const pathname = usePathname();
+  const isAdminOrApi = Boolean(
+    pathname?.startsWith("/admin") || pathname?.startsWith("/api"),
+  );
   const [hydrated, setHydrated] = useState(false);
   const [consent, setConsent] = useState<ConsentChoice | null>(null);
   const [showBanner, setShowBanner] = useState(false);
@@ -278,18 +272,8 @@ export default function MarketingConsent({
   const [draftAnalytics, setDraftAnalytics] = useState(false);
   const [draftMarketing, setDraftMarketing] = useState(false);
   const [staffExcluded, setStaffExcluded] = useState<boolean | null>(null);
-  const lastGooglePage = useRef(
-    typeof document !== "undefined" &&
-      document.documentElement.dataset.kidzeeInitialGaPageTracked
-      ? document.documentElement.dataset.kidzeeInitialGaPageTracked
-      : "",
-  );
-  const lastMetaPage = useRef(
-    typeof document !== "undefined" &&
-      document.documentElement.dataset.kidzeeInitialMetaPageTracked
-      ? document.documentElement.dataset.kidzeeInitialMetaPageTracked
-      : "",
-  );
+  const lastGooglePage = useRef("");
+  const lastMetaPage = useRef("");
   const recordedConversions = useRef(new Set<string>());
 
   const analyticsAvailable = Boolean(
@@ -325,6 +309,7 @@ export default function MarketingConsent({
   }, [analyticsAvailable, googleAdsAvailable, metaAvailable]);
 
   useEffect(() => {
+    if (isAdminOrApi) return;
     let active = true;
     void fetch("/api/website/internal-status", {
       credentials: "same-origin",
@@ -340,9 +325,10 @@ export default function MarketingConsent({
     return () => {
       active = false;
     };
-  }, []);
+  }, [isAdminOrApi]);
 
   useEffect(() => {
+    if (isAdminOrApi) return;
     if (staffExcluded === null) return;
     const timeoutId = window.setTimeout(() => {
       if (staffExcluded) {
@@ -364,10 +350,17 @@ export default function MarketingConsent({
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-  }, [optionalTrackingAvailable, staffExcluded]);
+  }, [isAdminOrApi, optionalTrackingAvailable, staffExcluded]);
 
   useEffect(() => {
-    if (staffExcluded || !consent || !optionalTrackingAvailable) {
+    const state = evaluateConsentState({
+      settings,
+      consent,
+      pathname,
+      staffExcluded: Boolean(staffExcluded),
+    });
+
+    if (state.isExcluded || !consent || !optionalTrackingAvailable) {
       return;
     }
 
@@ -377,52 +370,26 @@ export default function MarketingConsent({
       window.fbq("consent", "revoke");
     }
 
-    const canLoadTagManager = Boolean(
-      consent.analytics &&
-        consent.marketing &&
-        analyticsAvailable &&
-        settings.googleTagManagerId,
-    );
+    const hasAnyGoogleConsent = Boolean(consent.analytics || consent.marketing);
 
-    if (canLoadTagManager) {
+    if (hasAnyGoogleConsent) {
       const gtag = ensureGtag();
-      gtag("consent", "default", {
-        analytics_storage: "granted",
-        ad_storage: "granted",
-        ad_user_data: "granted",
-        ad_personalization: "granted",
-      });
-      loadGoogleTagManager(settings.googleTagManagerId);
-    }
+      gtag("consent", "default", state.consentMode);
+      gtag("consent", "update", state.consentMode);
 
-    const canLoadDirectAnalytics = Boolean(
-      consent.analytics &&
-        analyticsAvailable &&
-        settings.googleAnalyticsId &&
-        !settings.googleTagManagerId,
-    );
-    const canLoadGoogleAds = Boolean(
-      consent.marketing && googleAdsAvailable,
-    );
+      if (state.loadedGtm) {
+        loadGoogleTagManager(settings.googleTagManagerId);
+      }
 
-    if (canLoadDirectAnalytics || canLoadGoogleAds) {
-      const loadingId = canLoadDirectAnalytics
-        ? settings.googleAnalyticsId
-        : settings.googleAdsId;
-      const gtag = loadGoogleTag(
-        "kidzee-google-tag",
-        loadingId,
-      );
-
-      gtag("consent", "default", {
-        analytics_storage: consent.analytics ? "granted" : "denied",
-        ad_storage: consent.marketing ? "granted" : "denied",
-        ad_user_data: consent.marketing ? "granted" : "denied",
-        ad_personalization: consent.marketing ? "granted" : "denied",
-      });
+      if (state.loadedDirectGa4 || state.loadedGoogleAds) {
+        const loadingId = state.loadedDirectGa4
+          ? settings.googleAnalyticsId
+          : settings.googleAdsId;
+        loadGoogleTag("kidzee-google-tag", loadingId);
+      }
 
       if (
-        canLoadDirectAnalytics &&
+        state.configuredGa4Direct &&
         document.documentElement.dataset.kidzeeGaConfigured !==
           settings.googleAnalyticsId
       ) {
@@ -435,7 +402,7 @@ export default function MarketingConsent({
       }
 
       if (
-        canLoadGoogleAds &&
+        state.configuredAdsDirect &&
         document.documentElement.dataset.kidzeeAdsConfigured !==
           settings.googleAdsId
       ) {
@@ -445,15 +412,35 @@ export default function MarketingConsent({
         document.documentElement.dataset.kidzeeAdsConfigured =
           settings.googleAdsId;
       }
+
+      const phoneConversionKey = `${settings.googleAdsId}/${settings.googleAdsPhoneConversionLabel}:${settings.googleAdsPhoneConversionNumber}`;
+      if (
+        state.configuredAdsDirect &&
+        settings.googleAdsPhoneConversionLabel &&
+        settings.googleAdsPhoneConversionNumber &&
+        document.documentElement.dataset.kidzeeAdsPhoneConfigured !==
+          phoneConversionKey
+      ) {
+        gtag(
+          "config",
+          `${settings.googleAdsId}/${settings.googleAdsPhoneConversionLabel}`,
+          {
+            phone_conversion_number:
+              settings.googleAdsPhoneConversionNumber,
+          },
+        );
+        document.documentElement.dataset.kidzeeAdsPhoneConfigured =
+          phoneConversionKey;
+      }
     }
 
-    if (consent.marketing && metaAvailable) {
+    if (state.loadedMetaPixel) {
       loadMetaPixel(settings.metaPixelId);
     }
 
     const pageLocation = window.location.href;
 
-    if (consent.analytics && analyticsAvailable && window.gtag) {
+    if (state.canEmitDirectPageView && window.gtag) {
       if (lastGooglePage.current !== pageLocation) {
         window.gtag("event", "page_view", {
           page_title: document.title,
@@ -464,7 +451,7 @@ export default function MarketingConsent({
       }
     }
 
-    if (consent.marketing && metaAvailable && window.fbq) {
+    if (state.canEmitMetaLead && window.fbq) {
       if (lastMetaPage.current !== pageLocation) {
         window.fbq("track", "PageView");
         lastMetaPage.current = pageLocation;
@@ -478,6 +465,8 @@ export default function MarketingConsent({
     optionalTrackingAvailable,
     pathname,
     settings.googleAdsId,
+    settings.googleAdsPhoneConversionLabel,
+    settings.googleAdsPhoneConversionNumber,
     settings.googleAnalyticsId,
     settings.googleTagManagerId,
     settings.metaPixelId,
@@ -486,7 +475,11 @@ export default function MarketingConsent({
 
   useEffect(() => {
     function handleWebsiteEvent(event: Event) {
-      if (staffExcluded || !consent?.marketing) {
+      if (
+        isAdminOrApi ||
+        staffExcluded ||
+        (!consent?.marketing && !consent?.analytics)
+      ) {
         return;
       }
 
@@ -515,6 +508,21 @@ export default function MarketingConsent({
       recordedConversions.current.add(conversionKey);
 
       if (
+        consent?.analytics &&
+        analyticsAvailable &&
+        window.gtag
+      ) {
+        window.gtag("event", "generate_lead", {
+          event_category: "Admissions",
+          event_label: enquiryNumber,
+          value: 1.0,
+          currency: "INR",
+          transaction_id: enquiryNumber,
+        });
+      }
+
+      if (
+        consent?.marketing &&
         googleAdsAvailable &&
         settings.googleAdsConversionLabel &&
         window.gtag
@@ -522,15 +530,19 @@ export default function MarketingConsent({
         window.gtag("event", "conversion", {
           send_to: `${settings.googleAdsId}/${settings.googleAdsConversionLabel}`,
           transaction_id: enquiryNumber,
+          value: 1.0,
+          currency: "INR",
         });
       }
 
-      if (metaAvailable && window.fbq) {
+      if (consent?.marketing && metaAvailable && window.fbq) {
         window.fbq(
           "track",
           "Lead",
           {
             content_name: "Website admission enquiry",
+            value: 1.0,
+            currency: "INR",
           },
           {
             eventID: conversionKey,
@@ -548,8 +560,11 @@ export default function MarketingConsent({
       );
     };
   }, [
+    analyticsAvailable,
+    consent?.analytics,
     consent?.marketing,
     googleAdsAvailable,
+    isAdminOrApi,
     metaAvailable,
     settings.googleAdsConversionLabel,
     settings.googleAdsId,
@@ -585,7 +600,7 @@ export default function MarketingConsent({
     setShowBanner(false);
   }
 
-  if (!hydrated || !optionalTrackingAvailable) {
+  if (isAdminOrApi || !hydrated || !optionalTrackingAvailable) {
     return null;
   }
 

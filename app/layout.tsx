@@ -323,53 +323,13 @@ export default async function RootLayout({
           />
         ) : null}
 
-        {/* Google Ads Tag: AW-17974378144 */}
+        {/* Base dataLayer initialization for consent-managed tag loading */}
         <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=AW-17974378144"
-        />
-        <script
-          id="google-ads-gtag-init"
+          id="google-base-datalayer"
           dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'AW-17974378144');
-              if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/admin') && !window.location.pathname.startsWith('/api')) {
-                gtag('config', 'G-035S95BK3W', {
-                  page_path: window.location.pathname,
-                  anonymize_ip: true
-                });
-                document.documentElement.dataset.kidzeeInitialGaPageTracked = window.location.href;
-              }
-            `,
+            __html: `window.dataLayer = window.dataLayer || [];`,
           }}
         />
-
-        {trackingSettings.metaPixelEnabled && trackingSettings.metaPixelId ? (
-          <script
-            id="meta-pixel-init"
-            dangerouslySetInnerHTML={{
-              __html: `
-                if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/admin') && !window.location.pathname.startsWith('/api')) {
-                  !function(f,b,e,v,n,t,s)
-                  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-                  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-                  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-                  n.queue=[];t=b.createElement(e);t.async=!0;
-                  t.src=v;s=b.getElementsByTagName(e)[0];
-                  s.parentNode.insertBefore(t,s)}(window, document,'script',
-                  'https://connect.facebook.net/en_US/fbevents.js');
-                  fbq('init', '${trackingSettings.metaPixelId}');
-                  document.documentElement.dataset.kidzeeMetaPixelId = '${trackingSettings.metaPixelId}';
-                  fbq('track', 'PageView');
-                  document.documentElement.dataset.kidzeeInitialMetaPageTracked = window.location.href;
-                }
-              `,
-            }}
-          />
-        ) : null}
       </head>
 
       <body className="antialiased">

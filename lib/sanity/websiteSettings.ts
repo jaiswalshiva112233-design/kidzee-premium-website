@@ -9,6 +9,8 @@ export type PublicWebsiteTrackingSettings = {
   googleAnalyticsId: string;
   googleAdsId: string;
   googleAdsConversionLabel: string;
+  googleAdsPhoneConversionLabel: string;
+  googleAdsPhoneConversionNumber: string;
   metaPixelId: string;
   googleSearchConsoleVerification: string;
   bingWebmasterVerification: string;
@@ -26,6 +28,8 @@ export const emptyWebsiteTrackingSettings: PublicWebsiteTrackingSettings = {
   googleAnalyticsId: "",
   googleAdsId: "",
   googleAdsConversionLabel: "",
+  googleAdsPhoneConversionLabel: "",
+  googleAdsPhoneConversionNumber: "",
   metaPixelId: "",
   googleSearchConsoleVerification: "",
   bingWebmasterVerification: "",
@@ -77,6 +81,16 @@ function prepareSettings(
     /^[A-Za-z0-9_-]{1,100}$/,
     100,
   );
+  const googleAdsPhoneConversionLabel = validatedValue(
+    source.googleAdsPhoneConversionLabel || process.env.NEXT_PUBLIC_GOOGLE_ADS_PHONE_LABEL || "qZFtCLTfkaEcEKD97PpC",
+    /^[A-Za-z0-9_-]{1,100}$/,
+    100,
+  );
+  const googleAdsPhoneConversionNumber = validatedValue(
+    source.googleAdsPhoneConversionNumber || process.env.NEXT_PUBLIC_GOOGLE_ADS_PHONE_NUMBER || "09667038673",
+    /^[+0-9][0-9 +()-]{5,29}$/,
+    30,
+  );
   const metaPixelId = validatedValue(
     source.metaPixelId || process.env.NEXT_PUBLIC_META_PIXEL_ID,
     /^\d{5,30}$/,
@@ -98,6 +112,8 @@ function prepareSettings(
     googleAnalyticsId,
     googleAdsId,
     googleAdsConversionLabel,
+    googleAdsPhoneConversionLabel,
+    googleAdsPhoneConversionNumber,
     metaPixelId,
     googleSearchConsoleVerification,
     bingWebmasterVerification,
@@ -123,6 +139,8 @@ async function loadWebsiteTrackingSettings(): Promise<PublicWebsiteTrackingSetti
           googleAnalyticsId,
           googleAdsId,
           googleAdsConversionLabel,
+          googleAdsPhoneConversionLabel,
+          googleAdsPhoneConversionNumber,
           metaPixelId,
           googleSearchConsoleVerification,
           bingWebmasterVerification,
@@ -135,7 +153,6 @@ async function loadWebsiteTrackingSettings(): Promise<PublicWebsiteTrackingSetti
     return prepareSettings(settings);
   } catch {
     console.error("Unable to load the public website tracking settings.");
-
     return { ...emptyWebsiteTrackingSettings };
   }
 }
