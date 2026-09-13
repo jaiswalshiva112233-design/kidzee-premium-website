@@ -26,7 +26,7 @@ for (const variable of [
   "FIREBASE_AUTH_ENABLED",
   "NEXT_PUBLIC_SANITY_PROJECT_ID", "NEXT_PUBLIC_SANITY_DATASET",
   "NEXT_PUBLIC_SANITY_API_VERSION", "SANITY_API_WRITE_TOKEN",
-  "BILLING_CRON_SECRET", "WEBSITE_ANALYTICS_ENABLED",
+  "BILLING_CRON_SECRET", "MARKETING_CRON_SECRET", "WEBSITE_ANALYTICS_ENABLED",
   "WEBSITE_ADVERTISING_ENABLED", "WEBSITE_META_PIXEL_ENABLED",
 ]) {
   if (!appHosting.includes(`variable: ${variable}`)) throw new Error(`App Hosting is missing ${variable}.`);
@@ -43,7 +43,7 @@ for (const variable of ["WEBSITE_ANALYTICS_ENABLED", "WEBSITE_ADVERTISING_ENABLE
 }
 for (const variable of [
   "OPENAI_API_KEY", "MEDIA_WORKER_URL", "NEXT_PUBLIC_FIREBASE_VAPID_KEY",
-  "WHATSAPP_ACCESS_TOKEN", "WHATSAPP_CRON_SECRET", "MARKETING_CRON_SECRET",
+  "WHATSAPP_ACCESS_TOKEN", "WHATSAPP_CRON_SECRET",
   "META_CONVERSIONS_API_ACCESS_TOKEN", "GOOGLE_ADS_DEVELOPER_TOKEN",
   "GROWTH_SYNC_SECRET", "OWNER_INTELLIGENCE_CRON_SECRET", "NOTIFICATION_CRON_SECRET",
 ]) {
@@ -55,9 +55,11 @@ if (!functionsSource.includes("retryMarketingConversions") || !functionsSource.i
 if (!functionsSource.includes("generateMonthlyCentreInvoices") || !functionsSource.includes("every day 00:10")) {
   throw new Error("The scheduled recurring billing function is missing.");
 }
+if (functionsSource.includes('optionalSchedulerEnabled("MARKETING_SCHEDULER_ENABLED")')) {
+  throw new Error("retryMarketingConversions must be unconditionally exported without MARKETING_SCHEDULER_ENABLED.");
+}
 for (const [flag, exportName] of [
   ["GROWTH_SUMMARY_SCHEDULER_ENABLED", "buildDailyGrowthSummary"],
-  ["MARKETING_SCHEDULER_ENABLED", "retryMarketingConversions"],
   ["GROWTH_SCHEDULER_ENABLED", "synchronizeGrowthSources"],
   ["WHATSAPP_SCHEDULER_ENABLED", "processWhatsAppAutomation"],
   ["NOTIFICATION_SCHEDULER_ENABLED", "processCentreNotifications"],
@@ -70,8 +72,10 @@ for (const [flag, exportName] of [
     throw new Error(`${exportName} must remain absent unless ${flag} is explicitly enabled.`);
   }
 }
+if (!functionsSource.includes('defineSecret("MARKETING_CRON_SECRET")')) {
+  throw new Error("MARKETING_CRON_SECRET must be defined in Cloud Functions.");
+}
 for (const secret of [
-  "MARKETING_CRON_SECRET",
   "GROWTH_SYNC_SECRET",
   "WHATSAPP_CRON_SECRET",
   "NOTIFICATION_CRON_SECRET",

@@ -10,6 +10,7 @@ const sharp = require("sharp");
 initializeApp();
 
 const billingCronSecret = defineSecret("BILLING_CRON_SECRET");
+const marketingCronSecret = defineSecret("MARKETING_CRON_SECRET");
 const centreOsBaseUrl = defineString("CENTREOS_BASE_URL", {
   default: "https://kidzeedwarka.com",
 });
@@ -90,8 +91,6 @@ exports.buildDailyGrowthSummary = onSchedule(
 );
 }
 
-if (optionalSchedulerEnabled("MARKETING_SCHEDULER_ENABLED")) {
-const marketingCronSecret = defineSecret("MARKETING_CRON_SECRET");
 exports.retryMarketingConversions = onSchedule(
   {
     schedule: "every 15 minutes",
@@ -117,7 +116,6 @@ exports.retryMarketingConversions = onSchedule(
     }
   },
 );
-}
 
 if (optionalSchedulerEnabled("GROWTH_SCHEDULER_ENABLED")) {
 const growthSyncSecret = defineSecret("GROWTH_SYNC_SECRET");

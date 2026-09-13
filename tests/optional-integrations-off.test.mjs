@@ -35,5 +35,9 @@ test("disabled optional integrations do not export scheduled Firebase jobs", () 
       encoding: "utf8",
     }),
   );
-  assert.deepEqual(exportsFound, ["generateMonthlyCentreInvoices", "processGalleryUpload"]);
+  assert.deepEqual(exportsFound, [
+    "generateMonthlyCentreInvoices",
+    "processGalleryUpload",
+    "retryMarketingConversions",
+  ]);
 });

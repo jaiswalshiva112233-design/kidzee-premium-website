@@ -80,6 +80,9 @@ env:
   - variable: BILLING_CRON_SECRET
     secret: BILLING_CRON_SECRET
     availability: [RUNTIME]
+  - variable: MARKETING_CRON_SECRET
+    secret: MARKETING_CRON_SECRET
+    availability: [RUNTIME]
 
   # Production launch: provider integrations enabled
   - variable: WEBSITE_ANALYTICS_ENABLED
