@@ -27,31 +27,95 @@ function quietNow(start: string, end: string, date = new Date()) {
   return start <= end ? local >= start && local < end : local >= start || local < end;
 }
 
-export async function createAdminNotification(input: {
-  category: NotificationCategory; type: string; priority?: NotificationPriority; title: string; body: string; href: string;
-  entityType?: string; entityId?: string; eventKey: string; important?: boolean; ownerOnly?: boolean;
-}) {
-  const users = await prisma.adminUser.findMany({ where: { active: true }, select: { id: true, role: true, permissions: true, notificationPreference: true, pushDevices: { where: { active: true } } } });
+export async function createAdminNotification(
+  input: {
+    category: NotificationCategory;
+    type: string;
+    priority?: NotificationPriority;
+    title: string;
+    body: string;
+    href: string;
+    entityType?: string;
+    entityId?: string;
+    eventKey: string;
+    important?: boolean;
+    ownerOnly?: boolean;
+  },
+  client: Prisma.TransactionClient | typeof prisma = prisma,
+) {
+  const users = await client.adminUser.findMany({
+    where: { active: true },
+    select: {
+      id: true,
+      role: true,
+      permissions: true,
+      notificationPreference: true,
+      pushDevices: { where: { active: true } },
+    },
+  });
   const created = [];
   for (const user of users) {
     if (input.ownerOnly && user.role !== "OWNER") continue;
     if (user.role === "CENTRE_HEAD") {
       if (!operational.has(input.category)) continue;
       const requirement = permissionByCategory[input.category];
-      if (requirement && !hasAdminPermissionRequirement({ role: user.role, permissions: stringArray(user.permissions, []) }, requirement)) continue;
+      if (
+        requirement &&
+        !hasAdminPermissionRequirement(
+          { role: user.role, permissions: stringArray(user.permissions, []) },
+          requirement,
+        )
+      )
+        continue;
     }
     const defaults = defaultCategoriesForRole(user.role);
-    const enabled = stringArray(user.notificationPreference?.enabledCategories, defaults);
+    const enabled = stringArray(
+      user.notificationPreference?.enabledCategories,
+      defaults,
+    );
     if (!enabled.includes(input.category)) continue;
     const idempotencyKey = `${input.type}:${input.eventKey}:${user.id}`.slice(0, 500);
-    const record = await prisma.adminNotification.upsert({
+    const record = await client.adminNotification.upsert({
       where: { idempotencyKey },
-      create: { recipientUserId: user.id, category: input.category, type: input.type.slice(0, 80), priority: input.priority || "MEDIUM", title: input.title.slice(0, 120), body: input.body.slice(0, 250), href: input.href.slice(0, 500), entityType: input.entityType?.slice(0, 80), entityId: input.entityId?.slice(0, 100), idempotencyKey, important: input.important || input.priority === "HIGH" || input.priority === "CRITICAL" },
+      create: {
+        recipientUserId: user.id,
+        category: input.category,
+        type: input.type.slice(0, 80),
+        priority: input.priority || "MEDIUM",
+        title: input.title.slice(0, 120),
+        body: input.body.slice(0, 250),
+        href: input.href.slice(0, 500),
+        entityType: input.entityType?.slice(0, 80),
+        entityId: input.entityId?.slice(0, 100),
+        idempotencyKey,
+        important:
+          input.important ||
+          input.priority === "HIGH" ||
+          input.priority === "CRITICAL",
+      },
       update: {},
     });
-    const suppress = Boolean(user.notificationPreference?.quietHoursEnabled) && quietNow(user.notificationPreference?.quietStart || "19:00", user.notificationPreference?.quietEnd || "08:30") && input.priority !== "CRITICAL";
+    const suppress =
+      Boolean(user.notificationPreference?.quietHoursEnabled) &&
+      quietNow(
+        user.notificationPreference?.quietStart || "19:00",
+        user.notificationPreference?.quietEnd || "08:30",
+      ) &&
+      input.priority !== "CRITICAL";
     if (!suppress) {
-      await prisma.pushNotificationDelivery.createMany({ data: user.pushDevices.filter((device) => stringArray(device.enabledCategories, defaults).includes(input.category)).map((device) => ({ notificationId: record.id, deviceId: device.id })), skipDuplicates: true });
+      await client.pushNotificationDelivery.createMany({
+        data: user.pushDevices
+          .filter((device) =>
+            stringArray(device.enabledCategories, defaults).includes(
+              input.category,
+            ),
+          )
+          .map((device) => ({
+            notificationId: record.id,
+            deviceId: device.id,
+          })),
+        skipDuplicates: true,
+      });
     }
     created.push(record);
   }

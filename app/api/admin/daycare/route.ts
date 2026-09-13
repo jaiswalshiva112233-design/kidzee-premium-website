@@ -2997,7 +2997,8 @@ export async function POST(request: NextRequest) {
                 ? eveningSnackRate
                 : mealComboRate
           : 0;
-      const appliedFoodCharge = coveredByPrepaidPlan ? 0 : calculatedFoodCharge;
+      const appliedFoodCharge =
+        coveredByPrepaidPlan && fullDayFoodIncluded ? 0 : calculatedFoodCharge;
       const totalAmount = parseMoney(baseAmount + appliedFoodCharge);
       const gstApplicable =
         plan?.priceVersion?.gstApplicable ?? rate?.gstApplicable ?? false;
@@ -3083,38 +3084,40 @@ export async function POST(request: NextRequest) {
               gstRate,
               priceType,
             });
-            const selectedMealItems = selectedMeals.map((meal, index) => {
-              const version = meal.priceVersions[0];
-              const amount = parseMoney(version.price);
-              const tax = calculateChargePricing({
-                configuredAmount: amount,
-                gstApplicable: version.gstApplicable,
-                gstRate: Number(version.gstRate ?? 0),
-                priceType: version.priceType,
-              });
-              return {
-                category: "FOOD_FEE" as const,
-                title: meal.name,
-                detail: `Meal provided on ${formatDateLabel(sessionDate)}`,
-                quantity: 1,
-                unitAmount: tax.totalAmount,
-                amount: tax.totalAmount,
-                gstApplicable: version.gstApplicable,
-                gstRate: version.gstApplicable
-                  ? Number(version.gstRate ?? 0)
-                  : null,
-                priceType: version.priceType,
-                taxableAmount: tax.taxableAmount,
-                cgstAmount: tax.cgstAmount,
-                sgstAmount: tax.sgstAmount,
-                totalAmount: tax.totalAmount,
-                sortOrder: 20 + index,
-                chargeKey: `daycare:${studentId}:${formatDateKey(sessionDate)}:meal:${meal.id}`,
-                sourceType: "MealPriceVersion",
-                sourceId: meal.id,
-                sourceVersionId: version.id,
-              };
-            });
+            const selectedMealItems =
+              appliedFoodCharge > 0
+                ? selectedMeals.map((meal, index) => {
+                    const version = meal.priceVersions[0];
+                    const amount = parseMoney(version.price);
+                    const tax = calculateChargePricing({
+                      configuredAmount: amount,
+                      gstApplicable: version.gstApplicable,
+                      gstRate: Number(version.gstRate ?? 0),
+                      priceType: version.priceType,
+                    });
+                    return {
+                      category: "FOOD_FEE" as const,
+                      title: meal.name,
+                      detail: `Meal provided on ${formatDateLabel(sessionDate)}`,
+                      quantity: 1,
+                      unitAmount: tax.totalAmount,
+                      amount: tax.totalAmount,
+                      gstApplicable: version.gstApplicable,
+                      gstRate: version.gstApplicable
+                        ? Number(version.gstRate ?? 0)
+                        : null,
+                      priceType: version.priceType,
+                      taxableAmount: tax.taxableAmount,
+                      cgstAmount: tax.cgstAmount,
+                      sgstAmount: tax.sgstAmount,
+                      totalAmount: tax.totalAmount,
+                      sortOrder: 20 + index,
+                      chargeKey: `daycare-visit:${sessionSequence.formattedNumber}:meal:${meal.id}`,
+                      sourceType: "MealDefinition",
+                      sourceId: meal.id,
+                    };
+                  })
+                : [];
             const foodGst =
               selectedMealItems.length > 0
                 ? selectedMealItems.reduce(
@@ -3319,7 +3322,7 @@ export async function POST(request: NextRequest) {
               !plan || plan.planType === "OCCASIONAL" || additionalPlanVisit,
             invoiceStatus: invoiceId
               ? "INVOICED"
-              : completed && coveredByPrepaidPlan
+              : completed && coveredByPrepaidPlan && appliedFoodCharge === 0
                 ? "CONTRACT_COVERED"
                 : completed && sessionApproved
                   ? "APPROVED"
@@ -3760,8 +3763,10 @@ export async function POST(request: NextRequest) {
           gstRate,
           priceType: existing.priceType,
         });
-        const completedMealItems = existing.meals.map((sessionMeal, index) => {
-          const amount = Number(sessionMeal.totalAmount);
+        const completedMealItems =
+          foodAmount > 0
+            ? existing.meals.map((sessionMeal, index) => {
+                const amount = Number(sessionMeal.totalAmount);
           const tax = calculateChargePricing({
             configuredAmount: amount,
             gstApplicable: sessionMeal.gstApplicable,
@@ -3789,7 +3794,8 @@ export async function POST(request: NextRequest) {
             sourceType: "MealDefinition",
             sourceId: sessionMeal.mealId,
           };
-        });
+        })
+      : [];
         const foodGst =
           completedMealItems.length > 0
             ? completedMealItems.reduce(

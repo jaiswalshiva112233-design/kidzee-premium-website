@@ -6,6 +6,7 @@ import {
   enqueuePendingAdmissionConversions,
   processAdmissionConversionQueue,
 } from "@/lib/marketing/admissionConversions";
+import { deliverPendingFirestoreMirrors } from "@/lib/firebase/firestoreRest";
 import { logServerError } from "@/lib/server/safeLogging";
 
 export const runtime = "nodejs";
@@ -26,7 +27,8 @@ export async function POST(request: Request) {
   try {
     const discovered = await enqueuePendingAdmissionConversions(100);
     const result = await processAdmissionConversionQueue({ limit: 50 });
-    return NextResponse.json({ success: true, discovered, ...result });
+    const firestoreMirrors = await deliverPendingFirestoreMirrors(50);
+    return NextResponse.json({ success: true, discovered, firestoreMirrors, ...result });
   } catch (error) {
     logServerError("Scheduled marketing conversion processing failed.", error);
     return NextResponse.json({ success: false }, { status: 500 });

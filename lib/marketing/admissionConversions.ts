@@ -3,15 +3,42 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 
 import type { $Enums, Prisma } from "@/generated/prisma/client";
-import { sendGoogleConversion } from "@/lib/marketing/googleAdsConversions";
-import { sendMetaConversionEvent } from "@/lib/marketing/metaConversions";
 import {
   MARKETING_MAX_ATTEMPTS,
   marketingRetryDelay,
-} from "@/lib/marketing/retryPolicy";
-import { prisma } from "@/lib/prisma";
-import { getWebsiteTrackingSettings } from "@/lib/sanity/websiteSettings";
-import { logServerError } from "@/lib/server/safeLogging";
+} from "./retryPolicy";
+
+let defaultPrisma: any = null;
+async function getPrisma() {
+  if (!defaultPrisma) {
+    defaultPrisma = (await import("@/lib/prisma")).prisma;
+  }
+  return defaultPrisma;
+}
+
+let cachedDeliveryDeps: {
+  sendGoogleConversion: any;
+  sendMetaConversionEvent: any;
+  getWebsiteTrackingSettings: any;
+  logServerError: any;
+} | null = null;
+
+async function resolveDeliveryDeps() {
+  if (cachedDeliveryDeps) return cachedDeliveryDeps;
+  const [googleMod, metaMod, sanityMod, logMod] = await Promise.all([
+    import("@/lib/marketing/googleAdsConversions"),
+    import("@/lib/marketing/metaConversions"),
+    import("@/lib/sanity/websiteSettings"),
+    import("@/lib/server/safeLogging"),
+  ]);
+  cachedDeliveryDeps = {
+    sendGoogleConversion: googleMod.sendGoogleConversion,
+    sendMetaConversionEvent: metaMod.sendMetaConversionEvent,
+    getWebsiteTrackingSettings: sanityMod.getWebsiteTrackingSettings,
+    logServerError: logMod.logServerError,
+  };
+  return cachedDeliveryDeps;
+}
 
 const STALE_LOCK_MS = 15 * 60 * 1000;
 
@@ -71,8 +98,10 @@ function eligibleForEvent(
 export async function enqueueMarketingConversions(
   enquiryId: string,
   eventType: ConversionEventType,
+  client?: any,
 ) {
-  const enquiry = await prisma.enquiry.findUnique({
+  const dbClient = client || (await getPrisma());
+  const enquiry = await dbClient.enquiry.findUnique({
     where: { id: enquiryId },
     select: {
       id: true,
@@ -114,13 +143,13 @@ export async function enqueueMarketingConversions(
   }
 
   const googleSubmission = enquiry.websiteSubmissions.find(
-    (submission) =>
+    (submission: any) =>
       submission.source === "GOOGLE_ADS" ||
       submission.trafficChannel === "GOOGLE_ADS" ||
       Boolean(submission.gclid || submission.gbraid || submission.wbraid),
   );
   const metaSubmission = enquiry.websiteSubmissions.find(
-    (submission) =>
+    (submission: any) =>
       submission.source === "META_ADS" ||
       submission.trafficChannel === "META_ADS" ||
       Boolean(submission.fbclid || submission.fbc || submission.fbp),
@@ -144,7 +173,7 @@ export async function enqueueMarketingConversions(
       fbp: null,
     });
     jobs.push(
-      prisma.marketingConversionJob.upsert({
+      dbClient.marketingConversionJob.upsert({
         where: { deduplicationKey },
         create: {
           provider: "GOOGLE_ADS",
@@ -175,7 +204,7 @@ export async function enqueueMarketingConversions(
       fbp: metaSubmission.fbp,
     });
     jobs.push(
-      prisma.marketingConversionJob.upsert({
+      dbClient.marketingConversionJob.upsert({
         where: { deduplicationKey },
         create: {
           provider: "META",
@@ -194,21 +223,40 @@ export async function enqueueMarketingConversions(
   return { eligible: jobs.length > 0, queued: jobs.length };
 }
 
-export function enqueueLeadConversions(enquiryId: string) {
+export function enqueueLeadConversions(
+  enquiryId: string,
+  client?: any,
+) {
+  if (client) {
+    return enqueueMarketingConversions(enquiryId, "LEAD", client);
+  }
   return enqueueMarketingConversions(enquiryId, "LEAD");
 }
 
-export function enqueueQualifiedLeadConversions(enquiryId: string) {
+export function enqueueQualifiedLeadConversions(
+  enquiryId: string,
+  client?: any,
+) {
+  if (client) {
+    return enqueueMarketingConversions(enquiryId, "QUALIFIED_LEAD", client);
+  }
   return enqueueMarketingConversions(enquiryId, "QUALIFIED_LEAD");
 }
 
-export function enqueueAdmissionConversions(enquiryId: string) {
+export function enqueueAdmissionConversions(
+  enquiryId: string,
+  client?: any,
+) {
+  if (client) {
+    return enqueueMarketingConversions(enquiryId, "ADMISSION", client);
+  }
   return enqueueMarketingConversions(enquiryId, "ADMISSION");
 }
 
 async function attemptJob(jobId: string, workerId: string) {
+  const db = await getPrisma();
   const now = new Date();
-  const claimed = await prisma.marketingConversionJob.updateMany({
+  const claimed = await db.marketingConversionJob.updateMany({
     where: {
       id: jobId,
       status: { in: ["PENDING", "RETRY"] },
@@ -220,7 +268,7 @@ async function attemptJob(jobId: string, workerId: string) {
     return { claimed: false, sent: false, provider: null, dead: false };
   }
 
-  const job = await prisma.marketingConversionJob.findUnique({
+  const job = await db.marketingConversionJob.findUnique({
     where: { id: jobId },
   });
   if (!job) {
@@ -232,8 +280,9 @@ async function attemptJob(jobId: string, workerId: string) {
   try {
     const payload = job.payload as unknown as Record<string, unknown>;
     const conversionTime = validDate(payload.conversionTime);
+    const deps = await resolveDeliveryDeps();
     if (conversionTime && job.provider === "GOOGLE_ADS") {
-      const result = await sendGoogleConversion(job.eventType, {
+      const result = await deps.sendGoogleConversion(job.eventType, {
         enquiryNumber: String(payload.enquiryNumber ?? ""),
         conversionTime,
         gclid: typeof payload.gclid === "string" ? payload.gclid : null,
@@ -245,7 +294,7 @@ async function attemptJob(jobId: string, workerId: string) {
       sent = result.sent;
       reason = result.reason;
     } else if (conversionTime && job.provider === "META") {
-      const tracking = await getWebsiteTrackingSettings();
+      const tracking = await deps.getWebsiteTrackingSettings();
       const eventName =
         job.eventType === "LEAD"
           ? "Lead"
@@ -259,7 +308,7 @@ async function attemptJob(jobId: string, workerId: string) {
           : `${job.eventType.toLowerCase()}-${enquiryNumber}`;
       const result =
         tracking.metaPixelEnabled && tracking.metaPixelId
-          ? await sendMetaConversionEvent(eventName, {
+          ? await deps.sendMetaConversionEvent(eventName, {
               pixelId: tracking.metaPixelId,
               eventId,
               eventTime: conversionTime,
@@ -277,14 +326,19 @@ async function attemptJob(jobId: string, workerId: string) {
       reason = result.reason;
     }
   } catch (error) {
-    logServerError("Marketing conversion attempt failed.", error);
+    const deps = await resolveDeliveryDeps().catch(() => null);
+    if (deps?.logServerError) {
+      deps.logServerError("Marketing conversion attempt failed.", error);
+    } else {
+      console.error("Marketing conversion attempt failed.", error);
+    }
     reason = "unexpected_error";
   }
 
   const attemptNumber = job.attempts + 1;
   const dead = !sent && attemptNumber >= job.maxAttempts;
   const attemptedAt = new Date();
-  await prisma.$transaction(async (transaction) => {
+  await db.$transaction(async (transaction: any) => {
     await transaction.marketingConversionJob.update({
       where: { id: job.id },
       data: {
@@ -353,9 +407,10 @@ async function attemptJob(jobId: string, workerId: string) {
 export async function processAdmissionConversionQueue(
   options: { limit?: number; enquiryId?: string } = {},
 ) {
+  const db = await getPrisma();
   const limit = Math.min(100, Math.max(1, options.limit ?? 25));
   const staleBefore = new Date(Date.now() - STALE_LOCK_MS);
-  await prisma.marketingConversionJob.updateMany({
+  await db.marketingConversionJob.updateMany({
     where: { status: "PROCESSING", lockedAt: { lt: staleBefore } },
     data: {
       status: "RETRY",
@@ -365,7 +420,7 @@ export async function processAdmissionConversionQueue(
     },
   });
 
-  const due = await prisma.marketingConversionJob.findMany({
+  const due = await db.marketingConversionJob.findMany({
     where: {
       status: { in: ["PENDING", "RETRY"] },
       nextAttemptAt: { lte: new Date() },
@@ -392,11 +447,12 @@ export async function processAdmissionConversionQueue(
 }
 
 export async function retryMarketingConversion(jobId: string, actorId?: string | null) {
-  const job = await prisma.marketingConversionJob.findUnique({ where: { id: jobId } });
+  const db = await getPrisma();
+  const job = await db.marketingConversionJob.findUnique({ where: { id: jobId } });
   if (!job || job.status === "SUCCEEDED") return false;
 
-  await prisma.$transaction([
-    prisma.marketingConversionJob.update({
+  await db.$transaction([
+    db.marketingConversionJob.update({
       where: { id: jobId },
       data: {
         status: "RETRY",
@@ -406,7 +462,7 @@ export async function retryMarketingConversion(jobId: string, actorId?: string |
         lastError: null,
       },
     }),
-    prisma.leadActivity.create({
+    db.leadActivity.create({
       data: {
         enquiryId: job.enquiryId,
         type: "CONVERSION_RESENT",
@@ -419,27 +475,126 @@ export async function retryMarketingConversion(jobId: string, actorId?: string |
   return true;
 }
 
-export async function enqueuePendingAdmissionConversions(limit = 100) {
-  const enquiries = await prisma.enquiry.findMany({
-    where: {
-      status: "ADMITTED",
-      websiteSubmissions: {
-        some: {
-          marketingConsent: true,
-          leadType: "admission",
-          trafficClass: "GENUINE",
-          isInternal: false,
-          isTest: false,
-          isBot: false,
+export async function enqueuePendingAdmissionConversions(
+  limit = 100,
+  client?: any,
+) {
+  const dbClient = client || (await getPrisma());
+  const targetLimit = Math.max(1, limit);
+
+  const existingJobs = await dbClient.marketingConversionJob.findMany({
+    where: { eventType: "ADMISSION" },
+    select: { enquiryId: true, provider: true },
+  });
+  const existingJobKeys = new Set(
+    existingJobs
+      .filter((job: any) => Boolean(job.enquiryId && job.provider))
+      .map((job: any) => `${job.enquiryId}:${job.provider}`),
+  );
+
+  let enqueuedCount = 0;
+  let offset = 0;
+  const batchSize = Math.min(500, Math.max(50, targetLimit));
+  const seenEnquiryIds = new Set<string>();
+
+  while (enqueuedCount < targetLimit) {
+    const enquiries = await dbClient.enquiry.findMany({
+      where: {
+        status: "ADMITTED",
+        websiteSubmissions: {
+          some: {
+            marketingConsent: true,
+            leadType: "admission",
+            trafficClass: "GENUINE",
+            isInternal: false,
+            isTest: false,
+            isBot: false,
+          },
         },
       },
-    },
-    select: { id: true },
-    orderBy: { admittedAt: "asc" },
-    take: Math.min(500, Math.max(1, limit)),
-  });
-  for (const enquiry of enquiries) await enqueueAdmissionConversions(enquiry.id);
-  return enquiries.length;
+      select: {
+        id: true,
+        websiteSubmissions: {
+          where: {
+            marketingConsent: true,
+            leadType: "admission",
+            trafficClass: "GENUINE",
+            isInternal: false,
+            isTest: false,
+            isBot: false,
+          },
+          select: {
+            source: true,
+            trafficChannel: true,
+            gclid: true,
+            gbraid: true,
+            wbraid: true,
+            fbclid: true,
+            fbc: true,
+            fbp: true,
+          },
+        },
+      },
+      orderBy: [
+        { admittedAt: "asc" },
+        { id: "asc" },
+      ],
+      skip: offset,
+      take: batchSize,
+    });
+
+    if (!enquiries || enquiries.length === 0) {
+      break;
+    }
+
+    const newEnquiries = enquiries.filter((e: any) => !seenEnquiryIds.has(e.id));
+    if (newEnquiries.length === 0) {
+      break;
+    }
+
+    for (const enquiry of newEnquiries) {
+      seenEnquiryIds.add(enquiry.id);
+
+      const hasGoogle = enquiry.websiteSubmissions.some(
+        (submission: any) =>
+          submission.source === "GOOGLE_ADS" ||
+          submission.trafficChannel === "GOOGLE_ADS" ||
+          Boolean(submission.gclid || submission.gbraid || submission.wbraid),
+      );
+      const hasMeta = enquiry.websiteSubmissions.some(
+        (submission: any) =>
+          submission.source === "META_ADS" ||
+          submission.trafficChannel === "META_ADS" ||
+          Boolean(submission.fbclid || submission.fbc || submission.fbp),
+      );
+
+      const needsGoogle =
+        hasGoogle && !existingJobKeys.has(`${enquiry.id}:GOOGLE_ADS`);
+      const needsMeta =
+        hasMeta && !existingJobKeys.has(`${enquiry.id}:META`);
+
+      if (needsGoogle || needsMeta) {
+        const result = await enqueueAdmissionConversions(enquiry.id, dbClient);
+        if (result.queued > 0) {
+          enqueuedCount += 1;
+          if (needsGoogle) existingJobKeys.add(`${enquiry.id}:GOOGLE_ADS`);
+          if (needsMeta) existingJobKeys.add(`${enquiry.id}:META`);
+        }
+      }
+
+      if (enqueuedCount >= targetLimit) {
+        break;
+      }
+    }
+
+    if (enquiries.length < batchSize) {
+      break;
+    }
+
+    offset += enquiries.length;
+  }
+
+  return enqueuedCount;
 }
 
 export async function deliverMarketingConversions(

@@ -3,19 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { createAdminNotification } from "@/lib/admin/notifications";
-import { safeFirestoreMirror } from "@/lib/firebase/firestoreRest";
 import { classifyWebsiteRequest } from "@/lib/marketing/internalTraffic";
 import {
   enqueueLeadConversions,
-  processAdmissionConversionQueue,
 } from "@/lib/marketing/admissionConversions";
 import {
   consumeDistributedRateLimit,
   requestIp,
 } from "@/lib/server/distributedRateLimit";
 import { logServerError } from "@/lib/server/safeLogging";
-import { getWebsiteContactSettings } from "@/lib/sanity/contactSettings";
-import { buildSiteContact } from "@/lib/siteContact";
+import { defaultSiteContactSettings } from "@/lib/siteContact";
 import { queueWhatsAppAutomation } from "@/lib/whatsapp/automation";
 
 const PROGRAMMES = [
@@ -426,6 +423,158 @@ function noStoreJson(
       "Cache-Control": "no-store",
     },
   });
+}
+
+async function persistEnquiryOutboxRecords(
+  transaction: Prisma.TransactionClient,
+  params: {
+    enquiryId: string;
+    enquiryNumber: string;
+    created: boolean;
+    source: $Enums.EnquirySource;
+    submissionId: string;
+    parentName: string;
+    phone: { stored: string; matchKey?: string };
+    childName: string | null;
+    childAge: string | null;
+    programmeValue: string;
+    enquiryTypeValue: string;
+    trafficChannel: string;
+    requestClassification: ReturnType<typeof classifyWebsiteRequest>;
+    attribution: ReturnType<typeof collectAttributionFields>;
+    firstTouch: ReturnType<typeof collectAttributionTouch>;
+    lastTouch: ReturnType<typeof collectAttributionTouch>;
+    marketingConsent: boolean;
+    receivedAt: Date;
+  },
+) {
+  // 1. Audit log
+  await transaction.activityLog.create({
+    data: {
+      action: "CREATED",
+      entityType: "MARKETING_EVENT",
+      entityId: params.submissionId,
+      description: "Admission lead submitted from the public website.",
+      newData: {
+        eventName: "admission_lead_submitted",
+        eventScope: "ADMISSION",
+        leadType: "admission",
+        enquiryId: params.enquiryId,
+        enquiryNumber: params.enquiryNumber,
+        submissionId: params.submissionId,
+        trafficClass: params.requestClassification.trafficClass,
+        isInternal: params.requestClassification.isInternal,
+        isTest: params.requestClassification.isTest,
+        landingPage: params.attribution.landingPage,
+        utmSource: params.attribution.utmSource,
+        utmMedium: params.attribution.utmMedium,
+        utmCampaign: params.attribution.utmCampaign,
+      },
+    },
+  });
+
+  // 2. Firestore mirror outbox
+  await transaction.activityLog.create({
+    data: {
+      action: "CREATED",
+      entityType: "FIRESTORE_MIRROR_OUTBOX",
+      entityId: params.submissionId,
+      description: `Firestore mirror queued for enquiry ${params.enquiryNumber}`,
+      newData: {
+        submissionId: params.submissionId,
+        enquiryNumber: params.enquiryNumber,
+        status: "PENDING",
+        attempts: 0,
+        createdAt: params.receivedAt.toISOString(),
+        payload: {
+          leadSubmission: {
+            submissionId: params.submissionId,
+            enquiryNumber: params.enquiryNumber,
+            parentName: params.parentName,
+            phone: params.phone.stored,
+            childName: params.childName,
+            childAge: params.childAge,
+            programme: params.programmeValue || null,
+            enquiryType: params.enquiryTypeValue,
+            leadType: "admission",
+            trafficChannel: params.trafficChannel,
+            trafficClass: params.requestClassification.trafficClass,
+            attribution: params.attribution,
+            firstTouch: params.firstTouch,
+            lastTouch: params.lastTouch,
+            status: "SAVED",
+            receivedAt: params.receivedAt.toISOString(),
+          },
+          lead: {
+            enquiryNumber: params.enquiryNumber,
+            submissionId: params.submissionId,
+            parentName: params.parentName,
+            phone: params.phone.stored,
+            childName: params.childName,
+            childAge: params.childAge,
+            programme: params.programmeValue || null,
+            enquiryType: params.enquiryTypeValue,
+            source: params.source,
+            trafficChannel: params.trafficChannel,
+            trafficClass: params.requestClassification.trafficClass,
+            attribution: params.attribution,
+            firstTouch: params.firstTouch,
+            lastTouch: params.lastTouch,
+            latestSubmissionAt: params.receivedAt.toISOString(),
+            status: "NEW",
+          },
+        },
+      },
+    },
+  });
+
+  // 3. Admin Notification (if created and genuine)
+  const result = { created: params.created };
+  const requestClassification = params.requestClassification;
+  if (result.created && requestClassification.trafficClass === "GENUINE") {
+    await createAdminNotification(
+      {
+        category: "ADMISSION",
+        type: "NEW_ADMISSION_LEAD",
+        priority: "HIGH",
+        title: "New admission lead received",
+        body: "A new website admission enquiry is ready for follow-up.",
+        href: `/admin/enquiries/${params.enquiryId}`,
+        entityType: "ENQUIRY",
+        entityId: params.enquiryId,
+        eventKey: params.submissionId,
+        important: true,
+      },
+      transaction,
+    );
+  }
+
+  // 4. WhatsApp Automation (if genuine)
+  if (params.requestClassification.trafficClass === "GENUINE") {
+    await queueWhatsAppAutomation(
+      {
+        type: "ENQUIRY_NOTIFICATION",
+        deduplicationKey: `ENQUIRY_NOTIFICATION:${params.submissionId}`,
+        recipientPhone: defaultSiteContactSettings.phone,
+        enquiryId: params.enquiryId,
+        messageText: `New website enquiry ${params.enquiryNumber} from ${params.parentName}.`,
+        payload: {
+          parameters: [
+            params.enquiryNumber,
+            params.parentName,
+            params.childName || "Child",
+            params.phone.stored,
+          ],
+        },
+      },
+      transaction,
+    );
+  }
+
+  // 5. Marketing Conversions (if consent and genuine)
+  if (params.marketingConsent && params.requestClassification.trafficClass === "GENUINE") {
+    await enqueueLeadConversions(params.enquiryId, transaction);
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -887,6 +1036,27 @@ export async function POST(request: NextRequest) {
             },
           });
 
+          await persistEnquiryOutboxRecords(transaction, {
+            enquiryId: existingEnquiry.id,
+            enquiryNumber: existingEnquiry.enquiryNumber,
+            created: false,
+            source,
+            submissionId,
+            parentName,
+            phone,
+            childName,
+            childAge,
+            programmeValue,
+            enquiryTypeValue,
+            trafficChannel,
+            requestClassification,
+            attribution,
+            firstTouch,
+            lastTouch,
+            marketingConsent,
+            receivedAt,
+          });
+
           return {
             enquiryId: existingEnquiry.id,
             enquiryNumber:
@@ -1004,6 +1174,27 @@ export async function POST(request: NextRequest) {
           },
         });
 
+        await persistEnquiryOutboxRecords(transaction, {
+          enquiryId: enquiry.id,
+          enquiryNumber: enquiry.enquiryNumber,
+          created: true,
+          source,
+          submissionId,
+          parentName,
+          phone,
+          childName,
+          childAge,
+          programmeValue,
+          enquiryTypeValue,
+          trafficChannel,
+          requestClassification,
+          attribution,
+          firstTouch,
+          lastTouch,
+          marketingConsent,
+          receivedAt,
+        });
+
         return {
           enquiryId: enquiry.id,
           enquiryNumber: enquiry.enquiryNumber,
@@ -1013,109 +1204,6 @@ export async function POST(request: NextRequest) {
       },
     );
 
-    await safeFirestoreMirror("leadSubmissions", submissionId, {
-      submissionId,
-      enquiryNumber: result.enquiryNumber,
-      parentName,
-      phone: phone.stored,
-      childName,
-      childAge,
-      programme: programmeValue || null,
-      enquiryType: enquiryTypeValue,
-      leadType: "admission",
-      trafficChannel,
-      trafficClass: requestClassification.trafficClass,
-      attribution,
-      firstTouch,
-      lastTouch,
-      status: "SAVED",
-      receivedAt,
-    });
-
-    await safeFirestoreMirror("leads", result.enquiryNumber, {
-      enquiryNumber: result.enquiryNumber,
-      submissionId,
-      parentName,
-      phone: phone.stored,
-      childName,
-      childAge,
-      programme: programmeValue || null,
-      enquiryType: enquiryTypeValue,
-      source: result.source,
-      trafficChannel,
-      trafficClass: requestClassification.trafficClass,
-      attribution,
-      firstTouch,
-      lastTouch,
-      latestSubmissionAt: receivedAt,
-      status: "NEW",
-    });
-
-    // Post-commit side effects: must never fail the parent's successful enquiry response
-    try {
-      await prisma.activityLog.create({
-        data: {
-          action: "CREATED",
-          entityType: "MARKETING_EVENT",
-          entityId: submissionId,
-          description: "Admission lead submitted from the public website.",
-          newData: {
-            eventName: "admission_lead_submitted",
-            eventScope: "ADMISSION",
-            leadType: "admission",
-            enquiryId: result.enquiryId,
-            enquiryNumber: result.enquiryNumber,
-            submissionId,
-            trafficClass: requestClassification.trafficClass,
-            isInternal: requestClassification.isInternal,
-            isTest: requestClassification.isTest,
-            landingPage: attribution.landingPage,
-            utmSource: attribution.utmSource,
-            utmMedium: attribution.utmMedium,
-            utmCampaign: attribution.utmCampaign,
-          },
-        },
-      }).catch((error) => logServerError("Admission activity log could not be saved.", error));
-
-      if (result.created && requestClassification.trafficClass === "GENUINE") {
-        await createAdminNotification({
-          category: "ADMISSION",
-          type: "NEW_ADMISSION_LEAD",
-          priority: "HIGH",
-          title: "New admission lead received",
-          body: "A new website admission enquiry is ready for follow-up.",
-          href: `/admin/enquiries/${result.enquiryId}`,
-          entityType: "ENQUIRY",
-          entityId: result.enquiryId,
-          eventKey: submissionId,
-          important: true,
-        }).catch((error) => logServerError("Admission notification could not be queued.", error));
-      }
-
-      if (requestClassification.trafficClass === "GENUINE") {
-        const centreContact = buildSiteContact(await getWebsiteContactSettings());
-        await queueWhatsAppAutomation({
-          type: "ENQUIRY_NOTIFICATION",
-          deduplicationKey: `ENQUIRY_NOTIFICATION:${submissionId}`,
-          recipientPhone: centreContact.phone,
-          enquiryId: result.enquiryId,
-          messageText: `New website enquiry ${result.enquiryNumber} from ${parentName}.`,
-          payload: { parameters: [result.enquiryNumber, parentName, childName || "Child", phone.stored] },
-        }).catch((error) => logServerError("Enquiry WhatsApp notification could not be queued.", error));
-      }
-
-      if (marketingConsent && requestClassification.trafficClass === "GENUINE") {
-        await enqueueLeadConversions(result.enquiryId).catch((error) =>
-          logServerError("Lead conversion enqueue failed.", error),
-        );
-        await processAdmissionConversionQueue({ enquiryId: result.enquiryId, limit: 2 }).catch((error) =>
-          logServerError("Admission conversion queue processing failed.", error),
-        );
-      }
-    } catch (sideEffectError) {
-      logServerError("Enquiry side effect processing encountered an error.", sideEffectError);
-    }
-
     return noStoreJson(
       {
         success: true,
@@ -1123,7 +1211,6 @@ export async function POST(request: NextRequest) {
         source: result.source,
         enquiryNumber: result.enquiryNumber,
         submissionId,
-
         message: result.created
           ? "Thank you. Your enquiry has been received."
           : "Thank you. Your existing enquiry has been updated.",

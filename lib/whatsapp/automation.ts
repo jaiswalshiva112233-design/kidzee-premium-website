@@ -46,11 +46,14 @@ function retryDelay(attempt: number) {
   return Math.min(24 * 60 * 60 * 1_000, 5 * 60 * 1_000 * 2 ** Math.max(0, attempt - 1));
 }
 
-export async function queueWhatsAppAutomation(input: QueueInput) {
+export async function queueWhatsAppAutomation(
+  input: QueueInput,
+  client: Prisma.TransactionClient | typeof prisma = prisma,
+) {
   const recipientPhone = digits(input.recipientPhone);
   if (!/^91[6-9]\d{9}$/.test(recipientPhone)) return null;
   const templateName = process.env[templateEnvironment[input.type]]?.trim() || null;
-  return prisma.whatsAppAutomationMessage.upsert({
+  return client.whatsAppAutomationMessage.upsert({
     where: { deduplicationKey: input.deduplicationKey },
     create: {
       type: input.type,

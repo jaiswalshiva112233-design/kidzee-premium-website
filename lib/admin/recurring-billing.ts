@@ -330,7 +330,12 @@ export async function generateRecurringInvoices(
       for (const service of contract.services) {
         const configuredAmount = Math.max(0, Number(service.amountSnapshot) - Number(service.discountSnapshot));
         if (configuredAmount <= 0) continue;
-        add(main, {
+        const group =
+          config.defaultInvoiceMode === "SPLIT_DAYCARE" &&
+          service.category === "DAYCARE_FEE"
+            ? `daycare:${service.id}`
+            : main;
+        add(group, {
           category: service.category,
           title: service.label,
           detail: service.detail ?? label,
@@ -588,36 +593,42 @@ export async function generateRecurringInvoices(
           daycareSessionId: session.id,
         });
       }
-      if (session.meals.length > 0) {
-        for (const sessionMeal of session.meals) {
+      const sessionFoodCharge = money(session.foodCharge);
+      if (sessionFoodCharge > 0) {
+        const mealsSum = money(
+          session.meals.reduce((acc, m) => acc + money(m.totalAmount), 0),
+        );
+        if (session.meals.length > 0 && Math.abs(mealsSum - sessionFoodCharge) < 0.01) {
+          for (const sessionMeal of session.meals) {
+            add(main, {
+              category: "FOOD_FEE",
+              title: sessionMeal.meal.name,
+              detail: config.additionalDaycareDisplayMode === "DETAILED" ? `Meal taken on ${date}` : label,
+              amount: money(sessionMeal.totalAmount),
+              gstApplicable: sessionMeal.gstApplicable,
+              gstRate: sessionMeal.gstApplicable ? money(sessionMeal.gstRate) : 0,
+              priceType: sessionMeal.priceType as ChargePriceType,
+              chargeKey: `daycare-session:${session.id}:meal:${sessionMeal.mealId}`,
+              sourceType: "MealDefinition",
+              sourceId: sessionMeal.mealId,
+              daycareSessionId: session.id,
+            });
+          }
+        } else {
           add(main, {
             category: "FOOD_FEE",
-            title: sessionMeal.meal.name,
-            detail: config.additionalDaycareDisplayMode === "DETAILED" ? `Meal taken on ${date}` : label,
-            amount: money(sessionMeal.totalAmount),
-            gstApplicable: sessionMeal.gstApplicable,
-            gstRate: sessionMeal.gstApplicable ? money(sessionMeal.gstRate) : 0,
-            priceType: sessionMeal.priceType as ChargePriceType,
-            chargeKey: `daycare-session:${session.id}:meal:${sessionMeal.mealId}`,
-            sourceType: "MealDefinition",
-            sourceId: sessionMeal.mealId,
+            title: "Daycare meals",
+            detail: config.additionalDaycareDisplayMode === "DETAILED" ? `Meals taken on ${date}` : label,
+            amount: sessionFoodCharge,
+            gstApplicable: session.foodGstApplicable,
+            gstRate: session.foodGstApplicable ? money(session.foodGstRate) : 0,
+            priceType: session.foodPriceType as ChargePriceType,
+            chargeKey: `daycare-session:${session.id}:meals`,
+            sourceType: "DaycareSession",
+            sourceId: session.id,
             daycareSessionId: session.id,
           });
         }
-      } else if (money(session.foodCharge) > 0) {
-        add(main, {
-          category: "FOOD_FEE",
-          title: "Daycare meals",
-          detail: config.additionalDaycareDisplayMode === "DETAILED" ? `Meals taken on ${date}` : label,
-          amount: money(session.foodCharge),
-          gstApplicable: session.foodGstApplicable,
-          gstRate: session.foodGstApplicable ? money(session.foodGstRate) : 0,
-          priceType: session.foodPriceType as ChargePriceType,
-          chargeKey: `daycare-session:${session.id}:meals`,
-          sourceType: "DaycareSession",
-          sourceId: session.id,
-          daycareSessionId: session.id,
-        });
       }
     }
 
@@ -672,7 +683,10 @@ export async function generateRecurringInvoices(
   assertUniqueChargeKeys(candidates.flatMap((candidate) => candidate.items));
   const existingItems = allChargeKeys.length
     ? await prisma.feeInvoiceItem.findMany({
-        where: { chargeKey: { in: allChargeKeys } },
+        where: {
+          chargeKey: { in: allChargeKeys },
+          invoice: { status: { not: "CANCELLED" } },
+        },
         select: { chargeKey: true },
       })
     : [];

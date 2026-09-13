@@ -42,10 +42,10 @@ export async function POST(request: NextRequest) {
     const channel = String(body.channel || "GOOGLE").toUpperCase();
     const source = channel === "META" ? "META_ADS" : "GOOGLE_ADS";
     const budget = Number(body.budget) || 500;
-    const spend = Number(body.spend) >= 0 ? Number(body.spend) : 13.81;
-    const clicks = Number(body.clicks) >= 0 ? Number(body.clicks) : 2;
-    const impressions = Number(body.impressions) >= 0 ? Number(body.impressions) : 9;
-    const conversions = Number(body.conversions) || 0;
+    const spend = Number(body.spend) >= 0 ? Number(body.spend) : 0;
+    const clicks = Number(body.clicks) >= 0 ? Number(body.clicks) : 0;
+    const impressions = Number(body.impressions) >= 0 ? Number(body.impressions) : 0;
+    const conversions = Number(body.conversions) >= 0 ? Number(body.conversions) : 0;
     const campaignName = String(body.campaignName || "Kidzee_Dwarka_Sec12_Search_2KM").trim();
     const campaignStatus = String(body.campaignStatus || "Eligible (Standard)").trim();
 
@@ -86,58 +86,18 @@ export async function POST(request: NextRequest) {
           conversions,
         },
       ],
-      keywords: rawKeywords && rawKeywords.length > 0
-        ? rawKeywords
-        : [
-            {
-              keyword: "preschool in dwarka sector 12",
-              campaign: campaignName,
-              clicks: Math.ceil(clicks / 2),
-              cost: `₹${cpc}`,
-              cpc: `₹${cpc}`,
-              conversions: 0,
-            },
-            {
-              keyword: "playschool near me",
-              campaign: campaignName,
-              clicks: Math.floor(clicks / 2),
-              cost: `₹${cpc}`,
-              cpc: `₹${cpc}`,
-              conversions: 0,
-            },
-            {
-              keyword: "kidzee sector 12 dwarka",
-              campaign: campaignName,
-              clicks: 0,
-              cost: "₹0.00",
-              cpc: "₹0.00",
-              conversions: 0,
-            },
-            {
-              keyword: "daycare in sector 12 dwarka",
-              campaign: campaignName,
-              clicks: 0,
-              cost: "₹0.00",
-              cpc: "₹0.00",
-              conversions: 0,
-            },
-          ],
-      searchTerms: rawSearchTerms && rawSearchTerms.length > 0
-        ? rawSearchTerms
-        : [
-            {
-              keyword: "preschool near me",
-              clicks: 1,
-              cost: `₹${cpc}`,
-              conversions: 0,
-            },
-            {
-              keyword: "playschool in dwarka sector 12",
-              clicks: 1,
-              cost: `₹${cpc}`,
-              conversions: 0,
-            },
-          ],
+      keywords: rawKeywords && rawKeywords.length > 0 ? rawKeywords : [],
+      searchTerms:
+        rawSearchTerms && rawSearchTerms.length > 0
+          ? rawSearchTerms.map((item) => {
+              const record = item as Record<string, unknown>;
+              return {
+                ...record,
+                searchTerm:
+                  record.searchTerm || record.keyword || record.query || record.text || "-",
+              };
+            })
+          : [],
     };
 
     const now = new Date();
@@ -151,12 +111,19 @@ export async function POST(request: NextRequest) {
         deduplicationKey,
         periodStart,
         periodEnd: now,
-        dimensions: { centre: "Kidzee Sector 12B Dwarka" },
+        dimensions: {
+          centre: "Kidzee Sector 12B Dwarka",
+          provenance: isScriptAuth ? "AUTOMATED_SYNC" : "MANUAL_ENTRY",
+        },
         metrics: metricsPayload,
         collectedAt: now,
       },
       update: {
         metrics: metricsPayload,
+        dimensions: {
+          centre: "Kidzee Sector 12B Dwarka",
+          provenance: isScriptAuth ? "AUTOMATED_SYNC" : "MANUAL_ENTRY",
+        },
         collectedAt: now,
       },
     });

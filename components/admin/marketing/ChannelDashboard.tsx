@@ -136,8 +136,8 @@ export default function ChannelDashboard({ data }: { data: Data }) {
         ["Visits completed", number(data.totals.visitsCompleted), Target],
         ["Admissions", number(data.totals.admissions), CheckCircle2],
         ["Admission revenue", money(data.totals.revenue), IndianRupee],
-        ["Cost / visit", money(data.totals.costPerVisit), IndianRupee],
-        ["Cost / admission", money(data.totals.costPerAdmission), IndianRupee],
+        ["Cost / visit", data.totals.visitsCompleted > 0 && data.totals.costPerVisit > 0 ? money(data.totals.costPerVisit) : "—", IndianRupee],
+        ["Cost / admission", data.totals.admissions > 0 && data.totals.costPerAdmission > 0 ? money(data.totals.costPerAdmission) : "—", IndianRupee],
         ...(data.channel === "META"
           ? ([["Frequency", number(data.totals.frequency), BarChart3]] as const)
           : []),
@@ -149,7 +149,9 @@ export default function ChannelDashboard({ data }: { data: Data }) {
         className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border p-4 ${
           data.sourceStatus === "CONNECTED"
             ? "border-green-200 bg-green-50 text-green-800"
-            : "border-amber-200 bg-amber-50 text-amber-900"
+            : data.sourceStatus === "MANUAL_ENTRY"
+              ? "border-blue-200 bg-blue-50 text-blue-900"
+              : "border-amber-200 bg-amber-50 text-amber-900"
         }`}
       >
         <div className="flex items-center gap-3">
@@ -161,8 +163,10 @@ export default function ChannelDashboard({ data }: { data: Data }) {
           <div>
             <p className="text-sm font-black">
               {data.sourceStatus === "CONNECTED"
-                ? "Provider evidence connected"
-                : "Provider evidence awaiting its first sync"}
+                ? "Provider evidence connected (Live Sync)"
+                : data.sourceStatus === "MANUAL_ENTRY"
+                  ? "Manual snapshot data recorded"
+                  : "Provider evidence awaiting its first sync"}
             </p>
             <p className="text-xs font-semibold opacity-80">
               {data.latestSnapshotAt

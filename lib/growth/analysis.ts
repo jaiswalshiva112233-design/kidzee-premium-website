@@ -257,6 +257,13 @@ export async function buildGrowthSnapshot(days = 30) {
   const galleryEngagements = currentEvents.filter((event) => event.eventType === "GALLERY_OPEN").length;
   const parentStoryPlays = currentEvents.filter((event) => event.eventType === "VIDEO_PLAY").length;
 
+  const enquiryAdmissions = enquiries.filter(
+    (item) => item.status === "ADMITTED",
+  ).length;
+  const previousEnquiryAdmissions = previousEnquiries.filter(
+    (item) => item.status === "ADMITTED",
+  ).length;
+
   const metrics = {
     days,
     genuineVisitors: currentVisitors.size,
@@ -264,14 +271,15 @@ export async function buildGrowthSnapshot(days = 30) {
     leads,
     qualified,
     visits,
-    admissions,
+    admissions: enquiryAdmissions,
+    totalCentreAdmissions: admissions,
     formStarts,
     formSubmissions,
     callClicks,
     whatsappClicks,
     websiteToLead: percent(leads, currentVisitors.size),
     leadToVisit: percent(visits, leads),
-    visitToAdmission: percent(admissions, visits),
+    visitToAdmission: percent(enquiryAdmissions, visits),
     formCompletion: percent(formSubmissions, formStarts),
   };
 
@@ -279,7 +287,8 @@ export async function buildGrowthSnapshot(days = 30) {
     visitors: percentageChange(currentVisitors.size, previousVisitors.size),
     leads: percentageChange(leads, previousSubmissionCount),
     visits: percentageChange(visits, previousVisits),
-    admissions: percentageChange(admissions, previousAdmissions),
+    admissions: percentageChange(enquiryAdmissions, previousEnquiryAdmissions),
+    totalCentreAdmissions: percentageChange(admissions, previousAdmissions),
   };
 
   const pages = countBy(pageViews.map((event) => pathFromUrl(event.pagePath))).slice(0, 6);

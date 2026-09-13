@@ -4,12 +4,10 @@ import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin/auth";
 import { prisma } from "@/lib/prisma";
 import { getNextSequence } from "@/lib/numbering";
-
-class LedgerRequestError extends Error {
-  constructor(message: string, readonly status = 400) {
-    super(message);
-  }
-}
+import {
+  assertNoDuplicateAnnualOrKitCharge,
+  LedgerRequestError,
+} from "@/lib/admin/student-ledger-rules";
 
 const ALLOWED_CATEGORIES = new Set<$Enums.FeeCategory>([
   "ANNUAL_FEE",
@@ -162,28 +160,13 @@ export async function POST(request: Request) {
         const existing = await tx.studentCharge.findUnique({ where: { chargeKey } });
         if (existing) return { charge: existing, replayed: true };
         if (["ANNUAL_FEE", "KIT_FEE"].includes(definition.category) && academicYear) {
-          const automaticPrefixes = definition.category === "ANNUAL_FEE"
-            ? ["programme-annual:", "programme-annual-kit:"]
-            : ["programme-kit:", "programme-annual-kit:"];
-          const alreadyBilled = await tx.feeInvoiceItem.findFirst({
-            where: {
-              category: { in: ["ANNUAL_FEE", "KIT_FEE"] },
-              invoice: { studentId },
-              OR: automaticPrefixes.map((prefix) => ({
-                chargeKey: {
-                  startsWith: `${prefix}${studentId}:`,
-                  endsWith: `:${academicYear.slice(0, 4)}`,
-                },
-              })),
-            },
-            select: { id: true },
-          });
-          if (alreadyBilled) {
-            throw new LedgerRequestError(
-              `The ${definition.category === "KIT_FEE" ? "kit" : "annual"} fee for ${academicYear} is already on this child's financial history.`,
-              409,
-            );
-          }
+          // Reject duplicate if already on this child's financial history
+          await assertNoDuplicateAnnualOrKitCharge(
+            tx,
+            definition.category,
+            studentId,
+            academicYear,
+          );
         }
         const sequence = await getNextSequence(tx, { key: "STUDENT_CHARGE", prefix: "KZ-CHG", minimumWidth: 4 });
         const ownerApproved = isOwner(session);

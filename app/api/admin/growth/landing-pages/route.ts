@@ -242,47 +242,85 @@ export async function POST(request: Request) {
     if (action === "save-and-publish") {
       const existing = await prisma.landingPage.findUnique({
         where: { id: pageId },
+        include: { versions: { orderBy: { versionNumber: "desc" }, take: 1 } },
       });
       if (!existing) throw new LandingPageRequestError("Landing page not found.");
       const pageContent = content(body.content);
       const seoTitle = text(body.seoTitle, 70) || existing.seoTitle;
       const metaDescription = text(body.metaDescription, 180) || existing.metaDescription;
       const name = text(body.name, 120) || existing.name;
+      const isPublished = body.makeLive !== false;
+      const nextVersionNumber = (existing.versions[0]?.versionNumber ?? 0) + 1;
 
-      await prisma.$transaction([
-        prisma.landingPage.update({
+      await prisma.$transaction(async (tx) => {
+        if (isPublished) {
+          await tx.landingPageVersion.updateMany({
+            where: { landingPageId: pageId, status: "APPLIED" },
+            data: { status: "ROLLED_BACK", rolledBackAt: new Date() },
+          });
+        }
+
+        await tx.landingPage.update({
           where: { id: pageId },
           data: {
             name,
             seoTitle,
             metaDescription,
             content: pageContent,
-            status: body.makeLive === false ? "DRAFT" : "PUBLISHED",
+            status: isPublished ? "PUBLISHED" : "DRAFT",
+            publishedAt: isPublished ? new Date() : existing.publishedAt,
             updatedById: session.userId,
             updatedAt: new Date(),
           },
-        }),
-        prisma.landingPageVariant.updateMany({
+        });
+
+        await tx.landingPageVariant.updateMany({
           where: { landingPageId: pageId, variantKey: "A" },
           data: {
             name,
             content: pageContent,
             updatedAt: new Date(),
           },
-        }),
-        prisma.activityLog.create({
+        });
+
+        await tx.landingPageVersion.create({
+          data: {
+            landingPageId: pageId,
+            versionNumber: nextVersionNumber,
+            status: isPublished ? "APPLIED" : "DRAFT",
+            approval: isPublished ? "OWNER_APPROVED" : "PENDING_REVIEW",
+            approvedById: isPublished ? session.userId : null,
+            appliedAt: isPublished ? new Date() : null,
+            snapshot: { seoTitle, metaDescription, content: pageContent },
+            reason:
+              text(body.reason, 500) ||
+              (isPublished ? "Direct Save & Publish" : "Direct Save as Draft"),
+            expectedImpact: "Direct editor update",
+            filesChanged: [`CentreOS landing page: /landing/${existing.slug}`],
+            createdById: session.userId,
+          },
+        });
+
+        await tx.activityLog.create({
           data: {
             adminUserId: session.userId,
             action: "UPDATED",
             entityType: "LandingPage",
             entityId: pageId,
-            description: `${name} was directly updated.`,
+            description: `${name} was ${isPublished ? "saved and published live" : "saved as draft"}. Version ${nextVersionNumber} created.`,
+            newData: {
+              versionNumber: nextVersionNumber,
+              status: isPublished ? "PUBLISHED" : "DRAFT",
+            },
           },
-        }),
-      ]);
+        });
+      });
       return NextResponse.json({
         success: true,
-        message: body.makeLive === false ? "Landing page saved as Draft (Hidden)!" : "Landing page saved and published live!",
+        message:
+          body.makeLive === false
+            ? "Landing page saved as Draft (Hidden)!"
+            : "Landing page saved and published live!",
       });
     }
 
@@ -580,7 +618,7 @@ export async function POST(request: Request) {
         const previous = version.landingPage.versions.find(
           (item) =>
             item.versionNumber < version.versionNumber &&
-            item.status !== "DRAFT",
+            (item.status === "ROLLED_BACK" || item.appliedAt !== null),
         );
         if (!previous)
           throw new LandingPageRequestError(

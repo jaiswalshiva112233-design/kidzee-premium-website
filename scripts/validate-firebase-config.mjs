@@ -32,8 +32,14 @@ for (const variable of [
   if (!appHosting.includes(`variable: ${variable}`)) throw new Error(`App Hosting is missing ${variable}.`);
 }
 for (const variable of ["WEBSITE_ANALYTICS_ENABLED", "WEBSITE_ADVERTISING_ENABLED", "WEBSITE_META_PIXEL_ENABLED"]) {
-  const disabled = new RegExp(`variable: ${variable}\\s+value: ["']?false["']?`, "m");
-  if (!disabled.test(appHosting)) throw new Error(`${variable} must remain disabled for the controlled trial.`);
+  const isControlledTrial = process.argv.includes("--controlled-trial");
+  if (isControlledTrial) {
+    const disabled = new RegExp(`variable: ${variable}\\s+value: ["']?false["']?`, "m");
+    if (!disabled.test(appHosting)) throw new Error(`${variable} must remain disabled for the controlled trial.`);
+  } else {
+    const validBool = new RegExp(`variable: ${variable}\\s+value: ["']?(true|false)["']?`, "m");
+    if (!validBool.test(appHosting)) throw new Error(`${variable} must be set to "true" or "false" in App Hosting.`);
+  }
 }
 for (const variable of [
   "OPENAI_API_KEY", "MEDIA_WORKER_URL", "NEXT_PUBLIC_FIREBASE_VAPID_KEY",

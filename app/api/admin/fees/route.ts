@@ -1865,7 +1865,14 @@ export async function POST(
           data: {
             feeInvoiceId: null,
             status: "COMPLETED",
+            invoiceStatus: "APPROVED",
           },
+        });
+
+        // Release chargeKeys on cancelled invoice items so they can be re-billed
+        await tx.feeInvoiceItem.updateMany({
+          where: { invoiceId: invoice.id },
+          data: { chargeKey: null },
         });
 
         // Unlink any student charges tied to this invoice

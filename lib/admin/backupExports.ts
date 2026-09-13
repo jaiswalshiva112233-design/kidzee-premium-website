@@ -63,6 +63,11 @@ async function databaseBackup() {
     marketingConversionJobs,
     careers,
     campaignUrls,
+    batches,
+    studentBatchAssignments,
+    teacherActivities,
+    studentObservationReports,
+    internalMessages,
   ] = await Promise.all([
     prisma.enquiry.findMany({ include: { followUps: true } }),
     prisma.leadFamily.findMany(),
@@ -118,6 +123,11 @@ async function databaseBackup() {
       },
     }),
     prisma.campaignUrl.findMany(),
+    prisma.batch.findMany({ include: { studentAssignments: true } }),
+    prisma.studentBatchAssignment.findMany(),
+    prisma.teacherActivity.findMany(),
+    prisma.studentObservationReport.findMany(),
+    prisma.internalMessage.findMany(),
   ]);
   const data = {
     enquiries,
@@ -146,6 +156,11 @@ async function databaseBackup() {
     marketingConversionJobs,
     careers,
     campaignUrls,
+    batches,
+    studentBatchAssignments,
+    teacherActivities,
+    studentObservationReports,
+    internalMessages,
   };
   return { data, recordCount: Object.values(data).reduce((sum, rows) => sum + rows.length, 0) };
 }

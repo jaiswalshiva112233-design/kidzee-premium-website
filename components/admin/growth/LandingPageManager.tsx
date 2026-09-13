@@ -889,7 +889,15 @@ export default function LandingPageManager() {
                 </p>
               </div>
               {data.canManage ? (
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`/admin/marketing/landing-pages/${selected.id}/preview?versionId=${version.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-lg border border-[#DCCFE2] bg-white px-3 py-2 text-xs font-black text-[#5B2A86]"
+                  >
+                    Preview
+                  </a>
                   {version.status === "DRAFT" ? (
                     <button
                       onClick={() =>

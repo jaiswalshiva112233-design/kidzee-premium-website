@@ -159,3 +159,12 @@ test("legacy partial-payment GST snapshots are scaled once for CA reports", () =
   assert.equal(payment.cgstAmount, 45);
   assert.equal(payment.sgstAmount, 45);
 });
+
+test("receipt PDF route requires receipts.view permission or valid signature and rejects unauthorized staff with 403", () => {
+  const route = source("app/api/receipts/[id]/pdf/route.ts");
+  assert.match(
+    route,
+    /hasAdminPermissionRequirement\(session,\s*"receipts\.view"\)/,
+  );
+  assert.match(route, /status:\s*session\s*\?\s*403\s*:\s*401/);
+});

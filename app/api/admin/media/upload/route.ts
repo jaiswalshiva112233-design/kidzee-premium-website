@@ -12,6 +12,18 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const ALLOWED_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "video/mp4",
+  "video/quicktime",
+  "video/webm",
+]);
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50MB
+
 export async function POST(request: Request) {
   try {
     const isAuth = await isAdminAuthenticated();
@@ -48,27 +60,43 @@ export async function POST(request: Request) {
       mimeType = contentType.split(";")[0] || mimeType;
     }
 
-    const cleanExt = path.extname(fileName) || (mimeType.includes("video") ? ".mp4" : ".jpg");
+    if (!fileBuffer || fileBuffer.length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Empty file provided" },
+        { status: 400 },
+      );
+    }
+
+    if (!ALLOWED_MIME_TYPES.has(mimeType)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Unsupported file type. Only JPEG, PNG, WebP, GIF, and MP4/WebM videos are allowed.",
+        },
+        { status: 400 },
+      );
+    }
+
+    const isVideo = mimeType.startsWith("video/");
+    const maxBytes = isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+    if (fileBuffer.length > maxBytes) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `File exceeds maximum allowed size of ${isVideo ? "50MB" : "10MB"}.`,
+        },
+        { status: 400 },
+      );
+    }
+
+    const cleanExt =
+      path.extname(fileName) || (mimeType.includes("video") ? ".mp4" : ".jpg");
     const safeName = `${randomUUID()}${cleanExt}`;
     const storagePath = `public/landing/media/${safeName}`;
 
-    let finalUrl = "";
-
-    // 1. Try Firebase Storage first
-    try {
-      await uploadStoredFile(storagePath, new Uint8Array(fileBuffer), mimeType);
-      finalUrl = firebasePublicFileUrl(storagePath);
-    } catch (fbErr) {
-      console.warn("Firebase Storage upload skipped/failed, using local public fallback:", fbErr);
-      // 2. Local public fallback
-      const uploadDir = path.join(process.cwd(), "public", "uploads");
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-      const localFilePath = path.join(uploadDir, safeName);
-      fs.writeFileSync(localFilePath, fileBuffer);
-      finalUrl = `/uploads/${safeName}`;
-    }
+    await uploadStoredFile(storagePath, new Uint8Array(fileBuffer), mimeType);
+    const finalUrl = firebasePublicFileUrl(storagePath);
 
     return NextResponse.json({
       success: true,

@@ -9,15 +9,20 @@ export const dynamic = "force-dynamic";
 
 export default async function LandingPagePreview({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ versionId?: string }>;
 }) {
   if (!(await getAdminSession())) redirect("/admin/login");
   const { id } = await params;
+  const { versionId } = (await searchParams) ?? {};
+
   const page = await prisma.landingPage.findUnique({
     where: { id },
     include: {
       variants: { where: { active: true }, orderBy: { variantKey: "asc" } },
+      versions: versionId ? { where: { id: versionId }, take: 1 } : false,
       experiments: {
         where: { status: "RUNNING" },
         include: { variants: { include: { variant: true } } },
@@ -27,10 +32,26 @@ export default async function LandingPagePreview({
     },
   });
   if (!page) notFound();
+
+  const previewVersion = page.versions?.[0];
+  const versionSnapshot = previewVersion?.snapshot as
+    | { content?: Record<string, unknown> }
+    | undefined;
+  const effectiveContent = (versionSnapshot?.content || page.content) as Record<
+    string,
+    unknown
+  >;
+
   return (
     <>
       <div className="sticky top-0 z-[100] flex items-center justify-between bg-[#2D1736] px-4 py-2 text-xs font-black text-white">
-        <span>Owner preview / not public unless published</span>
+        <span>
+          Owner preview{" "}
+          {previewVersion
+            ? `(Version ${previewVersion.versionNumber}: ${previewVersion.status})`
+            : "(Current Saved State)"}{" "}
+          / not public unless published
+        </span>
         <a
           href="/admin/marketing/landing-pages"
           className="rounded-lg bg-white px-3 py-2 text-[#5B2A86]"
@@ -45,7 +66,7 @@ export default async function LandingPagePreview({
             slug: page.slug,
             name: page.name,
             pageType: page.pageType,
-            content: page.content as Record<string, unknown>,
+            content: effectiveContent,
           }}
           variants={page.variants.map((item) => ({
             id: item.id,

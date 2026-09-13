@@ -147,27 +147,60 @@ export function collectPersistentAttribution() {
     // Forms and analytics continue without persistent browser storage.
   }
 
-  const effective = lastTouch;
+  const hasLastCampaign = Boolean(
+    lastTouch.utmSource ||
+      lastTouch.utmMedium ||
+      lastTouch.utmCampaign ||
+      lastTouch.gclid ||
+      lastTouch.gbraid ||
+      lastTouch.wbraid ||
+      lastTouch.fbclid ||
+      lastTouch.campaignTrackingKey,
+  );
+
+  const effective = hasLastCampaign
+    ? lastTouch
+    : {
+        ...lastTouch,
+        utmSource: lastTouch.utmSource || firstTouch.utmSource,
+        utmMedium: lastTouch.utmMedium || firstTouch.utmMedium,
+        utmCampaign: lastTouch.utmCampaign || firstTouch.utmCampaign,
+        utmContent: lastTouch.utmContent || firstTouch.utmContent,
+        utmTerm: lastTouch.utmTerm || firstTouch.utmTerm,
+        adGroup: lastTouch.adGroup || firstTouch.adGroup,
+        adSet: lastTouch.adSet || firstTouch.adSet,
+        adId: lastTouch.adId || firstTouch.adId,
+        device: lastTouch.device || firstTouch.device,
+        gclid: lastTouch.gclid || firstTouch.gclid,
+        gbraid: lastTouch.gbraid || firstTouch.gbraid,
+        wbraid: lastTouch.wbraid || firstTouch.wbraid,
+        fbclid: lastTouch.fbclid || firstTouch.fbclid,
+        fbc: lastTouch.fbc || firstTouch.fbc,
+        fbp: lastTouch.fbp || firstTouch.fbp,
+        campaignTrackingKey:
+          lastTouch.campaignTrackingKey || firstTouch.campaignTrackingKey,
+      };
+
   return {
     pageUrl: clean(window.location.href),
     landingPage: effective.landingPage,
     referrer: effective.referrer,
-    utmSource: effective.utmSource || firstTouch.utmSource,
-    utmMedium: effective.utmMedium || firstTouch.utmMedium,
-    utmCampaign: effective.utmCampaign || firstTouch.utmCampaign,
-    utmContent: effective.utmContent || firstTouch.utmContent,
-    utmTerm: effective.utmTerm || firstTouch.utmTerm,
-    adGroup: effective.adGroup || firstTouch.adGroup,
-    adSet: effective.adSet || firstTouch.adSet,
-    adId: effective.adId || firstTouch.adId,
-    device: effective.device || firstTouch.device,
-    gclid: effective.gclid || firstTouch.gclid,
-    gbraid: effective.gbraid || firstTouch.gbraid,
-    wbraid: effective.wbraid || firstTouch.wbraid,
-    fbclid: effective.fbclid || firstTouch.fbclid,
-    fbc: effective.fbc || firstTouch.fbc,
-    fbp: effective.fbp || firstTouch.fbp,
-    campaignTrackingKey: effective.campaignTrackingKey || firstTouch.campaignTrackingKey,
+    utmSource: effective.utmSource,
+    utmMedium: effective.utmMedium,
+    utmCampaign: effective.utmCampaign,
+    utmContent: effective.utmContent,
+    utmTerm: effective.utmTerm,
+    adGroup: effective.adGroup,
+    adSet: effective.adSet,
+    adId: effective.adId,
+    device: effective.device,
+    gclid: effective.gclid,
+    gbraid: effective.gbraid,
+    wbraid: effective.wbraid,
+    fbclid: effective.fbclid,
+    fbc: effective.fbc,
+    fbp: effective.fbp,
+    campaignTrackingKey: effective.campaignTrackingKey,
     firstTouch,
     lastTouch,
   };

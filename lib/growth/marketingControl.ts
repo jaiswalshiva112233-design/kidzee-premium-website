@@ -323,10 +323,17 @@ export async function buildMarketingControlData(
     {} as Record<string, number>,
   );
 
+  const snapshotProvenance = (latest?.dimensions as Record<string, unknown> | null)?.provenance;
+  const sourceStatus = latest
+    ? snapshotProvenance === "AUTOMATED_SYNC"
+      ? ("CONNECTED" as const)
+      : ("MANUAL_ENTRY" as const)
+    : ("AWAITING_DATA" as const);
+
   return {
     channel,
     generatedAt: new Date().toISOString(),
-    sourceStatus: latest ? ("CONNECTED" as const) : ("AWAITING_DATA" as const),
+    sourceStatus,
     latestSnapshotAt: latest?.collectedAt.toISOString() ?? null,
     datasets: snapshots.map((item) => ({
       source: item.source,
@@ -355,11 +362,15 @@ export async function buildMarketingControlData(
       leadToVisit: percent(visitsCompleted, attributed.length),
       visitToAdmission: percent(admissions, visitsCompleted),
       costPerLead:
-        spend > 0 ? Math.round(spend / Math.max(1, attributed.length)) : 0,
+        attributed.length > 0 && spend > 0
+          ? Math.round(spend / attributed.length)
+          : 0,
       costPerAdmission:
-        spend > 0 ? Math.round(spend / Math.max(1, admissions)) : 0,
+        admissions > 0 && spend > 0 ? Math.round(spend / admissions) : 0,
       costPerVisit:
-        spend > 0 ? Math.round(spend / Math.max(1, visitsCompleted)) : 0,
+        visitsCompleted > 0 && spend > 0
+          ? Math.round(spend / visitsCompleted)
+          : 0,
     },
     providerRows: {
       campaigns: campaigns.slice(0, 50),

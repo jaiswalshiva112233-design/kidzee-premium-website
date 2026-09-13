@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { AiModelScope, Prisma } from "@/generated/prisma/client";
+import { type AiModelScope, Prisma } from "@/generated/prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { logServerError, logServerWarning } from "@/lib/server/safeLogging";
@@ -62,21 +62,54 @@ function responseText(value: unknown) {
   return responsesText || response.choices?.[0]?.message?.content?.trim() || "";
 }
 
-async function reserveCall(routeId: string, monthlyLimit: number) {
+async function reserveCall(
+  routeId: string,
+  monthlyLimit: number,
+): Promise<boolean> {
   if (monthlyLimit <= 0) return false;
   const month = new Date().toISOString().slice(0, 7);
   const key = `ai-route-usage-${routeId}-${month}`;
-  return prisma.$transaction(async (transaction) => {
-    const current = await transaction.centreSetting.findUnique({ where: { key } });
-    const currentValue = current?.value;
-    const count = currentValue && typeof currentValue === "object" && !Array.isArray(currentValue) && "count" in currentValue
-      ? Number((currentValue as { count?: unknown }).count) || 0
-      : 0;
-    if (count >= monthlyLimit) return false;
-    const value = { count: count + 1, limit: monthlyLimit, month, routeId };
-    await transaction.centreSetting.upsert({ where: { key }, create: { key, value }, update: { value } });
-    return true;
-  });
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      return await prisma.$transaction(
+        async (transaction) => {
+          const current = await transaction.centreSetting.findUnique({
+            where: { key },
+          });
+          const currentValue = current?.value;
+          const count =
+            currentValue &&
+            typeof currentValue === "object" &&
+            !Array.isArray(currentValue) &&
+            "count" in currentValue
+              ? Number((currentValue as { count?: unknown }).count) || 0
+              : 0;
+          if (count >= monthlyLimit) return false;
+          const value = { count: count + 1, limit: monthlyLimit, month, routeId };
+          await transaction.centreSetting.upsert({
+            where: { key },
+            create: { key, value },
+            update: { value },
+          });
+          return true;
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        },
+      );
+    } catch (err: unknown) {
+      const isSerializationError =
+        err instanceof Error &&
+        (err.message.includes("could not serialize access") ||
+          err.message.includes("P2034"));
+      if (isSerializationError && attempt < 2) {
+        continue;
+      }
+      return false;
+    }
+  }
+  return false;
 }
 
 export async function executeGrowthAi(options: {

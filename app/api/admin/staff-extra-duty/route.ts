@@ -1120,13 +1120,14 @@ export async function PATCH(request: Request) {
     } else if (action === "cancel") {
       if (
         existing.status === "PAID" ||
-        existing.status === "CANCELLED"
+        existing.status === "CANCELLED" ||
+        existing.payrollId != null
       ) {
         return NextResponse.json(
           {
             success: false,
             message:
-              "Paid or already-cancelled duties cannot be cancelled.",
+              "Paid, payroll-linked, or already-cancelled duties cannot be cancelled.",
           },
           { status: 409 },
         );
