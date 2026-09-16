@@ -1168,7 +1168,7 @@ export default function LandingPageExperience({
 
         <a
           href="#ad-enquiry"
-          className="flex flex-1.5 items-center justify-center gap-1 rounded-xl bg-[#5B2A86] py-2.5 text-xs font-extrabold text-white shadow-sm"
+          className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-[#5B2A86] py-2.5 text-xs font-extrabold text-white shadow-sm"
           aria-label="Book Visit"
         >
           <span>Book Visit</span>
