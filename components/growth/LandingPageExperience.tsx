@@ -1145,10 +1145,10 @@ export default function LandingPageExperience({
       </section>
 
       {/* Sticky Mobile Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between gap-2 border-t border-purple-200 bg-white/95 backdrop-blur-md p-2.5 shadow-2xl md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-3 items-center gap-2 border-t border-purple-200 bg-white/95 backdrop-blur-md p-2.5 shadow-2xl md:hidden">
         <a
           href={`tel:${site.phone}`}
-          className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-purple-200 bg-purple-50 py-2.5 text-xs font-bold text-[#5B2A86]"
+          className="flex w-full items-center justify-center gap-1 rounded-xl border border-purple-200 bg-purple-50 py-2.5 text-xs font-bold text-[#5B2A86]"
           aria-label="Call Admissions"
         >
           <Phone size={14} className="shrink-0" />
@@ -1159,7 +1159,7 @@ export default function LandingPageExperience({
           href={site.whatsapp}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-[#1FAF38] py-2.5 text-xs font-bold text-white shadow-xs"
+          className="flex w-full items-center justify-center gap-1 rounded-xl bg-[#1FAF38] py-2.5 text-xs font-bold text-white shadow-xs"
           aria-label="Chat on WhatsApp"
         >
           <FaWhatsapp size={15} className="shrink-0" />
@@ -1168,7 +1168,7 @@ export default function LandingPageExperience({
 
         <a
           href="#ad-enquiry"
-          className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-[#5B2A86] py-2.5 text-xs font-extrabold text-white shadow-sm"
+          className="flex w-full items-center justify-center gap-1 rounded-xl bg-[#5B2A86] py-2.5 text-xs font-bold whitespace-nowrap text-white shadow-sm"
           aria-label="Book Visit"
         >
           <span>Book Visit</span>
