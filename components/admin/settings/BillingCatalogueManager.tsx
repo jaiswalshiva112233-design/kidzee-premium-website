@@ -9,6 +9,7 @@ import {
   Plus,
   Save,
   Tags,
+  Trash2,
   Utensils,
 } from "lucide-react";
 
@@ -40,6 +41,17 @@ type Version = {
   monthlyGstApplicable?: boolean;
   monthlyGstRate?: number | null;
   monthlyPriceType?: PriceType;
+  admissionFeeName?: string;
+  annualFeeName?: string;
+  kitFeeName?: string;
+  customFees?: Array<{
+    id: string;
+    name: string;
+    amount: number;
+    gstApplicable: boolean;
+    gstRate: number | null;
+    priceType: PriceType;
+  }>;
 };
 type Programme = {
   id: string;
@@ -150,8 +162,11 @@ const blankProgramme = {
   capacity: "",
   active: true,
   displayOrder: "0",
+  admissionFeeName: "Admission fee",
   admissionFee: "0",
+  annualFeeName: "Annual fee",
   annualFee: "0",
+  kitFeeName: "Kit fee",
   kitFee: "0",
   combineAnnualAndKit: false,
   monthlyFee: "0",
@@ -167,6 +182,14 @@ const blankProgramme = {
   monthlyGstApplicable: false,
   monthlyGstRate: "",
   monthlyPriceType: "GST_INCLUSIVE" as PriceType,
+  customFees: [] as Array<{
+    id: string;
+    name: string;
+    amount: string;
+    gstApplicable: boolean;
+    gstRate: string;
+    priceType: PriceType;
+  }>,
   effectiveFrom: sessionStartDefault,
 };
 const blankPlan = {
@@ -542,7 +565,7 @@ export default function BillingCatalogueManager() {
           { key: "meals", label: "Meals & combos", value: activeCount.meals },
           {
             key: "charges",
-            label: "Other charges",
+            label: "One-time / Other charges",
             value: activeCount.charges,
           },
           {
@@ -605,8 +628,11 @@ export default function BillingCatalogueManager() {
                 capacity: item.capacity?.toString() ?? "",
                 active: item.status === "ACTIVE",
                 displayOrder: item.displayOrder.toString(),
+                admissionFeeName: version?.admissionFeeName || "Admission fee",
                 admissionFee: String(version?.admissionFee ?? 0),
+                annualFeeName: version?.annualFeeName || "Annual fee",
                 annualFee: String(version?.annualFee ?? 0),
+                kitFeeName: version?.kitFeeName || "Kit fee",
                 kitFee: String(version?.kitFee ?? 0),
                 combineAnnualAndKit: version?.combineAnnualAndKit ?? false,
                 monthlyFee: String(version?.monthlyFee ?? 0),
@@ -630,6 +656,14 @@ export default function BillingCatalogueManager() {
                   version?.gstRate?.toString() ??
                   "",
                 monthlyPriceType: version?.monthlyPriceType ?? "GST_INCLUSIVE",
+                customFees: (Array.isArray(version?.customFees) ? version.customFees : []).map((cf) => ({
+                  id: cf.id || `fee_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+                  name: cf.name || "One-Time Fee",
+                  amount: String(cf.amount ?? 0),
+                  gstApplicable: Boolean(cf.gstApplicable),
+                  gstRate: cf.gstRate?.toString() ?? "",
+                  priceType: cf.priceType ?? "GST_INCLUSIVE",
+                })),
                 effectiveFrom: dateInput(version?.effectiveFrom),
               });
             }}
@@ -705,9 +739,41 @@ export default function BillingCatalogueManager() {
               setProgramme({ ...programme, description: value })
             }
           />
-          <VersionBox title="Fee version">
+          <VersionBox
+            title="Fee version"
+            action={
+              <button
+                type="button"
+                onClick={() => {
+                  setProgramme({
+                    ...programme,
+                    customFees: [
+                      ...programme.customFees,
+                      {
+                        id: `fee_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+                        name: "One-Time Fee",
+                        amount: "0",
+                        gstApplicable: false,
+                        gstRate: "",
+                        priceType: "GST_INCLUSIVE",
+                      },
+                    ],
+                  });
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-[#D8C9DF] bg-white px-3 py-1.5 text-xs font-bold text-[#6A328F] shadow-sm hover:bg-[#F2EAF7] transition-all"
+              >
+                <Plus size={14} />
+                Add One-Time Fee
+              </button>
+            }
+          >
             <ProgrammeCharge
               label="Admission fee"
+              feeName={programme.admissionFeeName}
+              nameEditable
+              onFeeNameChange={(name) =>
+                setProgramme({ ...programme, admissionFeeName: name })
+              }
               amount={programme.admissionFee}
               gstApplicable={programme.admissionGstApplicable}
               gstRate={programme.admissionGstRate}
@@ -724,6 +790,11 @@ export default function BillingCatalogueManager() {
             />
             <ProgrammeCharge
               label="Annual fee"
+              feeName={programme.annualFeeName}
+              nameEditable
+              onFeeNameChange={(name) =>
+                setProgramme({ ...programme, annualFeeName: name })
+              }
               amount={programme.annualFee}
               gstApplicable={programme.annualGstApplicable}
               gstRate={programme.annualGstRate}
@@ -738,6 +809,11 @@ export default function BillingCatalogueManager() {
             />
             <ProgrammeCharge
               label="Kit fee"
+              feeName={programme.kitFeeName}
+              nameEditable
+              onFeeNameChange={(name) =>
+                setProgramme({ ...programme, kitFeeName: name })
+              }
               amount={programme.kitFee}
               gstApplicable={programme.kitGstApplicable}
               gstRate={programme.kitGstRate}
@@ -779,6 +855,44 @@ export default function BillingCatalogueManager() {
                 setProgramme({ ...programme, combineAnnualAndKit: value })
               }
             />
+            {programme.customFees.map((customFee, idx) => (
+              <ProgrammeCharge
+                key={customFee.id || idx}
+                label="Fee name"
+                feeName={customFee.name}
+                nameEditable
+                onFeeNameChange={(name) => {
+                  const updated = [...programme.customFees];
+                  updated[idx] = { ...updated[idx], name };
+                  setProgramme({ ...programme, customFees: updated });
+                }}
+                onRemove={() => {
+                  setProgramme({
+                    ...programme,
+                    customFees: programme.customFees.filter((_, i) => i !== idx),
+                  });
+                }}
+                amount={customFee.amount}
+                gstApplicable={customFee.gstApplicable}
+                gstRate={customFee.gstRate}
+                priceType={customFee.priceType}
+                onChange={(patch) => {
+                  const updated = [...programme.customFees];
+                  updated[idx] = {
+                    ...updated[idx],
+                    ...(patch.amount != null ? { amount: patch.amount } : {}),
+                    ...(patch.gstApplicable != null
+                      ? { gstApplicable: patch.gstApplicable }
+                      : {}),
+                    ...(patch.gstRate != null ? { gstRate: patch.gstRate } : {}),
+                    ...(patch.priceType != null
+                      ? { priceType: patch.priceType }
+                      : {}),
+                  };
+                  setProgramme({ ...programme, customFees: updated });
+                }}
+              />
+            ))}
           </VersionBox>
           <SaveRow
             saving={saving}
@@ -1827,6 +1941,10 @@ function ProgrammeCharge({
   gstApplicable,
   gstRate,
   priceType,
+  nameEditable,
+  feeName,
+  onFeeNameChange,
+  onRemove,
   onChange,
 }: {
   label: string;
@@ -1834,6 +1952,10 @@ function ProgrammeCharge({
   gstApplicable: boolean;
   gstRate: string;
   priceType: PriceType;
+  nameEditable?: boolean;
+  feeName?: string;
+  onFeeNameChange?: (name: string) => void;
+  onRemove?: () => void;
   onChange: (patch: {
     amount?: string;
     gstApplicable?: boolean;
@@ -1843,8 +1965,30 @@ function ProgrammeCharge({
 }) {
   return (
     <div className="space-y-3 rounded-2xl border border-[#E3D6E8] bg-white p-4">
+      {nameEditable ? (
+        <div className="flex items-end gap-2">
+          <div className="flex-1">
+            <Input
+              label="Fee name"
+              value={feeName ?? label}
+              onChange={(value) => onFeeNameChange?.(value)}
+              placeholder="e.g. Admission Fee"
+            />
+          </div>
+          {onRemove ? (
+            <button
+              type="button"
+              onClick={onRemove}
+              className="mb-1 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#E8DCE8] text-[#817684] hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition"
+              title="Remove fee"
+            >
+              <Trash2 size={16} />
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       <Input
-        label={label}
+        label={nameEditable ? "Amount" : label}
         type="number"
         value={amount}
         onChange={(value) => onChange({ amount: value })}
@@ -2037,16 +2181,21 @@ function Toggle({
 }
 function VersionBox({
   title,
+  action,
   children,
 }: {
   title: string;
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div className="rounded-[24px] bg-[#F8F3FA] p-5">
-      <h3 className="mb-4 text-sm font-black uppercase tracking-[0.14em] text-[#6A328F]">
-        {title}
-      </h3>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h3 className="text-sm font-black uppercase tracking-[0.14em] text-[#6A328F]">
+          {title}
+        </h3>
+        {action}
+      </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">{children}</div>
     </div>
   );

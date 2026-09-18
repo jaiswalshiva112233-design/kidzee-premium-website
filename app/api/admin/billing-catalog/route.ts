@@ -728,6 +728,19 @@ export async function POST(request: Request) {
       const annualTax = gstConfiguration(body, "annual");
       const kitTax = gstConfiguration(body, "kit");
       const monthlyTax = gstConfiguration(body, "monthly");
+      const admissionFeeName = text(body.admissionFeeName, 120) || "Admission fee";
+      const annualFeeName = text(body.annualFeeName, 120) || "Annual fee";
+      const kitFeeName = text(body.kitFeeName, 120) || "Kit fee";
+      const customFees = Array.isArray(body.customFees)
+        ? body.customFees.map((feeItem: any) => ({
+            id: text(feeItem.id, 60) || `fee_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+            name: text(feeItem.name, 120) || "One-Time Fee",
+            amount: Math.max(0, numberValue(feeItem.amount) || 0),
+            gstApplicable: booleanValue(feeItem.gstApplicable),
+            gstRate: booleanValue(feeItem.gstApplicable) ? numberValue(feeItem.gstRate) || 0 : null,
+            priceType: feeItem.priceType === "GST_EXCLUSIVE" ? "GST_EXCLUSIVE" : "GST_INCLUSIVE",
+          }))
+        : [];
 
       if (
         !name ||
@@ -755,6 +768,10 @@ export async function POST(request: Request) {
         kitFee,
         combineAnnualAndKit,
         monthlyFee,
+        admissionFeeName,
+        annualFeeName,
+        kitFeeName,
+        customFees,
         gstApplicable: monthlyTax.applicable,
         gstRate: monthlyTax.applicable ? monthlyTax.rate : null,
         admissionGstApplicable: admissionTax.applicable,

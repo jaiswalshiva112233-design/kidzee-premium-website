@@ -341,9 +341,36 @@ export async function createEnrollmentContractAndDraftInvoice(
   };
   if (programme && fee) {
     addProgrammeLine("PRESCHOOL", "MONTHLY_PRESCHOOL_FEE", `${programme.name} monthly fee`, Number(fee.monthlyFee), "monthly", true);
-    if (selection.includeAdmissionFee) addProgrammeLine("ADMISSION", "ADMISSION_FEE", `${programme.name} admission fee`, Number(fee.admissionFee), "admission", false);
-    if (selection.includeAnnualFee) addProgrammeLine("ANNUAL", "ANNUAL_FEE", `${programme.name} annual fee`, Number(fee.annualFee), "annual", false);
-    if (selection.includeKitFee) addProgrammeLine("KIT", "KIT_FEE", `${programme.name} kit fee`, Number(fee.kitFee), "kit", false);
+    if (selection.includeAdmissionFee) addProgrammeLine("ADMISSION", "ADMISSION_FEE", fee.admissionFeeName || `${programme.name} admission fee`, Number(fee.admissionFee), "admission", false);
+    if (selection.includeAnnualFee) addProgrammeLine("ANNUAL", "ANNUAL_FEE", fee.annualFeeName || `${programme.name} annual fee`, Number(fee.annualFee), "annual", false);
+    if (selection.includeKitFee) addProgrammeLine("KIT", "KIT_FEE", fee.kitFeeName || `${programme.name} kit fee`, Number(fee.kitFee), "kit", false);
+
+    if (Array.isArray(fee.customFees)) {
+      for (const customFee of fee.customFees as Array<{ id?: string; name?: string; amount?: number; gstApplicable?: boolean; gstRate?: number; priceType?: string }>) {
+        if (customFee && customFee.name && Number(customFee.amount) > 0) {
+          const isGst = Boolean(customFee.gstApplicable);
+          lines.push({
+            serviceType: "OTHER",
+            category: "OTHER",
+            catalogueItemType: "PROGRAMME",
+            catalogueItemId: programme.id,
+            label: customFee.name,
+            detail: selection.academicSession,
+            amount: Number(customFee.amount),
+            discount: 0,
+            gstApplicable: isGst,
+            gstRate: isGst ? Number(customFee.gstRate ?? 0) : 0,
+            priceType: customFee.priceType === "GST_EXCLUSIVE" ? "GST_EXCLUSIVE" : "GST_INCLUSIVE",
+            recurring: false,
+            frequency: "ONE_TIME",
+            effectiveFrom: referenceDate,
+            effectiveTo: null,
+            sourceVersionId: fee.id,
+            metadata: { academicSession: selection.academicSession, customFeeId: customFee.id },
+          });
+        }
+      }
+    }
   }
   if (selection.annualKitSkipReason && !selection.includeAnnualFee && !selection.includeKitFee) {
     lines.push({

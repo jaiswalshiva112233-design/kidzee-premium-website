@@ -130,6 +130,17 @@ type AddStudentFormProps = {
       kitGstApplicable: boolean;
       kitGstRate: number;
       kitPriceType: "GST_INCLUSIVE" | "GST_EXCLUSIVE";
+      admissionFeeName?: string | null;
+      annualFeeName?: string | null;
+      kitFeeName?: string | null;
+      customFees?: Array<{
+        id: string;
+        name: string;
+        amount: number;
+        gstApplicable: boolean;
+        gstRate: number | null;
+        priceType: "GST_INCLUSIVE" | "GST_EXCLUSIVE";
+      }> | null;
     } | null;
   }>;
   daycarePlans?: Array<{
@@ -525,9 +536,25 @@ export default function AddStudentForm({
     const rows: Array<{ label: string; total: number; recurring: boolean }> = [];
     if (fee) {
       if (fee.monthlyFee > 0) rows.push({ label: `${selectedProgramme?.name ?? "Preschool"} monthly fee`, total: configuredTotal({ amount: fee.monthlyFee, gstApplicable: fee.monthlyGstApplicable, gstRate: fee.monthlyGstRate, priceType: fee.monthlyPriceType }), recurring: true });
-      if (formData.includeAdmissionFee && fee.admissionFee > 0) rows.push({ label: "Admission fee", total: configuredTotal({ amount: fee.admissionFee, gstApplicable: fee.admissionGstApplicable, gstRate: fee.admissionGstRate, priceType: fee.admissionPriceType }), recurring: false });
-      if (formData.includeAnnualFee && fee.annualFee > 0) rows.push({ label: "Annual fee", total: configuredTotal({ amount: fee.annualFee, gstApplicable: fee.annualGstApplicable, gstRate: fee.annualGstRate, priceType: fee.annualPriceType }), recurring: false });
-      if (formData.includeKitFee && fee.kitFee > 0) rows.push({ label: "Kit fee", total: configuredTotal({ amount: fee.kitFee, gstApplicable: fee.kitGstApplicable, gstRate: fee.kitGstRate, priceType: fee.kitPriceType }), recurring: false });
+      if (formData.includeAdmissionFee && fee.admissionFee > 0) rows.push({ label: fee.admissionFeeName || "Admission fee", total: configuredTotal({ amount: fee.admissionFee, gstApplicable: fee.admissionGstApplicable, gstRate: fee.admissionGstRate, priceType: fee.admissionPriceType }), recurring: false });
+      if (formData.includeAnnualFee && fee.annualFee > 0) rows.push({ label: fee.annualFeeName || "Annual fee", total: configuredTotal({ amount: fee.annualFee, gstApplicable: fee.annualGstApplicable, gstRate: fee.annualGstRate, priceType: fee.annualPriceType }), recurring: false });
+      if (formData.includeKitFee && fee.kitFee > 0) rows.push({ label: fee.kitFeeName || "Kit fee", total: configuredTotal({ amount: fee.kitFee, gstApplicable: fee.kitGstApplicable, gstRate: fee.kitGstRate, priceType: fee.kitPriceType }), recurring: false });
+      if (Array.isArray(fee.customFees)) {
+        for (const cf of fee.customFees) {
+          if (cf.amount > 0) {
+            rows.push({
+              label: cf.name || "One-Time Fee",
+              total: configuredTotal({
+                amount: cf.amount,
+                gstApplicable: cf.gstApplicable,
+                gstRate: cf.gstRate ?? 0,
+                priceType: cf.priceType,
+              }),
+              recurring: false,
+            });
+          }
+        }
+      }
     }
     for (const plan of selectedDaycarePlans) rows.push({ label: plan.name, total: configuredTotal(plan), recurring: plan.recurring });
     if (selectedMeal) rows.push({ label: selectedMeal.name, total: configuredTotal(selectedMeal), recurring: true });
@@ -1533,16 +1560,22 @@ export default function AddStudentForm({
               <div className="rounded-[24px] border border-[#E4D9E9] bg-[#FAF8FC] p-5">
                 <p className="text-sm font-black text-[#2D1736]">Programme charges</p>
                 {([[
-                  "includeAdmissionFee", "Admission fee", selectedProgramme?.feeVersion?.admissionFee ?? 0,
+                  "includeAdmissionFee", selectedProgramme?.feeVersion?.admissionFeeName || "Admission fee", selectedProgramme?.feeVersion?.admissionFee ?? 0,
                 ], [
-                  "includeAnnualFee", "Annual fee", selectedProgramme?.feeVersion?.annualFee ?? 0,
+                  "includeAnnualFee", selectedProgramme?.feeVersion?.annualFeeName || "Annual fee", selectedProgramme?.feeVersion?.annualFee ?? 0,
                 ], [
-                  "includeKitFee", "Kit fee", selectedProgramme?.feeVersion?.kitFee ?? 0,
+                  "includeKitFee", selectedProgramme?.feeVersion?.kitFeeName || "Kit fee", selectedProgramme?.feeVersion?.kitFee ?? 0,
                 ]] as const).map(([field, label, amount]) => (
                   <label key={field} className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-[#E6DDEB] bg-white p-4">
                     <span className="flex items-center gap-3 text-sm font-black text-[#2D1736]"><input type="checkbox" checked={formData[field]} disabled={submitting || !formData.preschoolEnabled || amount <= 0} onChange={(event) => updateField(field, event.target.checked)} className="h-5 w-5 accent-[#5B2A86]" />{label}</span>
                     <span className="text-sm font-black text-[#5B2A86]">{formatMoney(amount)}</span>
                   </label>
+                ))}
+                {Array.isArray(selectedProgramme?.feeVersion?.customFees) && selectedProgramme.feeVersion.customFees.map((cf) => (
+                  <div key={cf.id} className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-[#E6DDEB] bg-white p-4">
+                    <span className="text-sm font-black text-[#2D1736]">{cf.name || "One-Time Fee"}</span>
+                    <span className="text-sm font-black text-[#5B2A86]">{formatMoney(cf.amount)}</span>
+                  </div>
                 ))}
                 {!formData.includeAnnualFee && !formData.includeKitFee && formData.preschoolEnabled ? (
                   <label className="mt-4 block"><span className="text-sm font-black text-[#35243E]">Reason for skipping Annual / Kit *</span><textarea value={formData.annualKitSkipReason} disabled={submitting} rows={3} onChange={(event) => updateField("annualKitSkipReason", event.target.value)} placeholder="Already purchased, transfer case, approved waiver…" className={textareaClassName} /></label>

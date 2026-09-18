@@ -1214,6 +1214,10 @@ model ProgrammeFeeVersion {
   monthlyGstApplicable   Boolean   @default(false)
   monthlyGstRate         Decimal?  @db.Decimal(5, 2)
   monthlyPriceType       PriceType @default(GST_INCLUSIVE)
+  admissionFeeName       String?   @default("Admission fee")
+  annualFeeName          String?   @default("Annual fee")
+  kitFeeName             String?   @default("Kit fee")
+  customFees             Json?     @default("[]")
   effectiveFrom          DateTime
   effectiveTo            DateTime?
   active                 Boolean   @default(true)
