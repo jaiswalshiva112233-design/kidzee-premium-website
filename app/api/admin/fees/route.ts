@@ -2800,6 +2800,7 @@ export async function POST(
             invoiceCgstAmount: Number(invoice.cgstAmount),
             invoiceSgstAmount: Number(invoice.sgstAmount),
             invoiceLateFeeAmount: Number(invoice.lateFeeAmount),
+            invoiceDiscountAmount: Number(invoice.discountAmount),
             allocatedCgstAmount: activePayments.reduce(
               (sum, payment) => sum + Number(payment.cgstAmount),
               0,
@@ -2810,6 +2811,10 @@ export async function POST(
             ),
             allocatedLateFeeAmount: activePayments.reduce(
               (sum, payment) => sum + Number(payment.lateFeeAmount),
+              0,
+            ),
+            allocatedDiscountAmount: activePayments.reduce(
+              (sum, payment) => sum + Number(payment.discountAmount),
               0,
             ),
           });
@@ -2965,10 +2970,14 @@ export async function POST(
                     updatedInvoice.feePeriodLabel.replace(/^Admission contract\s*·\s*/i, "").trim(),
 
                   amountBeforeTax:
-                    paymentSnapshot.totalAmount,
+                    roundMoney(
+                      Number(paymentSnapshot.totalAmount) +
+                        Number(paymentSnapshot.discountAmount) -
+                        Number(paymentSnapshot.lateFeeAmount),
+                    ),
 
                   discountAmount:
-                    0,
+                    paymentSnapshot.discountAmount,
 
                   lateFeeAmount:
                     paymentSnapshot.lateFeeAmount,

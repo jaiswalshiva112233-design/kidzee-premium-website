@@ -11,6 +11,8 @@ type PaymentAllocationInput = {
   allocatedCgstAmount: number;
   allocatedSgstAmount: number;
   allocatedLateFeeAmount: number;
+  invoiceDiscountAmount?: number;
+  allocatedDiscountAmount?: number;
 };
 
 /**
@@ -46,6 +48,10 @@ export function allocatePaymentSnapshot(input: PaymentAllocationInput) {
     input.invoiceLateFeeAmount,
     input.allocatedLateFeeAmount,
   );
+  const discountAmount = allocateRemaining(
+    input.invoiceDiscountAmount ?? 0,
+    input.allocatedDiscountAmount ?? 0,
+  );
   const taxableAmount = roundMoney(
     Math.max(amountReceived - cgstAmount - sgstAmount, 0),
   );
@@ -56,5 +62,6 @@ export function allocatePaymentSnapshot(input: PaymentAllocationInput) {
     cgstAmount,
     sgstAmount,
     lateFeeAmount,
+    discountAmount,
   };
 }

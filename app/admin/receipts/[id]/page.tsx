@@ -1443,16 +1443,14 @@ export default async function ReceiptDetailsPage({
       ?.items ?? [];
 
   const discountAmount =
-    Number(
-      receipt.payment
-        .discountAmount,
-    );
+    Number(receipt.payment.discountAmount) > 0
+      ? Number(receipt.payment.discountAmount)
+      : Number(receipt.payment.invoice?.discountAmount ?? 0);
 
   const lateFeeAmount =
-    Number(
-      receipt.payment
-        .lateFeeAmount,
-    );
+    Number(receipt.payment.lateFeeAmount) > 0
+      ? Number(receipt.payment.lateFeeAmount)
+      : Number(receipt.payment.invoice?.lateFeeAmount ?? 0);
 
   const totalAmount =
     Number(

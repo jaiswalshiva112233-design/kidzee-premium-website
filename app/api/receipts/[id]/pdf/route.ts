@@ -329,36 +329,87 @@ async function pdfBuffer(
   // 7. Fee Breakdown Section
   const feeTop = 264;
   const invoiceItems = receipt.payment.invoice?.items ?? [];
-  doc.roundedRect(36, feeTop, 523, 76, 6).lineWidth(0.6).strokeColor("#D0C6D8").stroke();
-  doc.rect(36, feeTop, 523, 18).fillColor("#F5EEF8").fill();
+  const discountAmount =
+    Number(receipt.payment.discountAmount) > 0
+      ? Number(receipt.payment.discountAmount)
+      : Number(receipt.payment.invoice?.discountAmount ?? 0);
+  const lateFeeAmount =
+    Number(receipt.payment.lateFeeAmount) > 0
+      ? Number(receipt.payment.lateFeeAmount)
+      : Number(receipt.payment.invoice?.lateFeeAmount ?? 0);
+
+  type BreakdownRow = {
+    title: string;
+    amount: string;
+    color?: string;
+    isBold?: boolean;
+  };
+  const breakdownRows: BreakdownRow[] = [];
+
+  if (invoiceItems.length > 0) {
+    for (const item of invoiceItems.slice(0, 4)) {
+      breakdownRows.push({
+        title: `${item.title}${item.gstApplicable ? " (GST inclusive)" : ""}`,
+        amount: money(item.totalAmount),
+      });
+    }
+  } else {
+    breakdownRows.push({
+      title: `Fee Payment (${className}) (GST inclusive)`,
+      amount: money(receipt.payment.amountBeforeTax || totalAmount),
+    });
+  }
+
+  if (discountAmount > 0) {
+    breakdownRows.push({
+      title: "Discount applied",
+      amount: `- ${money(discountAmount)}`,
+      color: "#047857",
+      isBold: true,
+    });
+  }
+
+  if (lateFeeAmount > 0) {
+    breakdownRows.push({
+      title: "Late fee",
+      amount: `+ ${money(lateFeeAmount)}`,
+      color: "#B45309",
+      isBold: true,
+    });
+  }
+
+  const rowHeight = 12;
+  const headerHeight = 18;
+  const totalRowHeight = 14;
+  const noteHeight = 12;
+  const feeHeight = Math.max(headerHeight + breakdownRows.length * rowHeight + totalRowHeight + noteHeight + 6, 76);
+
+  doc.roundedRect(36, feeTop, 523, feeHeight, 6).lineWidth(0.6).strokeColor("#D0C6D8").stroke();
+  doc.rect(36, feeTop, 523, headerHeight).fillColor("#F5EEF8").fill();
   doc.fontSize(7.8).font("Helvetica-Bold").fillColor(purpleDark)
      .text("Fee Particulars", 46, feeTop + 5)
      .text("Amount", 480, feeTop + 5, { align: "right", width: 65 });
 
-  let curY = feeTop + 23;
-  if (invoiceItems.length > 0) {
-    for (const item of invoiceItems.slice(0, 2)) {
-      doc.fontSize(7.5).font("Helvetica").fillColor("#2C1F3A")
-         .text(`${item.title}${item.gstApplicable ? " (GST inclusive)" : ""}`, 46, curY, { width: 400 })
-         .font("Helvetica-Bold").text(money(item.totalAmount), 480, curY, { align: "right", width: 65 });
-      curY += 12;
-    }
-  } else {
-    doc.fontSize(7.5).font("Helvetica").fillColor("#2C1F3A")
-       .text(`Fee Payment (${className}) (GST inclusive)`, 46, curY, { width: 400 })
-       .font("Helvetica-Bold").text(money(totalAmount), 480, curY, { align: "right", width: 65 });
+  let curY = feeTop + 22;
+  for (const r of breakdownRows) {
+    doc.fontSize(7.5).font(r.isBold ? "Helvetica-Bold" : "Helvetica").fillColor(r.color ?? "#2C1F3A")
+       .text(r.title, 46, curY, { width: 400 })
+       .font("Helvetica-Bold").text(r.amount, 480, curY, { align: "right", width: 65 });
+    curY += rowHeight;
   }
 
-  doc.moveTo(36, feeTop + 48).lineTo(559, feeTop + 48).lineWidth(0.5).strokeColor("#E0D8E6").stroke();
+  const dividerY = curY + 2;
+  doc.moveTo(36, dividerY).lineTo(559, dividerY).lineWidth(0.5).strokeColor("#E0D8E6").stroke();
+  const totalY = dividerY + 4;
   doc.fontSize(7.5).font("Helvetica-Bold").fillColor(purpleDark)
-     .text("Total Payable", 46, feeTop + 52)
-     .text(money(totalAmount), 480, feeTop + 52, { align: "right", width: 65 });
+     .text("Total Payable", 46, totalY)
+     .text(money(totalAmount), 480, totalY, { align: "right", width: 65 });
 
   doc.fontSize(6.5).font("Helvetica-Oblique").fillColor("#6A5D75")
-     .text("Inclusive of GST. The amounts above are the final parent-facing amounts.", 46, feeTop + 64);
+     .text("Inclusive of GST. The amounts above are the final parent-facing amounts.", 46, totalY + 12);
 
   // 8. Total Amount Received Bar
-  const totTop = 348;
+  const totTop = feeTop + feeHeight + 8;
   doc.save();
   doc.roundedRect(36, totTop, 523, 34, 6).fillColor("#EBE4F0").strokeColor(boxBorder).lineWidth(0.8).fillAndStroke();
   doc.fontSize(8.5).font("Helvetica-Bold").fillColor(purpleDark)
@@ -369,7 +420,7 @@ async function pdfBuffer(
   doc.restore();
 
   // 9. Payment Mode & Received By Row
-  const payTop = 390;
+  const payTop = totTop + 34 + 8;
   const payHeight = 64;
   doc.roundedRect(36, payTop, 523, payHeight, 6).lineWidth(0.8).strokeColor(boxBorder).stroke();
   doc.moveTo(335, payTop).lineTo(335, payTop + payHeight).lineWidth(0.6).strokeColor("#C5BED0").stroke();
@@ -407,7 +458,7 @@ async function pdfBuffer(
   doc.fontSize(7.5).font("Helvetica-Oblique").fillColor("#5B2A86").text("Authorised Signature", 345, payTop + 52, { align: "right", width: 200 });
 
   // 10. Terms & Conditions
-  const termsTop = 462;
+  const termsTop = payTop + payHeight + 8;
   doc.save();
   doc.roundedRect(36, termsTop, 523, 86, 6).fillColor("#FAFAFC").strokeColor("#D8D0DF").lineWidth(0.6).fillAndStroke();
   doc.fontSize(7.8).font("Helvetica-Bold").fillColor("#5B2A86").text("TERMS & CONDITIONS", 44, termsTop + 6);
