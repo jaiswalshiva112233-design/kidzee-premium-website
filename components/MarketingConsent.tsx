@@ -489,6 +489,24 @@ export default function MarketingConsent({
         enquiryNumber?: string;
       }>;
 
+      if (customEvent.detail?.eventType === "WHATSAPP_CLICK") {
+        if (
+          googleAdsAvailable &&
+          window.gtag &&
+          !recordedConversions.current.has("whatsapp_click_session")
+        ) {
+          recordedConversions.current.add("whatsapp_click_session");
+          const whatsAppLabel =
+            settings.googleAdsWhatsAppConversionLabel || "KFirCLj2lYAdEKD97PpC";
+          window.gtag("event", "conversion", {
+            send_to: `${settings.googleAdsId}/${whatsAppLabel}`,
+            value: 1.0,
+            currency: "INR",
+          });
+        }
+        return;
+      }
+
       const enquiryNumber = customEvent.detail?.enquiryNumber?.trim() ?? "";
       const eventName = customEvent.detail?.eventName?.trim().toLowerCase() ?? "";
       if (
@@ -568,6 +586,7 @@ export default function MarketingConsent({
     metaAvailable,
     settings.googleAdsConversionLabel,
     settings.googleAdsId,
+    settings.googleAdsWhatsAppConversionLabel,
     staffExcluded,
   ]);
 

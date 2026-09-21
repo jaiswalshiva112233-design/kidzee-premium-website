@@ -483,6 +483,17 @@ export default function LandingPageExperience({
                 href={site.whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => {
+                  window.dispatchEvent(
+                    new CustomEvent("kidzee:website-event", {
+                      detail: {
+                        eventType: "WHATSAPP_CLICK",
+                        eventName: "landing_hero_whatsapp_click",
+                        targetUrl: site.whatsapp,
+                      },
+                    }),
+                  );
+                }}
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1FAF38] py-3.5 px-3 text-xs sm:text-sm font-bold text-white shadow-sm transition duration-150 hover:bg-[#19922F] hover:shadow-md text-center"
               >
                 <FaWhatsapp size={18} className="shrink-0" />
@@ -1159,6 +1170,17 @@ export default function LandingPageExperience({
           href={site.whatsapp}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => {
+            window.dispatchEvent(
+              new CustomEvent("kidzee:website-event", {
+                detail: {
+                  eventType: "WHATSAPP_CLICK",
+                  eventName: "landing_mobile_sticky_whatsapp_click",
+                  targetUrl: site.whatsapp,
+                },
+              }),
+            );
+          }}
           className="flex w-full items-center justify-center gap-1 rounded-xl bg-[#1FAF38] py-2.5 text-xs font-bold text-white shadow-xs"
           aria-label="Chat on WhatsApp"
         >

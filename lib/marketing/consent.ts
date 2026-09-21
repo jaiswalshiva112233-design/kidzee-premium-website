@@ -5,6 +5,7 @@ export type MarketingSettings = {
   googleAdsConversionLabel: string;
   googleAdsPhoneConversionLabel: string;
   googleAdsPhoneConversionNumber: string;
+  googleAdsWhatsAppConversionLabel?: string;
   metaPixelId: string;
   analyticsEnabled: boolean;
   advertisingEnabled: boolean;

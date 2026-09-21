@@ -104,10 +104,13 @@ env:
     value: Fc3TCOPwkaEcEKD97PpC
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_GOOGLE_ADS_PHONE_LABEL
-    value: qZFtCLTfkaEcEKD97PpC
+    value: RBqBCLX2lYAdEKD97PpC
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_GOOGLE_ADS_PHONE_NUMBER
-    value: "09667038673"
+    value: "+91 96670 38673"
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_GOOGLE_ADS_WHATSAPP_LABEL
+    value: KFirCLj2lYAdEKD97PpC
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_META_PIXEL_ID
     value: "1677317359571765"

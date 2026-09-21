@@ -11,6 +11,7 @@ export type PublicWebsiteTrackingSettings = {
   googleAdsConversionLabel: string;
   googleAdsPhoneConversionLabel: string;
   googleAdsPhoneConversionNumber: string;
+  googleAdsWhatsAppConversionLabel: string;
   metaPixelId: string;
   googleSearchConsoleVerification: string;
   bingWebmasterVerification: string;
@@ -30,6 +31,7 @@ export const emptyWebsiteTrackingSettings: PublicWebsiteTrackingSettings = {
   googleAdsConversionLabel: "",
   googleAdsPhoneConversionLabel: "",
   googleAdsPhoneConversionNumber: "",
+  googleAdsWhatsAppConversionLabel: "",
   metaPixelId: "",
   googleSearchConsoleVerification: "",
   bingWebmasterVerification: "",
@@ -82,14 +84,19 @@ function prepareSettings(
     100,
   );
   const googleAdsPhoneConversionLabel = validatedValue(
-    source.googleAdsPhoneConversionLabel || process.env.NEXT_PUBLIC_GOOGLE_ADS_PHONE_LABEL || "qZFtCLTfkaEcEKD97PpC",
+    source.googleAdsPhoneConversionLabel || process.env.NEXT_PUBLIC_GOOGLE_ADS_PHONE_LABEL || "RBqBCLX2lYAdEKD97PpC",
     /^[A-Za-z0-9_-]{1,100}$/,
     100,
   );
   const googleAdsPhoneConversionNumber = validatedValue(
-    source.googleAdsPhoneConversionNumber || process.env.NEXT_PUBLIC_GOOGLE_ADS_PHONE_NUMBER || "09667038673",
+    source.googleAdsPhoneConversionNumber || process.env.NEXT_PUBLIC_GOOGLE_ADS_PHONE_NUMBER || "+91 96670 38673",
     /^[+0-9][0-9 +()-]{5,29}$/,
     30,
+  );
+  const googleAdsWhatsAppConversionLabel = validatedValue(
+    source.googleAdsWhatsAppConversionLabel || process.env.NEXT_PUBLIC_GOOGLE_ADS_WHATSAPP_LABEL || "KFirCLj2lYAdEKD97PpC",
+    /^[A-Za-z0-9_-]{1,100}$/,
+    100,
   );
   const metaPixelId = validatedValue(
     source.metaPixelId || process.env.NEXT_PUBLIC_META_PIXEL_ID,
@@ -114,6 +121,7 @@ function prepareSettings(
     googleAdsConversionLabel,
     googleAdsPhoneConversionLabel,
     googleAdsPhoneConversionNumber,
+    googleAdsWhatsAppConversionLabel,
     metaPixelId,
     googleSearchConsoleVerification,
     bingWebmasterVerification,
@@ -141,6 +149,7 @@ async function loadWebsiteTrackingSettings(): Promise<PublicWebsiteTrackingSetti
           googleAdsConversionLabel,
           googleAdsPhoneConversionLabel,
           googleAdsPhoneConversionNumber,
+          googleAdsWhatsAppConversionLabel,
           metaPixelId,
           googleSearchConsoleVerification,
           bingWebmasterVerification,
