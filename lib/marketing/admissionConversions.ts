@@ -90,7 +90,16 @@ function eligibleForEvent(
 ) {
   if (eventType === "LEAD") return true;
   if (eventType === "QUALIFIED_LEAD") {
-    return status === "QUALIFIED" || status === "ADMITTED";
+    return (
+      status === "QUALIFIED" ||
+      status === "VISIT_BOOKED" ||
+      status === "VISIT_SCHEDULED" ||
+      status === "VISIT_COMPLETED" ||
+      status === "TRIAL_SCHEDULED" ||
+      status === "TRIAL_COMPLETED" ||
+      status === "INTERESTED" ||
+      status === "ADMITTED"
+    );
   }
   return status === "ADMITTED";
 }
@@ -109,10 +118,15 @@ export async function enqueueMarketingConversions(
       parentName: true,
       phone: true,
       email: true,
+      source: true,
       status: true,
       createdAt: true,
       qualifiedAt: true,
       admittedAt: true,
+      latestGclid: true,
+      latestGbraid: true,
+      latestWbraid: true,
+      latestLandingPage: true,
       websiteSubmissions: {
         where: {
           marketingConsent: true,
@@ -157,15 +171,20 @@ export async function enqueueMarketingConversions(
   const conversionTime = eventTime(eventType, enquiry).toISOString();
   const jobs: Array<Promise<unknown>> = [];
 
-  if (googleSubmission) {
+  const isGoogle =
+    Boolean(googleSubmission) ||
+    enquiry.source === "GOOGLE_ADS" ||
+    Boolean(enquiry.latestGclid || enquiry.latestGbraid || enquiry.latestWbraid);
+
+  if (isGoogle) {
     const deduplicationKey = `GOOGLE_ADS:${eventType}:${enquiry.enquiryNumber}`;
     const payload = jsonPayload({
       enquiryNumber: enquiry.enquiryNumber,
       conversionTime,
-      pageUrl: googleSubmission.pageUrl,
-      gclid: googleSubmission.gclid,
-      gbraid: googleSubmission.gbraid,
-      wbraid: googleSubmission.wbraid,
+      pageUrl: googleSubmission?.pageUrl ?? enquiry.latestLandingPage ?? null,
+      gclid: googleSubmission?.gclid ?? enquiry.latestGclid ?? null,
+      gbraid: googleSubmission?.gbraid ?? enquiry.latestGbraid ?? null,
+      wbraid: googleSubmission?.wbraid ?? enquiry.latestWbraid ?? null,
       phone: enquiry.phone,
       parentName: enquiry.parentName,
       email: enquiry.email,
@@ -616,3 +635,12 @@ export async function deliverMarketingConversions(
 export function deliverAdmissionConversions(enquiryId: string) {
   return deliverMarketingConversions(enquiryId, "ADMISSION");
 }
+
+export function deliverQualifiedLeadConversions(enquiryId: string) {
+  return deliverMarketingConversions(enquiryId, "QUALIFIED_LEAD");
+}
+
+export function deliverLeadConversions(enquiryId: string) {
+  return deliverMarketingConversions(enquiryId, "LEAD");
+}
+

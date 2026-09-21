@@ -684,7 +684,12 @@ export async function PATCH(
         },
       );
 
-      if (status === "QUALIFIED") {
+      if (
+        status === "QUALIFIED" ||
+        status === "VISIT_BOOKED" ||
+        status === "VISIT_SCHEDULED" ||
+        status === "VISIT_COMPLETED"
+      ) {
         await enqueueQualifiedLeadConversions(id);
         await processAdmissionConversionQueue({ enquiryId: id, limit: 4 });
       }

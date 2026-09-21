@@ -1,11 +1,12 @@
 import type { $Enums, Prisma } from "@/generated/prisma/client";
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { createAdminNotification } from "@/lib/admin/notifications";
 import { classifyWebsiteRequest } from "@/lib/marketing/internalTraffic";
 import {
   enqueueLeadConversions,
+  processAdmissionConversionQueue,
 } from "@/lib/marketing/admissionConversions";
 import {
   consumeDistributedRateLimit,
@@ -1203,6 +1204,22 @@ export async function POST(request: NextRequest) {
         };
       },
     );
+
+    if (result.enquiryId) {
+      after(async () => {
+        try {
+          await processAdmissionConversionQueue({
+            enquiryId: result.enquiryId,
+            limit: 2,
+          });
+        } catch (queueError) {
+          logServerError(
+            "Website lead conversion queue delivery failed.",
+            queueError,
+          );
+        }
+      });
+    }
 
     return noStoreJson(
       {

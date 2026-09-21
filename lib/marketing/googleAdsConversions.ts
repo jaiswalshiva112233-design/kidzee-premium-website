@@ -96,10 +96,92 @@ async function accessToken(config: NonNullable<ReturnType<typeof configuration>>
   return payload.access_token;
 }
 
+const GOOGLE_ADS_SHEET_WEBHOOK_URL =
+  process.env.GOOGLE_ADS_SHEET_WEBHOOK_URL?.trim() ||
+  "https://script.google.com/macros/s/AKfycbyKDJmIadPkbDG7RbVzjESQlRShwIVPrP0kS9BfHQP2TPH27h62DQG4N3LU2fuolBqnEQ/exec";
+
+function formatISTDateTime(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "00";
+  return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}:${get("second")}`;
+}
+
+function formatE164Phone(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) return `+91${digits}`;
+  if (digits.length === 12 && digits.startsWith("91")) return `+${digits}`;
+  return phone.startsWith("+") ? phone : digits.length > 0 ? `+${digits}` : "";
+}
+
+async function sendViaGoogleSheetWebhook(
+  eventType: "LEAD" | "QUALIFIED_LEAD" | "ADMISSION",
+  event: GoogleConversionEvent,
+) {
+  const webhookUrl =
+    process.env.GOOGLE_ADS_SHEET_WEBHOOK_URL?.trim() || GOOGLE_ADS_SHEET_WEBHOOK_URL;
+  if (!webhookUrl) return null;
+
+  const conversionName =
+    eventType === "LEAD"
+      ? "Submit lead form Website"
+      : eventType === "QUALIFIED_LEAD"
+        ? "Qualified lead"
+        : "Admissions";
+
+  const payload = {
+    gclid: event.gclid || "",
+    conversionName,
+    conversionTime: formatISTDateTime(event.conversionTime),
+    conversionValue: 1,
+    conversionCurrency: "INR",
+    phone: formatE164Phone(event.phone),
+  };
+
+  const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    redirect: "follow",
+    signal: AbortSignal.timeout(12_000),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Google Sheet Webhook returned HTTP ${response.status}`);
+  }
+
+  const data = (await response.json().catch(() => ({ status: "unknown" }))) as {
+    status?: string;
+    message?: string;
+  };
+  if (data.status === "error") {
+    throw new Error(`Google Sheet Webhook error: ${data.message}`);
+  }
+
+  return { sent: true, reason: null };
+}
+
 export async function sendGoogleConversion(
   eventType: "LEAD" | "QUALIFIED_LEAD" | "ADMISSION",
   event: GoogleConversionEvent,
 ) {
+  try {
+    const webhookResult = await sendViaGoogleSheetWebhook(eventType, event);
+    if (webhookResult?.sent) {
+      return webhookResult;
+    }
+  } catch (webhookError) {
+    logServerError("Google Sheet conversion webhook delivery failed.", webhookError);
+  }
+
   const config = configuration(eventType);
 
   if (!config) return { sent: false, reason: "not_configured" as const };

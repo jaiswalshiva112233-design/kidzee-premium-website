@@ -240,7 +240,13 @@ export async function POST(request: Request, context: RouteContext) {
           },
         });
       });
-      if (status === "QUALIFIED") {
+      if (
+        status === "QUALIFIED" ||
+        status === "VISIT_BOOKED" ||
+        status === "VISIT_SCHEDULED" ||
+        status === "VISIT_COMPLETED" ||
+        status === "INTERESTED"
+      ) {
         await enqueueQualifiedLeadConversions(id);
         await processAdmissionConversionQueue({ enquiryId: id, limit: 4 });
       }
@@ -350,6 +356,10 @@ export async function POST(request: Request, context: RouteContext) {
           },
         });
       });
+      if (kind === "VISIT" || nextStatus === "VISIT_BOOKED") {
+        await enqueueQualifiedLeadConversions(id);
+        await processAdmissionConversionQueue({ enquiryId: id, limit: 4 });
+      }
     } else if (action === "COMPLETE_APPOINTMENT" || action === "NO_SHOW") {
       const appointmentId = text(body.appointmentId, 100);
       const appointment = await prisma.leadAppointment.findFirst({

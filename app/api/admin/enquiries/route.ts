@@ -1,7 +1,12 @@
 import type { $Enums } from "@/generated/prisma/client";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 
 import { isAdminAuthenticated } from "@/lib/admin/auth";
+import {
+  enqueueLeadConversions,
+  enqueueQualifiedLeadConversions,
+  processAdmissionConversionQueue,
+} from "@/lib/marketing/admissionConversions";
 import { prisma } from "@/lib/prisma";
 
 const PROGRAMMES = [
@@ -764,6 +769,25 @@ export async function POST(request: Request) {
         },
       });
     }
+
+    if (enquiry.source === "GOOGLE_ADS" || enquiry.source === "WEBSITE") {
+      await enqueueLeadConversions(enquiry.id);
+    }
+    if (
+      enquiry.status === "QUALIFIED" ||
+      enquiry.status === "VISIT_BOOKED" ||
+      enquiry.status === "VISIT_SCHEDULED"
+    ) {
+      await enqueueQualifiedLeadConversions(enquiry.id);
+    }
+
+    after(async () => {
+      try {
+        await processAdmissionConversionQueue({ enquiryId: enquiry.id, limit: 4 });
+      } catch {
+        // Safe background catch
+      }
+    });
 
     return NextResponse.json(
       {
