@@ -474,6 +474,44 @@ export default function MarketingConsent({
   ]);
 
   useEffect(() => {
+    function recordWhatsAppClick() {
+      if (
+        !consent?.marketing ||
+        !googleAdsAvailable ||
+        !window.gtag ||
+        recordedConversions.current.has("whatsapp_click_session")
+      ) {
+        return;
+      }
+
+      recordedConversions.current.add("whatsapp_click_session");
+      const whatsAppLabel =
+        settings.googleAdsWhatsAppConversionLabel || "KFirCLj2lYAdEKD97PpC";
+      window.gtag("event", "conversion", {
+        send_to: `${settings.googleAdsId}/${whatsAppLabel}`,
+        value: 1.0,
+        currency: "INR",
+      });
+    }
+
+    function handleWhatsAppLinkClick(event: MouseEvent) {
+      if (
+        isAdminOrApi ||
+        staffExcluded ||
+        !(event.target instanceof Element)
+      ) {
+        return;
+      }
+
+      const anchor = event.target.closest("a[href]");
+      if (!(anchor instanceof HTMLAnchorElement)) return;
+
+      const url = new URL(anchor.href);
+      if (url.hostname === "wa.me" || url.hostname === "api.whatsapp.com") {
+        recordWhatsAppClick();
+      }
+    }
+
     function handleWebsiteEvent(event: Event) {
       if (
         isAdminOrApi ||
@@ -490,20 +528,9 @@ export default function MarketingConsent({
       }>;
 
       if (customEvent.detail?.eventType === "WHATSAPP_CLICK") {
-        if (
-          googleAdsAvailable &&
-          window.gtag &&
-          !recordedConversions.current.has("whatsapp_click_session")
-        ) {
-          recordedConversions.current.add("whatsapp_click_session");
-          const whatsAppLabel =
-            settings.googleAdsWhatsAppConversionLabel || "KFirCLj2lYAdEKD97PpC";
-          window.gtag("event", "conversion", {
-            send_to: `${settings.googleAdsId}/${whatsAppLabel}`,
-            value: 1.0,
-            currency: "INR",
-          });
-        }
+        // A form can open WhatsApp after saving the same enquiry. Count only
+        // independent chat clicks, not that post-form handoff as another lead.
+        if (!customEvent.detail.enquiryNumber) recordWhatsAppClick();
         return;
       }
 
@@ -569,9 +596,11 @@ export default function MarketingConsent({
       }
     }
 
+    document.addEventListener("click", handleWhatsAppLinkClick, true);
     window.addEventListener("kidzee:website-event", handleWebsiteEvent);
 
     return () => {
+      document.removeEventListener("click", handleWhatsAppLinkClick, true);
       window.removeEventListener(
         "kidzee:website-event",
         handleWebsiteEvent,

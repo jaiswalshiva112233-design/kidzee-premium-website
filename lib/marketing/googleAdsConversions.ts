@@ -112,7 +112,7 @@ function formatISTDateTime(date: Date) {
     hour12: false,
   }).formatToParts(date);
   const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "00";
-  return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}:${get("second")}`;
+  return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}+05:30`;
 }
 
 function formatE164Phone(phone: string) {
@@ -158,12 +158,12 @@ async function sendViaGoogleSheetWebhook(
     throw new Error(`Google Sheet Webhook returned HTTP ${response.status}`);
   }
 
-  const data = (await response.json().catch(() => ({ status: "unknown" }))) as {
+  const data = (await response.json().catch(() => ({ status: "invalid_response" }))) as {
     status?: string;
     message?: string;
   };
-  if (data.status === "error") {
-    throw new Error(`Google Sheet Webhook error: ${data.message}`);
+  if (data.status !== "success") {
+    throw new Error(`Google Sheet Webhook did not confirm delivery: ${data.message || data.status || "unknown"}`);
   }
 
   return { sent: true, reason: null };
