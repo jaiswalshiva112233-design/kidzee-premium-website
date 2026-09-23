@@ -474,7 +474,24 @@ export default function MarketingConsent({
   ]);
 
   useEffect(() => {
+    function recordMetaContactIntent(method: "whatsapp" | "phone") {
+      const key = `meta_${method}_click_session`;
+      if (
+        !consent?.marketing ||
+        !metaAvailable ||
+        !window.fbq ||
+        recordedConversions.current.has(key)
+      ) {
+        return;
+      }
+
+      recordedConversions.current.add(key);
+      // A click indicates contact intent, not a confirmed chat, call or lead.
+      window.fbq("trackCustom", method === "whatsapp" ? "WhatsAppClickIntent" : "PhoneClickIntent");
+    }
+
     function recordWhatsAppClick() {
+      recordMetaContactIntent("whatsapp");
       if (
         !consent?.marketing ||
         !googleAdsAvailable ||
@@ -509,6 +526,8 @@ export default function MarketingConsent({
       const url = new URL(anchor.href);
       if (url.hostname === "wa.me" || url.hostname === "api.whatsapp.com") {
         recordWhatsAppClick();
+      } else if (url.protocol === "tel:") {
+        recordMetaContactIntent("phone");
       }
     }
 
@@ -531,6 +550,11 @@ export default function MarketingConsent({
         // A form can open WhatsApp after saving the same enquiry. Count only
         // independent chat clicks, not that post-form handoff as another lead.
         if (!customEvent.detail.enquiryNumber) recordWhatsAppClick();
+        return;
+      }
+
+      if (customEvent.detail?.eventType === "PHONE_CLICK") {
+        recordMetaContactIntent("phone");
         return;
       }
 

@@ -113,7 +113,7 @@ env:
     value: KFirCLj2lYAdEKD97PpC
     availability: [BUILD, RUNTIME]
   - variable: NEXT_PUBLIC_META_PIXEL_ID
-    value: "1677317359571765"
+    value: "1440034914683216"
     availability: [BUILD, RUNTIME]
   - variable: GOOGLE_ADS_SHEET_WEBHOOK_URL
     value: https://script.google.com/macros/s/AKfycbyKDJmIadPkbDG7RbVzjESQlRShwIVPrP0kS9BfHQP2TPH27h62DQG4N3LU2fuolBqnEQ/exec
