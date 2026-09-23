@@ -19,6 +19,7 @@ const recommendations = source("app/api/admin/growth/recommendations/route.ts");
 const health = source("app/admin/marketing/conversions/page.tsx");
 const permissions = source("lib/admin/permissions.ts");
 const attribution = source("lib/marketing/clientAttribution.ts");
+const websiteSettingsRoute = source("app/api/admin/website-settings/route.ts");
 
 test("1 admission form creates an explicitly classified admission lead", () => {
   assert.match(enquiry, /leadType:\s*"admission"/);
@@ -63,6 +64,11 @@ test("Meta jobs do not exhaust delivery attempts while the server token is missi
   assert.match(conversions, /job\.provider === "META" && reason === "not_configured"/);
   assert.match(conversions, /job\.attempts \+ \(awaitingMetaConfiguration \? 0 : 1\)/);
   assert.match(conversions, /!awaitingMetaConfiguration && attemptNumber >= job\.maxAttempts/);
+});
+
+test("website-settings endpoint reports Meta Conversions API readiness without leaking token", () => {
+  assert.match(websiteSettingsRoute, /metaConversionsApiReady:\s*Boolean\(\s*process\.env\.META_CONVERSIONS_API_ACCESS_TOKEN/);
+  assert.doesNotMatch(websiteSettingsRoute, /token:\s*process\.env\.META_CONVERSIONS_API_ACCESS_TOKEN/);
 });
 
 test("8 final admission conversion retains confirmed-admission gating", () => {

@@ -297,6 +297,9 @@ export async function GET() {
       success: true,
       settings,
       websiteUrl: site.url,
+      metaConversionsApiReady: Boolean(
+        process.env.META_CONVERSIONS_API_ACCESS_TOKEN?.trim(),
+      ),
     });
   } catch (error) {
     logServerError("Unable to load website tracking settings.", error);
@@ -371,6 +374,9 @@ export async function PATCH(request: Request) {
       message:
         "Website verification and tracking settings have been saved.",
       settings,
+      metaConversionsApiReady: Boolean(
+        process.env.META_CONVERSIONS_API_ACCESS_TOKEN?.trim(),
+      ),
     });
   } catch (error) {
     logServerError("Unable to save website tracking settings.", error);
