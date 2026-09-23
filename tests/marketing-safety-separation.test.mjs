@@ -59,6 +59,12 @@ test("7 valid admission conversions are idempotent and delivered once", () => {
   for (const field of ["adGroup", "adSet", "adId", "device"]) assert.ok(attribution.includes(field));
 });
 
+test("Meta jobs do not exhaust delivery attempts while the server token is missing", () => {
+  assert.match(conversions, /job\.provider === "META" && reason === "not_configured"/);
+  assert.match(conversions, /job\.attempts \+ \(awaitingMetaConfiguration \? 0 : 1\)/);
+  assert.match(conversions, /!awaitingMetaConfiguration && attemptNumber >= job\.maxAttempts/);
+});
+
 test("8 final admission conversion retains confirmed-admission gating", () => {
   const admissionPage = source("app/admin/admissions/page.tsx");
   assert.match(admissionPage, /statusValue === "CONFIRMED"/);

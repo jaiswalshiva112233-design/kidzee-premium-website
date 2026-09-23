@@ -354,8 +354,13 @@ async function attemptJob(jobId: string, workerId: string) {
     reason = "unexpected_error";
   }
 
-  const attemptNumber = job.attempts + 1;
-  const dead = !sent && attemptNumber >= job.maxAttempts;
+  // A missing Meta token is a setup gap, not a failed delivery attempt. Keep
+  // the job retryable so an eventual secret rollout can deliver it once.
+  const awaitingMetaConfiguration =
+    job.provider === "META" && reason === "not_configured";
+  const attemptNumber = job.attempts + (awaitingMetaConfiguration ? 0 : 1);
+  const dead =
+    !sent && !awaitingMetaConfiguration && attemptNumber >= job.maxAttempts;
   const attemptedAt = new Date();
   await db.$transaction(async (transaction: any) => {
     await transaction.marketingConversionJob.update({
@@ -366,7 +371,12 @@ async function attemptJob(jobId: string, workerId: string) {
         nextAttemptAt:
           sent || dead
             ? attemptedAt
-            : new Date(attemptedAt.getTime() + marketingRetryDelay(attemptNumber)),
+            : new Date(
+                attemptedAt.getTime() +
+                  (awaitingMetaConfiguration
+                    ? 60 * 60 * 1000
+                    : marketingRetryDelay(attemptNumber)),
+              ),
         lockedAt: null,
         lockedBy: null,
         lastAttemptAt: attemptedAt,
