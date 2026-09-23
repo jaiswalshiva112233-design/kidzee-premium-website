@@ -91,7 +91,8 @@ test("App Hosting requires only the controlled-trial core while preserving optio
   for (const variable of ["WEBSITE_ANALYTICS_ENABLED", "WEBSITE_ADVERTISING_ENABLED", "WEBSITE_META_PIXEL_ENABLED"]) {
     assert.match(hosting, new RegExp(`variable: ${variable}\\s+value: ["']?(?:true|false)["']?`, "m"));
   }
-  for (const variable of ["OPENAI_API_KEY", "WHATSAPP_ACCESS_TOKEN", "META_CONVERSIONS_API_ACCESS_TOKEN", "GOOGLE_ADS_DEVELOPER_TOKEN"]) {
+  assert.match(hosting, /variable: META_CONVERSIONS_API_ACCESS_TOKEN\s+secret: META_CONVERSIONS_API_ACCESS_TOKEN\s+availability: \[RUNTIME\]/m);
+  for (const variable of ["OPENAI_API_KEY", "WHATSAPP_ACCESS_TOKEN", "GOOGLE_ADS_DEVELOPER_TOKEN"]) {
     assert.doesNotMatch(hosting, new RegExp(`variable: ${variable}\\b`));
     assert.match(read(".env.example"), new RegExp(`^${variable}=`, "m"));
   }

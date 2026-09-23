@@ -44,10 +44,13 @@ for (const variable of ["WEBSITE_ANALYTICS_ENABLED", "WEBSITE_ADVERTISING_ENABLE
 for (const variable of [
   "OPENAI_API_KEY", "MEDIA_WORKER_URL", "NEXT_PUBLIC_FIREBASE_VAPID_KEY",
   "WHATSAPP_ACCESS_TOKEN", "WHATSAPP_CRON_SECRET",
-  "META_CONVERSIONS_API_ACCESS_TOKEN", "GOOGLE_ADS_DEVELOPER_TOKEN",
+  "GOOGLE_ADS_DEVELOPER_TOKEN",
   "GROWTH_SYNC_SECRET", "OWNER_INTELLIGENCE_CRON_SECRET", "NOTIFICATION_CRON_SECRET",
 ]) {
   if (appHosting.includes(`variable: ${variable}`)) throw new Error(`Disabled trial integration ${variable} must not require an App Hosting secret.`);
+}
+if (!/variable: META_CONVERSIONS_API_ACCESS_TOKEN\s+secret: META_CONVERSIONS_API_ACCESS_TOKEN\s+availability: \[RUNTIME\]/m.test(appHosting)) {
+  throw new Error("Meta Conversions API must use a runtime-only App Hosting secret.");
 }
 if (!functionsSource.includes("retryMarketingConversions") || !functionsSource.includes("every 15 minutes")) {
   throw new Error("The scheduled marketing retry function is missing.");
