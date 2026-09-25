@@ -781,6 +781,20 @@ export default async function AdminFeesPage() {
                                   ] ??
                                     payment.status}
                                 </span>
+
+                                {payment.gstApplicable && Number(payment.cgstAmount) + Number(payment.sgstAmount) > 0 ? (
+                                  <span className={`rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] ${
+                                    Number(payment.gstRate) === 5
+                                      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                      : "border-purple-200 bg-purple-50 text-purple-700"
+                                  }`}>
+                                    {payment.gstRate && Number(payment.gstRate) > 0 ? `${Number(payment.gstRate)}% GST` : "18% GST"} ({formatCurrency(Number(payment.cgstAmount) + Number(payment.sgstAmount))})
+                                  </span>
+                                ) : (
+                                  <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-slate-600">
+                                    0% GST (Exempt)
+                                  </span>
+                                )}
                               </div>
 
                               <p className="mt-1 text-xs font-semibold text-[#817684]">

@@ -1773,7 +1773,7 @@ export default async function ReceiptDetailsPage({
                   <span>
                     {item.title}
                     {item.detail ? ` - ${item.detail}` : ""}
-                    {item.gstApplicable ? " (GST inclusive)" : ""}
+                    {item.gstApplicable ? ` (${item.gstRate && Number(item.gstRate) > 0 ? `${Number(item.gstRate)}% ` : "18% "}GST inclusive)` : ""}
                   </span>
                   <span className="font-bold">{formatCurrency(Number(item.totalAmount))}</span>
                 </div>
@@ -1784,7 +1784,7 @@ export default async function ReceiptDetailsPage({
                   {receipt.payment.invoice
                     ? `Payment against ${receipt.payment.invoice.invoiceNumber}`
                     : feeCategoryLabels[receipt.payment.category] ?? receipt.payment.category}
-                  {receipt.payment.gstApplicable ? " (GST inclusive)" : ""}
+                  {receipt.payment.gstApplicable ? ` (${receipt.payment.gstRate && Number(receipt.payment.gstRate) > 0 ? `${Number(receipt.payment.gstRate)}% ` : "18% "}GST inclusive)` : ""}
                 </span>
                 <span className="font-bold">{formatCurrency(feeAmountOnReceipt)}</span>
               </div>
@@ -1821,6 +1821,11 @@ export default async function ReceiptDetailsPage({
                 <p className="text-[10px] font-black uppercase tracking-[0.08em] text-emerald-800">
                   GST included wherever applicable
                 </p>
+                {Number(receipt.payment.cgstAmount) + Number(receipt.payment.sgstAmount) > 0 ? (
+                  <p className="mt-0.5 text-[11px] font-black text-emerald-950">
+                    Tax Breakdown: CGST: {formatCurrency(Number(receipt.payment.cgstAmount))} • SGST: {formatCurrency(Number(receipt.payment.sgstAmount))} (Total GST: {formatCurrency(Number(receipt.payment.cgstAmount) + Number(receipt.payment.sgstAmount))})
+                  </p>
+                ) : null}
                 <p className="mt-0.5 text-[10px] font-semibold leading-4 text-emerald-700">
                   The amounts above are the final parent-facing amounts.
                   Statutory tax values remain recorded internally for accounts and CA reports.

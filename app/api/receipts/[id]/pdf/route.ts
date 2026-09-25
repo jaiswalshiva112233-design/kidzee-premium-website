@@ -355,14 +355,20 @@ async function pdfBuffer(
 
   if (invoiceItems.length > 0) {
     for (const item of invoiceItems.slice(0, 4)) {
+      const gstText = item.gstApplicable
+        ? ` (${item.gstRate && Number(item.gstRate) > 0 ? `${Number(item.gstRate)}% ` : "18% "}GST inclusive)`
+        : "";
       breakdownRows.push({
-        title: `${item.title}${item.gstApplicable ? " (GST inclusive)" : ""}`,
+        title: `${item.title}${gstText}`,
         amount: money(item.totalAmount),
       });
     }
   } else {
+    const gstText = receipt.payment.gstApplicable
+      ? ` (${receipt.payment.gstRate && Number(receipt.payment.gstRate) > 0 ? `${Number(receipt.payment.gstRate)}% ` : "18% "}GST inclusive)`
+      : "";
     breakdownRows.push({
-      title: `Fee Payment (${className}) (GST inclusive)`,
+      title: `Fee Payment (${className})${gstText}`,
       amount: money(receipt.payment.amountBeforeTax || totalAmount),
     });
   }
@@ -412,8 +418,12 @@ async function pdfBuffer(
      .text("Total Payable", 46, totalY)
      .text(money(totalAmount), 480, totalY, { align: "right", width: 65 });
 
+  const gstNoticeText =
+    Number(receipt.payment.cgstAmount) + Number(receipt.payment.sgstAmount) > 0
+      ? `Inclusive of GST (CGST: ${money(receipt.payment.cgstAmount)} + SGST: ${money(receipt.payment.sgstAmount)}). Final parent-facing amounts.`
+      : "Inclusive of GST wherever applicable. The amounts above are the final parent-facing amounts.";
   doc.fontSize(6.5).font("Helvetica-Oblique").fillColor("#6A5D75")
-     .text("Inclusive of GST. The amounts above are the final parent-facing amounts.", 46, totalY + 12);
+     .text(gstNoticeText, 46, totalY + 12);
 
   // 8. Total Amount Received Bar
   const totTop = feeTop + feeHeight + 8;

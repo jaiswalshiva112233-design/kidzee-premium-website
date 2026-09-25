@@ -380,6 +380,69 @@ function getFeeTypeLabel(
   return formatLabel(fallbackCategory);
 }
 
+function getGstRateLabel(
+  items:
+    | Array<{
+        gstApplicable?: boolean;
+        gstRate?: unknown;
+        cgstAmount?: unknown;
+        sgstAmount?: unknown;
+      }>
+    | undefined,
+  payment: {
+    gstApplicable?: boolean;
+    gstRate?: unknown;
+    cgstAmount?: unknown;
+    sgstAmount?: unknown;
+  },
+  basisFeeType?: string,
+): string {
+  if (basisFeeType === "Late Fee") {
+    return "No GST (0%)";
+  }
+
+  if (items && items.length > 0) {
+    const rateSet = new Set<string>();
+    let hasTaxable = false;
+    let hasExempt = false;
+
+    for (const item of items) {
+      const isApplicable = Boolean(item.gstApplicable);
+      const rateNum = Number(item.gstRate ?? 0);
+      const tax =
+        Number(item.cgstAmount ?? 0) + Number(item.sgstAmount ?? 0);
+
+      if (isApplicable && (rateNum > 0 || tax > 0)) {
+        hasTaxable = true;
+        const formattedRate =
+          rateNum > 0 ? `${formatMoney(rateNum)}%` : "18%";
+        rateSet.add(formattedRate);
+      } else {
+        hasExempt = true;
+      }
+    }
+
+    if (hasTaxable && hasExempt) {
+      return `${[...rateSet].join(" + ")} + Exempt (0%)`;
+    }
+    if (hasTaxable) {
+      return [...rateSet].join(" + ");
+    }
+    return "No GST (0%)";
+  }
+
+  const isApplicable = Boolean(payment.gstApplicable);
+  const rateNum = Number(payment.gstRate ?? 0);
+  const tax =
+    Number(payment.cgstAmount ?? 0) + Number(payment.sgstAmount ?? 0);
+
+  if (isApplicable && (rateNum > 0 || tax > 0)) {
+    return `${rateNum > 0 ? formatMoney(rateNum) : "18"}%`;
+  }
+
+  return "No GST (0%)";
+}
+
 function formatDate(
   value: Date | null | undefined,
 ) {
@@ -961,6 +1024,11 @@ async function buildFeeReport(
               invoice.items,
               invoice.category,
             ),
+          gstRate: getGstRateLabel(
+            invoice.items,
+            invoice,
+            basis.feeType,
+          ),
           billed: allocateReportAmount(
             Number(invoice.totalAmount),
             basis.grossShare,
@@ -1063,6 +1131,7 @@ async function buildFeeReport(
         { label: "Fee Type", weight: 1.1 },
         { label: "Period", weight: 0.85 },
         { label: "Status", weight: 0.75 },
+        { label: "GST Rate", weight: 0.8 },
         {
           label: "GST",
           weight: 0.6,
@@ -1084,7 +1153,7 @@ async function buildFeeReport(
           align: "right",
         },
       ],
-      rows: pendingEntries.map(({ invoice, feeType, billed, paid, pending, gst }) => {
+      rows: pendingEntries.map(({ invoice, feeType, gstRate, billed, paid, pending, gst }) => {
         const displayStatus =
           invoice.dueDate < today &&
           invoice.status !== "OVERDUE"
@@ -1104,6 +1173,7 @@ async function buildFeeReport(
           feeType,
           invoice.feePeriodLabel,
           formatLabel(displayStatus),
+          gstRate,
           formatMoney(gst),
           formatMoney(billed),
           formatMoney(paid),
@@ -1208,6 +1278,67 @@ async function buildFeeReport(
       const lateFeeReport =
         selectedCategories?.includes("LATE_FEE") ?? false;
 
+      const gstRate = getGstRateLabel(
+        invoiceItems,
+        payment,
+        basis.feeType,
+      );
+
+      let entryGst18 = 0;
+      let entryGst5 = 0;
+      let entryExempt = 0;
+
+      if (!lateFeeReport) {
+        if (invoiceItems.length > 0) {
+          for (const item of invoiceItems) {
+            const isApplicable = Boolean(item.gstApplicable);
+            const rateNum = Number(item.gstRate ?? 0);
+            const tax =
+              Number(item.cgstAmount ?? 0) + Number(item.sgstAmount ?? 0);
+            const itemGross = Number(item.totalAmount);
+            const itemReceived = allocateReportAmount(
+              itemGross * normalised.snapshotRatio,
+              basis.grossShare,
+            );
+
+            if (isApplicable && (rateNum === 18 || (rateNum === 0 && tax > 0))) {
+              const itemGst = allocateReportAmount(
+                tax * normalised.snapshotRatio,
+                basis.gstShare,
+              );
+              entryGst18 += itemGst;
+            } else if (isApplicable && rateNum === 5) {
+              const itemGst = allocateReportAmount(
+                tax * normalised.snapshotRatio,
+                basis.gstShare,
+              );
+              entryGst5 += itemGst;
+            } else if (!isApplicable || (rateNum === 0 && tax === 0)) {
+              entryExempt += itemReceived;
+            }
+          }
+        } else {
+          const isApplicable = Boolean(payment.gstApplicable);
+          const rateNum = Number(payment.gstRate ?? 0);
+          const totalTax = allocateReportAmount(
+            normalised.cgstAmount + normalised.sgstAmount,
+            basis.gstShare,
+          );
+          const received = allocateReportAmount(
+            normalised.amountReceived,
+            basis.grossShare,
+          );
+
+          if (isApplicable && (rateNum === 18 || (rateNum === 0 && totalTax > 0))) {
+            entryGst18 += totalTax;
+          } else if (isApplicable && rateNum === 5) {
+            entryGst5 += totalTax;
+          } else {
+            entryExempt += received;
+          }
+        }
+      }
+
       return [
         {
           payment,
@@ -1217,6 +1348,10 @@ async function buildFeeReport(
               invoiceItems,
               payment.category,
             ),
+          gstRate,
+          gst18: entryGst18,
+          gst5: entryGst5,
+          exempt: entryExempt,
           totalAmount: lateFeeReport
             ? normalised.lateFeeAmount
             : allocateReportAmount(
@@ -1321,6 +1456,18 @@ async function buildFeeReport(
       sgst:
         result.sgst +
         entry.sgst,
+
+      gst18:
+        result.gst18 +
+        entry.gst18,
+
+      gst5:
+        result.gst5 +
+        entry.gst5,
+
+      exempt:
+        result.exempt +
+        entry.exempt,
     }),
 
     {
@@ -1331,6 +1478,9 @@ async function buildFeeReport(
       lateFee: 0,
       cgst: 0,
       sgst: 0,
+      gst18: 0,
+      gst5: 0,
+      exempt: 0,
     },
   );
 
@@ -1352,9 +1502,37 @@ async function buildFeeReport(
         tone: "purple",
       },
       {
-        label: "Amount Received",
+        label: "Total Received",
         value: formatInr(
           totals.received,
+        ),
+        tone: "green",
+      },
+      {
+        label: "Exempt Fees (0% GST)",
+        value: formatInr(
+          totals.exempt,
+        ),
+        tone: "blue",
+      },
+      {
+        label: "Total GST Collected",
+        value: formatInr(
+          totals.cgst + totals.sgst,
+        ),
+        tone: "purple",
+      },
+      {
+        label: "18% GST Collected",
+        value: formatInr(
+          totals.gst18,
+        ),
+        tone: "amber",
+      },
+      {
+        label: "5% GST Collected",
+        value: formatInr(
+          totals.gst5,
         ),
         tone: "green",
       },
@@ -1363,77 +1541,65 @@ async function buildFeeReport(
         value: formatInr(
           totals.pending,
         ),
-        tone: "amber",
-      },
-      {
-        label: "Late Fee",
-        value: formatInr(
-          totals.lateFee,
-        ),
-        tone: "blue",
-      },
-      {
-        label: "Discounts",
-        value: formatInr(
-          totals.discount,
-        ),
         tone: "red",
       },
       {
-        label: "Total GST",
-        value: formatInr(
-          totals.cgst + totals.sgst,
-        ),
-        tone: "purple",
+        label: "Late Fee & Discounts",
+        value: `${formatInr(totals.lateFee)} / -${formatInr(totals.discount)}`,
+        tone: "blue",
       },
     ],
 
     columns: [
       {
         label: "Date",
-        weight: 0.75,
+        weight: 0.7,
       },
       {
         label: "Payment No.",
-        weight: 0.95,
-      },
-      {
-        label: "Student",
-        weight: 1.35,
-      },
-      {
-        label: "Programme",
         weight: 0.85,
       },
       {
-        label: "Fee Type",
+        label: "Student",
         weight: 1.25,
       },
       {
-        label: "Period",
-        weight: 0.95,
-      },
-      {
-        label: "Method",
+        label: "Programme",
         weight: 0.75,
       },
       {
+        label: "Fee Type",
+        weight: 1.2,
+      },
+      {
+        label: "Period",
+        weight: 0.75,
+      },
+      {
+        label: "Method",
+        weight: 0.65,
+      },
+      {
         label: "Status",
-        weight: 0.8,
+        weight: 0.7,
+      },
+      {
+        label: "GST Rate",
+        weight: 0.85,
       },
       {
         label: "GST",
-        weight: 0.65,
+        weight: 0.7,
         align: "right",
       },
       {
         label: "Received",
-        weight: 0.85,
+        weight: 0.8,
         align: "right",
       },
       {
         label: "Pending",
-        weight: 0.8,
+        weight: 0.75,
         align: "right",
       },
     ],
@@ -1459,6 +1625,7 @@ async function buildFeeReport(
         formatLabel(
           entry.payment.status,
         ),
+        entry.gstRate,
         formatMoney(
           entry.cgst +
             entry.sgst,
@@ -1473,6 +1640,7 @@ async function buildFeeReport(
     ),
 
     notes: [
+      "GST Rates: Preschool educational services are exempt (0% GST) under Notification 12/2017-Central Tax (Rate). Daycare services are subject to 18% GST (9% CGST + 9% SGST). Daycare meals/food are subject to 5% GST (2.5% CGST + 2.5% SGST) or exempt as configured.",
       "Amounts shown under GST are included within the recorded fee total.",
       "Cancelled and refunded payments are excluded unless selected explicitly.",
     ],
@@ -1852,6 +2020,14 @@ async function buildGstReport(
 
   const netGst = outputGst - inputGst;
 
+  const output18 = feeEntries
+    .filter((e) => e.gstRateLabel.includes("18%"))
+    .reduce((sum, e) => sum + e.cgst + e.sgst, 0);
+
+  const output5 = feeEntries
+    .filter((e) => e.gstRateLabel.includes("5%"))
+    .reduce((sum, e) => sum + e.cgst + e.sgst, 0);
+
   const feeRows = feeEntries.map(
     (entry) => {
       const { payment } = entry;
@@ -1943,6 +2119,16 @@ async function buildGstReport(
             : "purple",
       },
       {
+        label: "18% Output GST",
+        value: formatInr(output18),
+        tone: "purple",
+      },
+      {
+        label: "5% Output GST",
+        value: formatInr(output5),
+        tone: "green",
+      },
+      {
         label: "GST Records",
         value: rows.length.toString(),
         tone: "purple",
@@ -2000,9 +2186,10 @@ async function buildGstReport(
     rows,
 
     notes: [
-      "Output GST represents GST included in fee-payment records.",
-      "Input GST represents GST entered with centre expenses.",
-      "Please have the final GST return reviewed by the centre's accountant or CA.",
+      "Preschool education services are exempt (0% GST) under Notification 12/2017-Central Tax (Rate).",
+      "Daycare services are subject to 18% GST (9% CGST + 9% SGST). Daycare meals/food are subject to 5% GST (2.5% CGST + 2.5% SGST) or exempt as configured.",
+      "Input GST represents eligible ITC entered from vendor tax invoices for centre expenses.",
+      "Please have the final statutory GST return (GSTR-3B / GSTR-1) reviewed by your CA.",
     ],
   };
 }
@@ -2409,6 +2596,17 @@ async function buildReceiptReport(
       lateFeeAmount: Number(payment.lateFeeAmount),
     });
     const isLateFee = filters.feeCategory === "LATE_FEE";
+    const gstRate = getGstRateLabel(
+      invoiceItems,
+      payment,
+      basis.feeType,
+    );
+    const gst = isLateFee
+      ? 0
+      : allocateReportAmount(
+          normalised.cgstAmount + normalised.sgstAmount,
+          basis.gstShare,
+        );
 
     return [
       {
@@ -2418,6 +2616,8 @@ async function buildReceiptReport(
           invoiceItems,
           payment.category,
         ),
+        gstRate,
+        gst,
         received: isLateFee
           ? normalised.lateFeeAmount
           : allocateReportAmount(
@@ -2535,6 +2735,15 @@ async function buildReceiptReport(
         weight: 0.9,
       },
       {
+        label: "GST Rate",
+        weight: 0.8,
+      },
+      {
+        label: "GST",
+        weight: 0.7,
+        align: "right",
+      },
+      {
         label: "Received",
         weight: 0.85,
         align: "right",
@@ -2547,7 +2756,7 @@ async function buildReceiptReport(
     ],
 
     rows: receiptEntries.map(
-      ({ receipt, feeType, received, pending }) => [
+      ({ receipt, feeType, gstRate, gst, received, pending }) => [
         formatDate(receipt.issuedAt),
         receipt.receiptNumber,
         receipt.payment.paymentNumber,
@@ -2562,12 +2771,15 @@ async function buildReceiptReport(
             .paymentMethod,
         ),
         formatLabel(receipt.status),
+        gstRate,
+        formatMoney(gst),
         formatMoney(received),
         formatMoney(pending),
       ],
     ),
 
     notes: [
+      "GST Rates: Preschool educational services are exempt (0% GST) under Notification 12/2017-Central Tax (Rate). Daycare services are subject to 18% GST (9% CGST + 9% SGST). Daycare meals/food are subject to 5% GST (2.5% CGST + 2.5% SGST) or exempt as configured.",
       "Cancelled and refunded receipt records remain visible for audit purposes.",
     ],
   };
