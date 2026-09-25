@@ -736,6 +736,11 @@ export default async function AdmissionsPage({
       where,
       include: {
         enquiry: true,
+        enrollmentContract: {
+          select: {
+            preschoolClass: true,
+          },
+        },
         student: {
           include: {
             guardians: {
@@ -748,6 +753,7 @@ export default async function AdmissionsPage({
                 },
               ],
             },
+            programmeDefinition: true,
           },
         },
       },
@@ -1196,11 +1202,12 @@ export default async function AdmissionsPage({
                             </p>
 
                             <p className="mt-1 text-sm font-black text-[#2D1736]">
-                              {
+                              {admission.student?.programmeDefinition?.name ??
+                                admission.enrollmentContract?.preschoolClass ??
                                 programmeLabels[
                                   admission.programme
-                                ]
-                              }
+                                ] ??
+                                admission.programme}
                             </p>
                           </div>
 

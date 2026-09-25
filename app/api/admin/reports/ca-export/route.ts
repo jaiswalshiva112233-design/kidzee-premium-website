@@ -127,6 +127,7 @@ type DateFilter = {
 type SchoolProfile = {
   schoolName: string;
   centreName: string;
+  accountName: string;
   address: string;
   phone: string;
   email: string;
@@ -469,6 +470,10 @@ async function getSchoolProfile():
     centreName:
       getJsonText(value, "centreName") ||
       "Kidzee Sector 12, Dwarka",
+
+    accountName:
+      getJsonText(value, "accountName") ||
+      "Dhruvika Enterprises",
 
     address:
       address ||
@@ -878,6 +883,11 @@ async function buildFeeReport(
               middleName: true,
               lastName: true,
               programme: true,
+              programmeDefinition: {
+                select: {
+                  name: true,
+                },
+              },
             },
           },
           items: {
@@ -1056,9 +1066,10 @@ async function buildFeeReport(
           invoice.invoiceNumber,
           `${getStudentName(
             invoice.student,
-          )} (${invoice.student.studentNumber}) - ${formatLabel(
-            invoice.student.programme,
-          )}`,
+          )} (${invoice.student.studentNumber}) - ${
+            invoice.student.programmeDefinition?.name ||
+            formatLabel(invoice.student.programme)
+          }`,
           feeType,
           invoice.feePeriodLabel,
           formatLabel(displayStatus),
@@ -1096,6 +1107,11 @@ async function buildFeeReport(
             middleName: true,
             lastName: true,
             programme: true,
+            programmeDefinition: {
+              select: {
+                name: true,
+              },
+            },
           },
         },
 
@@ -1396,9 +1412,10 @@ async function buildFeeReport(
         `${getStudentName(
           entry.payment.student,
         )} (${entry.payment.student.studentNumber})`,
-        formatLabel(
-          entry.payment.student.programme,
-        ),
+        entry.payment.student.programmeDefinition?.name ||
+          formatLabel(
+            entry.payment.student.programme,
+          ),
         entry.feeType,
         entry.payment.feePeriodLabel ?? "-",
         formatLabel(
@@ -2621,6 +2638,25 @@ function drawReportHeader(
       },
     );
 
+  if (profile.accountName) {
+    document
+      .fillColor("#F6C84B")
+      .font("Helvetica-Bold")
+      .fontSize(8)
+      .text(
+        safePdfText(
+          `Legal Entity: ${profile.accountName}`,
+        ),
+        pageWidth * 0.62,
+        60,
+        {
+          width:
+            pageWidth * 0.33 - 36,
+          align: "right",
+        },
+      );
+  }
+
   if (profile.gstNumber) {
     document
       .fillColor("#F6C84B")
@@ -2631,7 +2667,7 @@ function drawReportHeader(
           `GSTIN: ${profile.gstNumber}`,
         ),
         pageWidth * 0.62,
-        62,
+        profile.accountName ? 74 : 60,
         {
           width:
             pageWidth * 0.33 - 36,
@@ -3365,9 +3401,11 @@ function csvCell(value: string) {
   return `"${value.replaceAll('"', '""')}"`;
 }
 
-function createCsvReport(report: ReportData) {
+function createCsvReport(report: ReportData, profile?: SchoolProfile) {
   const lines = [
     [report.title],
+    ...(profile?.accountName ? [["Legal Entity", profile.accountName]] : []),
+    ...(profile?.gstNumber ? [["GSTIN", profile.gstNumber]] : []),
     [report.description],
     ["Period", report.periodLabel],
     [],
@@ -3387,11 +3425,12 @@ function htmlCell(value: string, tag: "td" | "th") {
   return `<${tag}>${safe}</${tag}>`;
 }
 
-function createExcelReport(report: ReportData) {
+function createExcelReport(report: ReportData, profile?: SchoolProfile) {
   const summaryRows = report.summaries.map((item) => `<tr>${htmlCell(item.label, "td")}${htmlCell(item.value, "td")}</tr>`).join("");
   const tableRows = report.rows.map((row) => `<tr>${row.map((cell) => htmlCell(cell, "td")).join("")}</tr>`).join("");
   const notes = report.notes?.length ? `<h2>Notes</h2><ul>${report.notes.map((note) => `<li>${note.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")}</li>`).join("")}</ul>` : "";
-  return `<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif}table{border-collapse:collapse;margin:16px 0}th,td{border:1px solid #bbb;padding:6px;vertical-align:top}th{background:#5b2a86;color:#fff}</style></head><body><h1>${report.title}</h1><p>${report.description}</p><p><strong>Period:</strong> ${report.periodLabel}</p><table><tr><th>Summary</th><th>Value</th></tr>${summaryRows}</table><table><tr>${report.columns.map((column) => htmlCell(column.label, "th")).join("")}</tr>${tableRows}</table>${notes}</body></html>`;
+  const legalEntityHeader = profile?.accountName ? `<p><strong>Legal Entity:</strong> ${profile.accountName}${profile.gstNumber ? ` &nbsp;|&nbsp; <strong>GSTIN:</strong> ${profile.gstNumber}` : ""}</p>` : "";
+  return `<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif}table{border-collapse:collapse;margin:16px 0}th,td{border:1px solid #bbb;padding:6px;vertical-align:top}th{background:#5b2a86;color:#fff}</style></head><body><h1>${report.title}</h1>${legalEntityHeader}<p>${report.description}</p><p><strong>Period:</strong> ${report.periodLabel}</p><table><tr><th>Summary</th><th>Value</th></tr>${summaryRows}</table><table><tr>${report.columns.map((column) => htmlCell(column.label, "th")).join("")}</tr>${tableRows}</table>${notes}</body></html>`;
 }
 
 export async function GET(request: Request) {
@@ -3536,11 +3575,11 @@ export async function GET(request: Request) {
     }
 
     if (format === "CSV") {
-      return new NextResponse(createCsvReport(report), { status: 200, headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="${createFilename(report.title, "csv")}"`, "Cache-Control": "private, no-store, max-age=0", "X-Content-Type-Options": "nosniff" } });
+      return new NextResponse(createCsvReport(report, profile), { status: 200, headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": `attachment; filename="${createFilename(report.title, "csv")}"`, "Cache-Control": "private, no-store, max-age=0", "X-Content-Type-Options": "nosniff" } });
     }
 
     if (format === "EXCEL") {
-      return new NextResponse(createExcelReport(report), { status: 200, headers: { "Content-Type": "application/vnd.ms-excel; charset=utf-8", "Content-Disposition": `attachment; filename="${createFilename(report.title, "xls")}"`, "Cache-Control": "private, no-store, max-age=0", "X-Content-Type-Options": "nosniff" } });
+      return new NextResponse(createExcelReport(report, profile), { status: 200, headers: { "Content-Type": "application/vnd.ms-excel; charset=utf-8", "Content-Disposition": `attachment; filename="${createFilename(report.title, "xls")}"`, "Cache-Control": "private, no-store, max-age=0", "X-Content-Type-Options": "nosniff" } });
     }
 
     const pdf = await createReportPdf(report, profile);

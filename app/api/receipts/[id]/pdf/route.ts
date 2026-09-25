@@ -18,6 +18,7 @@ type SchoolProfile = {
   phone: string;
   email: string;
   gstNumber: string;
+  accountName: string;
   logoUrl: string;
   stampUrl: string;
   signatureUrl: string;
@@ -32,6 +33,7 @@ const defaultSchoolProfile: SchoolProfile = {
   phone: "9667038673",
   email: "kidzeepreschoolsector12@gmail.com",
   gstNumber: "07CIHPV5007K1ZW",
+  accountName: "Dhruvika Enterprises",
   logoUrl: "https://cdn.sanity.io/images/4pj1t073/production/e48729ca91847165641a71fcd6cc0ff824bac1d3-1558x482.png",
   stampUrl: "https://cdn.sanity.io/images/4pj1t073/production/896a8e18da82f7e9c53940b0fdfe1b44112cf830-1254x1254.jpg",
   signatureUrl: "https://cdn.sanity.io/images/4pj1t073/production/9ce98a2b564932905467d58927e791f2b406b667-1600x666.jpg",
@@ -67,6 +69,7 @@ function normaliseSchoolProfile(value: unknown): SchoolProfile {
     phone: cleanText(value.phone) || defaultSchoolProfile.phone,
     email: cleanText(value.email) || defaultSchoolProfile.email,
     gstNumber: cleanText(value.gstNumber) || defaultSchoolProfile.gstNumber,
+    accountName: cleanText(value.accountName) || defaultSchoolProfile.accountName,
     logoUrl: cleanText(value.logoUrl) || defaultSchoolProfile.logoUrl,
     stampUrl: cleanText(value.stampUrl) || defaultSchoolProfile.stampUrl,
     signatureUrl: cleanText(value.signatureUrl) || defaultSchoolProfile.signatureUrl,
@@ -257,7 +260,10 @@ async function pdfBuffer(
   doc.restore();
 
   // Centre Title
-  doc.fontSize(11).font("Helvetica-Bold").fillColor(purpleDark).text(schoolProfile.centreName.toUpperCase(), 100, 96, { align: "center", width: 345 });
+  doc.fontSize(10.5).font("Helvetica-Bold").fillColor(purpleDark).text(schoolProfile.centreName.toUpperCase(), 100, 95, { align: "center", width: 345 });
+  if (schoolProfile.accountName) {
+    doc.fontSize(7).font("Helvetica-Bold").fillColor("#5B2A86").text(`(A UNIT OF ${schoolProfile.accountName.toUpperCase()})`, 100, 106, { align: "center", width: 345 });
+  }
 
   // 5. Contact Pill
   const pillY = 114;
@@ -285,8 +291,9 @@ async function pdfBuffer(
   doc.moveTo(44, pillY + 27).lineTo(550, pillY + 27).lineWidth(0.5).strokeColor("#D5E0ED").stroke();
 
   // Statutory line (bottom)
+  const legalEntityPrefix = schoolProfile.accountName ? `Legal Entity: ${schoolProfile.accountName}   ·   ` : "";
   doc.fontSize(6.5).font("Helvetica-Bold").fillColor("#4B3B68")
-     .text(`Centre Code: ${schoolProfile.schoolCode}   ·   GSTIN: ${schoolProfile.gstNumber}`, 44, pillY + 29, { width: 507, align: "center" });
+     .text(`${legalEntityPrefix}Centre Code: ${schoolProfile.schoolCode}   ·   GSTIN: ${schoolProfile.gstNumber}`, 44, pillY + 29, { width: 507, align: "center" });
   doc.restore();
 
   // 6. Student & Parent Particulars (2 columns)

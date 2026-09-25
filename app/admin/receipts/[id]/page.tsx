@@ -89,7 +89,7 @@ const defaultSchoolProfile: SchoolProfile = {
   showBankDetailsOnReceipt: false,
   showQrOnReceipt: false,
   bankName: "",
-  accountName: "",
+  accountName: "Dhruvika Enterprises",
   accountNumber: "",
   ifscCode: "",
   bankBranch: "",
@@ -277,7 +277,8 @@ function normaliseSchoolProfile(
       cleanText(value.bankName),
 
     accountName:
-      cleanText(value.accountName),
+      cleanText(value.accountName) ||
+      defaultSchoolProfile.accountName,
 
     accountNumber:
       cleanText(value.accountNumber),
@@ -1673,6 +1674,11 @@ export default async function ReceiptDetailsPage({
               <h2 className="text-base sm:text-xl font-black uppercase tracking-wider text-[#25163E]">
                 {schoolProfile.centreName}
               </h2>
+              {schoolProfile.accountName ? (
+                <p className="mt-0.5 text-xs font-extrabold uppercase tracking-wide text-[#5B2A86]">
+                  (A Unit of {schoolProfile.accountName})
+                </p>
+              ) : null}
             </div>
 
             {/* Top Right: Smiley Doodle + Receipt No. Box */}
@@ -1719,8 +1725,14 @@ export default async function ReceiptDetailsPage({
                 </span>
               </div>
             </div>
-            {/* Centre Code & GSTIN */}
-            <div className="mt-2 flex items-center justify-center gap-3 border-t border-[#25163E]/15 pt-1.5 text-[10px] font-extrabold text-[#25163E]/85">
+            {/* Centre Code, GSTIN & Legal Business Name */}
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-2 sm:gap-3 border-t border-[#25163E]/15 pt-1.5 text-[10px] font-extrabold text-[#25163E]/85">
+              {schoolProfile.accountName ? (
+                <>
+                  <span>Legal Entity: <strong>{schoolProfile.accountName}</strong></span>
+                  <span>•</span>
+                </>
+              ) : null}
               <span>Centre Code: <strong>{schoolProfile.schoolCode || "7206"}</strong></span>
               <span>•</span>
               <span>GSTIN: <strong>{schoolProfile.gstNumber || "07CIHPV5007K1ZW"}</strong></span>
