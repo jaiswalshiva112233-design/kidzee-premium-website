@@ -191,6 +191,7 @@ const daycareFeeCategories:
     "DAYCARE_LUNCH_FEE",
     "DAYCARE_EVENING_SNACK_FEE",
     "DAYCARE_MEAL_COMBO_FEE",
+    "FOOD_FEE",
   ];
 
 const feeReportConfigurations:
@@ -301,7 +302,7 @@ const labelOverrides: Record<
     "Monthly Preschool Fee",
   ADMISSION_FEE: "Admission Fee",
   ANNUAL_FEE: "Annual Fee",
-  DAYCARE_FEE: "Daycare Hourly Fee",
+  DAYCARE_FEE: "Daycare Fee",
   DAYCARE_LUNCH_FEE:
     "Daycare Lunch Fee",
   DAYCARE_EVENING_SNACK_FEE:
@@ -351,6 +352,32 @@ function formatLabel(
         word.slice(1),
     )
     .join(" ");
+}
+
+function getFeeTypeLabel(
+  basisFeeType: string | undefined,
+  items: Array<{ category: string; title?: string }> | undefined,
+  fallbackCategory: string,
+) {
+  if (basisFeeType) {
+    return basisFeeType;
+  }
+
+  if (items && items.length > 0) {
+    const distinctCategories = [
+      ...new Set(items.map((item) => item.category)),
+    ];
+    if (distinctCategories.length > 1) {
+      return distinctCategories
+        .map((cat) => formatLabel(cat))
+        .join(" + ");
+    }
+    if (distinctCategories.length === 1) {
+      return formatLabel(distinctCategories[0]);
+    }
+  }
+
+  return formatLabel(fallbackCategory);
 }
 
 function formatDate(
@@ -929,7 +956,11 @@ async function buildFeeReport(
         {
           invoice,
           feeType:
-            basis.feeType || formatLabel(invoice.category),
+            getFeeTypeLabel(
+              basis.feeType,
+              invoice.items,
+              invoice.category,
+            ),
           billed: allocateReportAmount(
             Number(invoice.totalAmount),
             basis.grossShare,
@@ -1181,7 +1212,11 @@ async function buildFeeReport(
         {
           payment,
           feeType:
-            basis.feeType || formatLabel(payment.category),
+            getFeeTypeLabel(
+              basis.feeType,
+              invoiceItems,
+              payment.category,
+            ),
           totalAmount: lateFeeReport
             ? normalised.lateFeeAmount
             : allocateReportAmount(
@@ -2088,7 +2123,11 @@ async function buildNetIncomeReport(
     return [
       {
         payment,
-        feeType: basis.feeType || formatLabel(payment.category),
+        feeType: getFeeTypeLabel(
+          basis.feeType,
+          invoiceItems,
+          payment.category,
+        ),
         amount: isLateFee
           ? normalised.lateFeeAmount
           : allocateReportAmount(
@@ -2374,7 +2413,11 @@ async function buildReceiptReport(
     return [
       {
         receipt,
-        feeType: basis.feeType || formatLabel(payment.category),
+        feeType: getFeeTypeLabel(
+          basis.feeType,
+          invoiceItems,
+          payment.category,
+        ),
         received: isLateFee
           ? normalised.lateFeeAmount
           : allocateReportAmount(
