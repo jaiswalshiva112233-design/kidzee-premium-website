@@ -171,10 +171,8 @@ export async function enqueueMarketingConversions(
   const conversionTime = eventTime(eventType, enquiry).toISOString();
   const jobs: Array<Promise<unknown>> = [];
 
-  const isGoogle =
-    Boolean(googleSubmission) ||
-    enquiry.source === "GOOGLE_ADS" ||
-    Boolean(enquiry.latestGclid || enquiry.latestGbraid || enquiry.latestWbraid);
+  // A source label or a historic click ID is not proof of marketing consent.
+  const isGoogle = Boolean(googleSubmission);
 
   if (isGoogle) {
     const deduplicationKey = `GOOGLE_ADS:${eventType}:${enquiry.enquiryNumber}`;
@@ -182,9 +180,9 @@ export async function enqueueMarketingConversions(
       enquiryNumber: enquiry.enquiryNumber,
       conversionTime,
       pageUrl: googleSubmission?.pageUrl ?? enquiry.latestLandingPage ?? null,
-      gclid: googleSubmission?.gclid ?? enquiry.latestGclid ?? null,
-      gbraid: googleSubmission?.gbraid ?? enquiry.latestGbraid ?? null,
-      wbraid: googleSubmission?.wbraid ?? enquiry.latestWbraid ?? null,
+      gclid: googleSubmission?.gclid ?? null,
+      gbraid: googleSubmission?.gbraid ?? null,
+      wbraid: googleSubmission?.wbraid ?? null,
       phone: enquiry.phone,
       parentName: enquiry.parentName,
       email: enquiry.email,
@@ -202,7 +200,7 @@ export async function enqueueMarketingConversions(
           maxAttempts: MARKETING_MAX_ATTEMPTS,
           payload,
         },
-        update: { payload },
+        update: {},
       }),
     );
   }
@@ -233,7 +231,7 @@ export async function enqueueMarketingConversions(
           maxAttempts: MARKETING_MAX_ATTEMPTS,
           payload,
         },
-        update: { payload },
+        update: {},
       }),
     );
   }
@@ -354,13 +352,13 @@ async function attemptJob(jobId: string, workerId: string) {
     reason = "unexpected_error";
   }
 
-  // A missing Meta token is a setup gap, not a failed delivery attempt. Keep
-  // the job retryable so an eventual secret rollout can deliver it once.
+  // Setup gaps do not consume the provider retry budget.
   const awaitingMetaConfiguration =
     job.provider === "META" && reason === "not_configured";
-  const attemptNumber = job.attempts + (awaitingMetaConfiguration ? 0 : 1);
+  const awaitingConfiguration = awaitingMetaConfiguration || reason === "not_configured";
+  const attemptNumber = job.attempts + (awaitingConfiguration ? 0 : 1);
   const dead =
-    !sent && !awaitingMetaConfiguration && attemptNumber >= job.maxAttempts;
+    !sent && !awaitingConfiguration && attemptNumber >= job.maxAttempts;
   const attemptedAt = new Date();
   await db.$transaction(async (transaction: any) => {
     await transaction.marketingConversionJob.update({
@@ -373,7 +371,7 @@ async function attemptJob(jobId: string, workerId: string) {
             ? attemptedAt
             : new Date(
                 attemptedAt.getTime() +
-                  (awaitingMetaConfiguration
+                  (awaitingConfiguration
                     ? 60 * 60 * 1000
                     : marketingRetryDelay(attemptNumber)),
               ),

@@ -25,6 +25,16 @@ function jsonResult(payload) {
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
+    var expectedSecret = PropertiesService.getScriptProperties().getProperty("CENTREOS_WEBHOOK_SECRET") || "";
+    var suppliedSecret = typeof data.secret === "string" ? data.secret : "";
+    if (expectedSecret.length < 32 || suppliedSecret.length !== expectedSecret.length) {
+      throw new Error("Unauthorized");
+    }
+    var difference = 0;
+    for (var secretIndex = 0; secretIndex < expectedSecret.length; secretIndex++) {
+      difference |= expectedSecret.charCodeAt(secretIndex) ^ suppliedSecret.charCodeAt(secretIndex);
+    }
+    if (difference !== 0) throw new Error("Unauthorized");
     var conversionName = String(data.conversionName || "").trim();
     if (CONVERSION_NAMES.indexOf(conversionName) === -1) {
       throw new Error("Unknown conversion name");

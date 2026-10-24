@@ -22,7 +22,7 @@ function sha256(value: string) {
 }
 
 function conversionDateTime(date: Date) {
-  return date.toISOString().replace("T", " ").replace("Z", "+00:00");
+  return date.toISOString().replace(/\.\d{3}Z$/, "+00:00").replace("T", " ");
 }
 
 function conversionActionId(eventType: "LEAD" | "QUALIFIED_LEAD" | "ADMISSION") {
@@ -96,10 +96,6 @@ async function accessToken(config: NonNullable<ReturnType<typeof configuration>>
   return payload.access_token;
 }
 
-const GOOGLE_ADS_SHEET_WEBHOOK_URL =
-  process.env.GOOGLE_ADS_SHEET_WEBHOOK_URL?.trim() ||
-  "https://script.google.com/macros/s/AKfycbyKDJmIadPkbDG7RbVzjESQlRShwIVPrP0kS9BfHQP2TPH27h62DQG4N3LU2fuolBqnEQ/exec";
-
 function formatISTDateTime(date: Date) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Kolkata",
@@ -115,20 +111,28 @@ function formatISTDateTime(date: Date) {
   return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}+05:30`;
 }
 
-function formatE164Phone(phone: string) {
+export function formatE164Phone(phone: string) {
   const digits = phone.replace(/\D/g, "");
   if (digits.length === 10) return `+91${digits}`;
   if (digits.length === 12 && digits.startsWith("91")) return `+${digits}`;
-  return phone.startsWith("+") ? phone : digits.length > 0 ? `+${digits}` : "";
+  if (digits.length === 11 && digits.startsWith("0")) return `+91${digits.slice(1)}`;
+  return phone.startsWith("+") && /^[1-9]\d{7,14}$/.test(digits) ? `+${digits}` : "";
 }
 
 async function sendViaGoogleSheetWebhook(
   eventType: "LEAD" | "QUALIFIED_LEAD" | "ADMISSION",
   event: GoogleConversionEvent,
 ) {
-  const webhookUrl =
-    process.env.GOOGLE_ADS_SHEET_WEBHOOK_URL?.trim() || GOOGLE_ADS_SHEET_WEBHOOK_URL;
+  const webhookUrl = process.env.GOOGLE_ADS_SHEET_WEBHOOK_URL?.trim();
   if (!webhookUrl) return null;
+  const url = new URL(webhookUrl);
+  if (url.protocol !== "https:" || url.hostname !== "script.google.com" ||
+      !/^\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(url.pathname)) {
+    return { sent: false, reason: "not_configured" as const };
+  }
+
+  const webhookSecret = process.env.GOOGLE_ADS_SHEET_WEBHOOK_SECRET?.trim() ?? "";
+  if (webhookSecret.length < 32) return { sent: false, reason: "not_configured" as const };
 
   const conversionName =
     eventType === "LEAD"
@@ -138,6 +142,7 @@ async function sendViaGoogleSheetWebhook(
         : "Admissions";
 
   const payload = {
+    secret: webhookSecret,
     gclid: event.gclid || "",
     conversionName,
     conversionTime: formatISTDateTime(event.conversionTime),
@@ -175,11 +180,14 @@ export async function sendGoogleConversion(
 ) {
   try {
     const webhookResult = await sendViaGoogleSheetWebhook(eventType, event);
-    if (webhookResult?.sent) {
+    if (webhookResult) {
       return webhookResult;
     }
   } catch (webhookError) {
     logServerError("Google Sheet conversion webhook delivery failed.", webhookError);
+    // A timeout can happen after the Sheet accepted the row. Retry that route;
+    // switching to a different conversion action could count the lead twice.
+    return { sent: false, reason: "sheet_delivery_failed" as const };
   }
 
   const config = configuration(eventType);
@@ -197,7 +205,7 @@ export async function sendGoogleConversion(
   if (!clickIdentifier) return { sent: false, reason: "missing_click_id" as const };
 
   const userIdentifiers: Array<Record<string, string>> = [];
-  const phone = event.phone.replace(/\D/g, "");
+  const phone = formatE164Phone(event.phone);
 
   if (phone) userIdentifiers.push({ hashedPhoneNumber: sha256(phone) });
   if (event.email) {
@@ -244,8 +252,13 @@ export async function sendGoogleConversion(
       },
     );
 
-    const responseText = await response.text();
-    if (!response.ok || /partialFailureError/.test(responseText)) {
+    const result = await response.json().catch(() => null) as {
+      partialFailureError?: { code?: number };
+      results?: Array<{ conversionAction?: string }>;
+    } | null;
+    if (!response.ok || result?.partialFailureError?.code ||
+        result?.results?.[0]?.conversionAction !==
+          `customers/${config.customerId}/conversionActions/${config.conversionActionId}`) {
       logServerWarning(`Google Ads rejected a ${eventType} conversion.`, new Error(`ProviderStatus${response.status}`));
       return { sent: false, reason: "rejected" as const };
     }

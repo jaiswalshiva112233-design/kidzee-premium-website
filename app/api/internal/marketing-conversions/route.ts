@@ -7,6 +7,7 @@ import {
   processAdmissionConversionQueue,
 } from "@/lib/marketing/admissionConversions";
 import { deliverPendingFirestoreMirrors } from "@/lib/firebase/firestoreRest";
+import { prisma } from "@/lib/prisma";
 import { logServerError } from "@/lib/server/safeLogging";
 
 export const runtime = "nodejs";
@@ -24,13 +25,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false }, { status: 401 });
   }
 
+  const started = new Date();
+  const jobName = "marketing-conversion-delivery";
   try {
     const discovered = await enqueuePendingAdmissionConversions(100);
     const result = await processAdmissionConversionQueue({ limit: 50 });
     const firestoreMirrors = await deliverPendingFirestoreMirrors(50);
+    const unresolved = await prisma.marketingConversionJob.count({ where: { status: { in: ["DEAD", "RETRY"] } } });
+    const heartbeat = { status: unresolved > 0 ? "WARNING" as const : "HEALTHY" as const,
+      lastStartedAt: started, lastSucceededAt: new Date(), durationMs: Date.now() - started.getTime(),
+      lastError: null, metadata: { ...result, unresolved } };
+    await prisma.scheduledJobHeartbeat.upsert({ where: { jobName }, create: { jobName, ...heartbeat }, update: heartbeat });
     return NextResponse.json({ success: true, discovered, firestoreMirrors, ...result });
   } catch (error) {
     logServerError("Scheduled marketing conversion processing failed.", error);
+    await prisma.scheduledJobHeartbeat.upsert({ where: { jobName },
+      create: { jobName, status: "CRITICAL", lastFailedAt: new Date(), lastError: "Conversion processing failed." },
+      update: { status: "CRITICAL", lastFailedAt: new Date(), lastError: "Conversion processing failed." },
+    }).catch(() => undefined);
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }

@@ -69,14 +69,24 @@ function submissionMatches(
 export async function buildMarketingControlData(
   channel: "GOOGLE" | "META" | "ORGANIC",
 ) {
-  const from = new Date(Date.now() - 30 * DAY);
+  let from = new Date(Date.now() - 30 * DAY);
+  let to = new Date();
   const source = sourceForChannel(channel);
   const provider: "GOOGLE_ADS" | "META" =
     channel === "GOOGLE" ? "GOOGLE_ADS" : "META";
-  const [submissions, snapshots, jobs, landingPages] = await Promise.all([
+  const snapshots = await prisma.growthDataSnapshot.findMany({
+    where: { source: channel === "ORGANIC" ? { in: ["SEARCH_CONSOLE", "GOOGLE_ANALYTICS", "GBP"] } : source },
+    orderBy: { collectedAt: "desc" }, take: 40,
+  });
+  const latest = snapshots[0];
+  const snapshotProvenance = (latest?.dimensions as Record<string, unknown> | null)?.provenance;
+  const snapshotIsStale = Boolean(latest && Date.now() - latest.collectedAt.getTime() > 36 * 60 * 60 * 1000);
+  const comparableCosts = Boolean(latest?.periodStart && latest?.periodEnd && !snapshotIsStale && snapshotProvenance === "AUTOMATED_SYNC");
+  if (comparableCosts && latest?.periodStart && latest?.periodEnd) { from = latest.periodStart; to = latest.periodEnd; }
+  const [submissions, jobs, landingPages] = await Promise.all([
     prisma.websiteLeadSubmission.findMany({
       where: {
-        receivedAt: { gte: from },
+        receivedAt: { gte: from, lt: to },
         leadType: "admission",
         trafficClass: "GENUINE",
         isInternal: false,
@@ -105,21 +115,11 @@ export async function buildMarketingControlData(
       orderBy: { receivedAt: "desc" },
       take: 5_000,
     }),
-    prisma.growthDataSnapshot.findMany({
-      where: {
-        source:
-          channel === "ORGANIC"
-            ? { in: ["SEARCH_CONSOLE", "GOOGLE_ANALYTICS", "GBP"] }
-            : source,
-      },
-      orderBy: { collectedAt: "desc" },
-      take: 40,
-    }),
     channel === "ORGANIC"
       ? Promise.resolve([])
       : prisma.marketingConversionJob.groupBy({
           by: ["status", "eventType"],
-          where: { provider, createdAt: { gte: from } },
+          where: { provider, OR: [{ status: { in: ["PENDING", "PROCESSING", "RETRY", "DEAD"] } }, { createdAt: { gte: from } }] },
           _count: true,
         }),
     prisma.landingPage.findMany({
@@ -160,7 +160,7 @@ export async function buildMarketingControlData(
   const payments = enquiryIds.length
     ? await prisma.feePayment.findMany({
         where: {
-          paymentDate: { gte: from },
+          paymentDate: { gte: from, lt: to },
           status: { in: ["PAID", "PARTIALLY_PAID"] },
           student: { admission: { enquiryId: { in: enquiryIds } } },
         },
@@ -185,7 +185,6 @@ export async function buildMarketingControlData(
     (sum, value) => sum + value,
     0,
   );
-  const latest = snapshots[0];
   const metrics = record(latest?.metrics);
   const budget = firstNumber(metrics, ["budget", "dailyBudget", "totalBudget"]);
   const spend = firstNumber(metrics, [
@@ -323,8 +322,9 @@ export async function buildMarketingControlData(
     {} as Record<string, number>,
   );
 
-  const snapshotProvenance = (latest?.dimensions as Record<string, unknown> | null)?.provenance;
-  const sourceStatus = latest
+  const sourceStatus = snapshotIsStale
+    ? ("STALE" as const)
+    : latest
     ? snapshotProvenance === "AUTOMATED_SYNC"
       ? ("CONNECTED" as const)
       : ("MANUAL_ENTRY" as const)
@@ -333,8 +333,10 @@ export async function buildMarketingControlData(
   return {
     channel,
     generatedAt: new Date().toISOString(),
+    leadPeriod: { start: from.toISOString(), end: to.toISOString() },
     sourceStatus,
     latestSnapshotAt: latest?.collectedAt.toISOString() ?? null,
+    snapshotPeriod: latest?.periodStart && latest?.periodEnd ? { start: latest.periodStart.toISOString(), end: latest.periodEnd.toISOString() } : null,
     datasets: snapshots.map((item) => ({
       source: item.source,
       dataset: item.dataset,
@@ -362,13 +364,13 @@ export async function buildMarketingControlData(
       leadToVisit: percent(visitsCompleted, attributed.length),
       visitToAdmission: percent(admissions, visitsCompleted),
       costPerLead:
-        attributed.length > 0 && spend > 0
+        comparableCosts && attributed.length > 0 && spend > 0
           ? Math.round(spend / attributed.length)
           : 0,
       costPerAdmission:
-        admissions > 0 && spend > 0 ? Math.round(spend / admissions) : 0,
+        comparableCosts && admissions > 0 && spend > 0 ? Math.round(spend / admissions) : 0,
       costPerVisit:
-        visitsCompleted > 0 && spend > 0
+        comparableCosts && visitsCompleted > 0 && spend > 0
           ? Math.round(spend / visitsCompleted)
           : 0,
     },

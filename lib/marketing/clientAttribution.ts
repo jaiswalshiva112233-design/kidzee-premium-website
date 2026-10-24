@@ -105,10 +105,17 @@ function currentTouch(): AttributionTouch {
 }
 
 function isMeaningfulAcquisition(touch: AttributionTouch) {
+  let externalReferrer = false;
+  try {
+    externalReferrer = Boolean(touch.referrer) &&
+      new URL(touch.referrer).origin !== new URL(touch.pageUrl).origin;
+  } catch {
+    // Invalid and relative referrers do not start a new acquisition.
+  }
   return Boolean(
     touch.utmSource || touch.utmMedium || touch.utmCampaign || touch.gclid ||
-      touch.gbraid || touch.wbraid || touch.fbclid || touch.fbc ||
-      touch.campaignTrackingKey || touch.referrer,
+      touch.gbraid || touch.wbraid || touch.fbclid ||
+      touch.campaignTrackingKey || externalReferrer,
   );
 }
 

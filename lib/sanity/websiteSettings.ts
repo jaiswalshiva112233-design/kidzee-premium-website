@@ -12,6 +12,7 @@ export type PublicWebsiteTrackingSettings = {
   googleAdsPhoneConversionLabel: string;
   googleAdsPhoneConversionNumber: string;
   googleAdsWhatsAppConversionLabel: string;
+  googleAdsAdvancedConsentMode?: boolean;
   metaPixelId: string;
   googleSearchConsoleVerification: string;
   bingWebmasterVerification: string;
@@ -122,6 +123,7 @@ function prepareSettings(
     googleAdsPhoneConversionLabel,
     googleAdsPhoneConversionNumber,
     googleAdsWhatsAppConversionLabel,
+    googleAdsAdvancedConsentMode: process.env.GOOGLE_ADS_ADVANCED_CONSENT_MODE === "true" && !googleTagManagerId,
     metaPixelId,
     googleSearchConsoleVerification,
     bingWebmasterVerification,
