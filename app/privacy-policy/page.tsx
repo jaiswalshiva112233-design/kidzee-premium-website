@@ -101,7 +101,7 @@ export default async function PrivacyPage() {
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <span className="inline-flex items-center gap-2 rounded-full border border-purple-100 bg-white/90 px-4 py-2 text-xs font-bold text-slate-700 shadow-sm">
                   <ShieldCheck size={15} className="text-purple-700" />
-                  Last updated: 29 July 2026
+                  Last updated: 24 October 2026
                 </span>
 
                 <span className="inline-flex items-center gap-2 rounded-full border border-purple-100 bg-white/90 px-4 py-2 text-xs font-bold text-slate-700 shadow-sm">
@@ -413,6 +413,15 @@ export default async function PrivacyPage() {
                       understand traffic and evaluate advertising performance.
                     </p>
 
+                    <p className="mt-4 text-base leading-8 text-slate-600">
+                      When limited Google advertising measurement is enabled, Google may receive
+                      cookieless consent and enquiry-conversion signals even if you decline
+                      optional cookies. Your consent remains marked denied. These enquiry
+                      signals do not include names, phone numbers, email addresses or our
+                      enquiry identifiers. Google uses limited measurement to support modeled
+                      advertising reports. Optional analytics cookies, advertising cookies and
+                      Meta measurement continue to follow your choices.
+                    </p>
                     <p className="mt-4 text-base leading-8 text-slate-600">
                       You can manage or block cookies through your browser
                       settings. Blocking certain cookies may affect some

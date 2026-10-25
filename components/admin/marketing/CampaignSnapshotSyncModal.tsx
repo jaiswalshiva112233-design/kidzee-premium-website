@@ -15,10 +15,10 @@ type Props = {
 
 export default function CampaignSnapshotSyncModal({
   channel,
-  defaultSpend = 13.81,
-  defaultClicks = 2,
-  defaultImpressions = 9,
-  defaultBudget = 500,
+  defaultSpend = 0,
+  defaultClicks = 0,
+  defaultImpressions = 0,
+  defaultBudget = 0,
   defaultCampaign = "Kidzee_Dwarka_Sec12_Search_2KM",
 }: Props) {
   const router = useRouter();
@@ -46,7 +46,7 @@ export default function CampaignSnapshotSyncModal({
           spend: parseFloat(spend) || 0,
           clicks: parseInt(clicks, 10) || 0,
           impressions: parseInt(impressions, 10) || 0,
-          budget: parseFloat(budget) || 500,
+          budget: parseFloat(budget) || 0,
           campaignName,
         }),
       });
@@ -56,7 +56,7 @@ export default function CampaignSnapshotSyncModal({
         throw new Error(data.message || "Failed to update snapshot.");
       }
 
-      setMessage("Campaign snapshot updated successfully!");
+      setMessage("Manual snapshot saved successfully.");
       router.refresh();
       setTimeout(() => {
         setIsOpen(false);
@@ -77,7 +77,7 @@ export default function CampaignSnapshotSyncModal({
         className="inline-flex items-center gap-2 rounded-xl border border-[#D5C2E6] bg-white px-3.5 py-2 text-xs font-black text-[#5B2A86] shadow-sm transition hover:bg-[#FAF5FD] hover:border-[#B483D6]"
       >
         <RefreshCw size={14} className="text-[#6A328F]" />
-        <span>Sync Campaign Snapshot</span>
+        <span>Record Manual Snapshot</span>
       </button>
 
       {isOpen && (
@@ -95,10 +95,10 @@ export default function CampaignSnapshotSyncModal({
                 </div>
                 <div>
                   <h3 className="text-sm font-black text-[#2D1736]">
-                    Sync Google Ads Snapshot
+                    Record Manual Campaign Snapshot
                   </h3>
                   <p className="text-[11px] text-[#7A6E82]">
-                    Updates live spend, clicks & keywords in CentreOS
+                    Saves values you enter. Automatic reporting runs separately.
                   </p>
                 </div>
               </div>
@@ -204,7 +204,7 @@ export default function CampaignSnapshotSyncModal({
                   className="inline-flex items-center gap-1.5 rounded-xl bg-[#5B2A86] px-4 py-2 font-black text-white shadow-md transition hover:bg-[#4B2070] disabled:opacity-50"
                 >
                   {isSubmitting && <LoaderCircle size={14} className="animate-spin" />}
-                  <span>Save & Sync</span>
+                  <span>Save Manual Snapshot</span>
                 </button>
               </div>
             </form>

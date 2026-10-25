@@ -126,7 +126,7 @@ export default function ChannelDashboard({ data }: { data: Data }) {
         ],
       ] as const)
     : ([
-        ["Budget", money(data.totals.budget), IndianRupee],
+        [data.channel === "GOOGLE" ? "Daily budgets in report" : "Budget", money(data.totals.budget), IndianRupee],
         ["Spend", money(data.totals.spend), IndianRupee],
         ["Clicks", number(data.totals.clicks), MousePointerClick],
         ["CTR", `${number(data.totals.ctr)}%`, BarChart3],
@@ -163,14 +163,16 @@ export default function ChannelDashboard({ data }: { data: Data }) {
           <div>
             <p className="text-sm font-black">
               {data.sourceStatus === "CONNECTED"
-                ? "Provider evidence connected (Live Sync)"
-                : data.sourceStatus === "MANUAL_ENTRY"
+                ? "Automatic campaign snapshot received"
+                : data.sourceStatus === "STALE"
+                  ? "Campaign snapshot is stale — refresh before spending decisions"
+                  : data.sourceStatus === "MANUAL_ENTRY"
                   ? "Manual snapshot data recorded"
                   : "Provider evidence awaiting its first sync"}
             </p>
             <p className="text-xs font-semibold opacity-80">
               {data.latestSnapshotAt
-                ? `Latest snapshot ${new Date(data.latestSnapshotAt).toLocaleString("en-IN")}`
+                ? `Latest snapshot ${new Date(data.latestSnapshotAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST`
                 : "CentreOS still shows its own verified lead and admission attribution."}
             </p>
           </div>
@@ -179,13 +181,24 @@ export default function ChannelDashboard({ data }: { data: Data }) {
         <div className="shrink-0">
           <CampaignSnapshotSyncModal
             channel={data.channel}
-            defaultSpend={data.totals.spend || 13.81}
-            defaultClicks={data.totals.clicks || 2}
-            defaultBudget={data.totals.budget || 500}
+            defaultSpend={data.totals.spend}
+            defaultClicks={data.totals.clicks}
+            defaultImpressions={data.totals.impressions}
+            defaultBudget={data.totals.budget}
           />
         </div>
       </div>
 
+      {data.channel === "GOOGLE" && (data.sourceStatus === "CONNECTED" || data.sourceStatus === "STALE") ? (
+        <p className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-950">
+          Legacy Smart campaigns are not included in this automatic feed. Figures below cover the campaigns listed here; review legacy Smart campaigns in Google Ads separately.
+        </p>
+      ) : null}
+      <p className="text-xs font-semibold text-[#817684]">
+        CentreOS leads: {new Date(data.leadPeriod.start).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })} to {new Date(new Date(data.leadPeriod.end).getTime() - 1).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}.
+        {data.snapshotPeriod ? <> Campaign reporting: {new Date(data.snapshotPeriod.start).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })} to {new Date(new Date(data.snapshotPeriod.end).getTime() - 1).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}.</> : null}
+        {data.sourceStatus !== "CONNECTED" ? " Cost per visit and admission require a fresh automatic snapshot covering the same period." : null}
+      </p>
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {cards.map(([label, amount, Icon]) => (
           <article
@@ -204,7 +217,7 @@ export default function ChannelDashboard({ data }: { data: Data }) {
       {!isOrganic ? (
         <section className="grid gap-3 md:grid-cols-3">
           <Metric
-            label="Offline sent"
+            label="Provider handoffs (verify Ads import)"
             value={data.conversionDelivery.SUCCEEDED ?? 0}
           />
           <Metric

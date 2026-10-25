@@ -5,6 +5,7 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import MarketingPageFrame from "@/components/admin/marketing/MarketingPageFrame";
 import { getAdminSession } from "@/lib/admin/auth";
 import { prisma } from "@/lib/prisma";
+import { checkGoogleAdsSheetHealth } from "@/lib/marketing/googleAdsConversions";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,7 @@ export default async function ConversionCentrePage({
     Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const pageSize = 50;
   const since = new Date();
+  const checkedAt = since.getTime();
   since.setUTCDate(since.getUTCDate() - 30);
   const [
     jobs,
@@ -28,6 +30,8 @@ export default async function ConversionCentrePage({
     internalExcluded,
     missingGoogleId,
     missingMetaId,
+    heartbeat,
+    sheetHealth,
   ] = await Promise.all([
     prisma.marketingConversionJob.groupBy({
       by: ["provider", "eventType", "status"],
@@ -90,6 +94,8 @@ export default async function ConversionCentrePage({
         fbp: null,
       },
     }),
+    prisma.scheduledJobHeartbeat.findUnique({ where: { jobName: "marketing-conversion-delivery" } }),
+    checkGoogleAdsSheetHealth(),
   ]);
   const pages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -99,8 +105,21 @@ export default async function ConversionCentrePage({
         current="/admin/marketing/conversions"
         eyebrow="Conversion Centre"
         title="Admission feedback delivery"
-        description="Google Offline Conversion and Meta Conversions API use the existing idempotent retry queue. This page reports delivery; it does not resend or change provider data outside the scheduled workflow."
+        description="Google Offline Conversion and Meta Conversions API use the existing idempotent retry queue. A succeeded job confirms handoff to the configured integration. For Google Sheets, verify final acceptance in Google Ads Data Manager. This page does not resend conversions."
       >
+        <p className="rounded-2xl border border-[#E7DFEA] bg-white p-4 text-sm font-semibold text-[#574B5B]">
+          {heartbeat?.lastSucceededAt && checkedAt - heartbeat.lastSucceededAt.getTime() < 45 * 60 * 1000
+            ? "Automatic delivery worker has run recently. Check failed and retrying records below."
+            : "Automatic delivery worker is not verified recently. Check its 15-minute schedule before relying on automatic uploads."}
+          {heartbeat?.lastSucceededAt ? <> Last completed: {heartbeat.lastSucceededAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}.</> : null}
+        </p>
+        <p className="rounded-2xl border border-[#E7DFEA] bg-white p-4 text-sm font-semibold text-[#574B5B]">
+          {sheetHealth === "VERIFIED"
+            ? "Google Sheets connection verified: authentication, spreadsheet access and conversion columns passed. No lead rows were written by this check. Final Google Ads import acceptance is separate."
+            : sheetHealth === "NOT_CONFIGURED"
+              ? "Google Sheets connection is not configured. Check its dedicated URL and private credential before relying on uploads."
+              : "Google Sheets connection could not be verified. Check the webhook deployment, spreadsheet configuration and access before relying on uploads."}
+        </p>
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {["PENDING", "PROCESSING", "RETRY", "SUCCEEDED", "DEAD"].map((status) => (
             <article
@@ -199,13 +218,13 @@ export default async function ConversionCentrePage({
                     <td>
                       {row.lastError ||
                         (row.status === "SUCCEEDED"
-                          ? "Delivered"
+                          ? "Integration handoff completed"
                           : "Awaiting scheduled delivery")}
                     </td>
                     <td>
                       {new Date(
                         row.completedAt ?? row.nextAttemptAt,
-                      ).toLocaleString("en-IN")}
+                      ).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST
                     </td>
                   </tr>
                 ))}

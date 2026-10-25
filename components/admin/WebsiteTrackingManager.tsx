@@ -415,7 +415,7 @@ export default function WebsiteTrackingManager() {
 
     await saveSettings(
       connectedSettings,
-      "All complete Google and Meta connections are now enabled. Submitted enquiry forms will be recorded as conversions after visitor consent.",
+      "All complete Google and Meta connections are now enabled. Submitted enquiries follow the recorded consent choice; limited Google measurement may run without cookies when configured.",
     );
   }
 
@@ -479,7 +479,7 @@ export default function WebsiteTrackingManager() {
             Consent protected
           </p>
           <p className="mt-2 text-xs font-semibold leading-5 text-[#8B808F]">
-            Marketing tools activate only after permission.
+            Optional cookies and personal-data measurement require permission. Limited Google measurement may run without cookies when configured.
           </p>
         </article>
 
@@ -815,7 +815,7 @@ export default function WebsiteTrackingManager() {
               </h2>
               <p className="mt-2 text-xs font-semibold leading-5 text-[#55736A]">
                 Search verification needs no consent. Analytics and advertising
-                tools remain off until the visitor accepts them.
+                cookies remain off until the visitor accepts them. Limited Google measurement can use consent-denied signals when configured.
               </p>
             </div>
           </div>

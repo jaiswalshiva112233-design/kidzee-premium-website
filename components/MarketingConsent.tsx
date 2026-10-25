@@ -3,7 +3,6 @@
 import {
   BarChart3,
   Check,
-  ChevronRight,
   Cookie,
   Megaphone,
   ShieldCheck,
@@ -21,6 +20,9 @@ import {
 
 import {
   evaluateConsentState,
+  configureGoogleConsentMode,
+  googleAdsPageConfig,
+  googleAdsLeadPayload,
   type ConsentChoice,
   type MarketingSettings,
 } from "@/lib/marketing/consent";
@@ -190,19 +192,11 @@ function loadMetaPixel(pixelId: string) {
   return window.fbq;
 }
 
-function updateGoogleConsent(choice: ConsentChoice) {
-  if (!window.gtag && !window.dataLayer) {
-    return;
-  }
-
-  const gtag = ensureGtag();
-
-  gtag("consent", "update", {
-    analytics_storage: choice.analytics ? "granted" : "denied",
-    ad_storage: choice.marketing ? "granted" : "denied",
-    ad_user_data: choice.marketing ? "granted" : "denied",
-    ad_personalization: choice.marketing ? "granted" : "denied",
-  });
+function updateGoogleConsent(choice: ConsentChoice | null) {
+  const tag = ensureGtag();
+  configureGoogleConsentMode(tag, choice, document.documentElement.dataset.kidzeeConsentDefaultSet === "true");
+  document.documentElement.dataset.kidzeeConsentDefaultSet = "true";
+  return tag;
 }
 
 
@@ -287,6 +281,7 @@ export default function MarketingConsent({
     settings.metaPixelEnabled && settings.metaPixelId,
   );
   const marketingAvailable = googleAdsAvailable || metaAvailable;
+  const advancedGoogleAds = Boolean(settings.googleAdsAdvancedConsentMode && googleAdsAvailable && !settings.googleTagManagerId);
   const optionalTrackingAvailable =
     analyticsAvailable || marketingAvailable;
 
@@ -360,22 +355,19 @@ export default function MarketingConsent({
       staffExcluded: Boolean(staffExcluded),
     });
 
-    if (state.isExcluded || !consent || !optionalTrackingAvailable) {
+    if (!hydrated || staffExcluded === null || state.isExcluded || (!consent && !advancedGoogleAds) || !optionalTrackingAvailable) {
       return;
     }
 
-    updateGoogleConsent(consent);
 
-    if (!consent.marketing && window.fbq) {
+    if (!consent?.marketing && window.fbq) {
       window.fbq("consent", "revoke");
     }
 
-    const hasAnyGoogleConsent = Boolean(consent.analytics || consent.marketing);
+    const hasAnyGoogleConsent = Boolean(consent?.analytics || consent?.marketing);
 
-    if (hasAnyGoogleConsent) {
-      const gtag = ensureGtag();
-      gtag("consent", "default", state.consentMode);
-      gtag("consent", "update", state.consentMode);
+    if (hasAnyGoogleConsent || advancedGoogleAds || window.gtag) {
+      const gtag = updateGoogleConsent(consent);
 
       if (state.loadedGtm) {
         loadGoogleTagManager(settings.googleTagManagerId);
@@ -404,17 +396,16 @@ export default function MarketingConsent({
       if (
         state.configuredAdsDirect &&
         document.documentElement.dataset.kidzeeAdsConfigured !==
-          settings.googleAdsId
+          settings.googleAdsId + ":" + String(consent?.marketing === true)
       ) {
-        gtag("config", settings.googleAdsId, {
-          send_page_view: false,
-        });
+        gtag("config", settings.googleAdsId, googleAdsPageConfig(consent, window.location.href, document.referrer));
         document.documentElement.dataset.kidzeeAdsConfigured =
-          settings.googleAdsId;
+          settings.googleAdsId + ":" + String(consent?.marketing === true);
       }
 
       const phoneConversionKey = `${settings.googleAdsId}/${settings.googleAdsPhoneConversionLabel}:${settings.googleAdsPhoneConversionNumber}`;
       if (
+        consent?.marketing &&
         state.configuredAdsDirect &&
         settings.googleAdsPhoneConversionLabel &&
         settings.googleAdsPhoneConversionNumber &&
@@ -459,6 +450,9 @@ export default function MarketingConsent({
     }
   }, [
     analyticsAvailable,
+    advancedGoogleAds,
+    hydrated,
+    settings,
     consent,
     googleAdsAvailable,
     metaAvailable,
@@ -534,8 +528,8 @@ export default function MarketingConsent({
     function handleWebsiteEvent(event: Event) {
       if (
         isAdminOrApi ||
-        staffExcluded ||
-        (!consent?.marketing && !consent?.analytics)
+        staffExcluded !== false || !hydrated ||
+        (!consent?.marketing && !consent?.analytics && !advancedGoogleAds)
       ) {
         return;
       }
@@ -590,19 +584,8 @@ export default function MarketingConsent({
         });
       }
 
-      if (
-        consent?.marketing &&
-        googleAdsAvailable &&
-        settings.googleAdsConversionLabel &&
-        window.gtag
-      ) {
-        window.gtag("event", "conversion", {
-          send_to: `${settings.googleAdsId}/${settings.googleAdsConversionLabel}`,
-          transaction_id: enquiryNumber,
-          value: 1.0,
-          currency: "INR",
-        });
-      }
+      const googlePayload = googleAdsLeadPayload({ settings, consent, enquiryNumber, pageUrl: window.location.href, referrer: document.referrer });
+      if (googlePayload && window.gtag) window.gtag("event", "conversion", googlePayload);
 
       if (consent?.marketing && metaAvailable && window.fbq) {
         window.fbq(
@@ -632,6 +615,10 @@ export default function MarketingConsent({
     };
   }, [
     analyticsAvailable,
+    advancedGoogleAds,
+    settings,
+    hydrated,
+    consent,
     consent?.analytics,
     consent?.marketing,
     googleAdsAvailable,
@@ -691,7 +678,7 @@ export default function MarketingConsent({
               id="cookie-banner-title"
               className="mr-auto min-w-0 text-xs font-bold leading-tight text-[#4D4052]"
             >
-              We use cookies to improve your experience.{" "}
+              {advancedGoogleAds ? "Optional cookies are your choice. Limited Google measurement also runs without cookies." : "We use cookies to improve your experience."}{" "}
               <Link
                 href="/privacy-policy"
                 className="font-black text-[#5B2A86] underline"
@@ -722,7 +709,7 @@ export default function MarketingConsent({
               id="cookie-banner-description"
               className="mr-auto min-w-0 text-sm font-semibold leading-5 text-[#716576]"
             >
-              We use {serviceSummary} to improve your experience and measure admission enquiries.{" "}
+              We use {serviceSummary} to improve your experience and measure admission enquiries. {advancedGoogleAds ? "If you decline optional cookies, Google receives limited cookieless measurement with consent marked denied." : ""}{" "}
               <Link
                 href="/privacy-policy"
                 className="font-black text-[#5B2A86] hover:underline"
@@ -829,7 +816,7 @@ export default function MarketingConsent({
                 <ToggleChoice
                   checked={draftMarketing}
                   label="Advertising measurement"
-                  description="Measures whether Google, Facebook or Instagram advertising leads to an enquiry."
+                  description={advancedGoogleAds ? "Allows advertising cookies and fuller measurement. When off, limited Google measurement still runs without advertising cookies or contact details." : "Measures whether Google, Facebook or Instagram advertising leads to an enquiry."}
                   icon={<Megaphone aria-hidden="true" size={19} />}
                   onChange={setDraftMarketing}
                 />

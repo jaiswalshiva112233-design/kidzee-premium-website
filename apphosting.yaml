@@ -122,3 +122,17 @@ env:
     value: https://script.google.com/macros/s/AKfycbyKDJmIadPkbDG7RbVzjESQlRShwIVPrP0kS9BfHQP2TPH27h62DQG4N3LU2fuolBqnEQ/exec
     availability: [BUILD, RUNTIME]
 
+
+  - variable: GOOGLE_ADS_ADVANCED_CONSENT_MODE
+    value: "true"
+    availability: [BUILD, RUNTIME]
+
+  - variable: GOOGLE_ADS_CUSTOMER_ID
+    value: "3462690519"
+    availability: [RUNTIME]
+  - variable: GOOGLE_ADS_SHEET_WEBHOOK_SECRET
+    secret: GOOGLE_ADS_SHEET_WEBHOOK_SECRET
+    availability: [RUNTIME]
+  - variable: GOOGLE_ADS_SNAPSHOT_SECRET
+    secret: GOOGLE_ADS_SNAPSHOT_SECRET
+    availability: [RUNTIME]

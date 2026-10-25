@@ -1,0 +1,31 @@
+name: Ads tracking verification
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DIRECT_URL: postgresql://test:test@127.0.0.1:5432/test
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npx prisma generate
+      - run: npm run typecheck
+      - name: Conversion, consent and reporting regression tests
+        run: >-
+          node --test tests/advanced-consent-mode.test.mjs
+          tests/conversion-accuracy.test.mjs tests/google-ads-snapshot.test.mjs
+          tests/google-ads-snapshot-route.test.mjs tests/google-ads-sheet-webhook.test.mjs
+          tests/marketing-dashboard-accuracy.test.mjs tests/marketing-safety-separation.test.mjs
+          tests/phase1-production.test.mjs tests/marketing-catalogue-polish.test.mjs
+      - name: Production build against an isolated migrated database
+        run: npm run test:build:production
