@@ -15,6 +15,7 @@ import {
   retryMarketingConversion,
 } from "@/lib/marketing/admissionConversions";
 import { prisma } from "@/lib/prisma";
+import { isQualifiedLeadStatus } from "@/lib/marketing/conversionMilestones";
 import { logServerError } from "@/lib/server/safeLogging";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -211,7 +212,7 @@ export async function POST(request: Request, context: RouteContext) {
           data: {
             status,
             stageChangedAt: now,
-            qualifiedAt: status === "QUALIFIED" ? now : existing.qualifiedAt,
+            qualifiedAt: existing.qualifiedAt ?? (isQualifiedLeadStatus(status) ? now : null),
             closedAt: isClosedEnquiryStatus(status) ? now : null,
             lostReason: isClosedEnquiryStatus(status) ? notes : null,
             nextFollowUpAt: isClosedEnquiryStatus(status) ? null : undefined,
@@ -239,15 +240,9 @@ export async function POST(request: Request, context: RouteContext) {
             newData: { status, notes },
           },
         });
+        if (isQualifiedLeadStatus(status)) await enqueueQualifiedLeadConversions(id, transaction);
       });
-      if (
-        status === "QUALIFIED" ||
-        status === "VISIT_BOOKED" ||
-        status === "VISIT_SCHEDULED" ||
-        status === "VISIT_COMPLETED" ||
-        status === "INTERESTED"
-      ) {
-        await enqueueQualifiedLeadConversions(id);
+      if (isQualifiedLeadStatus(status)) {
         await processAdmissionConversionQueue({ enquiryId: id, limit: 4 });
       }
     } else if (action === "ADD_NOTE") {
@@ -341,6 +336,7 @@ export async function POST(request: Request, context: RouteContext) {
             stageChangedAt: now,
             preferredVisitDate: kind === "VISIT" ? scheduledAt : existing.preferredVisitDate,
             trialDate: kind === "TRIAL" ? scheduledAt : existing.trialDate,
+            qualifiedAt: existing.qualifiedAt ?? now,
           },
         });
         await transaction.leadActivity.create({
@@ -355,11 +351,9 @@ export async function POST(request: Request, context: RouteContext) {
             metadata: { appointmentId: appointment.id, scheduledAt: scheduledAt.toISOString() },
           },
         });
+        await enqueueQualifiedLeadConversions(id, transaction);
       });
-      if (kind === "VISIT" || nextStatus === "VISIT_BOOKED") {
-        await enqueueQualifiedLeadConversions(id);
-        await processAdmissionConversionQueue({ enquiryId: id, limit: 4 });
-      }
+      await processAdmissionConversionQueue({ enquiryId: id, limit: 4 });
     } else if (action === "COMPLETE_APPOINTMENT" || action === "NO_SHOW") {
       const appointmentId = text(body.appointmentId, 100);
       const appointment = await prisma.leadAppointment.findFirst({
@@ -371,8 +365,8 @@ export async function POST(request: Request, context: RouteContext) {
       const noShow = action === "NO_SHOW";
       const nextStatus: $Enums.EnquiryStatus =
         noShow ? "FOLLOW_UP" : appointment.kind === "VISIT" ? "VISIT_COMPLETED" : "TRIAL_COMPLETED";
-      await prisma.$transaction([
-        prisma.leadAppointment.update({
+      await prisma.$transaction(async (transaction) => {
+        await transaction.leadAppointment.update({
           where: { id: appointment.id },
           data: {
             status: noShow ? "NO_SHOW" : "COMPLETED",
@@ -381,12 +375,12 @@ export async function POST(request: Request, context: RouteContext) {
             parentFeedback: text(body.parentFeedback) || null,
             notes: notes ?? appointment.notes,
           },
-        }),
-        prisma.enquiry.update({
+        });
+        await transaction.enquiry.update({
           where: { id },
-          data: { status: nextStatus, stageChangedAt: now },
-        }),
-        prisma.leadActivity.create({
+          data: { status: nextStatus, stageChangedAt: now, qualifiedAt: existing.qualifiedAt ?? (!noShow ? now : null) },
+        });
+        await transaction.leadActivity.create({
           data: {
             enquiryId: id,
             type: noShow
@@ -401,8 +395,10 @@ export async function POST(request: Request, context: RouteContext) {
             recordedById: userId,
             metadata: { appointmentId: appointment.id, outcome: text(body.outcome), parentFeedback: text(body.parentFeedback) },
           },
-        }),
-      ]);
+        });
+        if (!noShow) await enqueueQualifiedLeadConversions(id, transaction);
+      });
+      if (!noShow) await processAdmissionConversionQueue({ enquiryId: id, limit: 4 });
     } else if (action === "PARENT_FEEDBACK") {
       const feedback = text(body.parentFeedback);
       if (!feedback) {

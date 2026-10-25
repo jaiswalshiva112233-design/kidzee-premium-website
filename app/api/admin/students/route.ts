@@ -7,7 +7,8 @@ import {
   findPossibleDuplicateStudent,
   type EnrollmentContractSelection,
 } from "@/lib/admin/enrollment-contract";
-import { deliverAdmissionConversions } from "@/lib/marketing/admissionConversions";
+import { deliverAdmissionConversions, enqueueAdmissionConversions, enqueueQualifiedLeadConversions, processAdmissionConversionQueue } from "@/lib/marketing/admissionConversions";
+import { isQualifiedLeadStatus } from "@/lib/marketing/conversionMilestones";
 import { logServerError } from "@/lib/server/safeLogging";
 import { prisma } from "@/lib/prisma";
 
@@ -743,6 +744,7 @@ export async function POST(request: Request) {
             programme: true,
             status: true,
             admittedAt: true,
+            qualifiedAt: true,
 
             admission: {
               select: {
@@ -998,6 +1000,8 @@ export async function POST(request: Request) {
                 admittedAt: documentsComplete
                   ? sourceEnquiry?.admittedAt ?? admissionChangedAt
                   : null,
+                qualifiedAt: sourceEnquiry?.qualifiedAt ??
+                  (documentsComplete || sourceEnquiry?.status === "NEW" || isQualifiedLeadStatus(sourceEnquiry?.status ?? "") ? admissionChangedAt : null),
                 nextFollowUpAt: documentsComplete ? null : undefined,
               },
             });
@@ -1014,6 +1018,8 @@ export async function POST(request: Request) {
                 status: "COMPLETED",
               },
             });
+            await enqueueQualifiedLeadConversions(enquiryId, transaction);
+            if (documentsComplete) await enqueueAdmissionConversions(enquiryId, transaction);
           } else {
             savedAdmission = await transaction.admission.create({
               data: {
@@ -1062,10 +1068,11 @@ export async function POST(request: Request) {
         { isolationLevel: "Serializable" },
       );
 
-    if (enquiryId && documentsComplete) {
+    if (enquiryId) {
       after(async () => {
         try {
-          await deliverAdmissionConversions(enquiryId);
+          if (documentsComplete) await deliverAdmissionConversions(enquiryId);
+          else await processAdmissionConversionQueue({ enquiryId, limit: 4 });
         } catch (error) {
           logServerError("Admission conversion delivery failed.", error);
         }

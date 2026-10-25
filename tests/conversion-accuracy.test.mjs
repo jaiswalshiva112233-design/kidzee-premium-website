@@ -108,7 +108,7 @@ test("Google upload success requires a populated per-row result, uses E164 hashe
 test("connection probes send no lead data and require an explicit healthy response", async t => {
   environment(t, "https://script.google.com/macros/s/synthetic/exec");
   const requests = [];
-  let payload = { status: "success", healthy: true };
+  let payload = { status: "success", healthy: true, schemaVersion: 2 };
   t.mock.method(globalThis, "fetch", async (url, options) => {
     requests.push({ url, body: JSON.parse(options.body) });
     return { ok: true, json: async () => payload };
@@ -124,4 +124,17 @@ test("connection probes cannot transmit credentials to an untrusted destination"
   environment(t, "https://example.com/macros/s/synthetic/exec");
   t.mock.method(globalThis, "fetch", async () => { throw new Error("Must not fetch"); });
   assert.equal(await checkGoogleAdsSheetHealth(), "NOT_CONFIGURED");
+});
+
+
+test("Sheet delivery retains braid identifiers and stage-specific order IDs and rejects older senders", async t => {
+ environment(t,"https://script.google.com/macros/s/synthetic/exec");
+ const bodies=[];let schemaVersion=2;
+ t.mock.method(globalThis,"fetch",async(url, options)=>{bodies.push(JSON.parse(options.body));return Response.json({status:"success",schemaVersion});});
+ const input={...event,gclid:null,gbraid:"Synthetic_Braid_123",wbraid:"Synthetic_WBraid_456"};
+ assert.equal((await sendGoogleConversion("QUALIFIED_LEAD",input)).sent,true);
+ assert.equal(bodies[0].gbraid,input.gbraid);assert.equal(bodies[0].wbraid,input.wbraid);
+ assert.equal(bodies[0].orderId,"qualified-lead-ENQ-SYNTHETIC");
+ assert.equal(bodies[0].adUserData,undefined);assert.equal(bodies[0].adPersonalization,undefined);
+ schemaVersion=undefined;assert.equal((await sendGoogleConversion("QUALIFIED_LEAD",input)).sent,false);
 });

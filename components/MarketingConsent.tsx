@@ -27,6 +27,8 @@ import {
   type MarketingSettings,
 } from "@/lib/marketing/consent";
 
+import { startWebsiteCallForwarding, type ForwardingNumber } from "@/lib/marketing/phoneForwarding";
+
 export { evaluateConsentState, type ConsentChoice, type MarketingSettings };
 
 type MarketingConsentProps = {
@@ -266,6 +268,7 @@ export default function MarketingConsent({
   const [draftAnalytics, setDraftAnalytics] = useState(false);
   const [draftMarketing, setDraftMarketing] = useState(false);
   const [staffExcluded, setStaffExcluded] = useState<boolean | null>(null);
+  const [phoneForwarding, setPhoneForwarding] = useState<ForwardingNumber | null>(null);
   const lastGooglePage = useRef("");
   const lastMetaPage = useRef("");
   const recordedConversions = useRef(new Set<string>());
@@ -418,6 +421,11 @@ export default function MarketingConsent({
           {
             phone_conversion_number:
               settings.googleAdsPhoneConversionNumber,
+            phone_conversion_callback: (formattedNumber: string, mobileNumber: string) => {
+              setPhoneForwarding(current =>
+                current?.formattedNumber === formattedNumber && current?.mobileNumber === mobileNumber && current?.originalNumber === settings.googleAdsPhoneConversionNumber
+                  ? current : { originalNumber: settings.googleAdsPhoneConversionNumber, formattedNumber, mobileNumber });
+            },
           },
         );
         document.documentElement.dataset.kidzeeAdsPhoneConfigured =
@@ -466,6 +474,12 @@ export default function MarketingConsent({
     settings.metaPixelId,
     staffExcluded,
   ]);
+
+  useEffect(() => {
+    if (!hydrated || isAdminOrApi || staffExcluded !== false || !consent?.marketing ||
+        !googleAdsAvailable || !phoneForwarding || phoneForwarding.originalNumber !== settings.googleAdsPhoneConversionNumber) return;
+    return startWebsiteCallForwarding(phoneForwarding);
+  }, [hydrated, isAdminOrApi, staffExcluded, consent?.marketing, googleAdsAvailable, phoneForwarding, settings.googleAdsPhoneConversionNumber, pathname]);
 
   useEffect(() => {
     function recordMetaContactIntent(method: "whatsapp" | "phone") {

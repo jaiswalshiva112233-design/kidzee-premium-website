@@ -137,8 +137,8 @@ export async function checkGoogleAdsSheetHealth(): Promise<"VERIFIED" | "NOT_CON
       cache: "no-store",
       signal: AbortSignal.timeout(8_000),
     });
-    const result = await response.json() as { status?: unknown; healthy?: unknown };
-    return response.ok && result.status === "success" && result.healthy === true ? "VERIFIED" : "UNAVAILABLE";
+    const result = await response.json() as { status?: unknown; healthy?: unknown; schemaVersion?: unknown };
+    return response.ok && result.status === "success" && result.healthy === true && result.schemaVersion === 2 ? "VERIFIED" : "UNAVAILABLE";
   } catch {
     return "UNAVAILABLE";
   }
@@ -168,7 +168,11 @@ async function sendViaGoogleSheetWebhook(
 
   const payload = {
     secret: webhookSecret,
+    schemaVersion: 2,
     gclid: event.gclid || "",
+    gbraid: event.gbraid || "",
+    wbraid: event.wbraid || "",
+    orderId: eventType === "LEAD" ? event.enquiryNumber : `${eventType.toLowerCase().replaceAll("_", "-")}-${event.enquiryNumber}`,
     conversionName,
     conversionTime: formatISTDateTime(event.conversionTime),
     conversionValue: 1,
@@ -191,8 +195,9 @@ async function sendViaGoogleSheetWebhook(
   const data = (await response.json().catch(() => ({ status: "invalid_response" }))) as {
     status?: string;
     message?: string;
+    schemaVersion?: number;
   };
-  if (data.status !== "success") {
+  if (data.status !== "success" || data.schemaVersion !== 2) {
     throw new Error(`Google Sheet Webhook did not confirm delivery: ${data.message || data.status || "unknown"}`);
   }
 

@@ -7,6 +7,7 @@ import {
   leadActivityTypeForStatus,
 } from "@/lib/admin/enquiryWorkflow";
 import { prisma } from "@/lib/prisma";
+import { isQualifiedLeadStatus } from "@/lib/marketing/conversionMilestones";
 import {
   enqueueQualifiedLeadConversions,
   processAdmissionConversionQueue,
@@ -214,6 +215,7 @@ export async function PATCH(
           childName: true,
           programme: true,
           status: true,
+          qualifiedAt: true,
 
           admission: {
             select: {
@@ -632,7 +634,7 @@ export async function PATCH(
               status,
               stageChangedAt: statusChangedAt,
               qualifiedAt:
-                status === "QUALIFIED" ? statusChangedAt : undefined,
+                existingEnquiry.qualifiedAt ?? (isQualifiedLeadStatus(status) ? statusChangedAt : undefined),
               closedAt: status === "NOT_INTERESTED" ? statusChangedAt : null,
               lostReason: status === "NOT_INTERESTED" ? note : null,
 
@@ -681,16 +683,11 @@ export async function PATCH(
               recordedById: userId,
             },
           });
+          if (isQualifiedLeadStatus(status)) await enqueueQualifiedLeadConversions(id, transaction);
         },
       );
 
-      if (
-        status === "QUALIFIED" ||
-        status === "VISIT_BOOKED" ||
-        status === "VISIT_SCHEDULED" ||
-        status === "VISIT_COMPLETED"
-      ) {
-        await enqueueQualifiedLeadConversions(id);
+      if (isQualifiedLeadStatus(status)) {
         await processAdmissionConversionQueue({ enquiryId: id, limit: 4 });
       }
 
