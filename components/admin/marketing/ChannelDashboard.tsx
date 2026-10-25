@@ -172,7 +172,7 @@ export default function ChannelDashboard({ data }: { data: Data }) {
             </p>
             <p className="text-xs font-semibold opacity-80">
               {data.latestSnapshotAt
-                ? `Latest snapshot ${new Date(data.latestSnapshotAt).toLocaleString("en-IN")}`
+                ? `Latest snapshot ${new Date(data.latestSnapshotAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST`
                 : "CentreOS still shows its own verified lead and admission attribution."}
             </p>
           </div>

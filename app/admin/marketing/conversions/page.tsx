@@ -214,7 +214,7 @@ export default async function ConversionCentrePage({
                     <td>
                       {new Date(
                         row.completedAt ?? row.nextAttemptAt,
-                      ).toLocaleString("en-IN")}
+                      ).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST
                     </td>
                   </tr>
                 ))}
