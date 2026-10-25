@@ -126,7 +126,7 @@ export default function ChannelDashboard({ data }: { data: Data }) {
         ],
       ] as const)
     : ([
-        ["Budget", money(data.totals.budget), IndianRupee],
+        [data.channel === "GOOGLE" ? "Daily budgets in report" : "Budget", money(data.totals.budget), IndianRupee],
         ["Spend", money(data.totals.spend), IndianRupee],
         ["Clicks", number(data.totals.clicks), MousePointerClick],
         ["CTR", `${number(data.totals.ctr)}%`, BarChart3],
@@ -189,6 +189,11 @@ export default function ChannelDashboard({ data }: { data: Data }) {
         </div>
       </div>
 
+      {data.channel === "GOOGLE" && (data.sourceStatus === "CONNECTED" || data.sourceStatus === "STALE") ? (
+        <p className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-950">
+          Legacy Smart campaigns are not included in this automatic feed. Figures below cover the campaigns listed here; review legacy Smart campaigns in Google Ads separately.
+        </p>
+      ) : null}
       <p className="text-xs font-semibold text-[#817684]">
         CentreOS leads: {new Date(data.leadPeriod.start).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })} to {new Date(new Date(data.leadPeriod.end).getTime() - 1).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}.
         {data.snapshotPeriod ? <> Campaign reporting: {new Date(data.snapshotPeriod.start).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })} to {new Date(new Date(data.snapshotPeriod.end).getTime() - 1).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}.</> : null}
