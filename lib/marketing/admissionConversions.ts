@@ -1,6 +1,7 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
+import { QUALIFIED_LEAD_STATUSES, isQualifiedLeadStatus } from "./conversionMilestones";
 
 import type { $Enums, Prisma } from "@/generated/prisma/client";
 import {
@@ -73,13 +74,19 @@ function eventTime(
     createdAt: Date;
     qualifiedAt: Date | null;
     admittedAt: Date | null;
+    stageChangedAt?: Date;
+    activities?: Array<{ occurredAt: Date }>;
   },
 ) {
   if (eventType === "QUALIFIED_LEAD") {
-    return enquiry.qualifiedAt ?? new Date();
+    const recorded = [enquiry.qualifiedAt, enquiry.activities?.[0]?.occurredAt]
+      .filter((value): value is Date => value instanceof Date);
+    return recorded.length
+      ? new Date(Math.min(...recorded.map(value => value.getTime())))
+      : enquiry.stageChangedAt ?? enquiry.createdAt;
   }
   if (eventType === "ADMISSION") {
-    return enquiry.admittedAt ?? new Date();
+    return enquiry.admittedAt ?? enquiry.stageChangedAt ?? enquiry.createdAt;
   }
   return enquiry.createdAt;
 }
@@ -87,19 +94,11 @@ function eventTime(
 function eligibleForEvent(
   eventType: ConversionEventType,
   status: $Enums.EnquiryStatus,
+  hasQualifiedMilestone = false,
 ) {
   if (eventType === "LEAD") return true;
   if (eventType === "QUALIFIED_LEAD") {
-    return (
-      status === "QUALIFIED" ||
-      status === "VISIT_BOOKED" ||
-      status === "VISIT_SCHEDULED" ||
-      status === "VISIT_COMPLETED" ||
-      status === "TRIAL_SCHEDULED" ||
-      status === "TRIAL_COMPLETED" ||
-      status === "INTERESTED" ||
-      status === "ADMITTED"
-    );
+    return hasQualifiedMilestone || isQualifiedLeadStatus(status);
   }
   return status === "ADMITTED";
 }
@@ -123,6 +122,13 @@ export async function enqueueMarketingConversions(
       createdAt: true,
       qualifiedAt: true,
       admittedAt: true,
+      stageChangedAt: true,
+      activities: {
+        where: { toStatus: { in: [...QUALIFIED_LEAD_STATUSES] } },
+        orderBy: { occurredAt: "asc" },
+        take: 1,
+        select: { occurredAt: true },
+      },
       latestGclid: true,
       latestGbraid: true,
       latestWbraid: true,
@@ -152,7 +158,7 @@ export async function enqueueMarketingConversions(
     },
   });
 
-  if (!enquiry || !eligibleForEvent(eventType, enquiry.status)) {
+  if (!enquiry || !eligibleForEvent(eventType, enquiry.status, Boolean(enquiry.qualifiedAt || enquiry.activities?.length))) {
     return { eligible: false, queued: 0 };
   }
 
@@ -502,7 +508,8 @@ export async function retryMarketingConversion(jobId: string, actorId?: string |
   return true;
 }
 
-export async function enqueuePendingAdmissionConversions(
+async function enqueueMissingMilestoneConversions(
+  eventType: "ADMISSION" | "QUALIFIED_LEAD",
   limit = 100,
   client?: any,
 ) {
@@ -510,7 +517,7 @@ export async function enqueuePendingAdmissionConversions(
   const targetLimit = Math.max(1, limit);
 
   const existingJobs = await dbClient.marketingConversionJob.findMany({
-    where: { eventType: "ADMISSION" },
+    where: { eventType },
     select: { enquiryId: true, provider: true },
   });
   const existingJobKeys = new Set(
@@ -527,7 +534,13 @@ export async function enqueuePendingAdmissionConversions(
   while (enqueuedCount < targetLimit) {
     const enquiries = await dbClient.enquiry.findMany({
       where: {
-        status: "ADMITTED",
+        ...(eventType === "ADMISSION" ? { status: "ADMITTED" } : {
+          OR: [
+            { qualifiedAt: { not: null } },
+            { status: { in: [...QUALIFIED_LEAD_STATUSES] } },
+            { activities: { some: { toStatus: { in: [...QUALIFIED_LEAD_STATUSES] } } } },
+          ],
+        }),
         websiteSubmissions: {
           some: {
             marketingConsent: true,
@@ -562,10 +575,9 @@ export async function enqueuePendingAdmissionConversions(
           },
         },
       },
-      orderBy: [
-        { admittedAt: "asc" },
-        { id: "asc" },
-      ],
+      orderBy: eventType === "ADMISSION"
+        ? [{ admittedAt: "asc" }, { id: "asc" }]
+        : [{ stageChangedAt: "asc" }, { id: "asc" }],
       skip: offset,
       take: batchSize,
     });
@@ -601,7 +613,7 @@ export async function enqueuePendingAdmissionConversions(
         hasMeta && !existingJobKeys.has(`${enquiry.id}:META`);
 
       if (needsGoogle || needsMeta) {
-        const result = await enqueueAdmissionConversions(enquiry.id, dbClient);
+        const result = await enqueueMarketingConversions(enquiry.id, eventType, dbClient);
         if (result.queued > 0) {
           enqueuedCount += 1;
           if (needsGoogle) existingJobKeys.add(`${enquiry.id}:GOOGLE_ADS`);
@@ -622,6 +634,14 @@ export async function enqueuePendingAdmissionConversions(
   }
 
   return enqueuedCount;
+}
+
+export function enqueuePendingAdmissionConversions(limit = 100, client?: any) {
+  return enqueueMissingMilestoneConversions("ADMISSION", limit, client);
+}
+
+export function enqueuePendingQualifiedLeadConversions(limit = 100, client?: any) {
+  return enqueueMissingMilestoneConversions("QUALIFIED_LEAD", limit, client);
 }
 
 export async function deliverMarketingConversions(

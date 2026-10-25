@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import {
   enqueuePendingAdmissionConversions,
+  enqueuePendingQualifiedLeadConversions,
   processAdmissionConversionQueue,
 } from "@/lib/marketing/admissionConversions";
 import { deliverPendingFirestoreMirrors } from "@/lib/firebase/firestoreRest";
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
   const jobName = "marketing-conversion-delivery";
   try {
     const discovered = await enqueuePendingAdmissionConversions(100);
+    const qualifiedDiscovered = await enqueuePendingQualifiedLeadConversions(100);
     const result = await processAdmissionConversionQueue({ limit: 50 });
     const firestoreMirrors = await deliverPendingFirestoreMirrors(50);
     const unresolved = await prisma.marketingConversionJob.count({ where: { status: { in: ["DEAD", "RETRY"] } } });
@@ -36,7 +38,7 @@ export async function POST(request: Request) {
       lastStartedAt: started, lastSucceededAt: new Date(), durationMs: Date.now() - started.getTime(),
       lastError: null, metadata: { ...result, unresolved } };
     await prisma.scheduledJobHeartbeat.upsert({ where: { jobName }, create: { jobName, ...heartbeat }, update: heartbeat });
-    return NextResponse.json({ success: true, discovered, firestoreMirrors, ...result });
+    return NextResponse.json({ success: true, discovered, qualifiedDiscovered, firestoreMirrors, ...result });
   } catch (error) {
     logServerError("Scheduled marketing conversion processing failed.", error);
     await prisma.scheduledJobHeartbeat.upsert({ where: { jobName },
