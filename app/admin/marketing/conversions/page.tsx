@@ -5,6 +5,7 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import MarketingPageFrame from "@/components/admin/marketing/MarketingPageFrame";
 import { getAdminSession } from "@/lib/admin/auth";
 import { prisma } from "@/lib/prisma";
+import { checkGoogleAdsSheetHealth } from "@/lib/marketing/googleAdsConversions";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,7 @@ export default async function ConversionCentrePage({
     missingGoogleId,
     missingMetaId,
     heartbeat,
+    sheetHealth,
   ] = await Promise.all([
     prisma.marketingConversionJob.groupBy({
       by: ["provider", "eventType", "status"],
@@ -93,6 +95,7 @@ export default async function ConversionCentrePage({
       },
     }),
     prisma.scheduledJobHeartbeat.findUnique({ where: { jobName: "marketing-conversion-delivery" } }),
+    checkGoogleAdsSheetHealth(),
   ]);
   const pages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -109,6 +112,13 @@ export default async function ConversionCentrePage({
             ? "Automatic delivery worker has run recently. Check failed and retrying records below."
             : "Automatic delivery worker is not verified recently. Check its 15-minute schedule before relying on automatic uploads."}
           {heartbeat?.lastSucceededAt ? <> Last completed: {heartbeat.lastSucceededAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}.</> : null}
+        </p>
+        <p className="rounded-2xl border border-[#E7DFEA] bg-white p-4 text-sm font-semibold text-[#574B5B]">
+          {sheetHealth === "VERIFIED"
+            ? "Google Sheets connection verified: authentication, spreadsheet access and conversion columns passed. No lead rows were written by this check. Final Google Ads import acceptance is separate."
+            : sheetHealth === "NOT_CONFIGURED"
+              ? "Google Sheets connection is not configured. Check its dedicated URL and private credential before relying on uploads."
+              : "Google Sheets connection could not be verified. Check the webhook deployment, spreadsheet configuration and access before relying on uploads."}
         </p>
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {["PENDING", "PROCESSING", "RETRY", "SUCCEEDED", "DEAD"].map((status) => (

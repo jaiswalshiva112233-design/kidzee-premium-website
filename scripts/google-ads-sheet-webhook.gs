@@ -7,6 +7,22 @@ var CONVERSION_NAMES = [
   "Admissions",
 ];
 
+var CONVERSION_HEADERS = ["Google Click ID", "Conversion Name", "Conversion Time", "Conversion Value", "Conversion Currency", "Phone Number"];
+
+function getConversionSheet() {
+  var spreadsheetId = PropertiesService.getScriptProperties().getProperty("CENTREOS_CONVERSION_SPREADSHEET_ID") || "";
+  if (!spreadsheetId) throw new Error("Conversion spreadsheet is not configured");
+  var sheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(CONVERSION_SHEET_NAME);
+  if (!sheet) throw new Error("Conversion sheet not found");
+  var headers = sheet.getRange(1, 1, 1, 6).getDisplayValues()[0];
+  for (var headerIndex = 0; headerIndex < CONVERSION_HEADERS.length; headerIndex++) {
+    if (String(headers[headerIndex] || "").trim() !== CONVERSION_HEADERS[headerIndex]) {
+      throw new Error("Conversion sheet columns do not match expected mapping");
+    }
+  }
+  return sheet;
+}
+
 function conversionTimeWithOffset(value) {
   var match = /^(\d{4}-\d{2}-\d{2})[ T](\d{1,2}):(\d{2}):(\d{2})(?:\+05:30)?$/.exec(
     String(value || "").trim(),
@@ -35,6 +51,10 @@ function doPost(e) {
       difference |= expectedSecret.charCodeAt(secretIndex) ^ suppliedSecret.charCodeAt(secretIndex);
     }
     if (difference !== 0) throw new Error("Unauthorized");
+    if (data.action === "health") {
+      getConversionSheet();
+      return jsonResult({ status: "success", healthy: true });
+    }
     var conversionName = String(data.conversionName || "").trim();
     if (CONVERSION_NAMES.indexOf(conversionName) === -1) {
       throw new Error("Unknown conversion name");
@@ -62,11 +82,7 @@ function doPost(e) {
       throw new Error("Invalid conversion currency");
     }
 
-    var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = spreadsheet.getSheetByName(CONVERSION_SHEET_NAME);
-    if (!sheet) {
-      throw new Error("Conversion sheet not found");
-    }
+    var sheet = getConversionSheet();
 
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);

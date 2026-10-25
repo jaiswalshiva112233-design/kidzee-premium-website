@@ -4,7 +4,7 @@ import { register } from "node:module";
 import test from "node:test";
 register(new URL("./test-loader.mjs", import.meta.url).href);
 const { collectPersistentAttribution } = await import("../lib/marketing/clientAttribution.ts");
-const { sendGoogleConversion, formatE164Phone } = await import("../lib/marketing/googleAdsConversions.ts");
+const { sendGoogleConversion, formatE164Phone, checkGoogleAdsSheetHealth } = await import("../lib/marketing/googleAdsConversions.ts");
 const { enqueueMarketingConversions } = await import("../lib/marketing/admissionConversions.ts");
 
 function browser(t, href, referrer = "") {
@@ -102,4 +102,26 @@ test("Google upload success requires a populated per-row result, uses E164 hashe
   assert.equal(conversion.userIdentifiers[0].hashedPhoneNumber, createHash("sha256").update("+919876543210").digest("hex"));
   responseBody.partialFailureError = { code: 3 };
   assert.equal((await sendGoogleConversion("LEAD", event)).sent, false);
+});
+
+
+test("connection probes send no lead data and require an explicit healthy response", async t => {
+  environment(t, "https://script.google.com/macros/s/synthetic/exec");
+  const requests = [];
+  let payload = { status: "success", healthy: true };
+  t.mock.method(globalThis, "fetch", async (url, options) => {
+    requests.push({ url, body: JSON.parse(options.body) });
+    return { ok: true, json: async () => payload };
+  });
+  assert.equal(await checkGoogleAdsSheetHealth(), "VERIFIED");
+  assert.deepEqual(Object.keys(requests[0].body).sort(), ["action", "secret"]);
+  assert.equal(requests[0].body.action, "health");
+  payload = { status: "success" };
+  assert.equal(await checkGoogleAdsSheetHealth(), "UNAVAILABLE");
+});
+
+test("connection probes cannot transmit credentials to an untrusted destination", async t => {
+  environment(t, "https://example.com/macros/s/synthetic/exec");
+  t.mock.method(globalThis, "fetch", async () => { throw new Error("Must not fetch"); });
+  assert.equal(await checkGoogleAdsSheetHealth(), "NOT_CONFIGURED");
 });

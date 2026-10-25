@@ -119,6 +119,31 @@ export function formatE164Phone(phone: string) {
   return phone.startsWith("+") && /^[1-9]\d{7,14}$/.test(digits) ? `+${digits}` : "";
 }
 
+export async function checkGoogleAdsSheetHealth(): Promise<"VERIFIED" | "NOT_CONFIGURED" | "UNAVAILABLE"> {
+  const webhookUrl = process.env.GOOGLE_ADS_SHEET_WEBHOOK_URL?.trim() ?? "";
+  const secret = process.env.GOOGLE_ADS_SHEET_WEBHOOK_SECRET?.trim() ?? "";
+  if (!URL.canParse(webhookUrl) || secret.length < 32) return "NOT_CONFIGURED";
+  const target = new URL(webhookUrl);
+  if (target.protocol !== "https:" || target.hostname !== "script.google.com" ||
+      !/^\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(target.pathname) || target.search || target.hash) {
+    return "NOT_CONFIGURED";
+  }
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ secret, action: "health" }),
+      redirect: "follow",
+      cache: "no-store",
+      signal: AbortSignal.timeout(8_000),
+    });
+    const result = await response.json() as { status?: unknown; healthy?: unknown };
+    return response.ok && result.status === "success" && result.healthy === true ? "VERIFIED" : "UNAVAILABLE";
+  } catch {
+    return "UNAVAILABLE";
+  }
+}
+
 async function sendViaGoogleSheetWebhook(
   eventType: "LEAD" | "QUALIFIED_LEAD" | "ADMISSION",
   event: GoogleConversionEvent,

@@ -19,13 +19,14 @@ Account: 3462690519. Website: https://kidzeedwarka.com.
 ## Deployment prerequisites and order
 
 1. Preserve the existing deployed version for rollback. Do not merge this change into an automatic production release before the credentials below are configured.
-2. Add GOOGLE_ADS_SHEET_WEBHOOK_SECRET (at least 32 random characters) to App Hosting runtime configuration. Set the identical value as the CENTREOS_WEBHOOK_SECRET property in the existing CentreOS Auto Lead Sync Apps Script. Keep the current deployment URL, Sheet1 columns and Data Manager mappings. Do not expose the secret in source, URLs, screenshots or logs.
-3. Deploy the application with that secret, then deploy scripts/google-ads-sheet-webhook.gs as a new version of the existing web app. Old application versions without the secret will be rejected after the authenticated script is deployed; coordinate the rollout. Test a synthetic row only in a separate test Sheet. Do not send fabricated GCLIDs to production Ads.
-4. For daily campaign snapshots, add GOOGLE_ADS_SNAPSHOT_SECRET (a different random value of at least 32 bytes) and GOOGLE_ADS_CUSTOMER_ID=3462690519 to App Hosting runtime configuration. Keep the reporting credential separate from the marketing cron and staff-device credentials.
-5. Install scripts/google-ads-centreos-sync.gs in this Google Ads account, put the reporting secret in its configuration, authorize the requested scope, run Preview (sends nothing), then run once and schedule daily. It cannot change budgets, ads or bidding. The receiver uses the same timezone as the account, and periodEnd is exclusive.
-6. Keep the existing Firebase retryMarketingConversions function scheduled every 15 minutes, with the same MARKETING_CRON_SECRET as App Hosting. Its new heartbeat should appear within 45 minutes of a successful run. A heartbeat confirms the worker ran; it does not confirm all providers accepted their rows.
-7. Review old DEAD jobs individually after fixing configuration. Confirm genuine admission scope, consent, click eligibility and Google import history before requeueing any. Never replay the whole backlog, especially historic test records.
-8. Review the changed visitor disclosure and privacy-policy copy before publishing the consent-mode behavior.
+2. Set CENTREOS_CONVERSION_SPREADSHEET_ID in the existing Apps Script properties to the ID of its existing Google Ads Conversions spreadsheet. The webhook opens this file explicitly because web-app requests do not have an active spreadsheet. Keep the existing Sheet1 headers and mappings; the authenticated, read-only health check validates all six columns without appending rows.
+3. Add GOOGLE_ADS_SHEET_WEBHOOK_SECRET (at least 32 random characters) to App Hosting runtime configuration. Set the identical value as the CENTREOS_WEBHOOK_SECRET property in the existing CentreOS Auto Lead Sync Apps Script. Keep the current deployment URL, Sheet1 columns and Data Manager mappings. Do not expose the secret in source, URLs, screenshots or logs.
+4. Deploy the application with that secret, then deploy scripts/google-ads-sheet-webhook.gs as a new version of the existing web app. Old application versions without the secret will be rejected after the authenticated script is deployed; coordinate the rollout. Test a synthetic row only in a separate test Sheet. Do not send fabricated GCLIDs to production Ads.
+5. For daily campaign snapshots, add GOOGLE_ADS_SNAPSHOT_SECRET (a different random value of at least 32 bytes) and GOOGLE_ADS_CUSTOMER_ID=3462690519 to App Hosting runtime configuration. Keep the reporting credential separate from the marketing cron and staff-device credentials.
+6. Install scripts/google-ads-centreos-sync.gs in this Google Ads account, put the reporting secret in its configuration, authorize the requested scope, run Preview (sends nothing), then run once and schedule daily. It cannot change budgets, ads or bidding. The receiver uses the same timezone as the account, and periodEnd is exclusive.
+7. Keep the existing Firebase retryMarketingConversions function scheduled every 15 minutes, with the same MARKETING_CRON_SECRET as App Hosting. Its new heartbeat should appear within 45 minutes of a successful run. A heartbeat confirms the worker ran; it does not confirm all providers accepted their rows.
+8. Review old DEAD jobs individually after fixing configuration. Confirm genuine admission scope, consent, click eligibility and Google import history before requeueing any. Never replay the whole backlog, especially historic test records.
+9. Review the changed visitor disclosure and privacy-policy copy before publishing the consent-mode behavior.
 
 ## Live acceptance required before scaling
 
@@ -37,7 +38,7 @@ Account: 3462690519. Website: https://kidzeedwarka.com.
 
 ## Verification
 
-Focused tracking, consent, reporting, auth and adjacent regression tests: 57 passed.
+Focused tracking, consent, reporting, auth and adjacent regression tests: 62 passed.
 TypeScript checking and changed-file ESLint checking pass. The Windows production build hit a filesystem EPERM during output-directory creation; full build success is not claimed. The new read-only GitHub Actions workflow runs the same tracking tests and an isolated migrated-database production build on Linux for every pull request. Do not deploy until that build passes.
 A broader 61-test regression run had one existing receipt-copy expectation failure in untouched code: tests/phase2-workflows.test.mjs, receipt output states GST inclusive without printing a GST percentage. Do not misreport that broader run as fully passing.
 No production database migration is required.

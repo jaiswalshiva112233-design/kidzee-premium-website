@@ -23,9 +23,10 @@ function createHarness() {
   };
   const secret = "synthetic-test-secret-at-least-32-characters";
   const context = {
-    PropertiesService: { getScriptProperties: () => ({ getProperty: () => secret }) },
+    PropertiesService: { getScriptProperties: () => ({ getProperty: (key) => key === "CENTREOS_WEBHOOK_SECRET" ? secret : "synthetic_conversion_sheet" }) },
     SpreadsheetApp: {
-      getActiveSpreadsheet: () => ({ getSheetByName: (name) => name === "Sheet1" ? sheet : null }),
+      getActiveSpreadsheet: () => { throw new Error("No active spreadsheet in a web app"); },
+      openById: (id) => { assert.equal(id, "synthetic_conversion_sheet"); return { getSheetByName: (name) => name === "Sheet1" ? sheet : null }; },
       flush: () => undefined,
     },
     LockService: {
@@ -87,5 +88,29 @@ test("unauthenticated requests cannot append forged conversion rows", () => {
   const valid = { conversionName: "Qualified lead", conversionTime: "2026-10-24T10:00:00+05:30", gclid: "synthetic_click_id" };
   assert.equal(post({ ...valid, secret: "" }).status, "error");
   assert.equal(post({ ...valid, secret: "wrong-token-but-the-same-length-as-the-real-one" }).status, "error");
+  assert.equal(rows.length, 1);
+});
+
+
+test("authenticated health checks work without an active spreadsheet and never append rows", () => {
+  const { rows, formats, post } = createHarness();
+  assert.deepEqual(post({ action: "health" }), { status: "success", healthy: true });
+  assert.equal(rows.length, 1);
+  assert.equal(formats.length, 0);
+  assert.equal(post({ action: "health", secret: "" }).status, "error");
+});
+
+test("health checks reject a missing spreadsheet configuration", () => {
+  const { post, context } = createHarness();
+  const secret = context.PropertiesService.getScriptProperties().getProperty("CENTREOS_WEBHOOK_SECRET");
+  context.PropertiesService.getScriptProperties = () => ({ getProperty: key => key === "CENTREOS_WEBHOOK_SECRET" ? secret : "" });
+  assert.deepEqual(post({ action: "health" }), { status: "error", message: "Error: Conversion spreadsheet is not configured" });
+});
+
+test("a changed column mapping blocks health confirmation and lead writes", () => {
+  const { rows, post } = createHarness();
+  rows[0][1] = "Unexpected column";
+  assert.equal(post({ action: "health" }).status, "error");
+  assert.equal(post({ conversionName: "Qualified lead", conversionTime: "2026-10-24T10:00:00+05:30", gclid: "synthetic_click_id" }).status, "error");
   assert.equal(rows.length, 1);
 });
