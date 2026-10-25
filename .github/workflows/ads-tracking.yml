@@ -24,7 +24,7 @@ jobs:
       - name: Conversion, consent and reporting regression tests
         run: >-
           node --test tests/advanced-consent-mode.test.mjs
-          tests/conversion-accuracy.test.mjs tests/conversion-recovery.test.mjs
+          tests/conversion-accuracy.test.mjs tests/conversion-recovery.test.mjs tests/phone-forwarding.test.mjs
           tests/audit-behavioural-regression.test.mjs tests/google-ads-snapshot.test.mjs
           tests/google-ads-snapshot-route.test.mjs tests/google-ads-sheet-webhook.test.mjs
           tests/marketing-dashboard-accuracy.test.mjs tests/marketing-safety-separation.test.mjs
