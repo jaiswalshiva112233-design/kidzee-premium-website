@@ -16,18 +16,29 @@ function main() {
   var today = Utilities.formatDate(new Date(), account.getTimeZone(), "yyyy-MM-dd");
   var todayUtc = new Date(today + "T00:00:00Z");
   var start = new Date(todayUtc.getTime() - 30 * 86400000).toISOString().slice(0,10);
-  var rows = AdsApp.search("SELECT campaign.id, campaign.name, campaign.status, campaign_budget.id, " +
-    "campaign_budget.amount_micros, metrics.cost_micros, metrics.clicks, metrics.impressions, " +
+  // Date-filtered metrics can omit campaigns with no activity. Read identities separately.
+  var metricsById = Object.create(null);
+  var rows = AdsApp.search("SELECT campaign.id, metrics.cost_micros, metrics.clicks, metrics.impressions, " +
     "metrics.conversions, metrics.all_conversions FROM campaign WHERE segments.date DURING LAST_30_DAYS");
-  var campaigns = [];
   while (rows.hasNext()) {
-    var row = rows.next();
-    campaigns.push({ id: String(row.campaign.id), name: row.campaign.name, status: row.campaign.status,
-      budgetId: String(row.campaignBudget.id), budgetMicros: Number(row.campaignBudget.amountMicros),
-      costMicros: Number(row.metrics.costMicros), clicks: Number(row.metrics.clicks),
-      impressions: Number(row.metrics.impressions), conversions: Number(row.metrics.conversions),
-      allConversions: Number(row.metrics.allConversions) });
+    var metricRow = rows.next();
+    metricsById[String(metricRow.campaign.id)] = metricRow.metrics;
   }
+  var campaigns = [];
+  var identities = AdsApp.search("SELECT campaign.id, campaign.name, campaign.status, campaign_budget.id, " +
+    "campaign_budget.amount_micros FROM campaign");
+  while (identities.hasNext()) {
+    var row = identities.next();
+    var id = String(row.campaign.id);
+    var metrics = metricsById[id] || { costMicros: 0, clicks: 0, impressions: 0, conversions: 0, allConversions: 0 };
+    campaigns.push({ id: id, name: row.campaign.name, status: row.campaign.status,
+      budgetId: String(row.campaignBudget.id), budgetMicros: Number(row.campaignBudget.amountMicros),
+      costMicros: Number(metrics.costMicros), clicks: Number(metrics.clicks),
+      impressions: Number(metrics.impressions), conversions: Number(metrics.conversions),
+      allConversions: Number(metrics.allConversions) });
+    delete metricsById[id];
+  }
+  if (Object.keys(metricsById).length) throw new Error("Campaign metadata is incomplete; snapshot was not sent.");
   if (AdsApp.getExecutionInfo().isPreview()) {
     Logger.log("Preview only: " + campaigns.length + " campaigns; no data sent.");
     return;

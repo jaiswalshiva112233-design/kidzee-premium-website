@@ -38,7 +38,7 @@ Account: 3462690519. Website: https://kidzeedwarka.com.
 
 ## Verification
 
-Focused tracking, consent, reporting, auth and adjacent regression tests: 62 passed.
+Focused tracking, consent, reporting, auth and adjacent regression tests: 66 passed.
 TypeScript checking and changed-file ESLint checking pass. The Windows production build hit a filesystem EPERM during output-directory creation; full build success is not claimed. The new read-only GitHub Actions workflow runs the same tracking tests and an isolated migrated-database production build on Linux for every pull request. Do not deploy until that build passes.
 A broader 61-test regression run had one existing receipt-copy expectation failure in untouched code: tests/phase2-workflows.test.mjs, receipt output states GST inclusive without printing a GST percentage. Do not misreport that broader run as fully passing.
 No production database migration is required.

@@ -34,11 +34,11 @@ test("zero-traffic accounts remain valid and cannot acquire invented sample metr
 });
 
 const source = readFileSync(new URL("../scripts/google-ads-centreos-sync.gs", import.meta.url), "utf8");
-function script(preview = false) {
+function script(preview = false, zeroTraffic = false) {
   const requests = [];
   const row = { campaign: { id: "1", name: "Synthetic", status: "PAUSED" }, campaignBudget: { id: "10", amountMicros: 500000000 }, metrics: { costMicros: 1000000, clicks: 2, impressions: 10, conversions: 0, allConversions: 3 } };
   const context = {
-    AdsApp: { currentAccount: () => ({ getCustomerId:()=>"346-269-0519", getCurrencyCode:()=>"INR", getTimeZone:()=>"Asia/Calcutta" }), getExecutionInfo:()=>({isPreview:()=>preview}), search:()=>{ let used=false; return {hasNext:()=>!used,next:()=>{ used=true; return row; }}; } },
+    AdsApp: { currentAccount: () => ({ getCustomerId:()=>"346-269-0519", getCurrencyCode:()=>"INR", getTimeZone:()=>"Asia/Calcutta" }), getExecutionInfo:()=>({isPreview:()=>preview}), search:(query)=>{ const entries=query.includes("metrics.cost_micros") ? [row] : [row,...(zeroTraffic ? [{campaign:{id:"2",name:"No activity",status:"PAUSED"},campaignBudget:{id:"20",amountMicros:400000000}}] : [])]; let index=0; return {hasNext:()=>index<entries.length,next:()=>entries[index++]}; } },
     Utilities: { formatDate:()=>"2026-10-24" }, Logger: { log:()=>{} },
     UrlFetchApp: { fetch: (url,options)=>{requests.push({url,options});return {getResponseCode:()=>200,getContentText:()=>'{"success":true}'};} }
   };
@@ -57,4 +57,40 @@ test("Ads script preview transmits nothing; a run sends reporting totals and fai
   assert.equal(Object.hasOwn(payload,"phone"),false);
   run.context.UrlFetchApp.fetch=()=>({getResponseCode:()=>401});
   assert.throws(()=>run.context.main());
+});
+
+
+test("reporting includes zero-activity campaign identities and their configured budgets", () => {
+  const run = script(false, true); run.context.main();
+  const payload = JSON.parse(run.requests[0].options.payload);
+  assert.equal(payload.campaigns.length, 2);
+  assert.deepEqual(payload.campaigns[1], { id: "2", name: "No activity", status: "PAUSED", budgetId: "20", budgetMicros: 400000000, costMicros: 0, clicks: 0, impressions: 0, conversions: 0, allConversions: 0 });
+});
+
+test("missing campaign metadata cannot silently remove reported spend", () => {
+  const run = script();
+  const search = run.context.AdsApp.search;
+  run.context.AdsApp.search = query => query.includes("metrics.cost_micros") ? search(query) : {hasNext:()=>false};
+  assert.throws(() => run.context.main(), /metadata is incomplete/);
+  assert.equal(run.requests.length, 0);
+});
+
+test("an account with no period activity still reports its stored campaign identities", () => {
+  const run = script(false, true);
+  const search = run.context.AdsApp.search;
+  run.context.AdsApp.search = query => query.includes("metrics.cost_micros") ? {hasNext:()=>false} : search(query);
+  run.context.main();
+  const payload = JSON.parse(run.requests[0].options.payload);
+  assert.equal(payload.campaigns.length, 2);
+  assert.equal(payload.campaigns.reduce((sum,row)=>sum+row.costMicros,0), 0);
+});
+
+test("campaign identities are queried without a reporting-date filter", () => {
+  const run = script(); const queries = [];
+  const search = run.context.AdsApp.search;
+  run.context.AdsApp.search = query => { queries.push(query); return search(query); };
+  run.context.main();
+  assert.equal(queries.length, 2);
+  assert.match(queries[0], /LAST_30_DAYS/);
+  assert.doesNotMatch(queries[1], /segments.date|metrics\./);
 });
