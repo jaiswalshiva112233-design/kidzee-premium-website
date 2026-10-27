@@ -65,6 +65,10 @@ try {
       const brokenImages = await page.locator("img").evaluateAll((images) => images.filter((image) => !image.complete || image.naturalWidth === 0).map((image) => image.src));
       assert.deepEqual(brokenImages, [], "Broken images");
       await page.screenshot({ path: output + "/" + (route.includes("landing") ? "ads" : "admissions") + "-" + width + ".png", fullPage: true });
+      if (route.includes("landing") && (width === 390 || width === 1440)) {
+        const image = await page.screenshot({ type: "jpeg", quality: 38 });
+        console.log("ADMISSIONS_PREVIEW_" + width + ":" + image.toString("base64") + ":END_PREVIEW");
+      }
       const visit = page.locator('header a[href="#admission-enquiry"]');
       if (width >= 768) await visit.click();
       else await page.locator('nav[aria-label="Contact admissions"] a[href="#admission-enquiry"]').click();
