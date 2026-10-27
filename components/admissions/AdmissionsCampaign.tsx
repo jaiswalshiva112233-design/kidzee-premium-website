@@ -109,9 +109,9 @@ export default function AdmissionsCampaign({
                 landingPageId={landingPageId}
                 landingVariantId={landingVariantId}
                 growthExperimentId={growthExperimentId}
-                badgeText="LET'S MEET"
-                title="Come and see our preschool"
-                subtitle="Leave your details and our centre team will call to discuss your child's programme, fees and a convenient visit time."
+                badgeText="ADMISSIONS 2027–28"
+                title="Book a School Visit"
+                subtitle="Meet our team, explore the classrooms and understand your child's programme and fees."
                 submitButtonText={visitLabel}
                 privacyText="Our centre team will use your details to respond to this enquiry. Please see our Privacy Policy for more information."
                 handoffText="After your enquiry is saved, WhatsApp opens so you can continue the conversation with our team."
