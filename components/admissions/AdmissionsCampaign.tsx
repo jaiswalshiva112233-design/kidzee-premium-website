@@ -236,7 +236,7 @@ export default function AdmissionsCampaign({
               ))}
             </div>
             <p className={styles.reviewNote}>These excerpts also appear on our main website and are shortened for readability. Open Google reviews to read the original context.</p>
-            <Link href="/gallery#parent-stories" className={styles.termsLink}>Explore parent stories and centre albums</Link>
+            <Link href="/gallery" className={styles.termsLink}>Explore parent stories and centre albums</Link>
           </div>
         </section>
 

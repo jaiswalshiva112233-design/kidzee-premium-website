@@ -147,6 +147,7 @@ try {
   console.log("Admissions browser verification passed: 8 responsive layouts, image loading, visit links, form validation, CentreOS persistence, attribution and retry deduplication.");
 } catch (error) {
   console.error("ADMISSIONS_BROWSER_ERROR: " + (error?.stack || error));
+  console.error("ADMISSIONS_TEST_SERVER: " + logs.slice(-8000));
   throw error;
 } finally {
   await writeFile(output + "/server.log", logs);
