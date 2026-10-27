@@ -3,7 +3,7 @@ import { spawn } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Pool } from "pg";
-import { chromium } from "playwright";
+const { chromium } = await import(process.env.ADMISSIONS_PLAYWRIGHT_MODULE || "playwright");
 
 const origin = "http://127.0.0.1:3100";
 const output = "work/admissions-browser";

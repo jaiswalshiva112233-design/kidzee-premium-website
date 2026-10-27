@@ -6,7 +6,7 @@ permissions:
   contents: read
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
       DIRECT_URL: postgresql://test:test@127.0.0.1:5432/test
@@ -31,11 +31,12 @@ jobs:
           tests/phase1-production.test.mjs tests/marketing-catalogue-polish.test.mjs
       - name: Install browser verification tools
         run: |
-          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.56.1
-          npx playwright install --with-deps chromium
+          npm install --prefix "$RUNNER_TEMP/admissions-browser-tools" --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.56.1
+          "$RUNNER_TEMP/admissions-browser-tools/node_modules/.bin/playwright" install --with-deps chromium
       - name: Production build and admissions browser verification against an isolated database
         env:
           ADMISSIONS_BROWSER_CHECK: "true"
+          ADMISSIONS_PLAYWRIGHT_MODULE: ${{ runner.temp }}/admissions-browser-tools/node_modules/playwright/index.mjs
         run: npm run test:build:production
       - name: Save admissions screenshots and verification results
         if: always()
