@@ -28,6 +28,8 @@ import { FaWhatsapp } from "react-icons/fa6";
 import { useEffect, useMemo, useState } from "react";
 
 import AdmissionForm from "@/components/AdmissionForm";
+import AdmissionsCampaign from "@/components/admissions/AdmissionsCampaign";
+import { ADMISSIONS_CAMPAIGN_SLUG } from "@/lib/website/admissionsCampaign";
 import CareerApplicationForm from "@/components/careers/CareerApplicationForm";
 import { useSiteContact } from "@/components/SiteContactProvider";
 
@@ -305,12 +307,12 @@ export default function LandingPageExperience({
 
   // Fast auto-playing slideshow: transitions every 2.5 seconds
   useEffect(() => {
-    if (isPhotoPaused) return;
+    if (isPhotoPaused || page.slug === ADMISSIONS_CAMPAIGN_SLUG) return;
     const interval = setInterval(() => {
       setActivePhotoIndex((prev) => (prev + 1) % activePhotos.length);
     }, 2500);
     return () => clearInterval(interval);
-  }, [isPhotoPaused]);
+  }, [isPhotoPaused, page.slug]);
 
   useEffect(() => {
     const bucket = anonymousBucket(
@@ -356,6 +358,18 @@ export default function LandingPageExperience({
       videoUrl.includes("/uploads/") ||
       videoUrl.startsWith("http") ||
       videoUrl.startsWith("/"));
+
+  // Keep the existing database IDs, selected variant and lead-attribution path
+  // while using the 2027–28 campaign design at the confirmed Google Ads URL.
+  if (page.slug === ADMISSIONS_CAMPAIGN_SLUG) {
+    return (
+      <AdmissionsCampaign
+        landingPageId={page.id}
+        landingVariantId={selected.id}
+        growthExperimentId={experiment?.id ?? ""}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FAF7FC] text-[#281034] font-sans antialiased selection:bg-[#5B2A86] selection:text-white">

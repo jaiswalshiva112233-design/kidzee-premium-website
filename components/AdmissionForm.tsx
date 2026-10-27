@@ -82,6 +82,8 @@ type AdmissionFormProps = {
   subtitle?: string;
   badgeText?: string;
   submitButtonText?: string;
+  privacyText?: string;
+  handoffText?: string;
 };
 
 function createSubmissionId() {
@@ -178,6 +180,8 @@ export default function AdmissionForm({
   subtitle,
   badgeText,
   submitButtonText,
+  privacyText,
+  handoffText,
 }: AdmissionFormProps) {
   const site = useSiteContact();
   const [formData, setFormData] =
@@ -631,8 +635,7 @@ export default function AdmissionForm({
               className="mt-0.5 shrink-0 text-[#5B2A86]"
             />
             <p className="text-sm leading-6 text-[#5F5F6D]">
-              Your details are saved securely in CentreOS and used only to
-              respond to this enquiry.
+              {privacyText || "Your details are saved securely in CentreOS and used only to respond to this enquiry."}
             </p>
           </div>
         </div>
@@ -682,8 +685,7 @@ export default function AdmissionForm({
         </div>
 
         <p className="text-center text-xs font-semibold leading-5 text-[#6F6474]">
-          Your enquiry is saved first. WhatsApp opens only after CentreOS
-          confirms it.
+          {handoffText || "Your enquiry is saved first. WhatsApp opens only after CentreOS confirms it."}
         </p>
 
         <p className="text-center text-xs leading-5 text-[#77707C]">

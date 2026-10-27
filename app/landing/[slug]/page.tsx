@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import LandingPageExperience from "@/components/growth/LandingPageExperience";
-import PageShell from "@/components/PageShell";
+import { ADMISSIONS_CAMPAIGN_SLUG, ADMISSIONS_CAMPAIGN_TITLE, ADMISSIONS_CAMPAIGN_DESCRIPTION, ADMISSIONS_CAMPAIGN_IMAGE } from "@/lib/website/admissionsCampaign";
 import { prisma } from "@/lib/prisma";
 import { site } from "@/lib/site";
 
@@ -16,6 +16,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const page = await pageData(slug);
   if (!page) return {};
+  if (slug === ADMISSIONS_CAMPAIGN_SLUG) {
+    return {
+      title: { absolute: ADMISSIONS_CAMPAIGN_TITLE },
+      description: ADMISSIONS_CAMPAIGN_DESCRIPTION,
+      alternates: { canonical: site.url + "/landing/" + page.slug },
+      robots: { index: false, follow: true },
+      openGraph: { title: ADMISSIONS_CAMPAIGN_TITLE, description: ADMISSIONS_CAMPAIGN_DESCRIPTION, url: site.url + "/landing/" + page.slug, images: [{ url: ADMISSIONS_CAMPAIGN_IMAGE, width: 1200, height: 630 }] },
+      twitter: { card: "summary_large_image", title: ADMISSIONS_CAMPAIGN_TITLE, description: ADMISSIONS_CAMPAIGN_DESCRIPTION, images: [ADMISSIONS_CAMPAIGN_IMAGE] },
+    };
+  }
   const content = page.content as { indexable?: boolean };
   const indexable = content.indexable === true;
   return { title: page.seoTitle, description: page.metaDescription, alternates: { canonical: `${site.url}/landing/${page.slug}` }, robots: { index: indexable, follow: indexable } };

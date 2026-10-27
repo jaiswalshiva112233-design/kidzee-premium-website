@@ -50,6 +50,9 @@ try {
   const nextCli = path.join(process.cwd(), "node_modules", "next", "dist", "bin", "next");
   await run([nextCli, "build", "--webpack"]);
   console.log("Production Next.js build passed against a fully migrated database.");
+  if (process.env.ADMISSIONS_BROWSER_CHECK === "true") {
+    console.log(await run([path.join(process.cwd(), "scripts", "verify-admissions-browser.mjs")]));
+  }
 } finally {
   await server.stop().catch(() => undefined);
   await database.close();

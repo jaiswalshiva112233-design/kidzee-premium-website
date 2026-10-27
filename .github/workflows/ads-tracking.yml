@@ -29,5 +29,18 @@ jobs:
           tests/google-ads-snapshot-route.test.mjs tests/google-ads-sheet-webhook.test.mjs
           tests/marketing-dashboard-accuracy.test.mjs tests/marketing-safety-separation.test.mjs
           tests/phase1-production.test.mjs tests/marketing-catalogue-polish.test.mjs
-      - name: Production build against an isolated migrated database
+      - name: Install browser verification tools
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Production build and admissions browser verification against an isolated database
+        env:
+          ADMISSIONS_BROWSER_CHECK: "true"
         run: npm run test:build:production
+      - name: Save admissions screenshots and verification results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admissions-2027-28-browser-review
+          path: work/admissions-browser
+          if-no-files-found: ignore
