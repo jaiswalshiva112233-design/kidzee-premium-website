@@ -71,6 +71,10 @@ try {
         const image = await sharp(screenshot).resize({ width: width === 1440 ? 900 : 270 }).jpeg({ quality: 40 }).toBuffer();
         console.log("ADMISSIONS_PREVIEW_" + width + ":" + image.toString("base64") + ":END_PREVIEW");
       }
+      if (route.includes("landing") && width === 1440) {
+        const fullPreview = await sharp(await page.screenshot({ fullPage: true })).resize({ width: 300 }).jpeg({ quality: 35 }).toBuffer();
+        console.log("ADMISSIONS_PREVIEW_FULL:" + fullPreview.toString("base64") + ":END_PREVIEW");
+      }
       const visit = page.locator('header a[href="#admission-enquiry"]');
       if (width >= 768) await visit.click();
       else await page.locator('nav[aria-label="Contact admissions"] a[href="#admission-enquiry"]').click();
@@ -117,7 +121,7 @@ try {
     await button.click();
     const response = await responsePromise;
     const body = await response.json();
-    assert.equal(response.status(), 200, JSON.stringify(body));
+    assert.equal(response.status(), 201, JSON.stringify(body));
     assert.equal(body.success, true);
     assert.ok(body.enquiryNumber);
     await page.getByRole("heading", { name: "Thank you. We have your enquiry." }).waitFor();
