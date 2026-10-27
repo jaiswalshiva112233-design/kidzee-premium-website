@@ -1,21 +1,24 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
   CalendarCheck,
   CheckCircle2,
   ChevronRight,
-  ClipboardCheck,
+  CirclePercent,
   FileCheck2,
+  HeartHandshake,
   MessageCircle,
   Phone,
+  Sparkles,
+  Sun,
 } from "lucide-react";
 
 import AdmissionForm from "@/components/AdmissionForm";
 import PageShell from "@/components/PageShell";
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
-import { getWebsiteContentSettings } from "@/lib/sanity/contentSettings";
 import { getWebsiteContactSettings } from "@/lib/sanity/contactSettings";
 import { buildWebsitePageMetadata } from "@/lib/sanity/seo";
 import { site as staticSite } from "@/lib/site";
@@ -25,29 +28,22 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildWebsitePageMetadata({
     pageKey: "admissions",
     path: "/admissions",
-    title: "Preschool Admissions",
+    title: "Admissions 2027–28 | Kidzee Sector 12 Dwarka",
     description:
-      "Enquire about Playgroup, Nursery, Junior KG, Senior KG and daycare admissions at Kidzee Sector 12, Dwarka. Book a centre visit or ask about the three-day trial.",
+      "Admissions 2027–28 at Kidzee Sector 12 Dwarka. Book a school visit and ask about 30% off annual charges, the January settling-in period and included summer camp.",
     keywords: [
-      "preschool admission Sector 12 Dwarka",
-      "Kidzee admission Dwarka",
+      "preschool admission 2027-28 Dwarka",
+      "Kidzee admission Sector 12 Dwarka",
       "nursery admission Dwarka",
       "playgroup admission Dwarka",
-      "Junior KG admission Dwarka",
-      "Senior KG admission Dwarka",
-      "preschool trial Dwarka",
+      "preschool offer Dwarka",
+      "school visit Kidzee Dwarka",
     ],
-    socialImage: "/images/hero/hero-classroom.jpg",
+    socialImage: "/images/landing/kidzee-creative-learning.jpg",
     socialImageAlt:
-      "Preschool admissions at Kidzee Sector 12 Dwarka",
+      "Children learning at Kidzee Sector 12 Dwarka",
   });
 }
-
-const quickFacts = [
-  "Playgroup to Senior KG",
-  "Three-day trial available",
-  "Daycare until 7:00 PM",
-] as const;
 
 const formProgrammes = new Set([
   "PLAYGROUP",
@@ -67,77 +63,110 @@ const formEnquiryTypes = new Set([
 ]);
 
 type AdmissionsPageProps = {
-  searchParams: Promise<
-    Record<string, string | string[] | undefined>
-  >;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 function firstQueryValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] ?? "" : value ?? "";
 }
 
+const offerHighlights = [
+  {
+    icon: CirclePercent,
+    title: "30% off annual charges",
+    description:
+      "The concession applies to the annual charges for eligible 2027–28 preschool admissions.",
+  },
+  {
+    icon: HeartHandshake,
+    title: "A January settling-in start",
+    description:
+      "Children joining in January attend through January and February, while monthly tuition begins from March.",
+  },
+  {
+    icon: Sun,
+    title: "Summer camp included",
+    description:
+      "Children enrolled in our 2027–28 preschool programme do not pay an additional summer camp fee.",
+  },
+] as const;
+
 const admissionSteps = [
   {
     number: "01",
     icon: MessageCircle,
-    title: "Tell us what you need",
+    title: "Tell us about your child",
     description:
-      "Share your child's age, the programme you are considering and whether you would like a school visit, trial or callback.",
+      "Share your child's age and the programme you are considering. If you are unsure, our centre team will guide you.",
   },
   {
     number: "02",
     icon: CalendarCheck,
-    title: "Visit and meet the team",
+    title: "Visit the preschool",
     description:
-      "See the classrooms, understand the routine and ask about settling, meals, daycare, preschool cab routes and current availability.",
+      "Meet the team, see the classrooms and discuss the daily routine, settling support, fees and current availability.",
   },
   {
     number: "03",
-    icon: ClipboardCheck,
-    title: "Complete admission",
+    icon: FileCheck2,
+    title: "Receive the written fee details",
     description:
-      "Once you are comfortable, confirm the programme and joining date, then submit the admission form and documents.",
+      "Before admission, we will confirm the programme, joining date, offer eligibility and complete fee breakup.",
   },
 ] as const;
 
-const documents = [
-  "Child's birth certificate",
-  "Recent passport-size photographs",
-  "Parent or guardian identity proof",
-  "Residential address proof",
-  "Relevant medical information, when applicable",
+const testimonials = [
+  {
+    quote:
+      "I am fully satisfied with the school in every manner—learning, communication and safety. All the teachers treat children very nicely, and my daughter is growing here.",
+    name: "Shailja Singh",
+    source: "Google reviewer",
+  },
+  {
+    quote:
+      "The preschool is trustworthy. The teachers share weekly feedback and regularly update parents about activities.",
+    name: "Komal Gahlot",
+    source: "Google reviewer",
+  },
+] as const;
+
+const offerTerms = [
+  "The 30% concession applies only to annual charges for eligible 2027–28 preschool admissions. Admission, kit and any other applicable charges remain payable as explained in the written fee breakup.",
+  "For a child whose admission is completed for a January 2027 start, January and February are the settling-in attendance period. The child attends the preschool routine during this period, and monthly tuition is charged from March 2027.",
+  "The no-additional-fee summer camp inclusion applies to children enrolled in the centre's 2027–28 preschool programme. Optional services outside the preschool programme are separate.",
+  "Programme placement, joining date, seat availability and the final fee schedule are confirmed by the centre team before payment.",
 ] as const;
 
 const admissionFaqs = [
   {
-    question: "How do I begin the admission process?",
+    question: "What exactly is reduced by 30%?",
     answer:
-      "Send the short enquiry form on this page. Your details are saved with our centre team, who can then discuss your child's age, the suitable programme, availability and a convenient visit time.",
+      "The concession is on annual charges for eligible 2027–28 preschool admissions. It does not reduce admission, kit or other applicable charges. The centre team will give you a written fee breakup before you complete admission.",
   },
   {
-    question: "Which programme is suitable for my child?",
+    question: "Will my child attend during January and February?",
     answer:
-      "Programme guidance begins with age and also considers readiness and any previous preschool experience. If you are unsure, select 'Please guide me' in the enquiry form.",
+      "Yes. A child admitted for a January 2027 start attends during January and February as a settling-in period and takes part in the preschool routine. Monthly tuition begins from March 2027.",
   },
   {
-    question: "Can we visit the centre before deciding?",
+    question: "Is summer camp included?",
     answer:
-      "Yes. A visit lets you see the classrooms, meet the centre team and understand the daily routine before you make a decision.",
+      "Yes. Children enrolled in our 2027–28 preschool programme will not be charged an additional summer camp fee. Any optional services outside the preschool programme are discussed separately.",
   },
   {
-    question: "Is a trial available before admission?",
+    question: "Can we visit before deciding?",
     answer:
-      "A three-day preschool trial is available with prior scheduling and subject to current classroom availability. The centre team will confirm the suitable dates and timings.",
+      "Yes. We encourage you to visit, see the classrooms, meet the centre team and understand the routine before making a decision.",
   },
   {
-    question: "Can I discuss fees before visiting?",
+    question: "Which programmes are open for admission?",
     answer:
-      "Yes. Choose 'Fees and availability' in the form and the centre team will explain the current programme fee structure and any optional services relevant to your child.",
+      "You can enquire for Playgroup, Nursery, Junior KG and Senior KG. Programme guidance is based on your child's age, readiness and previous preschool experience.",
   },
   {
-    question: "Can I enquire about daycare with preschool?",
+    question: "How do I get the complete fee details?",
     answer:
-      "Yes. Tell us whether you need preschool only, occasional daycare or regular daycare so we can explain the routine, meal options, timings and current charges.",
+      "Book a school visit or send the enquiry form. We will explain the offer, applicable charges, monthly tuition and current seat availability in a clear written breakup.",
   },
 ] as const;
 
@@ -155,23 +184,10 @@ const structuredData = [
       {
         "@type": "ListItem",
         position: 2,
-        name: "Admissions",
-        item: `${staticSite.url}/admissions`,
+        name: "Admissions 2027–28",
+        item: staticSite.url + "/admissions",
       },
     ],
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    name: "How to enquire about preschool admission at Kidzee Sector 12 Dwarka",
-    description:
-      "A parent-friendly path from first enquiry to preschool admission.",
-    step: admissionSteps.map((step) => ({
-      "@type": "HowToStep",
-      position: Number(step.number),
-      name: step.title,
-      text: step.description,
-    })),
   },
   {
     "@context": "https://schema.org",
@@ -199,10 +215,7 @@ export default async function AdmissionsPage({
   const initialEnquiryType = formEnquiryTypes.has(requestedEnquiryType)
     ? requestedEnquiryType
     : "SCHOOL_VISIT";
-  const [contentSettings, contactSettings] = await Promise.all([
-    getWebsiteContentSettings(),
-    getWebsiteContactSettings(),
-  ]);
+  const contactSettings = await getWebsiteContactSettings();
   const site = buildSiteContact(contactSettings);
 
   return (
@@ -211,58 +224,69 @@ export default async function AdmissionsPage({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(structuredData).replace(
-              /</g,
-              "\\u003c",
-            ),
+            __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
           }}
         />
 
-        <section className="relative isolate overflow-hidden bg-[linear-gradient(135deg,#FAF7FC_0%,#FFFFFF_52%,#FFF7D8_100%)] py-10 sm:py-14 lg:py-20">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 -z-10"
-          >
-            <div className="absolute -left-36 top-8 h-80 w-80 rounded-full bg-[#EADDF1]/80 blur-3xl" />
-            <div className="absolute -right-32 bottom-0 h-80 w-80 rounded-full bg-[#F6C84B]/25 blur-3xl" />
+        <section className="relative isolate overflow-hidden bg-[linear-gradient(135deg,#FAF7FC_0%,#FFFFFF_50%,#FFF4C9_100%)] py-8 sm:py-12 lg:py-16">
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
+            <div className="absolute -left-32 top-4 h-80 w-80 rounded-full bg-[#EADDF1]/80 blur-3xl" />
+            <div className="absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-[#F6C84B]/30 blur-3xl" />
           </div>
 
           <Container>
             <nav
               aria-label="Breadcrumb"
-              className="mb-8 flex items-center gap-2 text-sm text-[#746A78]"
+              className="mb-6 flex items-center gap-2 text-sm text-[#746A78]"
             >
-              <Link
-                href="/"
-                className="transition hover:text-[#5B2A86]"
-              >
+              <Link href="/" className="transition hover:text-[#5B2A86]">
                 Home
               </Link>
               <ChevronRight aria-hidden="true" size={15} />
               <span aria-current="page" className="font-bold text-[#5B2A86]">
-                Admissions
+                Admissions 2027–28
               </span>
             </nav>
 
-            <div className="grid items-start gap-10 lg:grid-cols-[0.88fr_1.12fr] lg:gap-14 xl:gap-16">
-              <div className="lg:sticky lg:top-28 lg:pt-2">
+            <div className="grid items-start gap-9 lg:grid-cols-[1.02fr_0.98fr] lg:gap-12">
+              <div>
                 <div className="inline-flex items-center gap-2 rounded-full border border-[#5B2A86]/10 bg-white/90 px-4 py-2 text-sm font-black text-[#5B2A86] shadow-sm">
-                  <CheckCircle2 aria-hidden="true" size={16} />
-                  {contentSettings.admissionsOpen
-                    ? `Admissions ${contentSettings.academicYear}`
-                    : `Admission enquiries ${contentSettings.academicYear}`}{" "}
-                  · Sector 12B, Dwarka
+                  <Sparkles aria-hidden="true" size={16} />
+                  Admissions 2027–28 · Sector 12B, Dwarka
                 </div>
 
-                <h1 className="mt-6 text-balance text-4xl font-black leading-[1.04] tracking-[-0.045em] text-[#2D1736] sm:text-5xl lg:text-[58px]">
-                  {contentSettings.admissionsHeroHeading}
+                <h1 className="mt-5 text-balance text-4xl font-black leading-[1.04] tracking-[-0.045em] text-[#2D1736] sm:text-5xl lg:text-[58px]">
+                  Give your child time to settle before the new session begins.
                 </h1>
 
-                <p className="mt-6 max-w-xl text-lg leading-8 text-[#6F6474] sm:text-xl sm:leading-9">
-                  {contentSettings.admissionsHeroIntro}
+                <p className="mt-5 max-w-2xl text-lg leading-8 text-[#6F6474] sm:text-xl sm:leading-9">
+                  Visit our preschool, meet the teachers and see the routine for
+                  yourself. Families joining for 2027–28 can ask about our
+                  January start plan and annual-charge concession.
                 </p>
 
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <div className="mt-7 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-2xl bg-[#5B2A86] p-4 text-white shadow-[0_16px_38px_rgba(91,42,134,0.2)]">
+                    <p className="text-3xl font-black">30%</p>
+                    <p className="mt-1 text-sm font-bold text-white/85">
+                      off annual charges
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-[#5B2A86]/10 bg-white/90 p-4">
+                    <p className="font-black text-[#2D1736]">January–February</p>
+                    <p className="mt-1 text-sm font-semibold leading-5 text-[#6F6474]">
+                      settling-in attendance
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-[#5B2A86]/10 bg-white/90 p-4">
+                    <p className="font-black text-[#2D1736]">Summer camp</p>
+                    <p className="mt-1 text-sm font-semibold leading-5 text-[#6F6474]">
+                      no additional camp fee
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <Button
                     href="#admission-enquiry"
                     variant="primary"
@@ -270,81 +294,76 @@ export default async function AdmissionsPage({
                     rightIcon={<ArrowRight aria-hidden="true" size={18} />}
                     className="w-full sm:w-auto"
                   >
-                    Send Enquiry
+                    Book a School Visit
                   </Button>
-
                   <Button
-                    href={`tel:${site.phone}`}
+                    href={"tel:" + site.phone}
                     variant="secondary"
                     size="lg"
                     leftIcon={<Phone aria-hidden="true" size={18} />}
                     className="w-full sm:w-auto"
                   >
-                    {contentSettings.secondaryCtaLabel}
+                    Call Admissions
                   </Button>
                 </div>
 
-                <div className="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-                  {quickFacts.map((fact) => (
-                    <div
-                      key={fact}
-                      className="flex items-start gap-2.5 rounded-2xl border border-[#5B2A86]/10 bg-white/80 px-4 py-3"
-                    >
-                      <CheckCircle2
-                        aria-hidden="true"
-                        size={17}
-                        className="mt-0.5 shrink-0 text-[#5B2A86]"
-                      />
-                      <span className="text-sm font-bold leading-5 text-[#514656]">
-                        {fact}
-                      </span>
-                    </div>
-                  ))}
+                <div className="relative mt-8 overflow-hidden rounded-[30px] shadow-[0_24px_65px_rgba(45,23,54,0.16)]">
+                  <Image
+                    src="/images/landing/kidzee-creative-learning.jpg"
+                    alt="Children learning through creative activities at Kidzee Sector 12 Dwarka"
+                    width={1200}
+                    height={800}
+                    priority
+                    className="aspect-[16/10] w-full object-cover"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#241229]/90 to-transparent px-5 pb-5 pt-16 text-white">
+                    <p className="text-sm font-bold">
+                      Photographed at our Sector 12B centre
+                    </p>
+                  </div>
                 </div>
               </div>
 
               <AdmissionForm
                 initialProgramme={initialProgramme}
                 initialEnquiryType={initialEnquiryType}
+                landingPageId="admissions_2027_28"
+                landingVariantId="december_ads_offer"
+                title="Plan your school visit"
+                subtitle="Share your details and our centre team will help you choose a programme, understand the offer and arrange a convenient visit."
+                badgeText="2027–28 admission enquiry"
+                submitButtonText="Request a School Visit"
               />
             </div>
           </Container>
         </section>
 
-        <section className="relative overflow-hidden bg-white py-16 sm:py-20 lg:py-24">
+        <section className="bg-white py-16 sm:py-20 lg:py-24">
           <Container>
             <div className="mx-auto max-w-3xl text-center">
               <p className="text-sm font-black uppercase tracking-[0.16em] text-[#5B2A86]">
-                A clear path to admission
+                The January start plan
               </p>
-              <h2 className="mt-4 text-balance text-3xl font-black leading-tight tracking-[-0.04em] text-[#2D1736] sm:text-4xl lg:text-5xl">
-                From your first question to your child&apos;s first day.
+              <h2 className="mt-4 text-balance text-3xl font-black tracking-[-0.04em] text-[#2D1736] sm:text-4xl lg:text-5xl">
+                A confident beginning, without rushing the first few weeks.
               </h2>
               <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-[#6F6474] sm:text-lg">
-                You can understand the programme, people and routine before
-                completing any admission formalities.
+                The offer is designed for families who want their child to know
+                the teachers, classroom and daily rhythm before the academic
+                session begins in March.
               </p>
             </div>
 
             <div className="mt-10 grid gap-5 md:grid-cols-3 lg:mt-12">
-              {admissionSteps.map(({ number, icon: Icon, title, description }) => (
+              {offerHighlights.map(({ icon: Icon, title, description }) => (
                 <article
-                  key={number}
-                  className="relative rounded-[28px] border border-[#5B2A86]/10 bg-[#FCFAFD] p-6 sm:p-7"
+                  key={title}
+                  className="rounded-[28px] border border-[#5B2A86]/10 bg-[#FCFAFD] p-6 sm:p-7"
                 >
-                  <span
-                    aria-hidden="true"
-                    className="absolute right-6 top-5 text-4xl font-black text-[#EEE4F3]"
-                  >
-                    {number}
-                  </span>
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#5B2A86] text-white">
-                    <Icon aria-hidden="true" size={21} />
+                    <Icon aria-hidden="true" size={22} />
                   </span>
-                  <p className="mt-6 text-xs font-black uppercase tracking-[0.16em] text-[#5B2A86]">
-                    Step {number}
-                  </p>
-                  <h3 className="mt-2 text-xl font-black tracking-[-0.02em] text-[#2D1736]">
+                  <h3 className="mt-5 text-xl font-black text-[#2D1736]">
                     {title}
                   </h3>
                   <p className="mt-3 text-[15px] leading-7 text-[#6F6474]">
@@ -354,65 +373,17 @@ export default async function AdmissionsPage({
               ))}
             </div>
 
-            <div className="mt-7 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-              <article className="rounded-[30px] bg-[#2D1736] p-7 text-white shadow-[0_24px_65px_rgba(45,23,54,0.18)] sm:p-9">
-                <p className="text-sm font-black uppercase tracking-[0.16em] text-[#F6D86F]">
-                  Before regular attendance
-                </p>
-                <h3 className="mt-4 text-3xl font-black leading-tight tracking-[-0.03em]">
-                  Ask about the three-day trial.
-                </h3>
-                <p className="mt-4 max-w-xl leading-8 text-white/75">
-                  A scheduled trial can help your child experience the
-                  teachers and classroom before regular preschool begins.
-                  Availability and suitable timings are confirmed by the
-                  centre team.
-                </p>
-                <div className="mt-7">
-                  <Button
-                    href="/admissions?enquiry=TRIAL#admission-enquiry"
-                    variant="yellow"
-                    size="md"
-                    rightIcon={<ArrowRight aria-hidden="true" size={17} />}
-                  >
-                    Ask About the Trial
-                  </Button>
-                </div>
-              </article>
-
-              <article className="rounded-[30px] border border-[#5B2A86]/10 bg-white p-7 shadow-[0_16px_46px_rgba(52,20,68,0.07)] sm:p-9">
-                <div className="flex items-start gap-4">
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#FFF1B8] text-[#5B2A86]">
-                    <FileCheck2 aria-hidden="true" size={23} />
-                  </span>
-                  <div>
-                    <p className="text-sm font-black uppercase tracking-[0.14em] text-[#5B2A86]">
-                      Keep these ready
-                    </p>
-                    <h3 className="mt-2 text-2xl font-black text-[#2D1736]">
-                      Common admission documents
-                    </h3>
-                  </div>
-                </div>
-
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  {documents.map((document) => (
-                    <div key={document} className="flex items-start gap-3">
-                      <CheckCircle2
-                        aria-hidden="true"
-                        size={18}
-                        className="mt-1 shrink-0 text-[#5B2A86]"
-                      />
-                      <p className="leading-7 text-[#6F6474]">{document}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <p className="mt-6 rounded-2xl bg-[#FAF7FC] p-4 text-sm leading-6 text-[#6F6474]">
-                  The centre team will confirm the final list for your child
-                  before admission.
-                </p>
-              </article>
+            <div className="mt-7 rounded-[30px] border border-[#E7D9ED] bg-[#FFF9E3] p-6 sm:p-8">
+              <p className="text-sm font-black uppercase tracking-[0.14em] text-[#5B2A86]">
+                In simple terms
+              </p>
+              <p className="mt-3 max-w-4xl text-lg font-bold leading-8 text-[#39243F]">
+                If your child's admission is completed for a January 2027
+                start, the child attends in January and February as part of the
+                settling-in period. Monthly tuition begins from March 2027.
+                Annual, admission, kit and other applicable charges are handled
+                separately as shown in your written fee breakup.
+              </p>
             </div>
           </Container>
         </section>
@@ -421,45 +392,47 @@ export default async function AdmissionsPage({
           <Container>
             <div className="mx-auto max-w-3xl text-center">
               <p className="text-sm font-black uppercase tracking-[0.16em] text-[#5B2A86]">
-                Parent questions
+                Visit before you decide
               </p>
               <h2 className="mt-4 text-balance text-3xl font-black tracking-[-0.04em] text-[#2D1736] sm:text-4xl lg:text-5xl">
-                Helpful answers before you visit.
+                See the place where your child will spend their day.
               </h2>
             </div>
 
-            <div className="mx-auto mt-10 max-w-4xl space-y-3">
-              {admissionFaqs.map((faq, index) => (
-                <details
-                  key={faq.question}
-                  className="group overflow-hidden rounded-[24px] border border-[#5B2A86]/10 bg-white open:shadow-[0_14px_40px_rgba(45,23,54,0.07)]"
+            <div className="mt-10 grid gap-5 md:grid-cols-3">
+              {admissionSteps.map(({ number, icon: Icon, title, description }) => (
+                <article
+                  key={number}
+                  className="relative rounded-[28px] border border-[#5B2A86]/10 bg-white p-6 sm:p-7"
                 >
-                  <summary className="flex cursor-pointer list-none items-center gap-4 px-5 py-5 sm:px-6">
-                    <span className="text-xs font-black text-[#8A4AB5]">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <h3 className="flex-1 text-left text-base font-black text-[#2D1736] sm:text-lg">
-                      {faq.question}
-                    </h3>
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F3EAF8] text-xl font-black text-[#5B2A86] transition group-open:rotate-45">
-                      +
-                    </span>
-                  </summary>
-                  <p className="border-t border-[#5B2A86]/10 px-5 py-5 leading-7 text-[#6F6474] sm:px-14">
-                    {faq.answer}
+                  <span
+                    aria-hidden="true"
+                    className="absolute right-6 top-5 text-4xl font-black text-[#EEE4F3]"
+                  >
+                    {number}
+                  </span>
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FFF1B8] text-[#5B2A86]">
+                    <Icon aria-hidden="true" size={21} />
+                  </span>
+                  <h3 className="mt-6 text-xl font-black text-[#2D1736]">
+                    {title}
+                  </h3>
+                  <p className="mt-3 text-[15px] leading-7 text-[#6F6474]">
+                    {description}
                   </p>
-                </details>
+                </article>
               ))}
             </div>
 
             <div className="mx-auto mt-10 flex max-w-5xl flex-col items-center justify-between gap-7 rounded-[32px] bg-[#2D1736] px-6 py-9 text-center text-white shadow-[0_24px_65px_rgba(45,23,54,0.2)] sm:px-9 lg:flex-row lg:text-left">
               <div className="max-w-2xl">
                 <h2 className="text-3xl font-black tracking-[-0.035em] sm:text-4xl">
-                  Ready to take the first simple step?
+                  Come and meet us before you decide.
                 </h2>
                 <p className="mt-3 leading-7 text-white/75">
-                  Send your details once. They will be saved securely with
-                  our centre team so we can guide you personally.
+                  Bring your child, see the classrooms and ask every practical
+                  question. We will explain the programme and complete fee
+                  structure clearly.
                 </p>
               </div>
               <Button
@@ -469,8 +442,147 @@ export default async function AdmissionsPage({
                 rightIcon={<ArrowRight aria-hidden="true" size={18} />}
                 className="w-full shrink-0 sm:w-auto"
               >
-                Send an Enquiry
+                Book Your Visit
               </Button>
+            </div>
+          </Container>
+        </section>
+
+        <section className="bg-white py-16 sm:py-20 lg:py-24">
+          <Container>
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-sm font-black uppercase tracking-[0.16em] text-[#5B2A86]">
+                Parent experiences
+              </p>
+              <h2 className="mt-4 text-balance text-3xl font-black tracking-[-0.04em] text-[#2D1736] sm:text-4xl lg:text-5xl">
+                What local parents chose to share.
+              </h2>
+            </div>
+
+            <div className="mx-auto mt-10 grid max-w-5xl gap-5 md:grid-cols-2">
+              {testimonials.map((testimonial) => (
+                <figure
+                  key={testimonial.name}
+                  className="rounded-[28px] border border-[#5B2A86]/10 bg-[#FCFAFD] p-7 sm:p-8"
+                >
+                  <div className="text-lg tracking-[0.18em] text-[#F2B705]">
+                    ★★★★★
+                  </div>
+                  <blockquote className="mt-4 text-lg font-semibold leading-8 text-[#3D3041]">
+                    “{testimonial.quote}”
+                  </blockquote>
+                  <figcaption className="mt-5">
+                    <p className="font-black text-[#2D1736]">
+                      {testimonial.name}
+                    </p>
+                    <p className="text-sm text-[#746A78]">
+                      {testimonial.source}
+                    </p>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+
+            <div className="mt-7 text-center">
+              <Button
+                href={staticSite.googleReviews}
+                variant="secondary"
+                size="md"
+              >
+                Read Current Google Reviews
+              </Button>
+            </div>
+          </Container>
+        </section>
+
+        <section className="bg-[#FAF7FC] py-16 sm:py-20 lg:py-24">
+          <Container>
+            <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:gap-12">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.16em] text-[#5B2A86]">
+                  Clear offer terms
+                </p>
+                <h2 className="mt-4 text-balance text-3xl font-black tracking-[-0.04em] text-[#2D1736] sm:text-4xl">
+                  No surprises after you visit.
+                </h2>
+                <p className="mt-5 leading-8 text-[#6F6474]">
+                  Our team will confirm eligibility and give you the complete
+                  fee schedule in writing before admission.
+                </p>
+
+                <div className="mt-7 space-y-4">
+                  {offerTerms.map((term) => (
+                    <div key={term} className="flex items-start gap-3">
+                      <CheckCircle2
+                        aria-hidden="true"
+                        size={19}
+                        className="mt-1 shrink-0 text-[#5B2A86]"
+                      />
+                      <p className="leading-7 text-[#5F5363]">{term}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {admissionFaqs.map((faq, index) => (
+                  <details
+                    key={faq.question}
+                    className="group overflow-hidden rounded-[24px] border border-[#5B2A86]/10 bg-white open:shadow-[0_14px_40px_rgba(45,23,54,0.07)]"
+                  >
+                    <summary className="flex cursor-pointer list-none items-center gap-4 px-5 py-5 sm:px-6">
+                      <span className="text-xs font-black text-[#8A4AB5]">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <h3 className="flex-1 text-left text-base font-black text-[#2D1736] sm:text-lg">
+                        {faq.question}
+                      </h3>
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F3EAF8] text-xl font-black text-[#5B2A86] transition group-open:rotate-45">
+                        +
+                      </span>
+                    </summary>
+                    <p className="border-t border-[#5B2A86]/10 px-5 py-5 leading-7 text-[#6F6474] sm:px-14">
+                      {faq.answer}
+                    </p>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </Container>
+        </section>
+
+        <section className="bg-[#2D1736] py-14 text-white sm:py-16">
+          <Container>
+            <div className="mx-auto max-w-4xl text-center">
+              <p className="text-sm font-black uppercase tracking-[0.16em] text-[#F6D86F]">
+                Admissions 2027–28
+              </p>
+              <h2 className="mt-4 text-balance text-3xl font-black tracking-[-0.04em] sm:text-4xl lg:text-5xl">
+                The best way to know if it feels right is to visit.
+              </h2>
+              <p className="mx-auto mt-5 max-w-2xl leading-8 text-white/75">
+                Tell us your child's age and choose a preferred date. Our centre
+                team will call you to confirm the visit.
+              </p>
+              <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+                <Button
+                  href="#admission-enquiry"
+                  variant="yellow"
+                  size="lg"
+                  rightIcon={<ArrowRight aria-hidden="true" size={18} />}
+                >
+                  Request a School Visit
+                </Button>
+                <Button
+                  href={"tel:" + site.phone}
+                  variant="secondary"
+                  size="lg"
+                  leftIcon={<Phone aria-hidden="true" size={18} />}
+                  className="border-white/25 bg-white text-[#2D1736]"
+                >
+                  Call {site.phoneDisplay}
+                </Button>
+              </div>
             </div>
           </Container>
         </section>
