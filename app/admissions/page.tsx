@@ -450,6 +450,58 @@ export default async function AdmissionsPage({
 
         <section className="bg-white py-16 sm:py-20 lg:py-24">
           <Container>
+            <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+              <div className="max-w-3xl">
+                <p className="text-sm font-black uppercase tracking-[0.16em] text-[#5B2A86]">
+                  Inside our preschool
+                </p>
+                <h2 className="mt-4 text-balance text-3xl font-black tracking-[-0.04em] text-[#2D1736] sm:text-4xl">
+                  Real classrooms. Real routines. Real moments.
+                </h2>
+                <p className="mt-4 leading-8 text-[#6F6474]">
+                  These photographs are from our Sector 12B centre. A school
+                  visit lets you see the spaces and meet the people behind them.
+                </p>
+              </div>
+              <Button href="#admission-enquiry" variant="secondary" size="md">
+                Plan a Visit
+              </Button>
+            </div>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[
+                {
+                  src: "/images/programmes/playgroup.jpg",
+                  alt: "Playgroup children learning at Kidzee Sector 12 Dwarka",
+                },
+                {
+                  src: "/images/programmes/nursery.jpg",
+                  alt: "Nursery children taking part in a classroom activity at Kidzee Sector 12 Dwarka",
+                },
+                {
+                  src: "/images/programmes/junior-kg.jpg",
+                  alt: "Junior KG children learning at Kidzee Sector 12 Dwarka",
+                },
+              ].map((photo) => (
+                <div
+                  key={photo.src}
+                  className="overflow-hidden rounded-[26px] bg-[#F3EAF8]"
+                >
+                  <Image
+                    src={photo.src}
+                    alt={photo.alt}
+                    width={900}
+                    height={700}
+                    className="aspect-[4/3] h-full w-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </Container>
+        </section>
+
+        <section className="bg-white py-16 sm:py-20 lg:py-24">
+          <Container>
             <div className="mx-auto max-w-3xl text-center">
               <p className="text-sm font-black uppercase tracking-[0.16em] text-[#5B2A86]">
                 Parent experiences
