@@ -38,7 +38,7 @@ function run(args, extraEnvironment = {}) {
     child.on("error", reject);
     child.on("close", (code) => {
       if (code === 0) resolve(output);
-      else reject(new Error(`Production build verification failed with exit ${code}:\n${output}`));
+      else reject(new Error(`Production build verification failed with exit ${code}:\n${output.replace(/ADMISSIONS_PREVIEW_[0-9]+:[A-Za-z0-9+/=]+:END_PREVIEW/g, "[preview saved in browser artifact]")}`));
     });
   });
 }

@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Pool } from "pg";
+import sharp from "sharp";
 const { chromium } = await import(process.env.ADMISSIONS_PLAYWRIGHT_MODULE || "playwright");
 
 const origin = "http://127.0.0.1:3100";
@@ -66,7 +67,8 @@ try {
       assert.deepEqual(brokenImages, [], "Broken images");
       await page.screenshot({ path: output + "/" + (route.includes("landing") ? "ads" : "admissions") + "-" + width + ".png", fullPage: true });
       if (route.includes("landing") && (width === 390 || width === 1440)) {
-        const image = await page.screenshot({ type: "jpeg", quality: 38 });
+        const screenshot = await page.screenshot();
+        const image = await sharp(screenshot).resize({ width: width === 1440 ? 900 : 270 }).jpeg({ quality: 40 }).toBuffer();
         console.log("ADMISSIONS_PREVIEW_" + width + ":" + image.toString("base64") + ":END_PREVIEW");
       }
       const visit = page.locator('header a[href="#admission-enquiry"]');
@@ -143,6 +145,9 @@ try {
   }
   await writeFile(output + "/verification.json", JSON.stringify(results, null, 2));
   console.log("Admissions browser verification passed: 8 responsive layouts, image loading, visit links, form validation, CentreOS persistence, attribution and retry deduplication.");
+} catch (error) {
+  console.error("ADMISSIONS_BROWSER_ERROR: " + (error?.stack || error));
+  throw error;
 } finally {
   await writeFile(output + "/server.log", logs);
   await browser?.close();
