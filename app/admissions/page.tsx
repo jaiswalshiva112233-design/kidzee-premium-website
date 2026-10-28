@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getPublishedWebsiteTeamMembers } from "@/lib/sanity/team";
 import AdmissionsCampaign from "@/components/admissions/AdmissionsCampaign";
 import {
   ADMISSIONS_CAMPAIGN_TITLE,
@@ -32,7 +33,7 @@ export default async function AdmissionsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const query = await searchParams;
+  const [query, teamMembers] = await Promise.all([searchParams, getPublishedWebsiteTeamMembers()]);
   const programme = first(query.programme);
   const enquiry = first(query.enquiry);
   const faq = {
@@ -49,6 +50,7 @@ export default async function AdmissionsPage({
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faq).replace(/</g, "\\u003c") }} />
       <AdmissionsCampaign
+        teamMembers={teamMembers}
         initialProgramme={programmes.has(programme) ? programme : ""}
         initialEnquiryType={enquiryTypes.has(enquiry) ? enquiry : "SCHOOL_VISIT"}
       />

@@ -28,6 +28,7 @@ import { FaWhatsapp } from "react-icons/fa6";
 import { useEffect, useMemo, useState } from "react";
 
 import AdmissionForm from "@/components/AdmissionForm";
+import type { WebsiteTeamMember } from "@/lib/sanity/team";
 import AdmissionsCampaign from "@/components/admissions/AdmissionsCampaign";
 import { ADMISSIONS_CAMPAIGN_SLUG } from "@/lib/website/admissionsCampaign";
 import CareerApplicationForm from "@/components/careers/CareerApplicationForm";
@@ -265,7 +266,24 @@ function anonymousBucket(key: string) {
   return Math.abs(hash) % 100;
 }
 
-export default function LandingPageExperience({
+type LandingPageExperienceProps = {
+  teamMembers?: WebsiteTeamMember[];
+  page: { id: string; slug: string; name: string; pageType: string; content: Content };
+  variants: Variant[];
+  experiment: Experiment;
+};
+
+export default function LandingPageExperience(props: LandingPageExperienceProps) {
+  // This campaign has one reviewed, code-managed design. Legacy content and
+  // experiments describe the previous template and must not label identical
+  // campaign views as different A/B variants. Keep page-level lead attribution.
+  if (props.page.slug === ADMISSIONS_CAMPAIGN_SLUG) {
+    return <AdmissionsCampaign landingPageId={props.page.id} teamMembers={props.teamMembers} />;
+  }
+  return <ManagedLandingPageExperience {...props} />;
+}
+
+function ManagedLandingPageExperience({
   page,
   variants,
   experiment,
@@ -307,7 +325,7 @@ export default function LandingPageExperience({
 
   // Fast auto-playing slideshow: transitions every 2.5 seconds
   useEffect(() => {
-    if (isPhotoPaused || page.slug === ADMISSIONS_CAMPAIGN_SLUG) return;
+    if (isPhotoPaused) return;
     const interval = setInterval(() => {
       setActivePhotoIndex((prev) => (prev + 1) % activePhotos.length);
     }, 2500);
@@ -358,18 +376,6 @@ export default function LandingPageExperience({
       videoUrl.includes("/uploads/") ||
       videoUrl.startsWith("http") ||
       videoUrl.startsWith("/"));
-
-  // Keep the existing database IDs, selected variant and lead-attribution path
-  // while using the 2027–28 campaign design at the confirmed Google Ads URL.
-  if (page.slug === ADMISSIONS_CAMPAIGN_SLUG) {
-    return (
-      <AdmissionsCampaign
-        landingPageId={page.id}
-        landingVariantId={selected.id}
-        growthExperimentId={experiment?.id ?? ""}
-      />
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#FAF7FC] text-[#281034] font-sans antialiased selection:bg-[#5B2A86] selection:text-white">

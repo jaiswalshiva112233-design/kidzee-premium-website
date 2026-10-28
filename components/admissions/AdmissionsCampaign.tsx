@@ -1,8 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
+import type { WebsiteTeamMember } from "@/lib/sanity/team";
 import Link from "next/link";
-import { ArrowRight, BookOpen, CalendarCheck, Check, Heart, MapPin, Phone, ShieldCheck, Sun, Users, Utensils } from "lucide-react";
+import { ArrowRight, BookOpen, CalendarCheck, Check, Heart, MapPin, Phone, Play, ShieldCheck, Sun, Users, Utensils } from "lucide-react";
+import MiraLauncher from "@/components/mira/MiraLauncher";
 import AdmissionForm from "@/components/AdmissionForm";
 import { useSiteContact } from "@/components/SiteContactProvider";
 import styles from "./AdmissionsCampaign.module.css";
@@ -10,6 +13,7 @@ import { admissionsCampaignFaqs } from "@/lib/website/admissionsCampaign";
 
 
 type AdmissionsCampaignProps = {
+  teamMembers?: WebsiteTeamMember[];
   initialProgramme?: string;
   initialEnquiryType?: string;
   landingPageId?: string;
@@ -36,6 +40,7 @@ const parentReviews = [
 ] as const;
 
 export default function AdmissionsCampaign({
+  teamMembers = [],
   initialProgramme = "",
   initialEnquiryType = "SCHOOL_VISIT",
   landingPageId = "",
@@ -43,6 +48,7 @@ export default function AdmissionsCampaign({
   growthExperimentId = "",
 }: AdmissionsCampaignProps) {
   const site = useSiteContact();
+  const [showParentVideo, setShowParentVideo] = useState(false);
   const visitLabel = initialEnquiryType === "SCHOOL_VISIT"
     ? "Request a School Visit"
     : "Send My Enquiry";
@@ -71,25 +77,29 @@ export default function AdmissionsCampaign({
             <div>
               <div className={styles.session}>ADMISSIONS 2027–28 · PLAYGROUP TO SENIOR KG</div>
               <h1 id="admissions-heading" className={styles.title}>
-                A happy preschool start in <span>Sector 12, Dwarka.</span>
+                Small groups. Happy first steps.<br /><span>Preschool in Sector 12, Dwarka.</span>
               </h1>
               <p className={styles.lead}>
-                A familiar face at the door. A teacher who knows your child.
-                A morning filled with stories, play and little discoveries.
-                Come and see how we make the first school years feel at Kidzee.
+                Caring teachers, learning through play and a gentle start to school.
+                Discover the right programme for your child, from Playgroup to Senior KG.
               </p>
+              <ul className={styles.heroBenefits} aria-label="Preschool benefits">
+                <li><Check size={16} aria-hidden="true" /><span>1:8 teacher–child ratio in Playgroup &amp; Nursery</span></li>
+                <li><Check size={16} aria-hidden="true" /><span>Péntemind learning through play · ages 2–6</span></li>
+                <li><Check size={16} aria-hidden="true" /><span>Vegetarian preschool breakfast included</span></li>
+              </ul>
               <p className={styles.offerLabel}>30% off annual charges for 2027–28</p>
               <p className={styles.micro}>
-                January enrolments: attend in January and February, with monthly
-                tuition starting in March. Summer camp included.
+                Join in January 2027: attend in January and February with no monthly
+                tuition until March. Summer camp included. <a href="#offer-terms">Offer details</a>
               </p>
               <div className={styles.actions}>
                 <a href="#admission-enquiry" className={styles.button}>
                   Book a School Visit <ArrowRight size={17} aria-hidden="true" />
                 </a>
-                <a href="#january-start" className={styles.button + " " + styles.secondary}>See the January Start Plan</a>
+                <a href={"tel:" + site.phone} className={styles.button + " " + styles.secondary}><Phone size={16} aria-hidden="true" />Call for Fee Details</a>
               </div>
-              <p className={styles.micro}>Meet the team. See the classrooms. Get the complete fee details.</p>
+              <p className={styles.micro}>See the classrooms, meet the teachers and receive a complete fee breakup.</p>
               <figure className={styles.heroPhoto}>
                 <Image
                   src="/images/landing/kidzee-creative-learning.jpg"
@@ -104,6 +114,8 @@ export default function AdmissionsCampaign({
             </div>
             <div id="ad-enquiry" className={styles.formColumn}>
               <AdmissionForm
+                compact
+                autoOpenWhatsApp={false}
                 initialProgramme={initialProgramme}
                 initialEnquiryType={initialEnquiryType}
                 landingPageId={landingPageId}
@@ -113,13 +125,17 @@ export default function AdmissionsCampaign({
                 title="Book a School Visit"
                 subtitle="Meet our team, explore the classrooms and understand your child's programme and fees."
                 submitButtonText={visitLabel}
-                privacyText="Our centre team will use your details to respond to this enquiry. Please see our Privacy Policy for more information."
-                handoffText="After your enquiry is saved, WhatsApp opens so you can continue the conversation with our team."
+                privacyText="Your details go directly to our centre team to arrange your visit or answer your questions."
+                handoffText="We will contact you to discuss your enquiry. Continuing on WhatsApp after submitting is optional."
               />
               <p className={styles.formNote}>
                 <CalendarCheck size={17} aria-hidden="true" />
-                Your preferred date is a request. Our team will confirm the visit with you.
+                Our team will call to confirm a convenient visit date and time.
               </p>
+              <figure className={styles.earlyReview}>
+                <blockquote>“The teachers share weekly feedback and regularly update parents about activities.”</blockquote>
+                <figcaption>Komal Gahlot · Google review excerpt<br /><a href={site.googleReviews} target="_blank" rel="noopener noreferrer">Read current reviews</a></figcaption>
+              </figure>
             </div>
           </div>
         </section>
@@ -151,7 +167,7 @@ export default function AdmissionsCampaign({
               <article className={styles.offerCell}>
                 <Heart size={27} className={styles.offerIcon} aria-hidden="true" />
                 <h3 className={styles.offerLabel}>January &amp; February attendance</h3>
-                <p>For January 2027 enrolments, your child joins the routine and activities with no monthly tuition charge for these two months. Monthly tuition starts in March 2027.</p>
+                <p>Children joining in January 2027 take part in the routine and activities with no monthly tuition charge for these two months. Monthly tuition starts in March 2027.</p>
               </article>
               <article className={styles.offerCell}>
                 <Sun size={27} className={styles.offerIcon} aria-hidden="true" />
@@ -166,6 +182,27 @@ export default function AdmissionsCampaign({
             <a href="#offer-terms" className={styles.termsLink}>Read the offer details and fee terms</a>
           </div>
         </section>
+
+        {teamMembers.length > 0 ? (
+          <section className={styles.section} aria-labelledby="admissions-team-heading">
+            <div className={styles.wrap + " " + styles.teamGrid}>
+              <div>
+                <p className={styles.eyebrow}>Meet the people behind the care</p>
+                <h2 id="admissions-team-heading" className={styles.heading}>A familiar face.<br />A conversation that matters.</h2>
+                <p className={styles.intro}>Meet our centre team, share what your child needs and ask how we support the first days of preschool.</p>
+                <Link href="/about#team" className={styles.termsLink}>Get to know our team <ArrowRight size={15} aria-hidden="true" /></Link>
+              </div>
+              <div className={styles.teamCards}>
+                {[...teamMembers].sort((a, b) => Number(/director|head|principal/i.test(b.role)) - Number(/director|head|principal/i.test(a.role))).slice(0, 2).map((member) => (
+                  <article key={member._id} className={styles.teamCard}>
+                    {member.imageUrl ? <Image src={member.imageUrl} alt={member.photoAlt || member.name} width={360} height={400} sizes="(max-width: 767px) 44vw, 240px" /> : null}
+                    <div><h3>{member.name}</h3><p>{member.role}</p>{member.qualification ? <small>{member.qualification}</small> : null}</div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <section className={styles.section}>
           <div className={styles.wrap}>
@@ -227,6 +264,22 @@ export default function AdmissionsCampaign({
               <div><p className={styles.eyebrow}>From families at our centre</p><h2 className={styles.heading}>Parents notice the everyday things.</h2></div>
               <a href={site.googleReviews} target="_blank" rel="noopener noreferrer" className={styles.termsLink}>Read current Google reviews <ArrowRight size={14} aria-hidden="true" /></a>
             </div>
+            <div className={styles.parentStory}>
+              <div>
+                <h3>Hear from a family at our centre</h3>
+                <p>A parent shares their experience of Kidzee Sector 12, Dwarka. Play the video when you are ready.</p>
+                <Link href="/about#team" className={styles.termsLink}>Meet our centre team <ArrowRight size={15} aria-hidden="true" /></Link>
+              </div>
+              {showParentVideo ? (
+                <video className={styles.parentVideo} src="/videos/parent-reviews-dwarka-sec12.mp4" controls playsInline autoPlay preload="none" data-analytics-name="admissions_parent_story" aria-label="Parent experience at Kidzee Sector 12 Dwarka" />
+              ) : (
+                <button type="button" className={styles.videoButton} onClick={() => setShowParentVideo(true)}>
+                  <span><Play size={23} fill="currentColor" aria-hidden="true" /></span>
+                  <strong>Watch a parent story</strong>
+                  <small>Plays with sound after you choose to watch</small>
+                </button>
+              )}
+            </div>
             <div className={styles.quotes}>
               {parentReviews.map((review) => (
                 <figure className={styles.quote} key={review.name}>
@@ -272,7 +325,7 @@ export default function AdmissionsCampaign({
               <h3>Admissions 2027–28 · Offer details</h3>
               <ul>
                 <li>The 30% concession is on annual charges for 2027–28 preschool admissions at this centre. It does not mean 30% off the total fee package or monthly tuition.</li>
-                <li>For January 2027 enrolments, children attend during January and February without monthly tuition for those months. Monthly tuition starts from March 2027 with the academic session. Attendance follows the centre&apos;s working days and agreed programme routine.</li>
+                <li>For children joining in January 2027, including families completing admission in December 2026, children attend during January and February without monthly tuition for those months. Monthly tuition starts from March 2027 with the academic session. Attendance follows the centre&apos;s working days and agreed programme routine.</li>
                 <li>Annual charges after the concession, kit and other applicable admission charges remain payable at enrolment. The complete fee breakup will be shared before payment.</li>
                 <li>Summer camp is included for children enrolled in our 2027–28 preschool programme, with no additional summer camp fee. Dates and timings will follow the centre&apos;s camp schedule.</li>
                 <li>Daycare, optional daycare meals and preschool transport are separate services with their own charges. Programme placement and seat availability are confirmed by the centre.</li>
@@ -292,6 +345,7 @@ export default function AdmissionsCampaign({
       <footer className={styles.footer}>
         <div className={styles.wrap + " " + styles.footerInner}>
           <div><strong>Kidzee Sector 12, Dwarka</strong><br />Admissions 2027–28 · {site.addressShort}</div>
+          <MiraLauncher inline />
           <nav className={styles.footerLinks} aria-label="Useful links">
             <Link href="/">Our Website</Link><Link href="/privacy-policy">Privacy Policy</Link><Link href="/terms">Terms of Use</Link>
           </nav>

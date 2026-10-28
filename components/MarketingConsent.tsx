@@ -531,6 +531,10 @@ export default function MarketingConsent({
       const anchor = event.target.closest("a[href]");
       if (!(anchor instanceof HTMLAnchorElement)) return;
 
+      // The saved enquiry already emitted the lead conversion. Its optional
+      // WhatsApp continuation is tracked with that reference by AdmissionForm.
+      if (anchor.dataset.enquiryReference) return;
+
       const url = new URL(anchor.href);
       if (url.hostname === "wa.me" || url.hostname === "api.whatsapp.com") {
         recordWhatsAppClick();

@@ -7,7 +7,7 @@ export const ADMISSIONS_CAMPAIGN_IMAGE = "/images/landing/kidzee-creative-learni
 export const admissionsCampaignFaqs = [
   {
     question: "How does the January start work?",
-    answer: "For children enrolling for a January 2027 start, January and February are a settling-in attendance period. Your child joins the preschool routine and activities during these months. There is no monthly tuition charge for January or February; monthly tuition begins from March 2027, when the academic session starts. Annual, kit and other applicable admission charges are payable at enrolment.",
+    answer: "For children joining in January 2027, including families completing admission in December 2026, January and February are a settling-in attendance period. Your child joins the preschool routine and activities during these months. There is no monthly tuition charge for January or February; monthly tuition begins from March 2027, when the academic session starts. Annual, kit and other applicable admission charges are payable at enrolment.",
   },
   {
     question: "What does 30% off annual charges mean?",
@@ -19,11 +19,11 @@ export const admissionsCampaignFaqs = [
   },
   {
     question: "Can we visit before taking admission?",
-    answer: "Yes. Choose a preferred date in the enquiry form. Our team will call to confirm a convenient time so you can see the classrooms and play spaces, meet the team and discuss your child's needs.",
+    answer: "Yes. Send the short enquiry form and add a preferred date if you wish. Our team will call to confirm a convenient time so you can see the classrooms and play spaces, meet the team and discuss your child's needs.",
   },
   {
     question: "Which class would suit my child?",
-    answer: "Playgroup is generally for ages 2–3, Nursery for 3–4, Junior KG for 4–5 and Senior KG for 5–6. We also consider readiness and previous preschool experience. If you are unsure, choose 'Please guide me' in the form.",
+    answer: "Playgroup is generally for ages 2–3, Nursery for 3–4, Junior KG for 4–5 and Senior KG for 5–6. We also consider readiness and previous preschool experience. If you are unsure, leave the optional programme field at 'Please guide me'.",
   },
   {
     question: "Can we discuss daycare, meals and transport?",

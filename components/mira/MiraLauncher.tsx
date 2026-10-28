@@ -5,17 +5,20 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { X } from "lucide-react";
 
+import { ADMISSIONS_CAMPAIGN_SLUG } from "@/lib/website/admissionsCampaign";
 import MiraPanel from "@/components/mira/MiraPanel";
 
-export default function MiraLauncher() {
+export default function MiraLauncher({ inline = false }: { inline?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   if (pathname.startsWith("/admin")) return null;
+  const campaignPage = pathname === "/admissions" || pathname === "/landing/" + ADMISSIONS_CAMPAIGN_SLUG;
+  if (campaignPage && !inline) return null;
 
   return (
     <>
       {open ? <MiraPanel onClose={() => setOpen(false)} /> : null}
-      <div className="fixed bottom-[5.4rem] right-3 z-[85] flex flex-col items-center md:bottom-[5.75rem] md:right-6">
+      <div className={inline ? "flex items-center gap-3" : "fixed bottom-[5.4rem] right-3 z-[85] flex flex-col items-center md:bottom-[5.75rem] md:right-6"}>
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}

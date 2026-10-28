@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { getPublishedWebsiteTeamMembers } from "@/lib/sanity/team";
 import LandingPageExperience from "@/components/growth/LandingPageExperience";
 import { ADMISSIONS_CAMPAIGN_SLUG, ADMISSIONS_CAMPAIGN_TITLE, ADMISSIONS_CAMPAIGN_DESCRIPTION, ADMISSIONS_CAMPAIGN_IMAGE } from "@/lib/website/admissionsCampaign";
 import { prisma } from "@/lib/prisma";
@@ -37,6 +38,7 @@ export default async function ManagedLandingPage({ params }: { params: Promise<{
   if (!page) notFound();
   return (
     <LandingPageExperience
+      teamMembers={slug === ADMISSIONS_CAMPAIGN_SLUG ? await getPublishedWebsiteTeamMembers() : []}
       page={{
         id: page.id,
         slug: page.slug,
