@@ -75,10 +75,11 @@ try {
       await page.goto(origin + route + "?utm_source=google&utm_medium=cpc&utm_campaign=admissions_2027_28&gclid=synthetic_browser_click", { waitUntil: "networkidle" });
       assert.equal(await page.getByRole("heading", { level: 1 }).count(), 1);
       assert.match(await page.title(), /2027–28/);
-      assert.match(await page.getByRole("heading", { level: 1 }).innerText(), /Small groups.*Preschool in Sector 12, Dwarka/s);
+      assert.match(await page.title(), /Preschool & Nursery Admissions/);
+      assert.match(await page.getByRole("heading", { level: 1 }).innerText(), /Preschool Admissions in Dwarka Sector 12/s);
       assert.equal(await page.getByText("Old 2026–27 headline", { exact: true }).count(), 0);
       assert.equal(await page.getByText("Old 2026–27 variant", { exact: true }).count(), 0);
-      assert.ok(await page.getByText("30% off annual charges for 2027–28", { exact: true }).isVisible());
+      assert.ok(await page.locator("section[aria-labelledby=\"admissions-heading\"]").getByText("30% off annual charges", { exact: true }).isVisible());
       assert.equal(await page.locator("#admission-enquiry").count(), 1);
       assert.equal(await page.locator("main").count(), 1);
       assert.ok(await page.getByText("1:8 teacher–child ratio in Playgroup & Nursery", { exact: true }).isVisible());

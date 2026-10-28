@@ -88,21 +88,20 @@ export default function AdmissionsCampaign({
             <div>
               <div className={styles.session}>ADMISSIONS 2027–28 · PLAYGROUP TO SENIOR KG</div>
               <h1 id="admissions-heading" className={styles.title}>
-                Small groups. Happy first steps.<br /><span>Preschool in Sector 12, Dwarka.</span>
+                Preschool Admissions in <span>Dwarka Sector 12.</span>
               </h1>
               <p className={styles.lead}>
-                Caring teachers, learning through play and a gentle start to school.
-                Discover the right programme for your child, from Playgroup to Senior KG.
+                Small groups, caring teachers and learning through play—for your child&apos;s happy first steps at school.
               </p>
               <ul className={styles.heroBenefits} aria-label="Preschool benefits">
                 <li><Check size={16} aria-hidden="true" /><span>1:8 teacher–child ratio in Playgroup &amp; Nursery</span></li>
                 <li><Check size={16} aria-hidden="true" /><span>Péntemind learning through play · ages 2–6</span></li>
                 <li><Check size={16} aria-hidden="true" /><span>Vegetarian preschool breakfast included</span></li>
               </ul>
-              <p className={styles.offerLabel}>30% off annual charges for 2027–28</p>
+              <p className={styles.offerLabel}>30% off annual charges</p>
               <p className={styles.micro}>
-                Join in January 2027: attend in January and February with no monthly
-                tuition until March. Summer camp included. <a href="#offer-terms">Offer details</a>
+                Join in January 2027: no monthly tuition for January–February attendance.
+                Tuition from March. Summer camp included. <a href="#offer-terms">Offer details</a>
               </p>
               <div className={styles.actions}>
                 <a href="#admission-enquiry" className={styles.button}>
@@ -257,7 +256,7 @@ export default function AdmissionsCampaign({
         <section className={styles.section}>
           <div className={styles.wrap}>
             <p className={styles.eyebrow}>From a first hello to school readiness</p>
-            <h2 className={styles.heading}>Find the right starting point.</h2>
+            <h2 className={styles.heading}>Playgroup, Nursery &amp; KG Admissions</h2>
             <p className={styles.intro}>Tell us your child&apos;s age and current routine. We&apos;ll help you understand the suitable programme.</p>
             <div className={styles.programmes}>
               {programmes.map((programme) => (

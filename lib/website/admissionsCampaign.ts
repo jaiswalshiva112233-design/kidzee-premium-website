@@ -1,10 +1,14 @@
 export const ADMISSIONS_CAMPAIGN_SLUG = "preschool-admissions-dwarka-sector-12";
-export const ADMISSIONS_CAMPAIGN_TITLE = "Preschool Admissions 2027–28 | Kidzee Sector 12 Dwarka";
+export const ADMISSIONS_CAMPAIGN_TITLE = "Preschool & Nursery Admissions 2027–28 | Kidzee Dwarka Sector 12";
 export const ADMISSIONS_CAMPAIGN_DESCRIPTION =
   "Visit Kidzee Sector 12 Dwarka for 2027–28 admissions. 30% off annual charges, January–February settling-in attendance with tuition from March, and summer camp included.";
 export const ADMISSIONS_CAMPAIGN_IMAGE = "/images/landing/kidzee-creative-learning.jpg";
 
 export const admissionsCampaignFaqs = [
+  {
+    question: "How do I enquire about nursery or play school admission?",
+    answer: "Send your name and mobile number through this page or call Kidzee Sector 12B, Dwarka. Our centre team will discuss your child\'s age, explain Playgroup, Nursery or KG placement and fees, and arrange a school visit. Sending an enquiry does not reserve a seat; admission and availability are confirmed by the centre.",
+  },
   {
     question: "How does the January start work?",
     answer: "For children joining in January 2027, including families completing admission in December 2026, January and February are a settling-in attendance period. Your child joins the preschool routine and activities during these months. There is no monthly tuition charge for January or February; monthly tuition begins from March 2027, when the academic session starts. Annual, kit and other applicable admission charges are payable at enrolment.",
