@@ -210,7 +210,7 @@ try {
     try {
       await page.waitForFunction(() => document.querySelector("video")?.readyState >= 1, null, { timeout: 15000 });
     } catch (error) {
-      console.log("ADMISSIONS_VIDEO_DIAGNOSTICS:" + JSON.stringify(await page.locator("video").evaluate((video) => ({ src: video.currentSrc, error: video.error?.message, code: video.error?.code, networkState: video.networkState, readyState: video.readyState, mp4: video.canPlayType(\'video/mp4; codecs="avc1.42E01E"\') }))));
+      console.log("ADMISSIONS_VIDEO_DIAGNOSTICS:" + JSON.stringify(await page.locator("video").evaluate((video) => ({ src: video.currentSrc, error: video.error?.message, code: video.error?.code, networkState: video.networkState, readyState: video.readyState, mp4: video.canPlayType('video/mp4; codecs="avc1.42E01E"') }))));
       throw error;
     }
     assert.ok(await page.locator("video").evaluate((video) => video.videoWidth > 0));
