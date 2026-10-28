@@ -447,6 +447,9 @@ export default function WebsiteAnalytics() {
         return;
       }
 
+      // AdmissionForm emits the reference-bearing continuation event itself.
+      if (anchor.dataset.enquiryReference) return;
+
       const eventType =
         classifyLink(anchor);
 

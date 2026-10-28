@@ -28,6 +28,9 @@ import { FaWhatsapp } from "react-icons/fa6";
 import { useEffect, useMemo, useState } from "react";
 
 import AdmissionForm from "@/components/AdmissionForm";
+import type { WebsiteTeamMember } from "@/lib/sanity/team";
+import AdmissionsCampaign from "@/components/admissions/AdmissionsCampaign";
+import { ADMISSIONS_CAMPAIGN_SLUG } from "@/lib/website/admissionsCampaign";
 import CareerApplicationForm from "@/components/careers/CareerApplicationForm";
 import { useSiteContact } from "@/components/SiteContactProvider";
 
@@ -263,7 +266,24 @@ function anonymousBucket(key: string) {
   return Math.abs(hash) % 100;
 }
 
-export default function LandingPageExperience({
+type LandingPageExperienceProps = {
+  teamMembers?: WebsiteTeamMember[];
+  page: { id: string; slug: string; name: string; pageType: string; content: Content };
+  variants: Variant[];
+  experiment: Experiment;
+};
+
+export default function LandingPageExperience(props: LandingPageExperienceProps) {
+  // This campaign has one reviewed, code-managed design. Legacy content and
+  // experiments describe the previous template and must not label identical
+  // campaign views as different A/B variants. Keep page-level lead attribution.
+  if (props.page.slug === ADMISSIONS_CAMPAIGN_SLUG) {
+    return <AdmissionsCampaign landingPageId={props.page.id} teamMembers={props.teamMembers} />;
+  }
+  return <ManagedLandingPageExperience {...props} />;
+}
+
+function ManagedLandingPageExperience({
   page,
   variants,
   experiment,
@@ -310,7 +330,7 @@ export default function LandingPageExperience({
       setActivePhotoIndex((prev) => (prev + 1) % activePhotos.length);
     }, 2500);
     return () => clearInterval(interval);
-  }, [isPhotoPaused]);
+  }, [isPhotoPaused, page.slug]);
 
   useEffect(() => {
     const bucket = anonymousBucket(

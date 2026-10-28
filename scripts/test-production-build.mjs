@@ -38,7 +38,10 @@ function run(args, extraEnvironment = {}) {
     child.on("error", reject);
     child.on("close", (code) => {
       if (code === 0) resolve(output);
-      else reject(new Error(`Production build verification failed with exit ${code}:\n${output}`));
+      else {
+        for (const preview of output.match(/ADMISSIONS_PREVIEW_(?:[0-9]+|FULL):[A-Za-z0-9+/=]+:END_PREVIEW/g) ?? []) console.log(preview);
+        reject(new Error(`Production build verification failed with exit ${code}:\n${output.replace(/ADMISSIONS_PREVIEW_(?:[0-9]+|FULL):[A-Za-z0-9+/=]+:END_PREVIEW/g, "[preview saved in browser artifact]")}`));
+      }
     });
   });
 }
@@ -50,6 +53,9 @@ try {
   const nextCli = path.join(process.cwd(), "node_modules", "next", "dist", "bin", "next");
   await run([nextCli, "build", "--webpack"]);
   console.log("Production Next.js build passed against a fully migrated database.");
+  if (process.env.ADMISSIONS_BROWSER_CHECK === "true") {
+    console.log(await run([path.join(process.cwd(), "scripts", "verify-admissions-browser.mjs")]));
+  }
 } finally {
   await server.stop().catch(() => undefined);
   await database.close();

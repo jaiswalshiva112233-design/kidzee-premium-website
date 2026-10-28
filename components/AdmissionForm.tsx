@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSiteContact } from "@/components/SiteContactProvider";
 import {
   ArrowRight,
@@ -82,6 +83,10 @@ type AdmissionFormProps = {
   subtitle?: string;
   badgeText?: string;
   submitButtonText?: string;
+  compact?: boolean;
+  autoOpenWhatsApp?: boolean;
+  privacyText?: ReactNode;
+  handoffText?: string;
 };
 
 function createSubmissionId() {
@@ -178,6 +183,10 @@ export default function AdmissionForm({
   subtitle,
   badgeText,
   submitButtonText,
+  privacyText,
+  handoffText,
+  compact = false,
+  autoOpenWhatsApp = true,
 }: AdmissionFormProps) {
   const site = useSiteContact();
   const [formData, setFormData] =
@@ -252,10 +261,10 @@ export default function AdmissionForm({
       submissionId.current = createSubmissionId();
     }
 
-    const whatsappWindow = window.open(
+    const whatsappWindow = autoOpenWhatsApp ? window.open(
       "about:blank",
       "kidzee-admission-whatsapp",
-    );
+    ) : null;
 
     if (whatsappWindow) {
       whatsappWindow.opener = null;
@@ -341,22 +350,24 @@ export default function AdmissionForm({
         }),
       );
 
-      window.dispatchEvent(
-        new CustomEvent("kidzee:website-event", {
-          detail: {
-            eventType: "WHATSAPP_CLICK",
-            eventName: "admissions_enquiry_whatsapp_opened",
-            targetText: "Saved admission enquiry",
-            targetUrl: whatsappUrl,
-            enquiryNumber: savedEnquiryNumber,
-          },
-        }),
-      );
-
-      if (whatsappWindow && !whatsappWindow.closed) {
-        whatsappWindow.location.replace(whatsappUrl);
-      } else {
-        window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      if (autoOpenWhatsApp) {
+        window.dispatchEvent(
+          new CustomEvent("kidzee:website-event", {
+            detail: {
+              eventType: "WHATSAPP_CLICK",
+              eventName: "admissions_enquiry_whatsapp_opened",
+              targetText: "Saved admission enquiry",
+              targetUrl: whatsappUrl,
+              enquiryNumber: savedEnquiryNumber,
+            },
+          }),
+        );
+  
+        if (whatsappWindow && !whatsappWindow.closed) {
+          whatsappWindow.location.replace(whatsappUrl);
+        } else {
+          window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+        }
       }
     } catch (error) {
       if (whatsappWindow && !whatsappWindow.closed) {
@@ -388,7 +399,7 @@ export default function AdmissionForm({
         </span>
 
         <p className="mt-6 text-xs font-black uppercase tracking-[0.16em] text-[#197A43]">
-          Safely saved in CentreOS
+          Enquiry received
         </p>
         <h2
           id="admission-success-heading"
@@ -397,8 +408,8 @@ export default function AdmissionForm({
           Thank you. We have your enquiry.
         </h2>
         <p className="mt-4 leading-7 text-[#41604C]">
-          Our centre team can now see your details. WhatsApp has opened with
-          your reference so you can continue the conversation immediately.
+          Our centre team has received your details and will contact you about
+          your enquiry. You can also continue on WhatsApp using your reference below.
         </p>
 
         <div className="mt-5 rounded-2xl border border-[#BCE4C9] bg-white px-5 py-4">
@@ -419,10 +430,22 @@ export default function AdmissionForm({
             )}
             target="_blank"
             rel="noopener noreferrer"
+            data-enquiry-reference={enquiryNumber}
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent("kidzee:website-event", {
+                detail: {
+                  eventType: "WHATSAPP_CLICK",
+                  eventName: "admissions_enquiry_whatsapp_continue",
+                  targetText: "Saved admission enquiry",
+                  targetUrl: createWhatsAppLink(formData, enquiryNumber, whatsappNumber),
+                  enquiryNumber,
+                },
+              }));
+            }}
             className="inline-flex min-h-[54px] flex-1 items-center justify-center gap-2 rounded-full bg-[#20C968] px-6 text-base font-black text-white shadow-[0_14px_34px_rgba(32,201,104,0.2)] transition hover:-translate-y-0.5 hover:bg-[#18B85B] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#F6C84B]/70 focus-visible:ring-offset-2"
           >
             <MessageCircle aria-hidden="true" size={19} />
-            Open WhatsApp Again
+            Continue on WhatsApp
           </a>
 
           <a
@@ -456,7 +479,7 @@ export default function AdmissionForm({
               id="admission-form-heading"
               className="mt-1 text-2xl font-black tracking-[-0.025em] text-[#2C1735] sm:text-3xl"
             >
-              {title || "How can we help your family?"}
+              {compact && formData.enquiryType === "FEES" ? "Ask About Fees & Availability" : title || "How can we help your family?"}
             </h2>
             <p className="mt-2 text-sm leading-6 text-[#5F5F6D] sm:text-base">
               {subtitle ||
@@ -526,6 +549,102 @@ export default function AdmissionForm({
           </FormField>
         </div>
 
+        {compact ? (
+          <>
+          <FormField id="programme" label="Programme (optional)">
+            <select
+              id="programme"
+              name="programme"
+              value={formData.programme}
+              onChange={(event) =>
+                updateField("programme", event.target.value)
+              }
+              className={inputClasses(false)}
+            >
+              {programmeOptions.map((programme) => (
+                <option key={programme.value} value={programme.value}>
+                  {programme.label}
+                </option>
+              ))}
+            </select>
+          </FormField>
+            <details className="rounded-2xl border border-[#EEE4F3] px-4 py-3">
+              <summary className="cursor-pointer text-sm font-bold text-[#5B2A86]">Add a visit date or other details (optional)</summary>
+              <div className="mt-4 space-y-4">
+        <div className="grid gap-3.5 sm:grid-cols-2">
+          <FormField id="childName" label="Child's name (optional)">
+            <input
+              id="childName"
+              name="childName"
+              type="text"
+              autoComplete="off"
+              value={formData.childName}
+              onChange={(event) =>
+                updateField("childName", event.target.value)
+              }
+              placeholder="Enter child's name"
+              className={inputClasses(false)}
+            />
+          </FormField>
+
+
+        </div>
+
+        <div className="grid gap-3.5 sm:grid-cols-2">
+          <FormField
+            id="enquiryType"
+            label="How can we help?"
+            required
+            error={errors.enquiryType}
+          >
+            <select
+              id="enquiryType"
+              name="enquiryType"
+              value={formData.enquiryType}
+              onChange={(event) =>
+                updateField("enquiryType", event.target.value)
+              }
+              aria-invalid={Boolean(errors.enquiryType)}
+              aria-describedby={
+                errors.enquiryType ? "enquiryType-error" : undefined
+              }
+              className={inputClasses(Boolean(errors.enquiryType))}
+            >
+              {enquiryTypeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </FormField>
+
+          <FormField id="preferredVisitDate" label="Preferred visit date">
+            <div className="relative">
+              <CalendarDays
+                aria-hidden="true"
+                size={18}
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#7A6F80]"
+              />
+              <input
+                id="preferredVisitDate"
+                name="preferredVisitDate"
+                type="date"
+                value={formData.preferredVisitDate}
+                onChange={(event) =>
+                  updateField("preferredVisitDate", event.target.value)
+                }
+                className={`${inputClasses(false)} pl-11`}
+              />
+            </div>
+          </FormField>
+        </div>
+
+
+              </div>
+            </details>
+          </>
+        ) : (
+          <>
         <div className="grid gap-3.5 sm:grid-cols-2">
           <FormField id="childName" label="Child's name (optional)">
             <input
@@ -610,6 +729,10 @@ export default function AdmissionForm({
           </FormField>
         </div>
 
+
+          </>
+        )}
+
         <div className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
           <label htmlFor="admissionWebsite">Website</label>
           <input
@@ -631,8 +754,7 @@ export default function AdmissionForm({
               className="mt-0.5 shrink-0 text-[#5B2A86]"
             />
             <p className="text-sm leading-6 text-[#5F5F6D]">
-              Your details are saved securely in CentreOS and used only to
-              respond to this enquiry.
+              {privacyText || "Your details are saved securely in CentreOS and used only to respond to this enquiry."}
             </p>
           </div>
         </div>
@@ -663,7 +785,7 @@ export default function AdmissionForm({
               </>
             ) : (
               <>
-                <span>{submitButtonText || "Send Enquiry"}</span>
+                <span>{compact ? (formData.enquiryType === "FEES" ? "Request Fee Details" : formData.enquiryType === "SCHOOL_VISIT" ? "Request a School Visit" : "Send My Enquiry") : submitButtonText || "Send Enquiry"}</span>
                 <ArrowRight aria-hidden="true" size={18} />
               </>
             )}
@@ -682,12 +804,12 @@ export default function AdmissionForm({
         </div>
 
         <p className="text-center text-xs font-semibold leading-5 text-[#6F6474]">
-          Your enquiry is saved first. WhatsApp opens only after CentreOS
-          confirms it.
+          {handoffText || "Your enquiry is saved first. WhatsApp opens only after CentreOS confirms it."}
         </p>
 
         <p className="text-center text-xs leading-5 text-[#77707C]">
-          By submitting, you agree to be contacted about this enquiry.
+          By submitting, you agree to be contacted about this enquiry.{" "}
+          <Link href="/privacy-policy" className="font-semibold text-[#5B2A86] underline underline-offset-2">Privacy Policy</Link>
         </p>
       </form>
     </section>
