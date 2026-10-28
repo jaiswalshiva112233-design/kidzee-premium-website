@@ -1,0 +1,34 @@
+name: Admissions live release verification
+on:
+  push:
+    branches: [admissions-live-verification]
+    paths:
+      - .github/workflows/admissions-live-verification.yml
+      - scripts/verify-admissions-live.mjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-pages:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install isolated read-only browser checker
+        run: |
+          npm install --prefix "$RUNNER_TEMP/admissions-live-tools" --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.56.1
+          "$RUNNER_TEMP/admissions-live-tools/node_modules/.bin/playwright" install chromium
+      - name: Wait for approved rollout and verify public pages
+        env:
+          ADMISSIONS_PLAYWRIGHT_MODULE: ${{ runner.temp }}/admissions-live-tools/node_modules/playwright/index.mjs
+        run: node scripts/verify-admissions-live.mjs
+      - name: Save public-page results and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admissions-live-release-verification
+          path: work/admissions-live
+          if-no-files-found: ignore
