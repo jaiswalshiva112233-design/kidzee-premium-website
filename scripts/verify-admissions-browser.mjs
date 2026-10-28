@@ -90,6 +90,12 @@ try {
       assert.equal(await page.locator("video[src]").count(), 0, "Parent video must not load before selection");
       const mislabeledViews = await page.evaluate(() => window.__admissionsEvents.filter((event) => event.eventType === "LANDING_VARIANT_VIEW"));
       assert.equal(mislabeledViews.length, 0, "Fixed campaign must not emit legacy A/B variant views");
+      const formPosition = await page.locator('#admission-enquiry').boundingBox();
+      if (width <= 390) {
+        assert.ok(formPosition.y < 620, 'Mobile form should follow the short introduction: ' + formPosition.y);
+        const inputPosition = await page.locator('#parentName').boundingBox();
+        assert.ok(inputPosition.y < 844, 'First required field should be visible in the mobile opening screen');
+      }
       const hasOverflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
       assert.equal(hasOverflow, false, "Horizontal overflow at " + route + " width " + width);
       await page.evaluate(async () => {
@@ -150,6 +156,11 @@ try {
     assert.ok(await page.getByText("Please enter the parent's name.", { exact: true }).isVisible());
     await page.locator("#parentName").fill("Browser Test Parent " + index);
     await page.locator("#phone").fill("900000000" + index);
+    await page.getByRole('button', { name: 'Fees & availability', exact: true }).click();
+    assert.equal(await page.locator('#parentName').inputValue(), 'Browser Test Parent ' + index);
+    assert.equal(await page.locator('#phone').inputValue(), '900000000' + index);
+    await page.getByRole('button', { name: 'School visit', exact: true }).click();
+    await page.getByText('Add a visit date or other details (optional)', { exact: true }).click();
     await page.locator("#programme").selectOption("NURSERY");
     const responsePromise = page.waitForResponse((response) => response.url().endsWith("/api/website/enquiry") && response.request().method() === "POST");
     await button.click();
@@ -161,6 +172,8 @@ try {
     await page.getByRole("heading", { name: "Thank you. We have your enquiry." }).waitFor();
     assert.equal(posts, 1);
     assert.equal(await page.evaluate(() => window.__admissionsPopupCount), 0, "Saving an enquiry must not force a WhatsApp popup");
+    assert.equal(submittedBody.enquiryType, "SCHOOL_VISIT");
+    assert.equal(submittedBody.programme, "NURSERY");
     assert.equal(submittedBody.gclid, "synthetic_browser_click");
     assert.equal(submittedBody.utmCampaign, "admissions_2027_28");
     assert.ok(submittedBody.submissionId);
@@ -207,6 +220,16 @@ try {
     assert.ok(await page.getByRole("heading", { name: "Book a School Visit", exact: true }).isVisible());
     const feeButton = page.getByRole("button", { name: "Request Fee Details", exact: true });
     assert.equal(await feeButton.count(), 0);
+    await page.locator('#parentName').fill('Browser Fees Parent');
+    await page.locator('#phone').fill('9000000009');
+    await page.getByRole('button', { name: 'Fees & availability', exact: true }).click();
+    assert.equal(await page.locator('#parentName').inputValue(), 'Browser Fees Parent');
+    const feesResponse = page.waitForResponse((response) => response.url().endsWith('/api/website/enquiry') && response.request().method() === 'POST');
+    await page.getByRole('button', { name: 'Request Fee Details', exact: true }).click();
+    const savedFees = await feesResponse;
+    assert.equal(savedFees.status(), 201);
+    assert.equal(savedFees.request().postDataJSON().enquiryType, 'FEES');
+    await page.getByRole('heading', { name: 'Thank you. We have your enquiry.' }).waitFor();
     await page.getByRole("button", { name: "Watch a parent story" }).click();
     assert.equal(await page.locator('video[controls][playsinline]').count(), 1);
     try {
@@ -249,3 +272,4 @@ try {
   app.kill("SIGTERM");
   await pool.end();
 }
+

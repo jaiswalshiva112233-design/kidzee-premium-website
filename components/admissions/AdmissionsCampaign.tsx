@@ -48,6 +48,7 @@ export default function AdmissionsCampaign({
   growthExperimentId = "",
 }: AdmissionsCampaignProps) {
   const site = useSiteContact();
+  const [enquiryIntent, setEnquiryIntent] = useState(initialEnquiryType);
   const [showParentVideo, setShowParentVideo] = useState(false);
   const parentVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -60,9 +61,7 @@ export default function AdmissionsCampaign({
     setShowParentVideo(true);
     void video.play().catch(() => { /* Native controls remain available. */ });
   }
-  const visitLabel = initialEnquiryType === "SCHOOL_VISIT"
-    ? "Request a School Visit"
-    : "Send My Enquiry";
+
 
   return (
     <div className={styles.page}>
@@ -77,7 +76,7 @@ export default function AdmissionsCampaign({
             <a href={"tel:" + site.phone} className={styles.phone}>
               <Phone size={17} aria-hidden="true" /><span>{site.phoneDisplay}</span>
             </a>
-            <a href="#admission-enquiry" className={styles.button}>Book a School Visit <ArrowRight size={16} aria-hidden="true" /></a>
+            <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button}>Book a School Visit <ArrowRight size={16} aria-hidden="true" /></a>
           </div>
         </div>
       </header>
@@ -85,32 +84,49 @@ export default function AdmissionsCampaign({
       <main id="admissions-main">
         <section className={styles.hero} aria-labelledby="admissions-heading">
           <div className={styles.wrap + " " + styles.heroGrid}>
-            <div>
-              <div className={styles.session}>ADMISSIONS 2027–28 · PLAYGROUP TO SENIOR KG</div>
+            <div className={styles.heroCopy}>
+              <div className={styles.session}>ADMISSIONS 2027–28 · AGES 2–6</div>
               <h1 id="admissions-heading" className={styles.title}>
                 Preschool Admissions in <span>Dwarka Sector 12.</span>
               </h1>
               <p className={styles.lead}>
-                Small groups, caring teachers and learning through play—for your child&apos;s happy first steps at school.
+                Kidzee play school in Sector 12B for Playgroup, Nursery &amp; KG. Caring teachers and learning through play.
               </p>
               <ul className={styles.heroBenefits} aria-label="Preschool benefits">
                 <li><Check size={16} aria-hidden="true" /><span>1:8 teacher–child ratio in Playgroup &amp; Nursery</span></li>
-                <li><Check size={16} aria-hidden="true" /><span>Péntemind learning through play · ages 2–6</span></li>
                 <li><Check size={16} aria-hidden="true" /><span>Vegetarian preschool breakfast included</span></li>
               </ul>
-              <p className={styles.offerLabel}>30% off annual charges</p>
-              <p className={styles.micro}>
-                Join in January 2027: no monthly tuition for January–February attendance.
-                Tuition from March. Summer camp included. <a href="#offer-terms">Offer details</a>
-              </p>
-              <div className={styles.actions}>
-                <a href="#admission-enquiry" className={styles.button}>
-                  Book a School Visit <ArrowRight size={17} aria-hidden="true" />
-                </a>
-                <a href={"tel:" + site.phone} className={styles.button + " " + styles.secondary}><Phone size={16} aria-hidden="true" />Call for Fee Details</a>
+              <div className={styles.heroOffer}>
+                <strong>30% off annual charges</strong>
+                <span>January start: no monthly tuition until March 2027.</span>
+                <small>Summer camp included · <a href="#offer-terms">View offer terms</a></small>
               </div>
-              <p className={styles.micro}>See the classrooms, meet the teachers and receive a complete fee breakup.</p>
-              <figure className={styles.heroPhoto}>
+
+            </div>
+            <div id="ad-enquiry" className={styles.formColumn}>
+              <AdmissionForm
+                compact
+                campaignIntent
+                enquiryType={enquiryIntent}
+                onEnquiryTypeChange={setEnquiryIntent}
+                autoOpenWhatsApp={false}
+                initialProgramme={initialProgramme}
+                initialEnquiryType={initialEnquiryType}
+                landingPageId={landingPageId}
+                landingVariantId={landingVariantId}
+                growthExperimentId={growthExperimentId}
+                badgeText="ADMISSIONS 2027–28"
+                title="Book a School Visit"
+                subtitle="Meet our team, explore the classrooms and understand your child's programme and fees."
+                privacyText="Your details go directly to our centre team to arrange your visit or answer your questions."
+                handoffText="We will contact you to discuss your enquiry. Continuing on WhatsApp after submitting is optional."
+              />
+              <figure className={styles.earlyReview}>
+                <blockquote>“The teachers share weekly feedback and regularly update parents about activities.”</blockquote>
+                <figcaption>Komal Gahlot · Google review excerpt<br /><a href={site.googleReviews} target="_blank" rel="noopener noreferrer">Read current reviews</a></figcaption>
+              </figure>
+            </div>
+            <figure className={styles.heroPhoto}>
                 <Image
                   src="/images/landing/kidzee-creative-learning.jpg"
                   alt="Children taking part in a creative classroom activity at Kidzee Sector 12 Dwarka"
@@ -121,32 +137,6 @@ export default function AdmissionsCampaign({
                 />
                 <figcaption className={styles.photoNote}>A real moment at our Sector 12B centre</figcaption>
               </figure>
-            </div>
-            <div id="ad-enquiry" className={styles.formColumn}>
-              <AdmissionForm
-                compact
-                autoOpenWhatsApp={false}
-                initialProgramme={initialProgramme}
-                initialEnquiryType={initialEnquiryType}
-                landingPageId={landingPageId}
-                landingVariantId={landingVariantId}
-                growthExperimentId={growthExperimentId}
-                badgeText="ADMISSIONS 2027–28"
-                title="Book a School Visit"
-                subtitle="Meet our team, explore the classrooms and understand your child's programme and fees."
-                submitButtonText={visitLabel}
-                privacyText="Your details go directly to our centre team to arrange your visit or answer your questions."
-                handoffText="We will contact you to discuss your enquiry. Continuing on WhatsApp after submitting is optional."
-              />
-              <p className={styles.formNote}>
-                <CalendarCheck size={17} aria-hidden="true" />
-                Our team will call to confirm a convenient visit date and time.
-              </p>
-              <figure className={styles.earlyReview}>
-                <blockquote>“The teachers share weekly feedback and regularly update parents about activities.”</blockquote>
-                <figcaption>Komal Gahlot · Google review excerpt<br /><a href={site.googleReviews} target="_blank" rel="noopener noreferrer">Read current reviews</a></figcaption>
-              </figure>
-            </div>
           </div>
         </section>
 
@@ -242,7 +232,7 @@ export default function AdmissionsCampaign({
           <div className={styles.wrap}>
             <div className={styles.sectionTop}>
               <div><p className={styles.eyebrow}>Inside Kidzee Sector 12B</p><h2 className={styles.heading}>A closer look at where<br />the little discoveries happen.</h2></div>
-              <a href="#admission-enquiry" className={styles.button + " " + styles.secondary}>See It in Person <ArrowRight size={16} aria-hidden="true" /></a>
+              <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button + " " + styles.secondary}>See It in Person <ArrowRight size={16} aria-hidden="true" /></a>
             </div>
             <div className={styles.gallery}>
               <figure><Image src="/images/landing/kidzee-modern-classroom.jpg" alt="Activity classroom at Kidzee Sector 12 Dwarka" width={900} height={675} sizes="(max-width: 767px) 100vw, 40vw" /><figcaption>Space to learn and create</figcaption></figure>
@@ -256,7 +246,7 @@ export default function AdmissionsCampaign({
         <section className={styles.section}>
           <div className={styles.wrap}>
             <p className={styles.eyebrow}>From a first hello to school readiness</p>
-            <h2 className={styles.heading}>Playgroup, Nursery &amp; KG Admissions</h2>
+            <h2 className={styles.heading}>Playgroup, Nursery &amp; KG Admissions in Dwarka</h2>
             <p className={styles.intro}>Tell us your child&apos;s age and current routine. We&apos;ll help you understand the suitable programme.</p>
             <div className={styles.programmes}>
               {programmes.map((programme) => (
@@ -313,7 +303,7 @@ export default function AdmissionsCampaign({
               <ul className={styles.visitList}>
                 {["Meet the centre team and see the classrooms.", "Discuss your child's age, routine and settling needs.", "Understand the offer and receive a complete fee breakup."].map((item) => <li key={item}><Check size={18} aria-hidden="true" />{item}</li>)}
               </ul>
-              <a href="#admission-enquiry" className={styles.button}>Arrange My School Visit <ArrowRight size={17} aria-hidden="true" /></a>
+              <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button}>Arrange My School Visit <ArrowRight size={17} aria-hidden="true" /></a>
             </div>
             <aside className={styles.address}>
               <MapPin size={27} aria-hidden="true" />
@@ -348,7 +338,7 @@ export default function AdmissionsCampaign({
         <section className={styles.closing}>
           <div className={styles.wrap + " " + styles.closingInner}>
             <div><h2 className={styles.heading}>Come and get a feel for your child&apos;s first school.</h2><p>Meet us at Kidzee Sector 12B, Dwarka. We&apos;ll take it from there, together.</p></div>
-            <a href="#admission-enquiry" className={styles.button + " " + styles.yellow}>Book a School Visit <ArrowRight size={17} aria-hidden="true" /></a>
+            <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button + " " + styles.yellow}>Book a School Visit <ArrowRight size={17} aria-hidden="true" /></a>
           </div>
         </section>
       </main>
@@ -364,8 +354,9 @@ export default function AdmissionsCampaign({
       </footer>
       <nav className={styles.mobileBar} aria-label="Contact admissions">
         <a href={"tel:" + site.phone} className={styles.button + " " + styles.secondary}><Phone size={17} aria-hidden="true" />Call</a>
-        <a href="#admission-enquiry" className={styles.button}><CalendarCheck size={17} aria-hidden="true" />Book a School Visit</a>
+        <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button}><CalendarCheck size={17} aria-hidden="true" />Book a School Visit</a>
       </nav>
     </div>
   );
 }
+

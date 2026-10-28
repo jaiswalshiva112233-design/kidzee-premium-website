@@ -38,3 +38,25 @@
 @media(max-width:359px){.title{font-size:30px}}
 
 .parentVideo[hidden]{display:none}.videoButton{width:100%}
+
+/* Keep the first decision and enquiry close together, with the real centre photo alongside on desktop. */
+.hero{padding:32px 0 42px}
+.heroGrid{grid-template-columns:minmax(0,1.18fr) minmax(0,.92fr);grid-template-areas:"copy form" "photo form";gap:24px 42px;align-items:start}
+.heroCopy{grid-area:copy;min-width:0}
+.formColumn{grid-area:form;position:static}
+.heroPhoto{grid-area:photo;margin:0;border-radius:22px;max-width:100%}
+.heroPhoto img{aspect-ratio:2.4/1;object-position:center 44%}
+.session{margin-bottom:16px}
+.title{font-size:clamp(35px,3.5vw,49px);line-height:1.1}
+.lead{font-size:15px;line-height:1.7;margin:15px 0}
+.heroBenefits{margin:14px 0 18px;gap:7px}
+.heroOffer{display:grid;gap:5px;padding:15px 18px;border-radius:15px;border:1px solid #e8d39c;background:#fff8e5;color:#493520}
+.heroOffer strong{font-size:19px;line-height:1.35;color:#43224f}
+.heroOffer span{font-size:12px;line-height:1.6}
+.heroOffer small{font-size:11px;line-height:1.6;color:#66523a}
+.heroOffer a{color:#5b2a86;text-underline-offset:3px;font-weight:650}
+.earlyReview{margin-top:18px}
+@media(max-width:1023px) and (min-width:768px){.heroGrid{gap:24px;grid-template-columns:1fr 1fr}.title{font-size:36px}.heroOffer{padding:13px}.heroOffer strong{font-size:17px}}
+@media(max-width:767px){.hero{padding:22px 0 34px}.heroGrid{grid-template-columns:1fr;grid-template-areas:"copy" "form" "photo";gap:22px}.session{margin-bottom:12px;font-size:10px;padding:6px 10px}.title{font-size:33px;line-height:1.1}.lead{font-size:14px;line-height:1.65;margin:12px 0}.heroBenefits{margin:12px 0 15px;gap:5px}.heroBenefits li{font-size:11px;line-height:1.55}.heroOffer{padding:12px 14px;gap:4px}.heroOffer strong{font-size:18px}.heroOffer span{font-size:11px}.heroOffer small{font-size:10px}.heroPhoto{margin:0}.heroPhoto img{aspect-ratio:16/9}.earlyReview{margin-top:16px}}
+@media(max-width:359px){.title{font-size:29px}.heroOffer span{font-size:10px}}
+
