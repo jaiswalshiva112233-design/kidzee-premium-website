@@ -101,11 +101,11 @@ try {
       await page.screenshot({ path: output + "/" + (route.includes("landing") ? "ads" : "admissions") + "-" + width + ".png", fullPage: true });
       if (route.includes("landing") && (width === 390 || width === 1440)) {
         const screenshot = await page.screenshot();
-        const image = await sharp(screenshot).resize({ width: width === 1440 ? 900 : 270 }).jpeg({ quality: 40 }).toBuffer();
+        const image = await sharp(screenshot).resize({ width: width === 1440 ? 900 : 230 }).jpeg({ quality: width === 1440 ? 40 : 30 }).toBuffer();
         console.log("ADMISSIONS_PREVIEW_" + width + ":" + image.toString("base64") + ":END_PREVIEW");
       }
       if (route.includes("landing") && width === 1440) {
-        const fullPreview = await sharp(await page.screenshot({ fullPage: true })).resize({ width: 300 }).jpeg({ quality: 35 }).toBuffer();
+        const fullPreview = await sharp(await page.screenshot({ fullPage: true })).resize({ width: 250 }).jpeg({ quality: 28 }).toBuffer();
         console.log("ADMISSIONS_PREVIEW_FULL:" + fullPreview.toString("base64") + ":END_PREVIEW");
       }
       const visit = page.locator('header a[href="#admission-enquiry"]');
@@ -194,7 +194,9 @@ try {
     await context.close();
   }
   {
-    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    // Official Chrome includes the licensed MP4 codecs absent from the open-source test shell.
+    const mediaBrowser = await chromium.launch({ channel: "chrome" });
+    const context = await mediaBrowser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
     await page.goto(origin + "/admissions?enquiry=FEES", { waitUntil: "networkidle" });
     assert.ok(await page.getByRole("button", { name: "Request Fee Details", exact: true }).isVisible());
@@ -214,9 +216,11 @@ try {
       throw error;
     }
     assert.ok(await page.locator("video").evaluate((video) => video.videoWidth > 0));
+    await page.waitForFunction(() => document.querySelector("video")?.currentTime > 0, null, { timeout: 10000 });
     assert.ok(await page.getByText(/including families completing admission in December 2026/).count() > 0);
     await context.close();
-    results.push({ expandedDetails: "pass", feesIntent: "pass", optionalVideo: "pass", decemberEligibility: "pass" });
+    await mediaBrowser.close();
+    results.push({ videoBrowser: "Google Chrome", expandedDetails: "pass", feesIntent: "pass", optionalVideo: "pass", decemberEligibility: "pass" });
   }
   {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
