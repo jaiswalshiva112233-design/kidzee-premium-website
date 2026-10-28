@@ -19,6 +19,7 @@ import {
   type ReactNode,
 } from "react";
 import { collectPersistentAttribution } from "@/lib/marketing/clientAttribution";
+import styles from "./AdmissionForm.module.css";
 
 type AdmissionFormData = {
   parentName: string;
@@ -87,6 +88,9 @@ type AdmissionFormProps = {
   autoOpenWhatsApp?: boolean;
   privacyText?: ReactNode;
   handoffText?: string;
+  campaignIntent?: boolean;
+  enquiryType?: string;
+  onEnquiryTypeChange?: (value: string) => void;
 };
 
 function createSubmissionId() {
@@ -187,14 +191,18 @@ export default function AdmissionForm({
   handoffText,
   compact = false,
   autoOpenWhatsApp = true,
+  campaignIntent = false,
+  enquiryType,
+  onEnquiryTypeChange,
 }: AdmissionFormProps) {
   const site = useSiteContact();
-  const [formData, setFormData] =
+  const [storedFormData, setFormData] =
     useState<AdmissionFormData>(() => ({
       ...initialFormData,
       programme: initialProgramme,
       enquiryType: initialEnquiryType,
     }));
+  const formData = { ...storedFormData, enquiryType: enquiryType ?? storedFormData.enquiryType };
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState("");
@@ -205,6 +213,7 @@ export default function AdmissionForm({
     field: keyof AdmissionFormData,
     value: string,
   ) {
+    if (field === "enquiryType") onEnquiryTypeChange?.(value);
     setFormData((current) => ({
       ...current,
       [field]: value,
@@ -464,25 +473,26 @@ export default function AdmissionForm({
     <section
       id="admission-enquiry"
       aria-labelledby="admission-form-heading"
+      data-campaign-form={campaignIntent || undefined}
       className="scroll-mt-28 overflow-hidden rounded-[32px] border border-[#E8DDF1] bg-white shadow-[0_24px_80px_rgba(52,20,68,0.12)]"
     >
-      <div className="border-b border-[#EEE6F3] bg-[#F9F5FC] px-6 py-6 sm:px-8">
+      <div className={campaignIntent ? styles.header : "border-b border-[#EEE6F3] bg-[#F9F5FC] px-6 py-6 sm:px-8"}>
         <div className="flex items-start gap-4">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#5B2A86] text-white">
+          {!campaignIntent ? <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#5B2A86] text-white">
             <UserRound aria-hidden="true" size={22} />
-          </span>
+          </span> : null}
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.15em] text-[#5B2A86]">
+            {!campaignIntent ? <p className="text-xs font-black uppercase tracking-[0.15em] text-[#5B2A86]">
               {badgeText || "Quick admission enquiry"}
-            </p>
+            </p> : null}
             <h2
               id="admission-form-heading"
-              className="mt-1 text-2xl font-black tracking-[-0.025em] text-[#2C1735] sm:text-3xl"
+              className={campaignIntent ? styles.title : "mt-1 text-2xl font-black tracking-[-0.025em] text-[#2C1735] sm:text-3xl"}
             >
               {compact && formData.enquiryType === "FEES" ? "Ask About Fees & Availability" : title || "How can we help your family?"}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-[#5F5F6D] sm:text-base">
-              {subtitle ||
+            <p className={campaignIntent ? styles.subtitle : "mt-2 text-sm leading-6 text-[#5F5F6D] sm:text-base"}>
+              {campaignIntent ? (formData.enquiryType === "FEES" ? "Request the programme fee breakdown and current availability from our centre team." : "See the classrooms, meet our teachers and discuss your child's needs.") : subtitle ||
                 "Your enquiry goes directly to the centre panel so our team can follow up with you."}
             </p>
           </div>
@@ -494,8 +504,13 @@ export default function AdmissionForm({
         noValidate
         aria-label="Admission enquiry form"
         data-analytics-name="admission_enquiry_form"
-        className="space-y-4 px-5 py-6 sm:px-6 sm:py-6"
+        className={campaignIntent ? styles.form : "space-y-4 px-5 py-6 sm:px-6 sm:py-6"}
       >
+        {campaignIntent ? <div className={styles.intent} role="group" aria-label="Choose your enquiry">
+          {[{ value: "SCHOOL_VISIT", label: "School visit" }, { value: "FEES", label: "Fees & availability" }].map((intent) => (
+            <button key={intent.value} type="button" data-enquiry-intent={intent.value} aria-pressed={formData.enquiryType === intent.value} onClick={() => updateField("enquiryType", intent.value)} disabled={isSubmitting}>{intent.label}</button>
+          ))}
+        </div> : null}
         <div className="grid gap-3.5 sm:grid-cols-2">
           <FormField
             id="parentName"
@@ -551,7 +566,7 @@ export default function AdmissionForm({
 
         {compact ? (
           <>
-          <FormField id="programme" label="Programme (optional)">
+          {!campaignIntent ? <FormField id="programme" label="Programme (optional)">
             <select
               id="programme"
               name="programme"
@@ -567,10 +582,15 @@ export default function AdmissionForm({
                 </option>
               ))}
             </select>
-          </FormField>
+          </FormField> : null}
             <details className="rounded-2xl border border-[#EEE4F3] px-4 py-3">
               <summary className="cursor-pointer text-sm font-bold text-[#5B2A86]">Add a visit date or other details (optional)</summary>
               <div className="mt-4 space-y-4">
+                {campaignIntent ? <FormField id="programme" label="Programme (optional)">
+                  <select id="programme" name="programme" value={formData.programme} onChange={(event) => updateField("programme", event.target.value)} className={inputClasses(false)}>
+                    {programmeOptions.map((programme) => <option key={programme.value} value={programme.value}>{programme.label}</option>)}
+                  </select>
+                </FormField> : null}
         <div className="grid gap-3.5 sm:grid-cols-2">
           <FormField id="childName" label="Child's name (optional)">
             <input
@@ -746,7 +766,7 @@ export default function AdmissionForm({
           />
         </div>
 
-        <div className="rounded-[22px] border border-[#EEE4F3] bg-[#FCFAFD] p-4">
+        {!campaignIntent ? <div className="rounded-[22px] border border-[#EEE4F3] bg-[#FCFAFD] p-4">
           <div className="flex items-start gap-3">
             <ShieldCheck
               aria-hidden="true"
@@ -757,7 +777,7 @@ export default function AdmissionForm({
               {privacyText || "Your details are saved securely in CentreOS and used only to respond to this enquiry."}
             </p>
           </div>
-        </div>
+        </div> : null}
 
         {submissionError ? (
           <div
@@ -803,9 +823,9 @@ export default function AdmissionForm({
           </div>
         </div>
 
-        <p className="text-center text-xs font-semibold leading-5 text-[#6F6474]">
+        {!campaignIntent ? <p className="text-center text-xs font-semibold leading-5 text-[#6F6474]">
           {handoffText || "Your enquiry is saved first. WhatsApp opens only after CentreOS confirms it."}
-        </p>
+        </p> : null}
 
         <p className="text-center text-xs leading-5 text-[#77707C]">
           By submitting, you agree to be contacted about this enquiry.{" "}
@@ -869,3 +889,4 @@ function inputClasses(hasError: boolean) {
       : "border-[#DFD5E5] focus:border-[#5B2A86]",
   ].join(" ");
 }
+
