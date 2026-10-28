@@ -206,7 +206,12 @@ try {
     assert.equal(await feeButton.count(), 0);
     await page.getByRole("button", { name: "Watch a parent story" }).click();
     assert.equal(await page.locator('video[controls][playsinline]').count(), 1);
-    await page.waitForFunction(() => document.querySelector("video")?.readyState >= 1);
+    try {
+      await page.waitForFunction(() => document.querySelector("video")?.readyState >= 1, null, { timeout: 15000 });
+    } catch (error) {
+      console.log("ADMISSIONS_VIDEO_DIAGNOSTICS:" + JSON.stringify(await page.locator("video").evaluate((video) => ({ src: video.currentSrc, error: video.error?.message, code: video.error?.code, networkState: video.networkState, readyState: video.readyState, mp4: video.canPlayType(\'video/mp4; codecs="avc1.42E01E"\') }))));
+      throw error;
+    }
     assert.ok(await page.locator("video").evaluate((video) => video.videoWidth > 0));
     assert.ok(await page.getByText(/including families completing admission in December 2026/).count() > 0);
     await context.close();

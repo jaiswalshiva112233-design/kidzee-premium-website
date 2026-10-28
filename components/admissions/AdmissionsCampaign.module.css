@@ -36,3 +36,5 @@
 .lead{line-height:1.75;margin:18px 0}.heroPhoto{margin-top:23px}
 @media(max-width:767px){.hero{padding-top:24px}.heroGrid{gap:24px}.title{font-size:34px;line-height:1.12}.lead{font-size:15px;line-height:1.75;margin:15px 0}.heroBenefits{margin:16px 0 20px;gap:7px}.heroBenefits li{font-size:12px}.actions{gap:10px;margin-top:20px}.actions .button{font-size:13px;padding-inline:15px}.heroPhoto{margin-top:20px}.heroPhoto img{aspect-ratio:2/1}.photoNote{font-size:9px;padding:6px 9px}.teamGrid,.parentStory{grid-template-columns:1fr;gap:25px}.teamCards{gap:12px}.teamCard>div{padding:14px}.teamCard h3{font-size:15px}.parentStory{margin-top:25px}.earlyReview{margin-top:18px}}
 @media(max-width:359px){.title{font-size:30px}}
+
+.parentVideo[hidden]{display:none}.videoButton{width:100%}

@@ -29,6 +29,10 @@ jobs:
           tests/google-ads-snapshot-route.test.mjs tests/google-ads-sheet-webhook.test.mjs
           tests/marketing-dashboard-accuracy.test.mjs tests/marketing-safety-separation.test.mjs
           tests/phase1-production.test.mjs tests/marketing-catalogue-polish.test.mjs
+      - name: Inspect existing parent video formats
+        run: |
+          ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,profile,width,height -of json public/videos/parent-reviews-dwarka-sec12.mp4
+          ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,profile,width,height -of json public/videos/aashvi-nursery-review.mp4
       - name: Install browser verification tools
         run: |
           npm install --prefix "$RUNNER_TEMP/admissions-browser-tools" --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.56.1

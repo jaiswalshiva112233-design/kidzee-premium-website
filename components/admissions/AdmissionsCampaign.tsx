@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { WebsiteTeamMember } from "@/lib/sanity/team";
 import Link from "next/link";
 import { ArrowRight, BookOpen, CalendarCheck, Check, Heart, MapPin, Phone, Play, ShieldCheck, Sun, Users, Utensils } from "lucide-react";
@@ -49,6 +49,17 @@ export default function AdmissionsCampaign({
 }: AdmissionsCampaignProps) {
   const site = useSiteContact();
   const [showParentVideo, setShowParentVideo] = useState(false);
+  const parentVideoRef = useRef<HTMLVideoElement>(null);
+
+  function playParentStory() {
+    const video = parentVideoRef.current;
+    if (!video) return;
+    // Start the media request within the parent\'s click, preserving browser
+    // user activation instead of relying on unmuted autoplay after rendering.
+    video.src = "/videos/parent-reviews-dwarka-sec12.mp4";
+    setShowParentVideo(true);
+    void video.play().catch(() => { /* Native controls remain available. */ });
+  }
   const visitLabel = initialEnquiryType === "SCHOOL_VISIT"
     ? "Request a School Visit"
     : "Send My Enquiry";
@@ -270,15 +281,16 @@ export default function AdmissionsCampaign({
                 <p>A parent shares their experience of Kidzee Sector 12, Dwarka. Play the video when you are ready.</p>
                 <Link href="/about#team" className={styles.termsLink}>Meet our centre team <ArrowRight size={15} aria-hidden="true" /></Link>
               </div>
-              {showParentVideo ? (
-                <video className={styles.parentVideo} src="/videos/parent-reviews-dwarka-sec12.mp4" controls playsInline autoPlay preload="none" data-analytics-name="admissions_parent_story" aria-label="Parent experience at Kidzee Sector 12 Dwarka" />
-              ) : (
-                <button type="button" className={styles.videoButton} onClick={() => setShowParentVideo(true)}>
-                  <span><Play size={23} fill="currentColor" aria-hidden="true" /></span>
-                  <strong>Watch a parent story</strong>
-                  <small>Plays with sound after you choose to watch</small>
-                </button>
-              )}
+              <div>
+                <video ref={parentVideoRef} hidden={!showParentVideo} className={styles.parentVideo} controls playsInline preload="none" data-analytics-name="admissions_parent_story" aria-label="Parent experience at Kidzee Sector 12 Dwarka" />
+                {!showParentVideo ? (
+                  <button type="button" className={styles.videoButton} onClick={playParentStory}>
+                    <span><Play size={23} fill="currentColor" aria-hidden="true" /></span>
+                    <strong>Watch a parent story</strong>
+                    <small>Plays with sound after you choose to watch</small>
+                  </button>
+                ) : null}
+              </div>
             </div>
             <div className={styles.quotes}>
               {parentReviews.map((review) => (
