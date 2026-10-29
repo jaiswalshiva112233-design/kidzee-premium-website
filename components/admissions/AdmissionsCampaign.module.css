@@ -60,3 +60,9 @@
 @media(max-width:767px){.hero{padding:22px 0 34px}.heroGrid{grid-template-columns:1fr;grid-template-areas:"copy" "form" "photo";gap:22px}.session{margin-bottom:12px;font-size:10px;padding:6px 10px}.title{font-size:33px;line-height:1.1}.lead{font-size:14px;line-height:1.65;margin:12px 0}.heroBenefits{margin:12px 0 15px;gap:5px}.heroBenefits li{font-size:11px;line-height:1.55}.heroOffer{padding:12px 14px;gap:4px}.heroOffer strong{font-size:18px}.heroOffer span{font-size:11px}.heroOffer small{font-size:10px}.heroPhoto{margin:0}.heroPhoto img{aspect-ratio:16/9}.earlyReview{margin-top:16px}}
 @media(max-width:359px){.title{font-size:29px}.heroOffer span{font-size:10px}}
 
+.services{display:flex;gap:8px;margin:0 0 17px;flex-wrap:wrap}.services button{min-height:44px;padding:9px 14px;border:1px solid #d9cbe1;border-radius:10px;background:#fff;color:#5b2a86;font-size:12px;font-weight:700;cursor:pointer}.services button[aria-pressed=true]{background:#5b2a86;border-color:#5b2a86;color:#fff}.services button:focus-visible{outline:3px solid #dba52b;outline-offset:3px}.daycareGrid{display:grid;grid-template-columns:1.3fr .7fr;gap:64px;align-items:center}.daycarePhoto{margin:0;min-width:0}.daycarePhoto img{display:block;width:100%;height:auto;max-height:450px;object-fit:cover;object-position:50% 30%;border-radius:22px}.daycarePhoto figcaption{font-size:11px;line-height:1.6;color:var(--muted);margin-top:12px}
+@media(max-width:1023px){.mobileBar{grid-template-columns:.8fr 1fr 1.15fr;gap:7px;padding-inline:12px}.mobileBar .button{font-size:12px;padding:10px 7px;gap:6px}}
+@media(max-width:767px){.session{margin-bottom:10px}.services{margin-bottom:13px;gap:6px}.services button{font-size:12px;padding:8px 11px}.daycareGrid{grid-template-columns:1fr;gap:28px}.daycarePhoto img{max-height:360px;object-position:50% 33%}}
+
+.mobileBar[hidden]{display:none}
+

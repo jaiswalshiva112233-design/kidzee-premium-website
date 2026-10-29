@@ -13,7 +13,7 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const slug = "preschool-admissions-dwarka-sector-12";
 await pool.query(
   'INSERT INTO "LandingPage" ("id","slug","name","pageType","status","seoTitle","metaDescription","content","updatedAt") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW())',
-  ["admissions_browser_page", slug, "Browser-only admissions fixture", "ADMISSION", "PUBLISHED", "Old 2026–27 test title", "Old 2026–27 test description", JSON.stringify({ heading: "Old 2026–27 headline" })],
+  ["admissions_browser_page", slug, "Browser-only admissions fixture", "ADMISSION", "PUBLISHED", "Old 2026–27 test title", "Old 2026–27 test description", JSON.stringify({ heading: "Old 2026–27 headline", privatePriceSentinel: "LEGACY_PRICE_MUST_NOT_REACH_PAGE" })],
 );
 await pool.query(
   'INSERT INTO "LandingPageVariant" ("id","landingPageId","variantKey","name","content","updatedAt") VALUES ($1,$2,$3,$4,$5,NOW())',
@@ -75,27 +75,34 @@ try {
       await page.goto(origin + route + "?utm_source=google&utm_medium=cpc&utm_campaign=admissions_2027_28&gclid=synthetic_browser_click", { waitUntil: "networkidle" });
       assert.equal(await page.getByRole("heading", { level: 1 }).count(), 1);
       assert.match(await page.title(), /2027–28/);
-      assert.match(await page.title(), /Preschool & Nursery Admissions/);
+      assert.match(await page.title(), /Preschool & Daycare/);
       assert.match(await page.getByRole("heading", { level: 1 }).innerText(), /Preschool Admissions in Dwarka Sector 12/s);
       assert.equal(await page.getByText("Old 2026–27 headline", { exact: true }).count(), 0);
       assert.equal(await page.getByText("Old 2026–27 variant", { exact: true }).count(), 0);
-      assert.ok(await page.locator("section[aria-labelledby=\"admissions-heading\"]").getByText("30% off annual charges", { exact: true }).isVisible());
+      assert.ok(await page.locator("section[aria-labelledby=\"admissions-heading\"]").getByText("30% Off Annual Charges", { exact: true }).isVisible());
       assert.equal(await page.locator("#admission-enquiry").count(), 1);
       assert.equal(await page.locator("main").count(), 1);
       assert.ok(await page.getByText("1:8 teacher–child ratio in Playgroup & Nursery", { exact: true }).isVisible());
       assert.equal(await page.locator('form #childName:visible').count(), 0);
       assert.equal(await page.locator('form #preferredVisitDate:visible').count(), 0);
       assert.equal(await page.locator('form a[href="/privacy-policy"]').count(), 1);
-      assert.equal(await page.getByRole("button", { name: "Ask MIRA, Kidzee Admissions Assistant", exact: true }).count(), 1);
+      assert.equal(await page.getByRole("button", { name: "Ask MIRA, Kidzee Admissions Assistant", exact: true }).count(), 0);
       assert.equal(await page.locator("video[src]").count(), 0, "Parent video must not load before selection");
       const mislabeledViews = await page.evaluate(() => window.__admissionsEvents.filter((event) => event.eventType === "LANDING_VARIANT_VIEW"));
       assert.equal(mislabeledViews.length, 0, "Fixed campaign must not emit legacy A/B variant views");
+      const publicContent = await page.evaluate(() => document.body.innerText + '\n' + [...document.querySelectorAll('meta[content],script[type="application/ld+json"]')].map(el => el.getAttribute('content') || el.textContent).join('\n'));
+      const publicPricingMatch = publicContent.match(/₹|\bINR\s*[0-9]|\bRs\.?\s*[0-9]|\bfees?\b|\bpricing\b|payable|charged separately|monthly tuition|no additional|no monthly/i);
+      assert.equal(publicPricingMatch, null, 'Unexpected public pricing wording: ' + (publicPricingMatch?.[0] || '')); 
+      assert.ok(!(await page.content()).includes('LEGACY_PRICE_MUST_NOT_REACH_PAGE'), 'Legacy managed content must not be serialized into campaign HTML');
       const formPosition = await page.locator('#admission-enquiry').boundingBox();
       if (width <= 390) {
         assert.ok(formPosition.y < 620, 'Mobile form should follow the short introduction: ' + formPosition.y);
         const inputPosition = await page.locator('#parentName').boundingBox();
         assert.ok(inputPosition.y < 844, 'First required field should be visible in the mobile opening screen');
       }
+      assert.equal(await page.locator('#reviews').count(), 1, 'Existing reviews sitelink has a real target');
+      const brokenLocalLinks = await page.locator('a[href^="#"]').evaluateAll(links => links.map(link=>link.getAttribute('href')).filter(href => href.length > 1 && !document.getElementById(decodeURIComponent(href.slice(1)))));
+      assert.deepEqual(brokenLocalLinks, [], 'In-page CTA and asset anchors must exist');
       const hasOverflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
       assert.equal(hasOverflow, false, "Horizontal overflow at " + route + " width " + width);
       await page.evaluate(async () => {
@@ -120,7 +127,7 @@ try {
       await page.waitForTimeout(400);
       assert.ok(await page.locator("#parentName").isVisible());
       await page.getByText("How does the January start work?", { exact: true }).click();
-      assert.ok(await page.getByText(/There is no monthly tuition charge for January or February/).isVisible());
+      assert.ok(await page.getByText(/Tuition Begins in March/).first().isVisible());
       assert.deepEqual(errors, [], "Browser errors at " + route);
       results.push({ route, width, layout: "pass", images: "pass", navigation: "pass" });
       await context.close();
@@ -156,7 +163,8 @@ try {
     assert.ok(await page.getByText("Please enter the parent's name.", { exact: true }).isVisible());
     await page.locator("#parentName").fill("Browser Test Parent " + index);
     await page.locator("#phone").fill("900000000" + index);
-    await page.getByRole('button', { name: 'Fees & availability', exact: true }).click();
+    assert.equal(await page.locator('nav[aria-label="Contact admissions"]').isVisible(), false, "Sticky actions hide while the form has focus");
+    await page.getByRole('button', { name: 'Speak to team', exact: true }).click();
     assert.equal(await page.locator('#parentName').inputValue(), 'Browser Test Parent ' + index);
     assert.equal(await page.locator('#phone').inputValue(), '900000000' + index);
     await page.getByRole('button', { name: 'School visit', exact: true }).click();
@@ -212,7 +220,7 @@ try {
     const context = await mediaBrowser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
     await page.goto(origin + "/admissions?enquiry=FEES", { waitUntil: "networkidle" });
-    assert.ok(await page.getByRole("button", { name: "Request Fee Details", exact: true }).isVisible());
+    assert.ok(await page.getByRole("button", { name: "Request Admissions Callback", exact: true }).isVisible());
     await page.getByText("Add a visit date or other details (optional)", { exact: true }).click();
     assert.ok(await page.locator("#childName").isVisible());
     assert.ok(await page.locator("#preferredVisitDate").isVisible());
@@ -222,28 +230,70 @@ try {
     assert.equal(await feeButton.count(), 0);
     await page.locator('#parentName').fill('Browser Fees Parent');
     await page.locator('#phone').fill('9000000009');
-    await page.getByRole('button', { name: 'Fees & availability', exact: true }).click();
+    await page.getByRole('button', { name: 'Speak to team', exact: true }).click();
     assert.equal(await page.locator('#parentName').inputValue(), 'Browser Fees Parent');
     const feesResponse = page.waitForResponse((response) => response.url().endsWith('/api/website/enquiry') && response.request().method() === 'POST');
-    await page.getByRole('button', { name: 'Request Fee Details', exact: true }).click();
+    await page.getByRole('button', { name: 'Request Admissions Callback', exact: true }).click();
     const savedFees = await feesResponse;
     assert.equal(savedFees.status(), 201);
-    assert.equal(savedFees.request().postDataJSON().enquiryType, 'FEES');
+    assert.equal(savedFees.request().postDataJSON().enquiryType, 'CALLBACK');
     await page.getByRole('heading', { name: 'Thank you. We have your enquiry.' }).waitFor();
-    await page.getByRole("button", { name: "Watch a parent story" }).click();
-    assert.equal(await page.locator('video[controls][playsinline]').count(), 1);
-    try {
-      await page.waitForFunction(() => document.querySelector("video")?.readyState >= 1, null, { timeout: 15000 });
-    } catch (error) {
-      console.log("ADMISSIONS_VIDEO_DIAGNOSTICS:" + JSON.stringify(await page.locator("video").evaluate((video) => ({ src: video.currentSrc, error: video.error?.message, code: video.error?.code, networkState: video.networkState, readyState: video.readyState, mp4: video.canPlayType('video/mp4; codecs="avc1.42E01E"') }))));
-      throw error;
-    }
-    assert.ok(await page.locator("video").evaluate((video) => video.videoWidth > 0));
-    await page.waitForFunction(() => document.querySelector("video")?.currentTime > 0, null, { timeout: 10000 });
+    assert.equal(await page.locator('video,audio').count(), 0, 'Unreviewed media must not disclose pricing on the campaign page');
     assert.ok(await page.getByText(/including families completing admission in December 2026/).count() > 0);
     await context.close();
     await mediaBrowser.close();
-    results.push({ videoBrowser: "Google Chrome", expandedDetails: "pass", feesIntent: "pass", optionalVideo: "pass", decemberEligibility: "pass" });
+    results.push({ videoBrowser: "Google Chrome", expandedDetails: "pass", legacyFeeQueryMapsToCallback: "pass", noPublicPricing: "pass", testimonialVideo: "omitted pending full pricing-content review", decemberEligibility: "pass" });
+  }
+  for (const [index, route] of routes.entries()) {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    await page.addInitScript(() => { window.__admissionsEvents = []; window.addEventListener('kidzee:website-event', (event) => window.__admissionsEvents.push(event.detail)); });
+    await page.goto(origin + route + '?programme=DAYCARE&enquiry=DAYCARE&utm_source=google&gclid=synthetic_daycare_click', { waitUntil: 'networkidle' });
+    assert.match(await page.getByRole('heading', { level: 1 }).innerText(), /Daycare in Dwarka Sector 12/);
+    assert.ok(await page.getByRole('button', { name: 'Request Daycare Callback', exact: true }).isVisible());
+    assert.equal(await page.getByRole('heading', { name: 'Ask About Daycare', exact: true }).count(), 1);
+    await page.locator('#parentName').fill('Browser Daycare Parent ' + index);
+    await page.locator('#phone').fill('900000001' + index);
+    await page.getByRole('button', { name: 'School visit', exact: true }).click();
+    assert.equal(await page.getByRole('heading', { name: 'Visit Our Daycare', exact: true }).count(), 1);
+    await page.getByRole('button', { name: 'Speak to team', exact: true }).click();
+    assert.equal(await page.locator('#parentName').inputValue(), 'Browser Daycare Parent ' + index);
+    const responsePromise = page.waitForResponse(response => response.url().endsWith('/api/website/enquiry') && response.request().method() === 'POST');
+    await page.getByRole('button', { name: 'Request Daycare Callback', exact: true }).click();
+    const response = await responsePromise;
+    assert.equal(response.status(), 201);
+    const payload = response.request().postDataJSON();
+    assert.equal(payload.programme, 'DAYCARE'); assert.equal(payload.enquiryType, 'DAYCARE');
+    assert.equal(payload.gclid, 'synthetic_daycare_click');
+    if (route.includes('landing')) assert.equal(payload.landingPageId, 'admissions_browser_page');
+    await page.getByRole('heading', { name: 'Thank you. We have your enquiry.' }).waitFor();
+    const events = await page.evaluate(() => window.__admissionsEvents.filter(event => event.eventType === 'FORM_SUBMITTED'));
+    assert.equal(events.length, 1);
+    const retry = await context.request.post(origin + '/api/website/enquiry', {data: payload});
+    assert.equal(retry.status(), 200); assert.equal((await retry.json()).enquiryNumber, (await response.json()).enquiryNumber);
+    await page.goto(origin + route, {waitUntil: 'networkidle'});
+    await page.getByRole('button', {name: 'Daycare from 12:30 PM', exact: true}).click();
+    assert.match(await page.getByRole('heading', {level:1}).innerText(), /Daycare in Dwarka Sector 12/);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({width, height: 900});
+      await page.evaluate(async () => {
+        document.querySelectorAll('img').forEach(image => { image.loading = 'eager'; });
+        await Promise.all([...document.images].map(image => image.decode().catch(() => {})));
+      });
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, 'Daycare must fit at ' + width);
+      assert.equal(await page.locator('#admission-enquiry').count(), 1);
+      assert.match(await page.getByRole('heading', {level:1}).innerText(), /Daycare in Dwarka Sector 12/);
+      const failedImages = await page.locator('main img').evaluateAll(images => images.filter(image => !image.complete || image.naturalWidth === 0).map(image => image.src));
+      assert.deepEqual(failedImages, [], 'Daycare images must load at ' + width);
+      await page.screenshot({path: output + '/daycare-' + index + '-' + width + '.png', fullPage: true});
+    }
+    const contact = page.getByRole('link', {name: 'Prefer WhatsApp? Message our team', exact:true});
+    assert.match(await contact.getAttribute('href'), /^https:\/\/wa\.me\//);
+    await page.getByRole('button', {name:'Preschool',exact:true}).click();
+    assert.match(await page.getByRole('heading', {level:1}).innerText(), /Preschool Admissions/);
+    await context.close();
+    results.push({route, daycareResponsiveWidths:[390,1440], daycareImages:'pass', daycarePreset:'pass', serviceSwitch:'pass', daycareCentreOS:'pass', daycareDeduplication:'pass', whatsAppLink:'pass'});
   }
   {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
@@ -272,4 +322,3 @@ try {
   app.kill("SIGTERM");
   await pool.end();
 }
-

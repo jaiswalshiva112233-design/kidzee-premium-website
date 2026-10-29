@@ -1,15 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { WebsiteTeamMember } from "@/lib/sanity/team";
 import Link from "next/link";
-import { ArrowRight, BookOpen, CalendarCheck, Check, Heart, MapPin, Phone, Play, ShieldCheck, Sun, Users, Utensils } from "lucide-react";
-import MiraLauncher from "@/components/mira/MiraLauncher";
+import { ArrowRight, BookOpen, CalendarCheck, Check, Heart, MapPin, MessageCircle, Phone, ShieldCheck, Sun, Users, Utensils } from "lucide-react";
 import AdmissionForm from "@/components/AdmissionForm";
 import { useSiteContact } from "@/components/SiteContactProvider";
 import styles from "./AdmissionsCampaign.module.css";
-import { admissionsCampaignFaqs } from "@/lib/website/admissionsCampaign";
+import { admissionsCampaignFaqs, campaignPortraitUrl } from "@/lib/website/admissionsCampaign";
 
 
 type AdmissionsCampaignProps = {
@@ -29,14 +28,8 @@ const programmes = [
 ] as const;
 
 const parentReviews = [
-  {
-    name: "Shailja Singh",
-    quote: "I am fully satisfied with the school in every manner—learning, communication and safety. All the teachers treat children very nicely, and my daughter is growing here.",
-  },
-  {
-    name: "Komal Gahlot",
-    quote: "The preschool is trustworthy. The teachers share weekly feedback and regularly update parents about activities.",
-  },
+  { name: "Shivam Kumar", quote: "The staff takes excellent care of children and keeps parents updated regularly." },
+  { name: "Thakur Sapna", quote: "Kidzee provides a happy and safe environment for children, and I am very satisfied as a mother." },
 ] as const;
 
 export default function AdmissionsCampaign({
@@ -48,20 +41,20 @@ export default function AdmissionsCampaign({
   growthExperimentId = "",
 }: AdmissionsCampaignProps) {
   const site = useSiteContact();
-  const [enquiryIntent, setEnquiryIntent] = useState(initialEnquiryType);
-  const [showParentVideo, setShowParentVideo] = useState(false);
-  const parentVideoRef = useRef<HTMLVideoElement>(null);
-
-  function playParentStory() {
-    const video = parentVideoRef.current;
-    if (!video) return;
-    // Start the media request within the parent\'s click, preserving browser
-    // user activation instead of relying on unmuted autoplay after rendering.
-    video.src = "/videos/parent-reviews-dwarka-sec12.mp4";
-    setShowParentVideo(true);
-    void video.play().catch(() => { /* Native controls remain available. */ });
+  const reviewsUrl = "https://www.google.com/maps/search/?api=1&query=Kidzee+Sector+12+Dwarka&query_place_id=ChIJW0OoVsUbDTkRAh71PzTvcHA";
+  const [enquiryIntent, setEnquiryIntent] = useState(initialEnquiryType === "FEES" ? "CALLBACK" : initialEnquiryType);
+  const [programmeInterest, setProgrammeInterest] = useState(initialEnquiryType === "DAYCARE" ? "DAYCARE" : initialProgramme);
+  const isDaycare = programmeInterest === "DAYCARE" || enquiryIntent === "DAYCARE";
+  function chooseService(daycare: boolean) {
+    setProgrammeInterest(daycare ? "DAYCARE" : programmeInterest === "DAYCARE" ? "" : programmeInterest);
+    setEnquiryIntent(daycare ? "DAYCARE" : "SCHOOL_VISIT");
   }
-
+  function changeProgramme(value: string) {
+    setProgrammeInterest(value);
+    if (value === "DAYCARE") setEnquiryIntent("DAYCARE");
+    else if (enquiryIntent === "DAYCARE") setEnquiryIntent("SCHOOL_VISIT");
+  }
+  const [formFocused, setFormFocused] = useState(false);
 
   return (
     <div className={styles.page}>
@@ -85,28 +78,32 @@ export default function AdmissionsCampaign({
         <section className={styles.hero} aria-labelledby="admissions-heading">
           <div className={styles.wrap + " " + styles.heroGrid}>
             <div className={styles.heroCopy}>
-              <div className={styles.session}>ADMISSIONS 2027–28 · AGES 2–6</div>
+              <div className={styles.session}>{isDaycare ? "DAYCARE · MONDAY TO SATURDAY" : "PRESCHOOL ADMISSIONS 2027–28"}</div>
+              <div className={styles.services} role="group" aria-label="Choose preschool or daycare">
+                <button type="button" aria-pressed={!isDaycare} onClick={() => chooseService(false)}>Preschool</button>
+                <button type="button" aria-pressed={isDaycare} onClick={() => chooseService(true)}>Daycare from 12:30 PM</button>
+              </div>
               <h1 id="admissions-heading" className={styles.title}>
-                Preschool Admissions in <span>Dwarka Sector 12.</span>
+                {isDaycare ? "Daycare in " : "Preschool Admissions in "}<span>Dwarka Sector 12.</span>
               </h1>
               <p className={styles.lead}>
-                Kidzee play school in Sector 12B for Playgroup, Nursery &amp; KG. Caring teachers and learning through play.
+                {isDaycare ? "A familiar place for rest, play and an unhurried afternoon. Monday to Saturday, 12:30 PM–7:00 PM." : "Kidzee play school in Sector 12B. Playgroup, Nursery & KG for ages 2–6, with learning through play."}
               </p>
-              <ul className={styles.heroBenefits} aria-label="Preschool benefits">
-                <li><Check size={16} aria-hidden="true" /><span>1:8 teacher–child ratio in Playgroup &amp; Nursery</span></li>
-                <li><Check size={16} aria-hidden="true" /><span>Vegetarian preschool breakfast included</span></li>
+              <ul className={styles.heroBenefits} aria-label={isDaycare ? "Daycare benefits" : "Preschool benefits"}>
+                <li><Check size={16} aria-hidden="true" /><span>{isDaycare ? "After-preschool, selected-day & occasional care" : "1:8 teacher–child ratio in Playgroup & Nursery"}</span></li>
+                <li><Check size={16} aria-hidden="true" /><span>{isDaycare ? "Quiet time, activities & homework support" : "Vegetarian preschool breakfast included"}</span></li>
               </ul>
               <div className={styles.heroOffer}>
-                <strong>30% off annual charges</strong>
-                <span>January start: no monthly tuition until March 2027.</span>
-                <small>Summer camp included · <a href="#offer-terms">View offer terms</a></small>
+                {isDaycare ? <><strong>Daycare from 12:30 PM to 7:00 PM</strong><span>Tell us your preferred days and pickup time.</span><small><a href="#daycare">Explore our daycare routine</a></small></> : <><strong>30% Off Annual Charges</strong><span>January settling-in · Tuition Begins in March</span><small>Summer Camp Included · <a href="#offer-terms">Preschool offer terms</a></small></>}
               </div>
 
             </div>
-            <div id="ad-enquiry" className={styles.formColumn}>
+            <div id="ad-enquiry" className={styles.formColumn} onFocusCapture={() => setFormFocused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFormFocused(false); }}>
               <AdmissionForm
                 compact
                 campaignIntent
+                programme={programmeInterest}
+                onProgrammeChange={changeProgramme}
                 enquiryType={enquiryIntent}
                 onEnquiryTypeChange={setEnquiryIntent}
                 autoOpenWhatsApp={false}
@@ -117,13 +114,12 @@ export default function AdmissionsCampaign({
                 growthExperimentId={growthExperimentId}
                 badgeText="ADMISSIONS 2027–28"
                 title="Book a School Visit"
-                subtitle="Meet our team, explore the classrooms and understand your child's programme and fees."
                 privacyText="Your details go directly to our centre team to arrange your visit or answer your questions."
                 handoffText="We will contact you to discuss your enquiry. Continuing on WhatsApp after submitting is optional."
               />
               <figure className={styles.earlyReview}>
-                <blockquote>“The teachers share weekly feedback and regularly update parents about activities.”</blockquote>
-                <figcaption>Komal Gahlot · Google review excerpt<br /><a href={site.googleReviews} target="_blank" rel="noopener noreferrer">Read current reviews</a></figcaption>
+                <blockquote>“The staff takes excellent care of children and keeps parents updated regularly.”</blockquote>
+                <figcaption>Shivam Kumar · Google review excerpt<br /><a href={reviewsUrl} target="_blank" rel="noopener noreferrer">Read current reviews</a></figcaption>
               </figure>
             </div>
             <figure className={styles.heroPhoto}>
@@ -145,13 +141,31 @@ export default function AdmissionsCampaign({
             <div className={styles.trustItem}><Users size={24} aria-hidden="true" /><div>Small groups<small>1:8 Playgroup &amp; Nursery · 1:10 KG</small></div></div>
             <div className={styles.trustItem}><BookOpen size={24} aria-hidden="true" /><div>Learning through play<small>Kidzee&apos;s Péntemind approach</small></div></div>
             <div className={styles.trustItem}><Utensils size={24} aria-hidden="true" /><div>Preschool breakfast included<small>Freshly cooked vegetarian meals</small></div></div>
-            <div className={styles.trustItem}><Heart size={24} aria-hidden="true" /><div>Support beyond preschool<small>Daycare available until 7:00 PM</small></div></div>
+            <div className={styles.trustItem}><Heart size={24} aria-hidden="true" /><div>Support beyond preschool<small>Daycare · 12:30 PM–7:00 PM</small></div></div>
+          </div>
+        </section>
+
+        <section id="daycare" className={styles.section} aria-labelledby="daycare-heading">
+          <div className={styles.wrap + " " + styles.daycareGrid}>
+            <div>
+              <p className={styles.eyebrow}>Afternoons at Kidzee Sector 12B</p>
+              <h2 id="daycare-heading" className={styles.heading}>Daycare in Dwarka Sector 12.<br />From 12:30 PM to 7:00 PM.</h2>
+              <p className={styles.intro}>Monday to Saturday. Continue after preschool, join after another school, or ask about selected-day and occasional care. Our team confirms a routine suited to your child and current availability.</p>
+              <ul className={styles.visitList}>
+                <li><Check size={18} aria-hidden="true" />Rest or quiet time, stories, art and supervised play.</li>
+                <li><Check size={18} aria-hidden="true" />Homework support for school-going children.</li>
+                <li><Check size={18} aria-hidden="true" />Discuss lunch, evening snacks and authorised pickup with our team.</li>
+              </ul>
+              <a href="#admission-enquiry" onClick={() => chooseService(true)} className={styles.button}>Enquire About Daycare <ArrowRight size={17} aria-hidden="true" /></a>
+              <p className={styles.micro}>Daycare transport is not available. Contact admissions to discuss programme details.</p>
+            </div>
+            <figure className={styles.daycarePhoto}><Image src="/images/daycare/daycare-main.jpg" alt="A child working on an activity during daycare at Kidzee Sector 12 Dwarka" width={720} height={1280} sizes="(max-width: 767px) calc(100vw - 32px), 400px" /><figcaption>A real daycare moment at our centre</figcaption></figure>
           </div>
         </section>
 
         <section id="january-start" className={styles.section + " " + styles.soft} style={{ scrollMarginTop: 100 }}>
           <div className={styles.wrap}>
-            <p className={styles.eyebrow}>A little time to feel at home</p>
+            <p className={styles.eyebrow}>Preschool · Early Start Advantage</p>
             <h2 className={styles.heading}>Start in January. Settle in with us.<br />Begin the academic session in March.</h2>
             <p className={styles.intro}>
               The first few weeks matter. For children joining in January 2027,
@@ -167,19 +181,19 @@ export default function AdmissionsCampaign({
               <article className={styles.offerCell}>
                 <Heart size={27} className={styles.offerIcon} aria-hidden="true" />
                 <h3 className={styles.offerLabel}>January &amp; February attendance</h3>
-                <p>Children joining in January 2027 take part in the routine and activities with no monthly tuition charge for these two months. Monthly tuition starts in March 2027.</p>
+                <p>A gentle beginning for eligible January 2027 starters, with time to get to know the teachers and preschool routine. Tuition Begins in March.</p>
               </article>
               <article className={styles.offerCell}>
                 <Sun size={27} className={styles.offerIcon} aria-hidden="true" />
                 <h3 className={styles.offerLabel}>Summer camp included</h3>
-                <p>Children enrolled for 2027–28 pay no additional summer camp fee.</p>
+                <p>Summer Camp Included for eligible 2027–28 preschool enrolments. The centre will share the schedule.</p>
               </article>
             </div>
             <div className={styles.timeline}>
-              <div><strong>At enrolment</strong><span>Annual charges after concession, kit and other applicable admission charges.</span></div>
-              <div><strong>From March 2027</strong><span>Monthly preschool tuition begins with the academic session.</span></div>
+              <div><strong>Before joining</strong><span>Meet the team, discuss readiness and confirm your child's programme.</span></div>
+              <div><strong>Tuition Begins in March</strong><span>The 2027–28 academic session begins in March 2027.</span></div>
             </div>
-            <a href="#offer-terms" className={styles.termsLink}>Read the offer details and fee terms</a>
+            <a href="#offer-terms" className={styles.termsLink}>Read preschool offer terms</a>
           </div>
         </section>
 
@@ -195,7 +209,7 @@ export default function AdmissionsCampaign({
               <div className={styles.teamCards}>
                 {[...teamMembers].sort((a, b) => Number(/director|head|principal/i.test(b.role)) - Number(/director|head|principal/i.test(a.role))).slice(0, 2).map((member) => (
                   <article key={member._id} className={styles.teamCard}>
-                    {member.imageUrl ? <Image src={member.imageUrl} alt={member.photoAlt || member.name} width={360} height={400} sizes="(max-width: 767px) 44vw, 240px" /> : null}
+                    {member.imageUrl ? <Image src={campaignPortraitUrl(member.imageUrl)} alt={member.photoAlt || member.name} width={360} height={400} sizes="(max-width: 767px) 44vw, 240px" /> : null}
                     <div><h3>{member.name}</h3><p>{member.role}</p>{member.qualification ? <small>{member.qualification}</small> : null}</div>
                   </article>
                 ))}
@@ -231,12 +245,12 @@ export default function AdmissionsCampaign({
         <section className={styles.section + " " + styles.soft}>
           <div className={styles.wrap}>
             <div className={styles.sectionTop}>
-              <div><p className={styles.eyebrow}>Inside Kidzee Sector 12B</p><h2 className={styles.heading}>A closer look at where<br />the little discoveries happen.</h2></div>
+              <div><p className={styles.eyebrow}>Inside Kidzee Sector 12B</p><h2 id="centre-photos" style={{scrollMarginTop:100}} className={styles.heading}>A closer look at where<br />the little discoveries happen.</h2></div>
               <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button + " " + styles.secondary}>See It in Person <ArrowRight size={16} aria-hidden="true" /></a>
             </div>
             <div className={styles.gallery}>
               <figure><Image src="/images/landing/kidzee-modern-classroom.jpg" alt="Activity classroom at Kidzee Sector 12 Dwarka" width={900} height={675} sizes="(max-width: 767px) 100vw, 40vw" /><figcaption>Space to learn and create</figcaption></figure>
-              <figure><Image src="/images/landing/kidzee-indoor-turf-arena.jpg" alt="Indoor turf play area at Kidzee Sector 12 Dwarka" width={900} height={675} sizes="(max-width: 767px) 50vw, 30vw" /><figcaption>Room to move and play</figcaption></figure>
+              <figure><Image src="/images/landing/kidzee-indoor-turf-play.webp" alt="Indoor turf play area at Kidzee Sector 12 Dwarka" width={900} height={675} sizes="(max-width: 767px) 50vw, 30vw" /><figcaption>Room to move and play</figcaption></figure>
               <figure><Image src="/images/landing/kidzee-sensory-ball-pool.jpg" alt="Soft ball-pool play area at Kidzee Sector 12 Dwarka" width={900} height={675} sizes="(max-width: 767px) 50vw, 30vw" /><figcaption>Play that invites exploration</figcaption></figure>
             </div>
             <p className={styles.reviewNote}>Photographs from our centre. Visit to see the current classroom and play arrangements.</p>
@@ -246,7 +260,7 @@ export default function AdmissionsCampaign({
         <section className={styles.section}>
           <div className={styles.wrap}>
             <p className={styles.eyebrow}>From a first hello to school readiness</p>
-            <h2 className={styles.heading}>Playgroup, Nursery &amp; KG Admissions in Dwarka</h2>
+            <h2 id="programmes" style={{scrollMarginTop:100}} className={styles.heading}>Playgroup, Nursery &amp; KG Admissions in Dwarka</h2>
             <p className={styles.intro}>Tell us your child&apos;s age and current routine. We&apos;ll help you understand the suitable programme.</p>
             <div className={styles.programmes}>
               {programmes.map((programme) => (
@@ -261,25 +275,8 @@ export default function AdmissionsCampaign({
         <section className={styles.section + " " + styles.soft}>
           <div className={styles.wrap}>
             <div className={styles.sectionTop}>
-              <div><p className={styles.eyebrow}>From families at our centre</p><h2 className={styles.heading}>Parents notice the everyday things.</h2></div>
-              <a href={site.googleReviews} target="_blank" rel="noopener noreferrer" className={styles.termsLink}>Read current Google reviews <ArrowRight size={14} aria-hidden="true" /></a>
-            </div>
-            <div className={styles.parentStory}>
-              <div>
-                <h3>Hear from a family at our centre</h3>
-                <p>A parent shares their experience of Kidzee Sector 12, Dwarka. Play the video when you are ready.</p>
-                <Link href="/about#team" className={styles.termsLink}>Meet our centre team <ArrowRight size={15} aria-hidden="true" /></Link>
-              </div>
-              <div>
-                <video ref={parentVideoRef} hidden={!showParentVideo} className={styles.parentVideo} controls playsInline preload="none" data-analytics-name="admissions_parent_story" aria-label="Parent experience at Kidzee Sector 12 Dwarka" />
-                {!showParentVideo ? (
-                  <button type="button" className={styles.videoButton} onClick={playParentStory}>
-                    <span><Play size={23} fill="currentColor" aria-hidden="true" /></span>
-                    <strong>Watch a parent story</strong>
-                    <small>Plays with sound after you choose to watch</small>
-                  </button>
-                ) : null}
-              </div>
+              <div id="reviews" style={{scrollMarginTop:100}}><p className={styles.eyebrow}>From families at our centre</p><h2 className={styles.heading}>Parents notice the everyday things.</h2></div>
+              <a href={reviewsUrl} target="_blank" rel="noopener noreferrer" className={styles.termsLink}>Read current Google reviews <ArrowRight size={14} aria-hidden="true" /></a>
             </div>
             <div className={styles.quotes}>
               {parentReviews.map((review) => (
@@ -289,7 +286,7 @@ export default function AdmissionsCampaign({
                 </figure>
               ))}
             </div>
-            <p className={styles.reviewNote}>These excerpts also appear on our main website and are shortened for readability. Open Google reviews to read the original context.</p>
+            <p className={styles.reviewNote}>Short excerpts from this centre's public Google reviews. Open Google reviews to read the full context.</p>
             <Link href="/gallery" className={styles.termsLink}>Explore parent stories and centre albums</Link>
           </div>
         </section>
@@ -301,7 +298,7 @@ export default function AdmissionsCampaign({
               <h2 className={styles.heading}>Bring your questions.<br />Bring your child.</h2>
               <p className={styles.intro}>You don&apos;t have to decide on the first visit. We&apos;ll walk you through the spaces, explain the routine and help you picture your child&apos;s day here.</p>
               <ul className={styles.visitList}>
-                {["Meet the centre team and see the classrooms.", "Discuss your child's age, routine and settling needs.", "Understand the offer and receive a complete fee breakup."].map((item) => <li key={item}><Check size={18} aria-hidden="true" />{item}</li>)}
+                {["Meet the centre team and see the classrooms.", "Discuss your child's age, routine and settling needs.", "Discuss the programme, settling-in and approved offer terms."].map((item) => <li key={item}><Check size={18} aria-hidden="true" />{item}</li>)}
               </ul>
               <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button}>Arrange My School Visit <ArrowRight size={17} aria-hidden="true" /></a>
             </div>
@@ -325,11 +322,10 @@ export default function AdmissionsCampaign({
             <div id="offer-terms" className={styles.terms}>
               <h3>Admissions 2027–28 · Offer details</h3>
               <ul>
-                <li>The 30% concession is on annual charges for 2027–28 preschool admissions at this centre. It does not mean 30% off the total fee package or monthly tuition.</li>
-                <li>For children joining in January 2027, including families completing admission in December 2026, children attend during January and February without monthly tuition for those months. Monthly tuition starts from March 2027 with the academic session. Attendance follows the centre&apos;s working days and agreed programme routine.</li>
-                <li>Annual charges after the concession, kit and other applicable admission charges remain payable at enrolment. The complete fee breakup will be shared before payment.</li>
-                <li>Summer camp is included for children enrolled in our 2027–28 preschool programme, with no additional summer camp fee. Dates and timings will follow the centre&apos;s camp schedule.</li>
-                <li>Daycare, optional daycare meals and preschool transport are separate services with their own charges. Programme placement and seat availability are confirmed by the centre.</li>
+                <li>30% Off Annual Charges applies to eligible 2027–28 preschool admissions at this centre. Contact the admissions team to discuss the approved terms.</li>
+                <li>January and February are a settling-in attendance period for eligible children joining in January 2027, including families completing admission in December 2026. Tuition Begins in March. Attendance follows the centre&apos;s working days and agreed routine.</li>
+                <li>Summer Camp Included for eligible 2027–28 preschool enrolments. Dates and timings follow the centre&apos;s camp schedule.</li>
+                <li>These preschool benefits do not describe a daycare offer. Discuss daycare, meals, transport arrangements, placement and availability directly with the admissions team before enrolling.</li>
               </ul>
             </div>
           </div>
@@ -346,15 +342,15 @@ export default function AdmissionsCampaign({
       <footer className={styles.footer}>
         <div className={styles.wrap + " " + styles.footerInner}>
           <div><strong>Kidzee Sector 12, Dwarka</strong><br />Admissions 2027–28 · {site.addressShort}</div>
-          <MiraLauncher inline />
           <nav className={styles.footerLinks} aria-label="Useful links">
             <Link href="/">Our Website</Link><Link href="/privacy-policy">Privacy Policy</Link><Link href="/terms">Terms of Use</Link>
           </nav>
         </div>
       </footer>
-      <nav className={styles.mobileBar} aria-label="Contact admissions">
+      <nav className={styles.mobileBar} aria-label="Contact admissions" hidden={formFocused}>
         <a href={"tel:" + site.phone} className={styles.button + " " + styles.secondary}><Phone size={17} aria-hidden="true" />Call</a>
-        <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button}><CalendarCheck size={17} aria-hidden="true" />Book a School Visit</a>
+        <a href={isDaycare ? site.whatsappDaycare : site.whatsappAdmission} target="_blank" rel="noopener noreferrer" className={styles.button + " " + styles.secondary}><MessageCircle size={17} aria-hidden="true" />WhatsApp</a>
+        <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button}><CalendarCheck size={17} aria-hidden="true" />Book Visit</a>
       </nav>
     </div>
   );

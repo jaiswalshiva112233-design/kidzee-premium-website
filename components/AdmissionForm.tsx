@@ -91,6 +91,8 @@ type AdmissionFormProps = {
   campaignIntent?: boolean;
   enquiryType?: string;
   onEnquiryTypeChange?: (value: string) => void;
+  programme?: string;
+  onProgrammeChange?: (value: string) => void;
 };
 
 function createSubmissionId() {
@@ -194,6 +196,8 @@ export default function AdmissionForm({
   campaignIntent = false,
   enquiryType,
   onEnquiryTypeChange,
+  programme,
+  onProgrammeChange,
 }: AdmissionFormProps) {
   const site = useSiteContact();
   const [storedFormData, setFormData] =
@@ -202,7 +206,8 @@ export default function AdmissionForm({
       programme: initialProgramme,
       enquiryType: initialEnquiryType,
     }));
-  const formData = { ...storedFormData, enquiryType: enquiryType ?? storedFormData.enquiryType };
+  const formData = { ...storedFormData, enquiryType: enquiryType ?? storedFormData.enquiryType, programme: programme ?? storedFormData.programme };
+  const daycareEnquiry = formData.programme === "DAYCARE" || formData.enquiryType === "DAYCARE";
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState("");
@@ -214,6 +219,7 @@ export default function AdmissionForm({
     value: string,
   ) {
     if (field === "enquiryType") onEnquiryTypeChange?.(value);
+    if (field === "programme") onProgrammeChange?.(value);
     setFormData((current) => ({
       ...current,
       [field]: value,
@@ -489,10 +495,10 @@ export default function AdmissionForm({
               id="admission-form-heading"
               className={campaignIntent ? styles.title : "mt-1 text-2xl font-black tracking-[-0.025em] text-[#2C1735] sm:text-3xl"}
             >
-              {compact && formData.enquiryType === "FEES" ? "Ask About Fees & Availability" : title || "How can we help your family?"}
+              {campaignIntent ? (formData.enquiryType === "SCHOOL_VISIT" ? (daycareEnquiry ? "Visit Our Daycare" : "Book a School Visit") : daycareEnquiry ? "Ask About Daycare" : "Speak to Admissions") : compact && formData.enquiryType === "FEES" ? "Ask About Fees & Availability" : title || "How can we help your family?"}
             </h2>
             <p className={campaignIntent ? styles.subtitle : "mt-2 text-sm leading-6 text-[#5F5F6D] sm:text-base"}>
-              {campaignIntent ? (formData.enquiryType === "FEES" ? "Request the programme fee breakdown and current availability from our centre team." : "See the classrooms, meet our teachers and discuss your child's needs.") : subtitle ||
+              {campaignIntent ? (daycareEnquiry ? "Tell us the hours you need. Our team will discuss your child's routine and availability." : "Meet our teachers, see the classrooms and discuss your child's next step.") : subtitle ||
                 "Your enquiry goes directly to the centre panel so our team can follow up with you."}
             </p>
           </div>
@@ -507,8 +513,8 @@ export default function AdmissionForm({
         className={campaignIntent ? styles.form : "space-y-4 px-5 py-6 sm:px-6 sm:py-6"}
       >
         {campaignIntent ? <div className={styles.intent} role="group" aria-label="Choose your enquiry">
-          {[{ value: "SCHOOL_VISIT", label: "School visit" }, { value: "FEES", label: "Fees & availability" }].map((intent) => (
-            <button key={intent.value} type="button" data-enquiry-intent={intent.value} aria-pressed={formData.enquiryType === intent.value} onClick={() => updateField("enquiryType", intent.value)} disabled={isSubmitting}>{intent.label}</button>
+          {[{ value: "SCHOOL_VISIT", label: "School visit" }, { value: "CALLBACK", label: "Speak to team" }].map((intent) => (
+            <button key={intent.value} type="button" data-enquiry-intent={intent.value} aria-pressed={intent.value === "SCHOOL_VISIT" ? formData.enquiryType === "SCHOOL_VISIT" : formData.enquiryType !== "SCHOOL_VISIT"} onClick={() => updateField("enquiryType", intent.value === "CALLBACK" && daycareEnquiry ? "DAYCARE" : intent.value)} disabled={isSubmitting}>{intent.label}</button>
           ))}
         </div> : null}
         <div className="grid gap-3.5 sm:grid-cols-2">
@@ -630,7 +636,7 @@ export default function AdmissionForm({
               }
               className={inputClasses(Boolean(errors.enquiryType))}
             >
-              {enquiryTypeOptions.map((option) => (
+              {enquiryTypeOptions.filter((option) => !campaignIntent || option.value !== "FEES").map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -805,7 +811,7 @@ export default function AdmissionForm({
               </>
             ) : (
               <>
-                <span>{compact ? (formData.enquiryType === "FEES" ? "Request Fee Details" : formData.enquiryType === "SCHOOL_VISIT" ? "Request a School Visit" : "Send My Enquiry") : submitButtonText || "Send Enquiry"}</span>
+                <span>{campaignIntent ? (formData.enquiryType === "SCHOOL_VISIT" ? "Request a School Visit" : daycareEnquiry ? "Request Daycare Callback" : "Request Admissions Callback") : compact ? (formData.enquiryType === "FEES" ? "Request Fee Details" : formData.enquiryType === "SCHOOL_VISIT" ? "Request a School Visit" : "Send My Enquiry") : submitButtonText || "Send Enquiry"}</span>
                 <ArrowRight aria-hidden="true" size={18} />
               </>
             )}
@@ -822,6 +828,8 @@ export default function AdmissionForm({
             </a>
           </div>
         </div>
+
+        {campaignIntent ? <a href={daycareEnquiry ? site.whatsappDaycare : site.whatsappAdmission} target="_blank" rel="noopener noreferrer" className={styles.whatsapp}><MessageCircle size={16} aria-hidden="true" />Prefer WhatsApp? Message our team</a> : null}
 
         {!campaignIntent ? <p className="text-center text-xs font-semibold leading-5 text-[#6F6474]">
           {handoffText || "Your enquiry is saved first. WhatsApp opens only after CentreOS confirms it."}

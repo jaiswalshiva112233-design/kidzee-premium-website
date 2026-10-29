@@ -6,6 +6,7 @@ import {
   ADMISSIONS_CAMPAIGN_DESCRIPTION,
   ADMISSIONS_CAMPAIGN_IMAGE,
   admissionsCampaignFaqs,
+  getAdmissionsEnquiry,
 } from "@/lib/website/admissionsCampaign";
 
 export const metadata: Metadata = {
@@ -21,21 +22,13 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: ADMISSIONS_CAMPAIGN_TITLE, description: ADMISSIONS_CAMPAIGN_DESCRIPTION, images: [ADMISSIONS_CAMPAIGN_IMAGE] },
 };
 
-const programmes = new Set(["PLAYGROUP", "NURSERY", "JUNIOR_KG", "SENIOR_KG", "DAYCARE"]);
-const enquiryTypes = new Set(["ADMISSION", "SCHOOL_VISIT", "TRIAL", "DAYCARE", "FEES", "CALLBACK"]);
-
-function first(value: string | string[] | undefined) {
-  return (Array.isArray(value) ? value[0] ?? "" : value ?? "").toUpperCase();
-}
-
 export default async function AdmissionsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const [query, teamMembers] = await Promise.all([searchParams, getPublishedWebsiteTeamMembers()]);
-  const programme = first(query.programme);
-  const enquiry = first(query.enquiry);
+  const enquiry = getAdmissionsEnquiry(query);
   const faq = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -51,9 +44,9 @@ export default async function AdmissionsPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faq).replace(/</g, "\\u003c") }} />
       <AdmissionsCampaign
         teamMembers={teamMembers}
-        initialProgramme={programmes.has(programme) ? programme : ""}
-        initialEnquiryType={enquiryTypes.has(enquiry) ? enquiry : "SCHOOL_VISIT"}
+        {...enquiry}
       />
     </>
   );
 }
+
