@@ -21,3 +21,6 @@ Production build, regression and browser checks are required. Browser checks use
 ## Visual pricing review
 The previous turf photo contains a visible promotional price poster, so this campaign uses the existing genuine indoor-turf WebP photograph without that poster. The unreviewed testimonial video is not embedded until its full audio and on-screen content have been checked against the no-pricing restriction. Genuine approved text reviews remain. Main-site media is unchanged.
 
+## Review provenance
+Short Google-review excerpts for Shivam Kumar and Thakur Sapna were verified on the linked Sector 12 Business Profile on October 29, 2026. The page uses a precise Place-ID link. No numerical rating or review-count claim is embedded. The linked profile address and phone match the school; its displayed 6 PM closing time differs from the owner-confirmed 7 PM daycare close. No Business Profile settings were edited.
+

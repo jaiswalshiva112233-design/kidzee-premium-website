@@ -28,14 +28,8 @@ const programmes = [
 ] as const;
 
 const parentReviews = [
-  {
-    name: "Shailja Singh",
-    quote: "I am fully satisfied with the school in every manner—learning, communication and safety. All the teachers treat children very nicely, and my daughter is growing here.",
-  },
-  {
-    name: "Komal Gahlot",
-    quote: "The preschool is trustworthy. The teachers share weekly feedback and regularly update parents about activities.",
-  },
+  { name: "Shivam Kumar", quote: "The staff takes excellent care of children and keeps parents updated regularly." },
+  { name: "Thakur Sapna", quote: "Kidzee provides a happy and safe environment for children, and I am very satisfied as a mother." },
 ] as const;
 
 export default function AdmissionsCampaign({
@@ -47,6 +41,7 @@ export default function AdmissionsCampaign({
   growthExperimentId = "",
 }: AdmissionsCampaignProps) {
   const site = useSiteContact();
+  const reviewsUrl = "https://www.google.com/maps/search/?api=1&query=Kidzee+Sector+12+Dwarka&query_place_id=ChIJW0OoVsUbDTkRAh71PzTvcHA";
   const [enquiryIntent, setEnquiryIntent] = useState(initialEnquiryType === "FEES" ? "CALLBACK" : initialEnquiryType);
   const [programmeInterest, setProgrammeInterest] = useState(initialEnquiryType === "DAYCARE" ? "DAYCARE" : initialProgramme);
   const isDaycare = programmeInterest === "DAYCARE" || enquiryIntent === "DAYCARE";
@@ -123,8 +118,8 @@ export default function AdmissionsCampaign({
                 handoffText="We will contact you to discuss your enquiry. Continuing on WhatsApp after submitting is optional."
               />
               <figure className={styles.earlyReview}>
-                <blockquote>“The teachers share weekly feedback and regularly update parents about activities.”</blockquote>
-                <figcaption>Komal Gahlot · Google review excerpt<br /><a href={site.googleReviews} target="_blank" rel="noopener noreferrer">Read current reviews</a></figcaption>
+                <blockquote>“The staff takes excellent care of children and keeps parents updated regularly.”</blockquote>
+                <figcaption>Shivam Kumar · Google review excerpt<br /><a href={reviewsUrl} target="_blank" rel="noopener noreferrer">Read current reviews</a></figcaption>
               </figure>
             </div>
             <figure className={styles.heroPhoto}>
@@ -281,7 +276,7 @@ export default function AdmissionsCampaign({
           <div className={styles.wrap}>
             <div className={styles.sectionTop}>
               <div id="reviews" style={{scrollMarginTop:100}}><p className={styles.eyebrow}>From families at our centre</p><h2 className={styles.heading}>Parents notice the everyday things.</h2></div>
-              <a href={site.googleReviews} target="_blank" rel="noopener noreferrer" className={styles.termsLink}>Read current Google reviews <ArrowRight size={14} aria-hidden="true" /></a>
+              <a href={reviewsUrl} target="_blank" rel="noopener noreferrer" className={styles.termsLink}>Read current Google reviews <ArrowRight size={14} aria-hidden="true" /></a>
             </div>
             <div className={styles.quotes}>
               {parentReviews.map((review) => (
@@ -291,7 +286,7 @@ export default function AdmissionsCampaign({
                 </figure>
               ))}
             </div>
-            <p className={styles.reviewNote}>These excerpts also appear on our main website and are shortened for readability. Open Google reviews to read the original context.</p>
+            <p className={styles.reviewNote}>Short excerpts from this centre's public Google reviews. Open Google reviews to read the full context.</p>
             <Link href="/gallery" className={styles.termsLink}>Explore parent stories and centre albums</Link>
           </div>
         </section>
