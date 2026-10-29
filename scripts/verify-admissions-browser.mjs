@@ -91,7 +91,8 @@ try {
       const mislabeledViews = await page.evaluate(() => window.__admissionsEvents.filter((event) => event.eventType === "LANDING_VARIANT_VIEW"));
       assert.equal(mislabeledViews.length, 0, "Fixed campaign must not emit legacy A/B variant views");
       const publicContent = await page.evaluate(() => document.body.innerText + '\n' + [...document.querySelectorAll('meta[content],script[type="application/ld+json"]')].map(el => el.getAttribute('content') || el.textContent).join('\n'));
-      assert.doesNotMatch(publicContent, /₹|\bINR\s*[0-9]|Rs\.?\s*[0-9]|\bfees?\b|\bpricing\b|payable|charged separately|monthly tuition|no additional|no monthly/i, 'Public page must not disclose pricing information');
+      const publicPricingMatch = publicContent.match(/₹|\bINR\s*[0-9]|\bRs\.?\s*[0-9]|\bfees?\b|\bpricing\b|payable|charged separately|monthly tuition|no additional|no monthly/i);
+      assert.equal(publicPricingMatch, null, 'Unexpected public pricing wording: ' + (publicPricingMatch?.[0] || '')); 
       assert.ok(!(await page.content()).includes('LEGACY_PRICE_MUST_NOT_REACH_PAGE'), 'Legacy managed content must not be serialized into campaign HTML');
       const formPosition = await page.locator('#admission-enquiry').boundingBox();
       if (width <= 390) {
@@ -159,6 +160,7 @@ try {
     assert.ok(await page.getByText("Please enter the parent's name.", { exact: true }).isVisible());
     await page.locator("#parentName").fill("Browser Test Parent " + index);
     await page.locator("#phone").fill("900000000" + index);
+    assert.equal(await page.locator('nav[aria-label="Contact admissions"]').isVisible(), false, "Sticky actions hide while the form has focus");
     await page.getByRole('button', { name: 'Speak to team', exact: true }).click();
     assert.equal(await page.locator('#parentName').inputValue(), 'Browser Test Parent ' + index);
     assert.equal(await page.locator('#phone').inputValue(), '900000000' + index);

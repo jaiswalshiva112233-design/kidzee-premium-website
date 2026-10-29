@@ -59,6 +59,7 @@ export default function AdmissionsCampaign({
     if (value === "DAYCARE") setEnquiryIntent("DAYCARE");
     else if (enquiryIntent === "DAYCARE") setEnquiryIntent("SCHOOL_VISIT");
   }
+  const [formFocused, setFormFocused] = useState(false);
   const [showParentVideo, setShowParentVideo] = useState(false);
   const parentVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -115,7 +116,7 @@ export default function AdmissionsCampaign({
               </div>
 
             </div>
-            <div id="ad-enquiry" className={styles.formColumn}>
+            <div id="ad-enquiry" className={styles.formColumn} onFocusCapture={() => setFormFocused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFormFocused(false); }}>
               <AdmissionForm
                 compact
                 campaignIntent
@@ -381,7 +382,7 @@ export default function AdmissionsCampaign({
           </nav>
         </div>
       </footer>
-      <nav className={styles.mobileBar} aria-label="Contact admissions">
+      <nav className={styles.mobileBar} aria-label="Contact admissions" hidden={formFocused}>
         <a href={"tel:" + site.phone} className={styles.button + " " + styles.secondary}><Phone size={17} aria-hidden="true" />Call</a>
         <a href={isDaycare ? site.whatsappDaycare : site.whatsappAdmission} target="_blank" rel="noopener noreferrer" className={styles.button + " " + styles.secondary}><MessageCircle size={17} aria-hidden="true" />WhatsApp</a>
         <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button}><CalendarCheck size={17} aria-hidden="true" />Book Visit</a>
