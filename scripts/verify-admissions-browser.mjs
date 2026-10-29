@@ -275,13 +275,25 @@ try {
     await page.getByRole('button', {name: 'Daycare from 12:30 PM', exact: true}).click();
     assert.match(await page.getByRole('heading', {level:1}).innerText(), /Daycare in Dwarka Sector 12/);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
-    await page.screenshot({path: output + '/daycare-' + index + '-390.png', fullPage: true});
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({width, height: 900});
+      await page.evaluate(async () => {
+        document.querySelectorAll('img').forEach(image => { image.loading = 'eager'; });
+        await Promise.all([...document.images].map(image => image.decode().catch(() => {})));
+      });
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, 'Daycare must fit at ' + width);
+      assert.equal(await page.locator('#admission-enquiry').count(), 1);
+      assert.match(await page.getByRole('heading', {level:1}).innerText(), /Daycare in Dwarka Sector 12/);
+      const failedImages = await page.locator('main img').evaluateAll(images => images.filter(image => !image.complete || image.naturalWidth === 0).map(image => image.src));
+      assert.deepEqual(failedImages, [], 'Daycare images must load at ' + width);
+      await page.screenshot({path: output + '/daycare-' + index + '-' + width + '.png', fullPage: true});
+    }
     const contact = page.getByRole('link', {name: 'Prefer WhatsApp? Message our team', exact:true});
     assert.match(await contact.getAttribute('href'), /^https:\/\/wa\.me\//);
     await page.getByRole('button', {name:'Preschool',exact:true}).click();
     assert.match(await page.getByRole('heading', {level:1}).innerText(), /Preschool Admissions/);
     await context.close();
-    results.push({route, daycarePreset:'pass', serviceSwitch:'pass', daycareCentreOS:'pass', daycareDeduplication:'pass', whatsAppLink:'pass'});
+    results.push({route, daycareResponsiveWidths:[390,1440], daycareImages:'pass', daycarePreset:'pass', serviceSwitch:'pass', daycareCentreOS:'pass', daycareDeduplication:'pass', whatsAppLink:'pass'});
   }
   {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
@@ -310,4 +322,3 @@ try {
   app.kill("SIGTERM");
   await pool.end();
 }
-
