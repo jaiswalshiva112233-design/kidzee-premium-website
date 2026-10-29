@@ -18,3 +18,6 @@ The exact ads route renders AdmissionsCampaign directly rather than serializing 
 ## Verification and approval
 Production build, regression and browser checks are required. Browser checks use an isolated database and synthetic parent details. They cover no public pricing in body/metadata/JSON-LD, no legacy-content serialization, mobile placement, both route presets, daycare saves, retry deduplication, service switching, direct WhatsApp links and optional parent video. Live provider receipts and alert delivery remain separate checks. This revision is prepared for owner approval; do not merge, publish or activate advertising before approval.
 
+## Visual pricing review
+The previous turf photo contains a visible promotional price poster, so this campaign uses the existing genuine indoor-turf WebP photograph without that poster. The unreviewed testimonial video is not embedded until its full audio and on-screen content have been checked against the no-pricing restriction. Genuine approved text reviews remain. Main-site media is unchanged.
+

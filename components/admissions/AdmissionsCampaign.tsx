@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { WebsiteTeamMember } from "@/lib/sanity/team";
 import Link from "next/link";
-import { ArrowRight, BookOpen, CalendarCheck, Check, Heart, MapPin, MessageCircle, Phone, Play, ShieldCheck, Sun, Users, Utensils } from "lucide-react";
+import { ArrowRight, BookOpen, CalendarCheck, Check, Heart, MapPin, MessageCircle, Phone, ShieldCheck, Sun, Users, Utensils } from "lucide-react";
 import AdmissionForm from "@/components/AdmissionForm";
 import { useSiteContact } from "@/components/SiteContactProvider";
 import styles from "./AdmissionsCampaign.module.css";
@@ -60,19 +60,6 @@ export default function AdmissionsCampaign({
     else if (enquiryIntent === "DAYCARE") setEnquiryIntent("SCHOOL_VISIT");
   }
   const [formFocused, setFormFocused] = useState(false);
-  const [showParentVideo, setShowParentVideo] = useState(false);
-  const parentVideoRef = useRef<HTMLVideoElement>(null);
-
-  function playParentStory() {
-    const video = parentVideoRef.current;
-    if (!video) return;
-    // Start the media request within the parent\'s click, preserving browser
-    // user activation instead of relying on unmuted autoplay after rendering.
-    video.src = "/videos/parent-reviews-dwarka-sec12.mp4";
-    setShowParentVideo(true);
-    void video.play().catch(() => { /* Native controls remain available. */ });
-  }
-
 
   return (
     <div className={styles.page}>
@@ -268,7 +255,7 @@ export default function AdmissionsCampaign({
             </div>
             <div className={styles.gallery}>
               <figure><Image src="/images/landing/kidzee-modern-classroom.jpg" alt="Activity classroom at Kidzee Sector 12 Dwarka" width={900} height={675} sizes="(max-width: 767px) 100vw, 40vw" /><figcaption>Space to learn and create</figcaption></figure>
-              <figure><Image src="/images/landing/kidzee-indoor-turf-arena.jpg" alt="Indoor turf play area at Kidzee Sector 12 Dwarka" width={900} height={675} sizes="(max-width: 767px) 50vw, 30vw" /><figcaption>Room to move and play</figcaption></figure>
+              <figure><Image src="/images/landing/kidzee-indoor-turf-play.webp" alt="Indoor turf play area at Kidzee Sector 12 Dwarka" width={900} height={675} sizes="(max-width: 767px) 50vw, 30vw" /><figcaption>Room to move and play</figcaption></figure>
               <figure><Image src="/images/landing/kidzee-sensory-ball-pool.jpg" alt="Soft ball-pool play area at Kidzee Sector 12 Dwarka" width={900} height={675} sizes="(max-width: 767px) 50vw, 30vw" /><figcaption>Play that invites exploration</figcaption></figure>
             </div>
             <p className={styles.reviewNote}>Photographs from our centre. Visit to see the current classroom and play arrangements.</p>
@@ -295,23 +282,6 @@ export default function AdmissionsCampaign({
             <div className={styles.sectionTop}>
               <div id="reviews" style={{scrollMarginTop:100}}><p className={styles.eyebrow}>From families at our centre</p><h2 className={styles.heading}>Parents notice the everyday things.</h2></div>
               <a href={site.googleReviews} target="_blank" rel="noopener noreferrer" className={styles.termsLink}>Read current Google reviews <ArrowRight size={14} aria-hidden="true" /></a>
-            </div>
-            <div className={styles.parentStory}>
-              <div>
-                <h3>Hear from a family at our centre</h3>
-                <p>A parent shares their experience of Kidzee Sector 12, Dwarka. Play the video when you are ready.</p>
-                <Link href="/about#team" className={styles.termsLink}>Meet our centre team <ArrowRight size={15} aria-hidden="true" /></Link>
-              </div>
-              <div>
-                <video ref={parentVideoRef} hidden={!showParentVideo} className={styles.parentVideo} controls playsInline preload="none" data-analytics-name="admissions_parent_story" aria-label="Parent experience at Kidzee Sector 12 Dwarka" />
-                {!showParentVideo ? (
-                  <button type="button" className={styles.videoButton} onClick={playParentStory}>
-                    <span><Play size={23} fill="currentColor" aria-hidden="true" /></span>
-                    <strong>Watch a parent story</strong>
-                    <small>Plays with sound after you choose to watch</small>
-                  </button>
-                ) : null}
-              </div>
             </div>
             <div className={styles.quotes}>
               {parentReviews.map((review) => (

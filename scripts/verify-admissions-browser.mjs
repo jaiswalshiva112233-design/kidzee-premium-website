@@ -238,20 +238,11 @@ try {
     assert.equal(savedFees.status(), 201);
     assert.equal(savedFees.request().postDataJSON().enquiryType, 'CALLBACK');
     await page.getByRole('heading', { name: 'Thank you. We have your enquiry.' }).waitFor();
-    await page.getByRole("button", { name: "Watch a parent story" }).click();
-    assert.equal(await page.locator('video[controls][playsinline]').count(), 1);
-    try {
-      await page.waitForFunction(() => document.querySelector("video")?.readyState >= 1, null, { timeout: 15000 });
-    } catch (error) {
-      console.log("ADMISSIONS_VIDEO_DIAGNOSTICS:" + JSON.stringify(await page.locator("video").evaluate((video) => ({ src: video.currentSrc, error: video.error?.message, code: video.error?.code, networkState: video.networkState, readyState: video.readyState, mp4: video.canPlayType('video/mp4; codecs="avc1.42E01E"') }))));
-      throw error;
-    }
-    assert.ok(await page.locator("video").evaluate((video) => video.videoWidth > 0));
-    await page.waitForFunction(() => document.querySelector("video")?.currentTime > 0, null, { timeout: 10000 });
+    assert.equal(await page.locator('video,audio').count(), 0, 'Unreviewed media must not disclose pricing on the campaign page');
     assert.ok(await page.getByText(/including families completing admission in December 2026/).count() > 0);
     await context.close();
     await mediaBrowser.close();
-    results.push({ videoBrowser: "Google Chrome", expandedDetails: "pass", legacyFeeQueryMapsToCallback: "pass", noPublicPricing: "pass", optionalVideo: "pass", decemberEligibility: "pass" });
+    results.push({ videoBrowser: "Google Chrome", expandedDetails: "pass", legacyFeeQueryMapsToCallback: "pass", noPublicPricing: "pass", testimonialVideo: "omitted pending full pricing-content review", decemberEligibility: "pass" });
   }
   for (const [index, route] of routes.entries()) {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
