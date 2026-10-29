@@ -96,10 +96,10 @@ export default function AdmissionsCampaign({
         <section className={styles.hero} aria-labelledby="admissions-heading">
           <div className={styles.wrap + " " + styles.heroGrid}>
             <div className={styles.heroCopy}>
-              <div className={styles.session}>PRESCHOOL ADMISSIONS 2027–28</div>
+              <div className={styles.session}>{isDaycare ? "DAYCARE · MONDAY TO SATURDAY" : "PRESCHOOL ADMISSIONS 2027–28"}</div>
               <div className={styles.services} role="group" aria-label="Choose preschool or daycare">
                 <button type="button" aria-pressed={!isDaycare} onClick={() => chooseService(false)}>Preschool</button>
-                <button type="button" aria-pressed={isDaycare} onClick={() => chooseService(true)}>Daycare · 12:30 PM onwards</button>
+                <button type="button" aria-pressed={isDaycare} onClick={() => chooseService(true)}>Daycare from 12:30 PM</button>
               </div>
               <h1 id="admissions-heading" className={styles.title}>
                 {isDaycare ? "Daycare in " : "Preschool Admissions in "}<span>Dwarka Sector 12.</span>

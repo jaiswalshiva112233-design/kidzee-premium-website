@@ -281,7 +281,7 @@ try {
     const retry = await context.request.post(origin + '/api/website/enquiry', {data: payload});
     assert.equal(retry.status(), 200); assert.equal((await retry.json()).enquiryNumber, (await response.json()).enquiryNumber);
     await page.goto(origin + route, {waitUntil: 'networkidle'});
-    await page.getByRole('button', {name: 'Daycare · 12:30 PM onwards', exact: true}).click();
+    await page.getByRole('button', {name: 'Daycare from 12:30 PM', exact: true}).click();
     assert.match(await page.getByRole('heading', {level:1}).innerText(), /Daycare in Dwarka Sector 12/);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     await page.screenshot({path: output + '/daycare-' + index + '-390.png', fullPage: true});
