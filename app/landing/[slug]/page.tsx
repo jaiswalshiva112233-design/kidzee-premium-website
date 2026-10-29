@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 
 import { getPublishedWebsiteTeamMembers } from "@/lib/sanity/team";
 import LandingPageExperience from "@/components/growth/LandingPageExperience";
-import { ADMISSIONS_CAMPAIGN_SLUG, ADMISSIONS_CAMPAIGN_TITLE, ADMISSIONS_CAMPAIGN_DESCRIPTION, ADMISSIONS_CAMPAIGN_IMAGE } from "@/lib/website/admissionsCampaign";
+import AdmissionsCampaign from "@/components/admissions/AdmissionsCampaign";
+import { ADMISSIONS_CAMPAIGN_SLUG, ADMISSIONS_CAMPAIGN_TITLE, ADMISSIONS_CAMPAIGN_DESCRIPTION, ADMISSIONS_CAMPAIGN_IMAGE, getAdmissionsEnquiry } from "@/lib/website/admissionsCampaign";
 import { prisma } from "@/lib/prisma";
 import { site } from "@/lib/site";
 
@@ -32,13 +33,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return { title: page.seoTitle, description: page.metaDescription, alternates: { canonical: `${site.url}/landing/${page.slug}` }, robots: { index: indexable, follow: indexable } };
 }
 
-export default async function ManagedLandingPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ManagedLandingPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { slug } = await params;
   const page = await pageData(slug);
   if (!page) notFound();
+  if (slug === ADMISSIONS_CAMPAIGN_SLUG) {
+    const [query, teamMembers] = await Promise.all([searchParams, getPublishedWebsiteTeamMembers()]);
+    return <AdmissionsCampaign landingPageId={page.id} teamMembers={teamMembers} {...getAdmissionsEnquiry(query)} />;
+  }
   return (
     <LandingPageExperience
-      teamMembers={slug === ADMISSIONS_CAMPAIGN_SLUG ? await getPublishedWebsiteTeamMembers() : []}
       page={{
         id: page.id,
         slug: page.slug,
@@ -73,3 +77,4 @@ export default async function ManagedLandingPage({ params }: { params: Promise<{
     />
   );
 }
+

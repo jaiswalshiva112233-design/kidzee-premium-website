@@ -1,37 +1,28 @@
 export const ADMISSIONS_CAMPAIGN_SLUG = "preschool-admissions-dwarka-sector-12";
-export const ADMISSIONS_CAMPAIGN_TITLE = "Preschool & Nursery Admissions 2027–28 | Kidzee Dwarka Sector 12";
-export const ADMISSIONS_CAMPAIGN_DESCRIPTION =
-  "Visit Kidzee Sector 12 Dwarka for 2027–28 admissions. 30% off annual charges, January–February settling-in attendance with tuition from March, and summer camp included.";
+export const ADMISSIONS_CAMPAIGN_TITLE = "Preschool & Daycare 2027–28 | Kidzee Dwarka Sector 12";
+export const ADMISSIONS_CAMPAIGN_DESCRIPTION = "Preschool admissions 2027–28 at Kidzee Dwarka Sector 12. Daycare from 12:30 PM. Book a visit. 30% Off Annual Charges, Tuition Begins in March, Summer Camp Included. Terms apply.";
 export const ADMISSIONS_CAMPAIGN_IMAGE = "/images/landing/kidzee-creative-learning.jpg";
 
+export function getAdmissionsEnquiry(query: Record<string, string | string[] | undefined>) {
+  const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] ?? "" : value ?? "").toUpperCase();
+  const programme = first(query.programme);
+  const enquiry = first(query.enquiry);
+  const programmes = new Set(["PLAYGROUP", "NURSERY", "JUNIOR_KG", "SENIOR_KG", "DAYCARE"]);
+  const enquiries = new Set(["ADMISSION", "SCHOOL_VISIT", "TRIAL", "DAYCARE", "CALLBACK"]);
+  return { initialProgramme: programmes.has(programme) ? programme : "", initialEnquiryType: enquiry === "FEES" ? "CALLBACK" : enquiries.has(enquiry) ? enquiry : programme === "DAYCARE" ? "DAYCARE" : "SCHOOL_VISIT" };
+}
+
 export const admissionsCampaignFaqs = [
-  {
-    question: "How do I enquire about nursery or play school admission?",
-    answer: "Send your name and mobile number through this page or call Kidzee Sector 12B, Dwarka. Our centre team will discuss your child\'s age, explain Playgroup, Nursery or KG placement and fees, and arrange a school visit. Sending an enquiry does not reserve a seat; admission and availability are confirmed by the centre.",
-  },
-  {
-    question: "How does the January start work?",
-    answer: "For children joining in January 2027, including families completing admission in December 2026, January and February are a settling-in attendance period. Your child joins the preschool routine and activities during these months. There is no monthly tuition charge for January or February; monthly tuition begins from March 2027, when the academic session starts. Annual, kit and other applicable admission charges are payable at enrolment.",
-  },
-  {
-    question: "What does 30% off annual charges mean?",
-    answer: "The concession is 30% off annual charges for 2027–28 preschool admissions at Kidzee Sector 12, Dwarka. It is not a 30% discount on the entire fee package or monthly tuition. We will explain the annual charges, kit and other applicable charges in a written fee breakup before you enrol.",
-  },
-  {
-    question: "Does my child pay separately for summer camp?",
-    answer: "Children enrolled in our preschool programme for 2027–28 can attend the centre's summer camp without an additional summer camp fee. The centre team will share the camp dates and timings when the schedule is ready.",
-  },
-  {
-    question: "Can we visit before taking admission?",
-    answer: "Yes. Send the short enquiry form and add a preferred date if you wish. Our team will call to confirm a convenient time so you can see the classrooms and play spaces, meet the team and discuss your child's needs.",
-  },
-  {
-    question: "Which class would suit my child?",
-    answer: "Playgroup is generally for ages 2–3, Nursery for 3–4, Junior KG for 4–5 and Senior KG for 5–6. We also consider readiness and previous preschool experience. If you are unsure, leave the optional programme field at 'Please guide me'.",
-  },
-  {
-    question: "Can we discuss daycare, meals and transport?",
-    answer: "Yes. Daycare is available until 7:00 PM and is charged separately. Preschool breakfast is included; daycare lunch and evening snacks are optional and charged separately. Preschool cab service is available on selected routes, subject to confirmation. Daycare cab service is not available.",
-  },
+  { question: "How do I enquire about nursery or play school admission?", answer: "Send your name and mobile number or call Kidzee Sector 12B, Dwarka. Our centre team will discuss your child's age, explain Playgroup, Nursery or KG placement and arrange a school visit. Sending an enquiry does not reserve a seat; admission and availability are confirmed by the centre." },
+  { question: "How does the January start work?", answer: "For eligible children joining in January 2027, including families completing admission in December 2026, January and February are a settling-in attendance period. Your child gets to know the teachers, friends and preschool routine. Tuition Begins in March. Ask the admissions team to explain the approved offer terms before enrolling." },
+  { question: "What is the Early Start Advantage?", answer: "Eligible 2027–28 preschool enrolments can receive 30% Off Annual Charges, January settling-in with Tuition Begins in March, and Summer Camp Included. The admissions team will explain eligibility and the approved terms during your conversation or school visit." },
+  { question: "Which enrolments include summer camp?", answer: "Summer Camp Included applies to eligible 2027–28 preschool enrolments under the approved offer. The centre will confirm eligibility and share the camp dates and timings when the schedule is ready." },
+  { question: "Can we visit before taking admission?", answer: "Yes. Send the short enquiry form and add a preferred date if you wish. Our team will call to confirm a convenient time so you can see the classrooms and play spaces, meet the team and discuss your child's needs." },
+  { question: "Which class would suit my child?", answer: "Playgroup is generally for ages 2–3, Nursery for 3–4, Junior KG for 4–5 and Senior KG for 5–6. We also consider readiness and previous preschool experience. If you are unsure, leave the optional programme field at 'Please guide me'." },
+  { question: "What are the preschool timings?", answer: "Preschool runs from 8:30 AM to 1:00 PM, Monday to Friday. Ask our team about the class routine and settling-in arrangements for your child." },
+  { question: "What time does daycare start?", answer: "Daycare runs from 12:30 PM to 7:00 PM, Monday to Saturday. Families can discuss after-preschool, selected-day, occasional or after-school care. The centre confirms age suitability, the routine and current availability." },
+  { question: "Can we discuss meals and transport?", answer: "Vegetarian preschool breakfast is included. Talk to the admissions team about daycare lunch and evening snacks. Preschool transport is available on selected routes, subject to confirmation. Daycare transport is not available." },
+  { question: "Who can collect my child from daycare?", answer: "Children are handed over to adults approved by the parent. Inform the centre in advance if a different approved adult will collect your child, and discuss the pickup process during your visit." },
+  { question: "How can I discuss detailed programme information?", answer: "Contact the admissions team by phone or WhatsApp, or book a school visit. We will discuss your child's needs, programme options and the details relevant to your family directly." },
 ] as const;
 

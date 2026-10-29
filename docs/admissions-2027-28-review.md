@@ -1,23 +1,20 @@
-# Admissions 2027–28 campaign review
+# Admissions and daycare campaign review
 
-## Owner-confirmed offer
-Families completing admission in December 2026 for a January 2027 start qualify for January–February preschool attendance without monthly tuition. Monthly tuition starts in March 2027. Annual charges after the 30% concession, kit and other applicable admission charges remain payable at enrolment. Summer camp has no additional camp fee. Optional daycare, daycare meals and preschool transport remain separate.
+## Scope and destination
+The established Google Ads destination remains /landing/preschool-admissions-dwarka-sector-12. The public /admissions route uses the same campaign component and enquiry integration. Neither route is redirected. Both accept validated programme/enquiry query presets so a daycare ad can use the established path with ?programme=DAYCARE&enquiry=DAYCARE. No new thin page is created. Existing published-record availability remains authoritative for the ads route.
 
-## Template and experiment controls
-The exact campaign slug preschool-admissions-dwarka-sector-12 and /admissions use the reviewed code-managed AdmissionsCampaign template. Content, photographs, offers and terms for these pages are maintained in that component and lib/website/admissionsCampaign.ts. The published managed-page record still controls whether the campaign URL is available.
+## Public content restriction
+No fee amounts, price tables, admission-charge explanations, comparisons or fee download promises are displayed. The approved preschool messages remain 30% Off Annual Charges, Tuition Begins in March and Summer Camp Included. December 2026 admissions for January 2027 starts retain eligibility. Offer terms explain preschool eligibility and direct families to admissions, without publishing pricing. The campaign chat launcher is omitted so a general assistant cannot reintroduce prices. Other website pages are outside this change.
 
-Legacy page-content edits, saved versions and A/B variants describe the previous template and do not control the fixed campaign layout. For this slug the new template deliberately sends no legacy variant/experiment ID or LANDING_VARIANT_VIEW event. Page-level attribution, enquiry IDs, consent, click identifiers and conversion deduplication remain active. Configure a campaign-compatible content/variant renderer and review it before starting new experiments for this URL. Other managed landing pages keep their existing content and A/B behavior.
+## Daycare
+The owner confirmed the 12:30 PM start. The established daycare page and configuration confirm 12:30 PM–7:00 PM, Monday to Saturday, after-school/after-preschool, occasional and selected-day care, quiet time, activities and homework support. Meals and pickup arrangements are discussed directly with the team. Daycare transport is not available. Preschool offers are not represented as daycare offers.
 
-Published team profiles are read from the existing website team settings; no names, photos, qualifications or ratings are invented. If no published profiles are available, their photo section is omitted and the existing About/team link remains.
+## Parent and tracking flow
+A preschool/daycare choice keeps one form on the page. Switching service or enquiry intent preserves parent details. Programme and enquiry type are saved through the existing CentreOS endpoint. Visit requests retain daycare programme interest. Legacy enquiry=FEES links open the admissions callback choice. Successful submissions retain their reference and optional WhatsApp continuation; submissionId and enquiry-reference deduplication are unchanged. Direct WhatsApp links remain click signals, not verified enquiries.
 
-## Parent flow
-The first step asks for parent name and phone. A visible school-visit / fees-and-availability selector preserves entered details when parents switch. Programme, child name and visit date are optional and sit inside a disclosure. Visit CTAs restore school-visit intent without remounting the form. The fees request is followed up by the centre; it does not promise an immediate fee download. Additional details remain in a disclosure. A saved enquiry shows its reference and an optional WhatsApp continuation. The continuation carries the same reference and is excluded from independent WhatsApp click conversions. The existing server submissionId retry protection is unchanged.
+## Rendering and experiment controls
+The exact ads route renders AdmissionsCampaign directly rather than serializing unused legacy managed-page content and variants into the public response. This also avoids loading the legacy landing renderer for this campaign. Page-level attribution remains. No obsolete legacy variant or experiment labels are emitted for this fixed template. Other managed pages preserve their content and experiment behavior.
 
-## Release checks
-The owner approved the campaign page and requested these further improvements after comparison with the Footprints paid landing page. Before the December 15, 2026 restart, update the outdated 2026–27 ad headline and review daycare keyword/ad destination matching separately. Verify current Google rating/review count before displaying a numerical badge. Do not invent fee amounts; share the approved complete fee breakup with families.
-
-The automated browser checks use an isolated database and synthetic details. They do not confirm live enquiry notification delivery, production tag receipts, call forwarding, or real-user speed. Verify these after an approved release with an explicitly identified test enquiry.
-
-## Mobile and message-match refinement
-The hero identifies preschool admissions in Dwarka Sector 12, Kidzee play school, Playgroup, Nursery and KG, with the confirmed offer and ages 2–6. The short mobile opening is followed by the form before the centre photograph; desktop keeps the real image beside the enquiry. No numerical rating, invented fee, unverifiable safety feature or ranking guarantee is added. October 28 account diagnostics showed generic preschool keywords with below-average landing-page experience; these are historical diagnostics, not a measurement of the new release. Daycare-specific campaigns and outdated ad copy still need a separate pre-restart review.
+## Verification and approval
+Production build, regression and browser checks are required. Browser checks use an isolated database and synthetic parent details. They cover no public pricing in body/metadata/JSON-LD, no legacy-content serialization, mobile placement, both route presets, daycare saves, retry deduplication, service switching, direct WhatsApp links and optional parent video. Live provider receipts and alert delivery remain separate checks. This revision is prepared for owner approval; do not merge, publish or activate advertising before approval.
 
