@@ -8,7 +8,7 @@ import { ArrowRight, BookOpen, CalendarCheck, Check, Heart, MapPin, MessageCircl
 import AdmissionForm from "@/components/AdmissionForm";
 import { useSiteContact } from "@/components/SiteContactProvider";
 import styles from "./AdmissionsCampaign.module.css";
-import { admissionsCampaignFaqs } from "@/lib/website/admissionsCampaign";
+import { admissionsCampaignFaqs, campaignPortraitUrl } from "@/lib/website/admissionsCampaign";
 
 
 type AdmissionsCampaignProps = {
@@ -227,7 +227,7 @@ export default function AdmissionsCampaign({
               <div className={styles.teamCards}>
                 {[...teamMembers].sort((a, b) => Number(/director|head|principal/i.test(b.role)) - Number(/director|head|principal/i.test(a.role))).slice(0, 2).map((member) => (
                   <article key={member._id} className={styles.teamCard}>
-                    {member.imageUrl ? <Image src={member.imageUrl} alt={member.photoAlt || member.name} width={360} height={400} sizes="(max-width: 767px) 44vw, 240px" /> : null}
+                    {member.imageUrl ? <Image src={campaignPortraitUrl(member.imageUrl)} alt={member.photoAlt || member.name} width={360} height={400} sizes="(max-width: 767px) 44vw, 240px" /> : null}
                     <div><h3>{member.name}</h3><p>{member.role}</p>{member.qualification ? <small>{member.qualification}</small> : null}</div>
                   </article>
                 ))}
