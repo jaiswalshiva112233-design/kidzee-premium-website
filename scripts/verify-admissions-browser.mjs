@@ -100,6 +100,9 @@ try {
         const inputPosition = await page.locator('#parentName').boundingBox();
         assert.ok(inputPosition.y < 844, 'First required field should be visible in the mobile opening screen');
       }
+      assert.equal(await page.locator('#reviews').count(), 1, 'Existing reviews sitelink has a real target');
+      const brokenLocalLinks = await page.locator('a[href^="#"]').evaluateAll(links => links.map(link=>link.getAttribute('href')).filter(href => href.length > 1 && !document.getElementById(decodeURIComponent(href.slice(1)))));
+      assert.deepEqual(brokenLocalLinks, [], 'In-page CTA and asset anchors must exist');
       const hasOverflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
       assert.equal(hasOverflow, false, "Horizontal overflow at " + route + " width " + width);
       await page.evaluate(async () => {

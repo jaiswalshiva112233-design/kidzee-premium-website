@@ -263,7 +263,7 @@ export default function AdmissionsCampaign({
         <section className={styles.section + " " + styles.soft}>
           <div className={styles.wrap}>
             <div className={styles.sectionTop}>
-              <div><p className={styles.eyebrow}>Inside Kidzee Sector 12B</p><h2 className={styles.heading}>A closer look at where<br />the little discoveries happen.</h2></div>
+              <div><p className={styles.eyebrow}>Inside Kidzee Sector 12B</p><h2 id="centre-photos" style={{scrollMarginTop:100}} className={styles.heading}>A closer look at where<br />the little discoveries happen.</h2></div>
               <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button + " " + styles.secondary}>See It in Person <ArrowRight size={16} aria-hidden="true" /></a>
             </div>
             <div className={styles.gallery}>
@@ -278,7 +278,7 @@ export default function AdmissionsCampaign({
         <section className={styles.section}>
           <div className={styles.wrap}>
             <p className={styles.eyebrow}>From a first hello to school readiness</p>
-            <h2 className={styles.heading}>Playgroup, Nursery &amp; KG Admissions in Dwarka</h2>
+            <h2 id="programmes" style={{scrollMarginTop:100}} className={styles.heading}>Playgroup, Nursery &amp; KG Admissions in Dwarka</h2>
             <p className={styles.intro}>Tell us your child&apos;s age and current routine. We&apos;ll help you understand the suitable programme.</p>
             <div className={styles.programmes}>
               {programmes.map((programme) => (
@@ -293,7 +293,7 @@ export default function AdmissionsCampaign({
         <section className={styles.section + " " + styles.soft}>
           <div className={styles.wrap}>
             <div className={styles.sectionTop}>
-              <div><p className={styles.eyebrow}>From families at our centre</p><h2 className={styles.heading}>Parents notice the everyday things.</h2></div>
+              <div id="reviews" style={{scrollMarginTop:100}}><p className={styles.eyebrow}>From families at our centre</p><h2 className={styles.heading}>Parents notice the everyday things.</h2></div>
               <a href={site.googleReviews} target="_blank" rel="noopener noreferrer" className={styles.termsLink}>Read current Google reviews <ArrowRight size={14} aria-hidden="true" /></a>
             </div>
             <div className={styles.parentStory}>
