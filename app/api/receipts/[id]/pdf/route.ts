@@ -31,7 +31,7 @@ const defaultSchoolProfile: SchoolProfile = {
   schoolName: "Kidzee Preschool & Daycare",
   centreName: "Kidzee Sector 12, Dwarka",
   schoolCode: "7206",
-  address: site.address,
+  address: "Plot No. 19, Block B, Sector 12B, Dwarka, New Delhi - 110078",
   phone: "9667038673",
   email: "kidzeepreschoolsector12@gmail.com",
   gstNumber: "07CIHPV5007K1ZW",
@@ -48,6 +48,18 @@ const defaultSchoolProfile: SchoolProfile = {
     "Please retain this receipt for future reference.",
   ],
 };
+
+
+function formatReceiptAddress(value: Record<string, unknown>): string {
+  const line1 = cleanText(value.addressLine1);
+  const line2 = cleanText(value.addressLine2);
+  const city = cleanText(value.city) || "New Delhi";
+  const pin = cleanText(value.postalCode) || "110078";
+  if (line1) {
+    return [line1, line2, city].filter(Boolean).join(", ") + " - " + pin;
+  }
+  return "Plot No. 19, Block B, Sector 12B, Dwarka, New Delhi - 110078";
+}
 
 function cleanText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
@@ -67,7 +79,7 @@ function normaliseSchoolProfile(value: unknown): SchoolProfile {
     schoolName: cleanText(value.schoolName) || defaultSchoolProfile.schoolName,
     centreName: cleanText(value.centreName) || defaultSchoolProfile.centreName,
     schoolCode: cleanText(value.schoolCode) || defaultSchoolProfile.schoolCode,
-    address: (isRecord(value) ? formatCentreAddress(value) : "") || defaultSchoolProfile.address,
+    address: (isRecord(value) ? formatReceiptAddress(value) : "") || defaultSchoolProfile.address,
     phone: cleanText(value.phone) || defaultSchoolProfile.phone,
     email: cleanText(value.email) || defaultSchoolProfile.email,
     gstNumber: cleanText(value.gstNumber) || defaultSchoolProfile.gstNumber,
