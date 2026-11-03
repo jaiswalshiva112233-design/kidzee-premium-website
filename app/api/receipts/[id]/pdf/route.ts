@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import PDFDocument from "pdfkit";
 import { NextResponse } from "next/server";
 
@@ -130,6 +132,19 @@ function numberToWords(value: number): string {
   return `${parts.join(" ")} Rupees Only`;
 }
 
+
+async function loadLogoBuffer(url: string | null | undefined): Promise<Buffer | null> {
+  try {
+    const localLogo = path.join(process.cwd(), "public", "images", "kidzee-logo.png");
+    if (fs.existsSync(localLogo)) {
+      return fs.readFileSync(localLogo);
+    }
+  } catch {
+    // continue to fetch
+  }
+  return fetchImageBuffer(url);
+}
+
 async function fetchImageBuffer(url: string | null | undefined): Promise<Buffer | null> {
   if (!url) return null;
   try {
@@ -173,7 +188,7 @@ async function pdfBuffer(
 
   // Pre-fetch images
   const [logoBuf, stampBuf, sigBuf] = await Promise.all([
-    fetchImageBuffer(schoolProfile.logoUrl),
+    loadLogoBuffer(schoolProfile.logoUrl),
     fetchImageBuffer(schoolProfile.stampUrl),
     fetchImageBuffer(schoolProfile.signatureUrl),
   ]);
@@ -231,38 +246,46 @@ async function pdfBuffer(
   doc.restore();
 
   // 3. Top-Right Box + Smiley
+  const centerX = 297.5;
+
   doc.save();
-  doc.circle(360, 48, 11).lineWidth(1.2).strokeColor("#E11D48").stroke();
-  doc.circle(356, 46, 1.2).fillColor("#E11D48").fill();
-  doc.circle(364, 46, 1.2).fillColor("#E11D48").fill();
-  doc.moveTo(356, 51).quadraticCurveTo(360, 55, 364, 51).lineWidth(1.2).strokeColor("#E11D48").stroke();
+  doc.circle(375, 48, 10).lineWidth(1.2).strokeColor("#E11D48").stroke();
+  doc.circle(371.5, 46, 1.2).fillColor("#E11D48").fill();
+  doc.circle(378.5, 46, 1.2).fillColor("#E11D48").fill();
+  doc.moveTo(371.5, 51).quadraticCurveTo(375, 54.5, 378.5, 51).lineWidth(1.2).strokeColor("#E11D48").stroke();
   doc.restore();
 
-  doc.roundedRect(385, 32, 175, 46, 7).lineWidth(1).strokeColor(boxBorder).stroke();
+  doc.roundedRect(390, 32, 170, 46, 7).lineWidth(1).strokeColor(boxBorder).stroke();
   doc.fontSize(8.5).fillColor(purpleDark).font("Helvetica-Bold")
-     .text("Receipt No. :", 393, 41)
+     .text("Receipt No. :", 396, 41)
      .font("Helvetica").text(receipt.receiptNumber, 460, 41)
-     .font("Helvetica-Bold").text("Receipt Date :", 393, 57)
+     .font("Helvetica-Bold").text("Receipt Date :", 396, 57)
      .font("Helvetica").text((receipt.payment?.paymentDate || receipt.issuedAt).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric", timeZone: "Asia/Kolkata" }), 460, 57);
 
-  // 4. Center Kidzee Header
+  // 4. Center Kidzee Header - mathematically centered horizontally on page
+  const logoBoxWidth = 140;
+  const logoX = centerX - logoBoxWidth / 2;
   if (logoBuf) {
-    doc.image(logoBuf, 210, 30, { fit: [160, 40], align: "center" });
+    doc.image(logoBuf, logoX, 30, { fit: [logoBoxWidth, 40], align: "center" });
   } else {
-    doc.fontSize(22).fillColor(purpleDark).font("Helvetica-Bold").text("KIDZEE", 150, 32, { align: "center", width: 220 });
-    doc.fontSize(7.5).font("Helvetica-Bold").fillColor("#5B2A86").text("N U R T U R I N G   G E N - N E X T", 150, 54, { align: "center", width: 220 });
+    doc.fontSize(22).fillColor(purpleDark).font("Helvetica-Bold").text("KIDZEE", centerX - 100, 32, { align: "center", width: 200 });
+    doc.fontSize(7.5).font("Helvetica-Bold").fillColor("#5B2A86").text("N U R T U R I N G   G E N - N E X T", centerX - 100, 54, { align: "center", width: 200 });
   }
 
-  // Golden Banner
+  // Golden Banner - mathematically centered
+  const bannerWidth = 150;
+  const bannerX = centerX - bannerWidth / 2;
   doc.save();
-  doc.rect(185, 74, 160, 18).fillColor(yellowGold).fill();
-  doc.fillColor(purpleDark).fontSize(9.5).font("Helvetica-Bold").text("FEE RECEIPT", 185, 78, { align: "center", width: 160 });
+  doc.rect(bannerX, 74, bannerWidth, 18).fillColor(yellowGold).fill();
+  doc.fillColor(purpleDark).fontSize(9.5).font("Helvetica-Bold").text("FEE RECEIPT", bannerX, 78, { align: "center", width: bannerWidth });
   doc.restore();
 
-  // Centre Title
-  doc.fontSize(10.5).font("Helvetica-Bold").fillColor(purpleDark).text(schoolProfile.centreName.toUpperCase(), 100, 95, { align: "center", width: 345 });
+  // Centre Title - mathematically centered
+  const titleWidth = 340;
+  const titleX = centerX - titleWidth / 2;
+  doc.fontSize(10.5).font("Helvetica-Bold").fillColor(purpleDark).text(schoolProfile.centreName.toUpperCase(), titleX, 95, { align: "center", width: titleWidth });
   if (schoolProfile.accountName) {
-    doc.fontSize(7).font("Helvetica-Bold").fillColor("#5B2A86").text(`(A UNIT OF ${schoolProfile.accountName.toUpperCase()})`, 100, 106, { align: "center", width: 345 });
+    doc.fontSize(7).font("Helvetica-Bold").fillColor("#5B2A86").text(`(A UNIT OF ${schoolProfile.accountName.toUpperCase()})`, titleX, 106, { align: "center", width: titleWidth });
   }
 
   // 5. Contact Pill

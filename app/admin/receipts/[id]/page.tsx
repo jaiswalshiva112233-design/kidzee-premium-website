@@ -1635,7 +1635,7 @@ export default async function ReceiptDetailsPage({
           {/* Top Header Row with Hanging Ribbon, Kidzee Branding, and Receipt Number Box */}
           <header className="relative flex flex-col md:flex-row items-start justify-between gap-4">
             {/* Top Left Ribbon + Playful Doodles */}
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-3 w-full md:w-[220px] shrink-0">
               <div className="relative -mt-4 sm:-mt-6 md:-mt-8">
                 <HangingRibbon />
               </div>
@@ -1682,7 +1682,7 @@ export default async function ReceiptDetailsPage({
             </div>
 
             {/* Top Right: Smiley Doodle + Receipt No. Box */}
-            <div className="flex flex-col items-end gap-2 self-stretch md:self-auto">
+            <div className="flex flex-col items-end gap-2 w-full md:w-[220px] shrink-0 self-stretch md:self-auto">
               <div className="hidden sm:flex items-center gap-2 pr-2">
                 <SmileyDoodle />
                 <DoodleStarLoop />
