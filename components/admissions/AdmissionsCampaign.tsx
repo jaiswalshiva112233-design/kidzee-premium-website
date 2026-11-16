@@ -43,9 +43,11 @@ export default function AdmissionsCampaign({
   const site = useSiteContact();
   const reviewsUrl = "https://www.google.com/maps/search/?api=1&query=Kidzee+Sector+12+Dwarka&query_place_id=ChIJW0OoVsUbDTkRAh71PzTvcHA";
   const [enquiryIntent, setEnquiryIntent] = useState(initialEnquiryType === "FEES" ? "CALLBACK" : initialEnquiryType);
+  const [whatsAppFirst, setWhatsAppFirst] = useState(false);
   const [programmeInterest, setProgrammeInterest] = useState(initialEnquiryType === "DAYCARE" ? "DAYCARE" : initialProgramme);
   const isDaycare = programmeInterest === "DAYCARE" || enquiryIntent === "DAYCARE";
   function chooseService(daycare: boolean) {
+    setWhatsAppFirst(false);
     setProgrammeInterest(daycare ? "DAYCARE" : programmeInterest === "DAYCARE" ? "" : programmeInterest);
     setEnquiryIntent(daycare ? "DAYCARE" : "SCHOOL_VISIT");
   }
@@ -53,6 +55,16 @@ export default function AdmissionsCampaign({
     setProgrammeInterest(value);
     if (value === "DAYCARE") setEnquiryIntent("DAYCARE");
     else if (enquiryIntent === "DAYCARE") setEnquiryIntent("SCHOOL_VISIT");
+  }
+  function chooseEnquiry(value: string) {
+    setWhatsAppFirst(false);
+    setEnquiryIntent(value);
+  }
+  function requestWhatsApp() {
+    setWhatsAppFirst(true);
+    setEnquiryIntent(isDaycare ? "DAYCARE" : "CALLBACK");
+    document.getElementById("admission-enquiry")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("parentName")?.focus({ preventScroll: true });
   }
   const [formFocused, setFormFocused] = useState(false);
 
@@ -69,7 +81,7 @@ export default function AdmissionsCampaign({
             <a href={"tel:" + site.phone} className={styles.phone}>
               <Phone size={17} aria-hidden="true" /><span>{site.phoneDisplay}</span>
             </a>
-            <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button}>Book a School Visit <ArrowRight size={16} aria-hidden="true" /></a>
+            <a href="#admission-enquiry" onClick={() => chooseEnquiry("SCHOOL_VISIT")} className={styles.button}>Book a School Visit <ArrowRight size={16} aria-hidden="true" /></a>
           </div>
         </div>
       </header>
@@ -105,8 +117,10 @@ export default function AdmissionsCampaign({
                 programme={programmeInterest}
                 onProgrammeChange={changeProgramme}
                 enquiryType={enquiryIntent}
-                onEnquiryTypeChange={setEnquiryIntent}
+                onEnquiryTypeChange={chooseEnquiry}
                 autoOpenWhatsApp={false}
+                whatsAppFirst={whatsAppFirst}
+                onWhatsAppRequest={requestWhatsApp}
                 initialProgramme={initialProgramme}
                 initialEnquiryType={initialEnquiryType}
                 landingPageId={landingPageId}
@@ -190,7 +204,7 @@ export default function AdmissionsCampaign({
               </article>
             </div>
             <div className={styles.timeline}>
-              <div><strong>Before joining</strong><span>Meet the team, discuss readiness and confirm your child's programme.</span></div>
+              <div><strong>Before joining</strong><span>Meet the team, discuss readiness and confirm your child&apos;s programme.</span></div>
               <div><strong>Tuition Begins in March</strong><span>The 2027–28 academic session begins in March 2027.</span></div>
             </div>
             <a href="#offer-terms" className={styles.termsLink}>Read preschool offer terms</a>
@@ -246,7 +260,7 @@ export default function AdmissionsCampaign({
           <div className={styles.wrap}>
             <div className={styles.sectionTop}>
               <div><p className={styles.eyebrow}>Inside Kidzee Sector 12B</p><h2 id="centre-photos" style={{scrollMarginTop:100}} className={styles.heading}>A closer look at where<br />the little discoveries happen.</h2></div>
-              <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button + " " + styles.secondary}>See It in Person <ArrowRight size={16} aria-hidden="true" /></a>
+              <a href="#admission-enquiry" onClick={() => chooseEnquiry("SCHOOL_VISIT")} className={styles.button + " " + styles.secondary}>See It in Person <ArrowRight size={16} aria-hidden="true" /></a>
             </div>
             <div className={styles.gallery}>
               <figure><Image src="/images/landing/kidzee-modern-classroom.jpg" alt="Activity classroom at Kidzee Sector 12 Dwarka" width={900} height={675} sizes="(max-width: 767px) 100vw, 40vw" /><figcaption>Space to learn and create</figcaption></figure>
@@ -286,7 +300,7 @@ export default function AdmissionsCampaign({
                 </figure>
               ))}
             </div>
-            <p className={styles.reviewNote}>Short excerpts from this centre's public Google reviews. Open Google reviews to read the full context.</p>
+            <p className={styles.reviewNote}>Short excerpts from this centre&apos;s public Google reviews. Open Google reviews to read the full context.</p>
             <Link href="/gallery" className={styles.termsLink}>Explore parent stories and centre albums</Link>
           </div>
         </section>
@@ -300,7 +314,7 @@ export default function AdmissionsCampaign({
               <ul className={styles.visitList}>
                 {["Meet the centre team and see the classrooms.", "Discuss your child's age, routine and settling needs.", "Discuss the programme, settling-in and approved offer terms."].map((item) => <li key={item}><Check size={18} aria-hidden="true" />{item}</li>)}
               </ul>
-              <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button}>Arrange My School Visit <ArrowRight size={17} aria-hidden="true" /></a>
+              <a href="#admission-enquiry" onClick={() => chooseEnquiry("SCHOOL_VISIT")} className={styles.button}>Arrange My School Visit <ArrowRight size={17} aria-hidden="true" /></a>
             </div>
             <aside className={styles.address}>
               <MapPin size={27} aria-hidden="true" />
@@ -334,7 +348,7 @@ export default function AdmissionsCampaign({
         <section className={styles.closing}>
           <div className={styles.wrap + " " + styles.closingInner}>
             <div><h2 className={styles.heading}>Come and get a feel for your child&apos;s first school.</h2><p>Meet us at Kidzee Sector 12B, Dwarka. We&apos;ll take it from there, together.</p></div>
-            <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button + " " + styles.yellow}>Book a School Visit <ArrowRight size={17} aria-hidden="true" /></a>
+            <a href="#admission-enquiry" onClick={() => chooseEnquiry("SCHOOL_VISIT")} className={styles.button + " " + styles.yellow}>Book a School Visit <ArrowRight size={17} aria-hidden="true" /></a>
           </div>
         </section>
       </main>
@@ -349,8 +363,8 @@ export default function AdmissionsCampaign({
       </footer>
       <nav className={styles.mobileBar} aria-label="Contact admissions" hidden={formFocused}>
         <a href={"tel:" + site.phone} className={styles.button + " " + styles.secondary}><Phone size={17} aria-hidden="true" />Call</a>
-        <a href={isDaycare ? site.whatsappDaycare : site.whatsappAdmission} target="_blank" rel="noopener noreferrer" className={styles.button + " " + styles.secondary}><MessageCircle size={17} aria-hidden="true" />WhatsApp</a>
-        <a href="#admission-enquiry" onClick={() => setEnquiryIntent("SCHOOL_VISIT")} className={styles.button}><CalendarCheck size={17} aria-hidden="true" />Book Visit</a>
+        <a href="#admission-enquiry" onClick={requestWhatsApp} className={styles.button + " " + styles.secondary}><MessageCircle size={17} aria-hidden="true" />WhatsApp</a>
+        <a href="#admission-enquiry" onClick={() => chooseEnquiry("SCHOOL_VISIT")} className={styles.button}><CalendarCheck size={17} aria-hidden="true" />Book Visit</a>
       </nav>
     </div>
   );

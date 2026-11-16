@@ -86,6 +86,8 @@ type AdmissionFormProps = {
   submitButtonText?: string;
   compact?: boolean;
   autoOpenWhatsApp?: boolean;
+  whatsAppFirst?: boolean;
+  onWhatsAppRequest?: () => void;
   privacyText?: ReactNode;
   handoffText?: string;
   campaignIntent?: boolean;
@@ -193,6 +195,8 @@ export default function AdmissionForm({
   handoffText,
   compact = false,
   autoOpenWhatsApp = true,
+  whatsAppFirst = false,
+  onWhatsAppRequest,
   campaignIntent = false,
   enquiryType,
   onEnquiryTypeChange,
@@ -276,7 +280,8 @@ export default function AdmissionForm({
       submissionId.current = createSubmissionId();
     }
 
-    const whatsappWindow = autoOpenWhatsApp ? window.open(
+    const openWhatsAppAfterSave = autoOpenWhatsApp || whatsAppFirst;
+    const whatsappWindow = openWhatsAppAfterSave ? window.open(
       "about:blank",
       "kidzee-admission-whatsapp",
     ) : null;
@@ -365,7 +370,7 @@ export default function AdmissionForm({
         }),
       );
 
-      if (autoOpenWhatsApp) {
+      if (openWhatsAppAfterSave) {
         window.dispatchEvent(
           new CustomEvent("kidzee:website-event", {
             detail: {
@@ -495,10 +500,10 @@ export default function AdmissionForm({
               id="admission-form-heading"
               className={campaignIntent ? styles.title : "mt-1 text-2xl font-black tracking-[-0.025em] text-[#2C1735] sm:text-3xl"}
             >
-              {campaignIntent ? (formData.enquiryType === "SCHOOL_VISIT" ? (daycareEnquiry ? "Visit Our Daycare" : "Book a School Visit") : daycareEnquiry ? "Ask About Daycare" : "Speak to Admissions") : compact && formData.enquiryType === "FEES" ? "Ask About Fees & Availability" : title || "How can we help your family?"}
+              {campaignIntent ? (whatsAppFirst ? "Chat with Our Centre Team" : formData.enquiryType === "SCHOOL_VISIT" ? (daycareEnquiry ? "Visit Our Daycare" : "Book a School Visit") : daycareEnquiry ? "Ask About Daycare" : "Speak to Admissions") : compact && formData.enquiryType === "FEES" ? "Ask About Fees & Availability" : title || "How can we help your family?"}
             </h2>
             <p className={campaignIntent ? styles.subtitle : "mt-2 text-sm leading-6 text-[#5F5F6D] sm:text-base"}>
-              {campaignIntent ? (daycareEnquiry ? "Tell us the hours you need. Our team will discuss your child's routine and availability." : "Meet our teachers, see the classrooms and discuss your child's next step.") : subtitle ||
+              {campaignIntent ? (whatsAppFirst ? "Add your name and mobile number. We will save your enquiry, then open WhatsApp with your reference." : daycareEnquiry ? "Tell us the hours you need. Our team will discuss your child's routine and availability." : "Meet our teachers, see the classrooms and discuss your child's next step.") : subtitle ||
                 "Your enquiry goes directly to the centre panel so our team can follow up with you."}
             </p>
           </div>
@@ -811,7 +816,7 @@ export default function AdmissionForm({
               </>
             ) : (
               <>
-                <span>{campaignIntent ? (formData.enquiryType === "SCHOOL_VISIT" ? "Request a School Visit" : daycareEnquiry ? "Request Daycare Callback" : "Request Admissions Callback") : compact ? (formData.enquiryType === "FEES" ? "Request Fee Details" : formData.enquiryType === "SCHOOL_VISIT" ? "Request a School Visit" : "Send My Enquiry") : submitButtonText || "Send Enquiry"}</span>
+                <span>{campaignIntent ? (whatsAppFirst ? "Save & Open WhatsApp" : formData.enquiryType === "SCHOOL_VISIT" ? "Request a School Visit" : daycareEnquiry ? "Request Daycare Callback" : "Request Admissions Callback") : compact ? (formData.enquiryType === "FEES" ? "Request Fee Details" : formData.enquiryType === "SCHOOL_VISIT" ? "Request a School Visit" : "Send My Enquiry") : submitButtonText || "Send Enquiry"}</span>
                 <ArrowRight aria-hidden="true" size={18} />
               </>
             )}
@@ -829,7 +834,7 @@ export default function AdmissionForm({
           </div>
         </div>
 
-        {campaignIntent ? <a href={daycareEnquiry ? site.whatsappDaycare : site.whatsappAdmission} target="_blank" rel="noopener noreferrer" className={styles.whatsapp}><MessageCircle size={16} aria-hidden="true" />Prefer WhatsApp? Message our team</a> : null}
+        {campaignIntent && !whatsAppFirst && onWhatsAppRequest ? <button type="button" onClick={onWhatsAppRequest} disabled={isSubmitting} className={styles.whatsapp}><MessageCircle size={16} aria-hidden="true" />Prefer WhatsApp? Message our team</button> : null}
 
         {!campaignIntent ? <p className="text-center text-xs font-semibold leading-5 text-[#6F6474]">
           {handoffText || "Your enquiry is saved first. WhatsApp opens only after CentreOS confirms it."}
