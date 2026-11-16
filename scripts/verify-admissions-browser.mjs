@@ -123,7 +123,7 @@ try {
       }
       const visit = page.locator('header a[href="#admission-enquiry"]');
       if (width >= 768) await visit.click();
-      else await page.locator('nav[aria-label="Contact admissions"] a[href="#admission-enquiry"]').click();
+      else await page.getByRole('navigation', { name: 'Contact admissions' }).getByRole('link', { name: 'Book Visit', exact: true }).click();
       await page.waitForTimeout(400);
       assert.ok(await page.locator("#parentName").isVisible());
       await page.getByText("How does the January start work?", { exact: true }).click();
