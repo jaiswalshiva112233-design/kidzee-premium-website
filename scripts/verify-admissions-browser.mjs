@@ -123,7 +123,7 @@ try {
       }
       const visit = page.locator('header a[href="#admission-enquiry"]');
       if (width >= 768) await visit.click();
-      else await page.locator('nav[aria-label="Contact admissions"] a[href="#admission-enquiry"]').click();
+      else await page.getByRole('navigation', { name: 'Contact admissions' }).getByRole('link', { name: 'Book Visit', exact: true }).click();
       await page.waitForTimeout(400);
       assert.ok(await page.locator("#parentName").isVisible());
       await page.getByText("How does the January start work?", { exact: true }).click();
@@ -288,12 +288,66 @@ try {
       assert.deepEqual(failedImages, [], 'Daycare images must load at ' + width);
       await page.screenshot({path: output + '/daycare-' + index + '-' + width + '.png', fullPage: true});
     }
-    const contact = page.getByRole('link', {name: 'Prefer WhatsApp? Message our team', exact:true});
-    assert.match(await contact.getAttribute('href'), /^https:\/\/wa\.me\//);
+    const contact = page.getByRole('button', {name: 'Prefer WhatsApp? Message our team', exact:true});
+    await contact.click();
+    assert.ok(await page.getByRole('button', {name: 'Save & Open WhatsApp', exact:true}).isVisible());
     await page.getByRole('button', {name:'Preschool',exact:true}).click();
     assert.match(await page.getByRole('heading', {level:1}).innerText(), /Preschool Admissions/);
     await context.close();
     results.push({route, daycareResponsiveWidths:[390,1440], daycareImages:'pass', daycarePreset:'pass', serviceSwitch:'pass', daycareCentreOS:'pass', daycareDeduplication:'pass', whatsAppLink:'pass'});
+  }
+  for (const [index, route] of routes.entries()) {
+    const context = await browser.newContext({viewport:{width:390,height:844}});
+    const page = await context.newPage();
+    await page.addInitScript(() => {
+      window.__admissionsEvents = [];
+      window.__openedWhatsApp = [];
+      window.__admissionsPopupCount = 0;
+      window.addEventListener('kidzee:website-event', event => window.__admissionsEvents.push(event.detail));
+      window.open = () => {
+        window.__admissionsPopupCount++;
+        return {opener:null,closed:false,document:{title:'',body:{innerHTML:''}},
+          location:{replace(url){window.__openedWhatsApp.push(url);}},close(){this.closed=true;}};
+      };
+    });
+    const submissions = [];
+    await page.route('**/api/website/enquiry', async intercepted => {
+      submissions.push(intercepted.request().postDataJSON());
+      if (submissions.length === 1) await intercepted.fulfill({status:503,contentType:'application/json',body:JSON.stringify({success:false,message:'Temporary test failure. Try again.'})});
+      else await intercepted.continue();
+    });
+    await page.goto(origin + route + '?programme=DAYCARE&enquiry=DAYCARE&utm_source=google&utm_medium=cpc&gclid=synthetic_whatsapp_click', {waitUntil:'networkidle'});
+    await page.getByRole('button', {name:'Prefer WhatsApp? Message our team',exact:true}).click();
+    const submit = page.getByRole('button', {name:'Save & Open WhatsApp',exact:true});
+    await submit.click();
+    assert.equal(submissions.length,0,'WhatsApp must validate before saving or opening');
+    assert.equal(await page.evaluate(()=>window.__admissionsPopupCount),0);
+    await page.locator('#parentName').fill('WhatsApp Browser Parent ' + index);
+    await page.locator('#phone').fill('900000002' + index);
+    await submit.click();
+    await page.getByRole('alert').filter({hasText:'Temporary test failure'}).waitFor();
+    assert.equal(await page.evaluate(()=>window.__openedWhatsApp.length),0,'A failed save must not hand off a parent');
+    assert.equal(await page.evaluate(()=>window.__admissionsEvents.filter(event=>event.eventType==='FORM_SUBMITTED').length),0);
+    const saved = page.waitForResponse(response=>response.url().endsWith('/api/website/enquiry')&&response.request().method()==='POST'&&response.status()===201);
+    await submit.click();
+    const body = await (await saved).json();
+    await page.getByRole('heading',{name:'Thank you. We have your enquiry.'}).waitFor();
+    assert.equal(submissions.length,2);
+    assert.equal(submissions[0].submissionId,submissions[1].submissionId,'Retry must retain the submission identity');
+    assert.equal(submissions[1].programme,'DAYCARE');
+    assert.equal(submissions[1].gclid,'synthetic_whatsapp_click');
+    const handoffs = await page.evaluate(()=>window.__openedWhatsApp);
+    assert.equal(handoffs.length,1);
+    assert.ok(handoffs[0].includes(encodeURIComponent(body.enquiryNumber)),'Chat must contain the saved enquiry reference');
+    const events=await page.evaluate(()=>window.__admissionsEvents.filter(event=>['FORM_SUBMITTED','WHATSAPP_CLICK'].includes(event.eventType)));
+    assert.deepEqual(events.map(event=>event.eventType),['FORM_SUBMITTED','WHATSAPP_CLICK']);
+    assert.ok(events.every(event=>event.enquiryNumber===body.enquiryNumber));
+    const retry=await context.request.post(origin+'/api/website/enquiry',{data:submissions[1]});
+    assert.equal((await retry.json()).enquiryNumber,body.enquiryNumber);
+    const count=await pool.query('SELECT COUNT(*)::int AS count FROM "WebsiteLeadSubmission" WHERE "submissionId"=$1',[submissions[1].submissionId]);
+    assert.equal(count.rows[0].count,1);
+    await context.close();
+    results.push({route,whatsAppSaveFirst:'pass',failedSaveNoHandoff:'pass',retryIdentity:'pass',singleLead:'pass',daycareAttribution:'pass'});
   }
   {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
