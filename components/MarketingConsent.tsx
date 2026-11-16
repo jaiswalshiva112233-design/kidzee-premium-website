@@ -28,6 +28,7 @@ import {
 } from "@/lib/marketing/consent";
 
 import { startWebsiteCallForwarding, type ForwardingNumber } from "@/lib/marketing/phoneForwarding";
+import { ensureGoogleTagQueue } from "@/lib/marketing/googleTagQueue";
 
 export { evaluateConsentState, type ConsentChoice, type MarketingSettings };
 
@@ -97,13 +98,7 @@ function saveStoredConsent(choice: ConsentChoice) {
 }
 
 function ensureGtag() {
-  window.dataLayer ??= [];
-
-  window.gtag ??= (...args: unknown[]) => {
-    window.dataLayer?.push(args);
-  };
-
-  return window.gtag;
+  return ensureGoogleTagQueue(window);
 }
 
 function addExternalScript(id: string, source: string) {
