@@ -179,7 +179,7 @@ export async function PATCH(request: Request) {
 
     return json({
       success: true,
-      message: "Teacher-child ratios have been updated across the website.",
+      message: "Adult-child ratios have been updated on the homepage and programme pages.",
       settings,
     });
   } catch (error) {

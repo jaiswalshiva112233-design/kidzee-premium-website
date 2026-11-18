@@ -862,10 +862,9 @@ export default async function ProgrammePage({
   const pageCopy = programmePageCopy[programme.slug];
 
   const ratio =
-    programme.slug === "playgroup" ||
-    programme.slug === "nursery"
-      ? `1:${ratioSettings.youngGroupChildrenPerTeacher} teacher-child ratio`
-      : `1:${ratioSettings.kindergartenChildrenPerTeacher} teacher-child ratio`;
+    programme.slug === "playgroup"
+      ? `1:${ratioSettings.youngGroupChildrenPerTeacher} adult-child ratio`
+      : `1:${ratioSettings.kindergartenChildrenPerTeacher} adult-child ratio`;
 
   const programmeEnquiryPath = `/admissions?programme=${programme.slug
     .toUpperCase()

@@ -102,7 +102,7 @@ export default function AdmissionsCampaign({
                 {isDaycare ? "A familiar place for rest, play and an unhurried afternoon. Monday to Saturday, 12:30 PM–7:00 PM." : "Kidzee play school in Sector 12B. Playgroup, Nursery & KG for ages 2–6, with learning through play."}
               </p>
               <ul className={styles.heroBenefits} aria-label={isDaycare ? "Daycare benefits" : "Preschool benefits"}>
-                <li><Check size={16} aria-hidden="true" /><span>{isDaycare ? "After-preschool, selected-day & occasional care" : "1:8 teacher–child ratio in Playgroup & Nursery"}</span></li>
+                <li><Check size={16} aria-hidden="true" /><span>{isDaycare ? "After-preschool, selected-day & occasional care" : "Adult-child ratio: Playgroup 1:8 · Nursery to UKG 1:10"}</span></li>
                 <li><Check size={16} aria-hidden="true" /><span>{isDaycare ? "Quiet time, activities & homework support" : "Vegetarian preschool breakfast included"}</span></li>
               </ul>
               <div className={styles.heroOffer}>
@@ -152,7 +152,7 @@ export default function AdmissionsCampaign({
 
         <section className={styles.trustStrip} aria-label="At a glance">
           <div className={styles.wrap + " " + styles.trustGrid}>
-            <div className={styles.trustItem}><Users size={24} aria-hidden="true" /><div>Small groups<small>1:8 Playgroup &amp; Nursery · 1:10 KG</small></div></div>
+            <div className={styles.trustItem}><Users size={24} aria-hidden="true" /><div>Adult-child ratios<small>Playgroup 1:8 · Nursery to UKG 1:10</small></div></div>
             <div className={styles.trustItem}><BookOpen size={24} aria-hidden="true" /><div>Learning through play<small>Kidzee&apos;s Péntemind approach</small></div></div>
             <div className={styles.trustItem}><Utensils size={24} aria-hidden="true" /><div>Preschool breakfast included<small>Freshly cooked vegetarian meals</small></div></div>
             <div className={styles.trustItem}><Heart size={24} aria-hidden="true" /><div>Support beyond preschool<small>Daycare · 12:30 PM–7:00 PM</small></div></div>

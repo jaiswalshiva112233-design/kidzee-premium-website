@@ -20,8 +20,8 @@ export default function ProgrammeFAQ({
         "Age is the starting point: Playgroup is for 2-3 years, Nursery for 3-4 years, Junior KG for 4-5 years and Senior KG for 5-6 years. We also consider previous preschool experience, comfort and readiness before guiding you.",
     },
     {
-      question: "What is the teacher-child ratio?",
-      answer: `The teacher-child ratio is 1:${youngGroupChildrenPerTeacher} for Playgroup and Nursery, and 1:${kindergartenChildrenPerTeacher} for Junior KG and Senior KG. Smaller groups help teachers observe children closely and provide age-appropriate support.`,
+      question: "What is the adult-child ratio?",
+      answer: `The adult-child ratio is 1:${youngGroupChildrenPerTeacher} for Playgroup, and 1:${kindergartenChildrenPerTeacher} for Nursery, Junior KG (LKG) and Senior KG (UKG). This means one supervising adult for every ${youngGroupChildrenPerTeacher} children in Playgroup and every ${kindergartenChildrenPerTeacher} children from Nursery through UKG.`,
     },
     {
       question: "Does the programme include only academic learning?",

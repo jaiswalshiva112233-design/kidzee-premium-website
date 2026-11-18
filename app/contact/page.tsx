@@ -441,7 +441,7 @@ export default async function ContactPage() {
                 <p className="mt-4 text-sm leading-7 text-purple-100 sm:text-base">
                   The purpose of the visit is to help you understand the centre
                   clearly. You can ask about classroom routines, safety,
-                  teacher-child ratios, meals, daycare, preschool cab routes
+                  adult-child ratios, meals, daycare, preschool cab routes
                   and the settling process.
                 </p>
 

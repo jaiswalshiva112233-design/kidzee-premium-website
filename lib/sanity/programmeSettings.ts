@@ -3,7 +3,9 @@ import "server-only";
 import { sanityServerClient } from "@/lib/sanity/serverClient";
 
 export type ProgrammeRatioSettings = {
+  // Keep stored field names compatible: Playgroup children per supervising adult.
   youngGroupChildrenPerTeacher: number;
+  // Nursery, Junior KG (LKG) and Senior KG (UKG) children per supervising adult.
   kindergartenChildrenPerTeacher: number;
 };
 

@@ -120,19 +120,19 @@ export default function ProgrammeRatioManager() {
 
       if (!response.ok || !result.success || !result.settings) {
         throw new Error(
-          result.message ?? "Teacher-child ratios could not be saved.",
+          result.message ?? "Adult-child ratios could not be saved.",
         );
       }
 
       setSettings(result.settings);
       setSuccess(
-        result.message ?? "Teacher-child ratios have been updated.",
+        result.message ?? "Adult-child ratios have been updated.",
       );
     } catch (saveError) {
       setError(
         saveError instanceof Error
           ? saveError.message
-          : "Teacher-child ratios could not be saved.",
+          : "Adult-child ratios could not be saved.",
       );
     } finally {
       setSaving(false);
@@ -154,7 +154,7 @@ export default function ProgrammeRatioManager() {
               Homepage USP
             </p>
             <h2 className="mt-1 text-xl font-black text-[#2D1736]">
-              Teacher-child ratios
+              Adult-child ratios
             </h2>
             <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-[#7B7080]">
               These figures appear once on the homepage, once in the main
@@ -164,7 +164,7 @@ export default function ProgrammeRatioManager() {
         </div>
 
         <span className="rounded-full border border-[#E2D6E7] bg-[#FAF7FC] px-3 py-2 text-xs font-black text-[#5B2A86]">
-          One teacher : children
+          One supervising adult : children
         </span>
       </div>
 
@@ -189,10 +189,10 @@ export default function ProgrammeRatioManager() {
       ) : null}
 
       <fieldset disabled={loading || saving} className="mt-6">
-        <legend className="sr-only">Teacher-child ratio settings</legend>
+        <legend className="sr-only">Adult-child ratio settings</legend>
         <div className="grid gap-5 md:grid-cols-2">
           <label className="block text-sm font-black text-[#4B3F50]">
-            Playgroup and Nursery
+            Playgroup
             <div className="relative">
               <span className="pointer-events-none absolute left-4 top-1/2 mt-1 -translate-y-1/2 text-base font-black text-[#5B2A86]">
                 1 :
@@ -213,12 +213,12 @@ export default function ProgrammeRatioManager() {
               />
             </div>
             <span className="mt-2 block text-xs font-semibold leading-5 text-[#887D8B]">
-              Used for the 2–4 year age groups.
+              Used for Playgroup (2–3 years).
             </span>
           </label>
 
           <label className="block text-sm font-black text-[#4B3F50]">
-            Junior KG and Senior KG
+            Nursery, Junior KG (LKG) and Senior KG (UKG)
             <div className="relative">
               <span className="pointer-events-none absolute left-4 top-1/2 mt-1 -translate-y-1/2 text-base font-black text-[#5B2A86]">
                 1 :
@@ -239,7 +239,7 @@ export default function ProgrammeRatioManager() {
               />
             </div>
             <span className="mt-2 block text-xs font-semibold leading-5 text-[#887D8B]">
-              Used for the 4–6 year age groups.
+              Used from Nursery through UKG (3–6 years).
             </span>
           </label>
         </div>
@@ -247,9 +247,9 @@ export default function ProgrammeRatioManager() {
 
       <div className="mt-6 flex flex-col gap-4 rounded-[22px] bg-[#F8F4FA] p-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm font-semibold leading-6 text-[#6F6474]">
-          Current website wording: <strong>1:{settings.youngGroupChildrenPerTeacher}</strong>
-          {" "}for Playgroup and Nursery; <strong>1:{settings.kindergartenChildrenPerTeacher}</strong>
-          {" "}for Junior KG and Senior KG.
+          Adult-child ratio: <strong>1:{settings.youngGroupChildrenPerTeacher}</strong>
+          {" "}for Playgroup; <strong>1:{settings.kindergartenChildrenPerTeacher}</strong>
+          {" "}for Nursery, Junior KG (LKG) and Senior KG (UKG).
         </p>
         <button
           type="submit"

@@ -361,9 +361,9 @@ const content: Record<string, ArticleContent> = {
         ],
       },
       {
-        heading: "Understand the teacher-child ratio",
+        heading: "Understand the adult-child ratio",
         paragraphs: [
-          "The number of children assigned to each teacher affects supervision, communication and the attention children receive.",
+          "The number of children supported by each supervising adult affects supervision, communication and the attention children receive.",
           "Ask for the practical classroom ratio rather than only the total number of staff working at the centre.",
         ],
       },

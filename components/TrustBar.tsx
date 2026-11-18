@@ -26,8 +26,8 @@ export default async function TrustBar() {
     },
     {
       icon: UsersRound,
-      title: "Small groups, closer attention",
-      text: `1:${ratioSettings.youngGroupChildrenPerTeacher} in Playgroup and Nursery; 1:${ratioSettings.kindergartenChildrenPerTeacher} in Junior KG and Senior KG.`,
+      title: "Adult-child ratios",
+      text: `1:${ratioSettings.youngGroupChildrenPerTeacher} in Playgroup; 1:${ratioSettings.kindergartenChildrenPerTeacher} in Nursery, Junior KG (LKG) and Senior KG (UKG).`,
     },
     {
       icon: ShieldCheck,
