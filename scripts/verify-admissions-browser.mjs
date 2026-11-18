@@ -97,10 +97,32 @@ try {
       assert.ok(!(await page.content()).includes('LEGACY_PRICE_MUST_NOT_REACH_PAGE'), 'Legacy managed content must not be serialized into campaign HTML');
       const formPosition = await page.locator('#admission-enquiry').boundingBox();
       if (width <= 390) {
-        assert.ok(formPosition.y < 620, 'Mobile form should follow the short introduction: ' + formPosition.y);
+        const introPosition = await page.locator('#admissions-heading').locator('..').boundingBox();
+        const spaceBeforeForm = formPosition.y - (introPosition.y + introPosition.height);
+        assert.ok(spaceBeforeForm >= 0 && spaceBeforeForm <= 40, 'Mobile form must immediately follow the readable introduction: ' + spaceBeforeForm);
         const inputPosition = await page.locator('#parentName').boundingBox();
-        assert.ok(inputPosition.y < 844, 'First required field should be visible in the mobile opening screen');
+        assert.ok(inputPosition.y - formPosition.y < 390, 'First required field must stay near the start of the form');
       }
+      const readability = await page.evaluate(() => {
+        const selectors = {
+          introduction: '#admissions-heading + p',
+          ratio: 'ul[aria-label="Preschool benefits"] li',
+          formDescription: '#admission-form-heading + p',
+          formLabel: 'label[for="parentName"]',
+          formInput: '#parentName',
+          submitButton: 'form button[type="submit"]',
+        };
+        const sizes = Object.fromEntries(Object.entries(selectors).map(([key,selector]) => [key,parseFloat(getComputedStyle(document.querySelector(selector)).fontSize)]));
+        const smallText = [...document.querySelectorAll('header *,main *,footer *,nav[aria-label="Contact admissions"] *')].filter(el => {
+          if (el.closest('svg,[aria-hidden="true"]')) return false;
+          if (![...el.childNodes].some(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim())) return false;
+          const rect=el.getBoundingClientRect();
+          return rect.width>0 && rect.height>0 && el.getClientRects().length>0 && parseFloat(getComputedStyle(el).fontSize)<14;
+        }).map(el => ({text:el.textContent.trim().slice(0,100),fontSize:getComputedStyle(el).fontSize}));
+        return {sizes,smallText};
+      });
+      for (const [name,size] of Object.entries(readability.sizes)) assert.ok(size>=16, name + ' must be at least 16px: ' + size);
+      assert.deepEqual(readability.smallText, [], 'Supporting text must be at least 14px: ' + JSON.stringify(readability.smallText));
       assert.equal(await page.locator('#reviews').count(), 1, 'Existing reviews sitelink has a real target');
       const brokenLocalLinks = await page.locator('a[href^="#"]').evaluateAll(links => links.map(link=>link.getAttribute('href')).filter(href => href.length > 1 && !document.getElementById(decodeURIComponent(href.slice(1)))));
       assert.deepEqual(brokenLocalLinks, [], 'In-page CTA and asset anchors must exist');
@@ -113,6 +135,13 @@ try {
       const brokenImages = await page.locator("img").evaluateAll((images) => images.filter((image) => !image.complete || image.naturalWidth === 0).map((image) => image.src));
       assert.deepEqual(brokenImages, [], "Broken images");
       await page.screenshot({ path: output + "/" + (route.includes("landing") ? "ads" : "admissions") + "-" + width + ".png", fullPage: true });
+      await page.screenshot({ path: output + "/" + (route.includes("landing") ? "ads" : "admissions") + "-" + width + "-viewport.png" });
+      if (width === 390) {
+        await page.evaluate(() => { document.documentElement.style.fontSize='200%'; });
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, 'Larger text must reflow without horizontal scrolling: ' + route);
+        await page.screenshot({path:output + '/' + (route.includes('landing') ? 'ads' : 'admissions') + '-390-large-text.png'});
+        await page.evaluate(() => { document.documentElement.style.removeProperty('font-size'); });
+      }
       if (route.includes("landing") && (width === 390 || width === 1440)) {
         const screenshot = await page.screenshot();
         const image = await sharp(screenshot).resize({ width: width === 1440 ? 900 : 230 }).jpeg({ quality: width === 1440 ? 40 : 30 }).toBuffer();
@@ -130,7 +159,7 @@ try {
       await page.getByText("How does the January start work?", { exact: true }).click();
       assert.ok(await page.getByText(/Tuition Begins in March/).first().isVisible());
       assert.deepEqual(errors, [], "Browser errors at " + route);
-      results.push({ route, width, layout: "pass", images: "pass", navigation: "pass" });
+      results.push({ route, width, layout: "pass", images: "pass", navigation: "pass", readability: "pass", fontSizes: readability.sizes });
       await context.close();
     }
   }
