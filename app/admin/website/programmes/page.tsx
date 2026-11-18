@@ -49,7 +49,7 @@ export default async function AdminProgrammesPage() {
                 </h1>
 
                 <p className="mt-4 max-w-3xl text-sm leading-7 text-white/70 sm:text-base">
-                  Manage the teacher-child ratios and programme photographs
+                  Manage the adult-child ratios and programme photographs
                   shown across the homepage, main Programmes page and every
                   individual programme page.
                 </p>

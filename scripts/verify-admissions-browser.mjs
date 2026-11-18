@@ -82,7 +82,8 @@ try {
       assert.ok(await page.locator("section[aria-labelledby=\"admissions-heading\"]").getByText("30% Off Annual Charges", { exact: true }).isVisible());
       assert.equal(await page.locator("#admission-enquiry").count(), 1);
       assert.equal(await page.locator("main").count(), 1);
-      assert.ok(await page.getByText("1:8 teacher–child ratio in Playgroup & Nursery", { exact: true }).isVisible());
+      assert.ok(await page.getByText("Adult-child ratio: Playgroup 1:8 · Nursery to UKG 1:10", { exact: true }).isVisible());
+      assert.equal(await page.getByText(/teacher[-– ](?:child|student) ratio/i).count(), 0);
       assert.equal(await page.locator('form #childName:visible').count(), 0);
       assert.equal(await page.locator('form #preferredVisitDate:visible').count(), 0);
       assert.equal(await page.locator('form a[href="/privacy-policy"]').count(), 1);

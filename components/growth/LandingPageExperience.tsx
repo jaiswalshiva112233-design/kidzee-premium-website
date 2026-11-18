@@ -110,7 +110,7 @@ const campusPhotos = [
     src: "/images/landing/kidzee-creative-learning.jpg",
     tag: "Creative Learning",
     title: "Early Literacy & Hands-on Craft Discovery",
-    subtitle: "Low 1:8 teacher guidance with proprietary Péntemind curriculum in Sector 12 Dwarka",
+    subtitle: "Adult-child ratio: Playgroup 1:8; Nursery to UKG 1:10, with Péntemind curriculum in Sector 12 Dwarka",
   },
   {
     src: "/images/landing/kidzee-indoor-turf-arena.jpg",
@@ -145,9 +145,9 @@ const comparisonPillars = [
     others: "Unrecognized local playschool with no structured syllabus",
   },
   {
-    feature: "Teacher-Student Ratio",
-    kidzee: "Low 1:8 Ratio (Playgroup/Nursery) — Dedicated Attention",
-    others: "Overcrowded 1:20+ ratio with minimal supervision",
+    feature: "Adult-Child Ratio",
+    kidzee: "Playgroup 1:8; Nursery to UKG 1:10 — One supervising adult per 8 or 10 children",
+    others: "Ask each centre about its adult-child ratio",
   },
   {
     feature: "Admission Fee Offer",
@@ -198,15 +198,15 @@ const parentTestimonials = [
 const faqs = [
   {
     q: "Why choose Kidzee Sector 12 Dwarka over local play schools?",
-    a: "You get the best of both worlds: The national credibility and research-backed Péntemind curriculum of India's largest preschool network (2,000+ centres), combined with our Sector 12 centre's attentive 1:8 teacher ratio, 24/7 CCTV, and extended daycare till 7 PM.",
+    a: "You get the best of both worlds: The national credibility and research-backed Péntemind curriculum of India's largest preschool network (2,000+ centres), combined with our Sector 12 centre's adult-child ratios of 1:8 for Playgroup and 1:10 for Nursery to UKG, 24/7 CCTV, and extended daycare till 7 PM.",
   },
   {
     q: "What is the 30% Annual Fee Offer for Playgroup and Nursery?",
     a: "For the academic session 2026–27, we are offering a flat 30% discount on the annual fee for Playgroup and Nursery admissions when you book a campus visit through this page.",
   },
   {
-    q: "What is the Teacher-Student ratio at Kidzee Sector 12 Dwarka?",
-    a: "We maintain a low 1:8 ratio for Playgroup & Nursery (1 teacher for every 8 children) and 1:10 for Kindergarten, ensuring every child receives attentive, individualized care and guidance.",
+    q: "What is the adult-child ratio at Kidzee Sector 12 Dwarka?",
+    a: "Our adult-child ratio is 1:8 for Playgroup and 1:10 for Nursery, Junior KG (LKG) and Senior KG (UKG). This means one supervising adult for every 8 children in Playgroup and every 10 children from Nursery through UKG.",
   },
   {
     q: "What are the school and daycare timings?",
@@ -443,7 +443,7 @@ function ManagedLandingPageExperience({
 
             <p className="text-base sm:text-lg leading-relaxed text-gray-700 font-medium">
               {content.description ||
-                "Admissions open for Playgroup, Nursery, Junior KG & Senior KG (2026–27). Low 1:8 teacher-student ratio, air-conditioned activity rooms, and extended daycare till 7:00 PM with fresh warm meals."}
+                "Admissions open for Playgroup, Nursery, Junior KG & Senior KG (2026–27). Adult-child ratio: Playgroup 1:8; Nursery to UKG 1:10. Air-conditioned activity rooms, and extended daycare till 7:00 PM with fresh warm meals."}
             </p>
 
             {/* Admissions 2026-27 Trust Highlights */}
@@ -461,8 +461,8 @@ function ManagedLandingPageExperience({
                   <Users size={18} />
                 </div>
                 <div>
-                  <h3 className="text-xs sm:text-sm font-bold text-gray-900">Low 1:8 Ratio</h3>
-                  <p className="text-[11px] sm:text-xs text-gray-500">Dedicated individual care & milestone tracking</p>
+                  <h3 className="text-xs sm:text-sm font-bold text-gray-900">Adult-Child Ratios</h3>
+                  <p className="text-[11px] sm:text-xs text-gray-500">Playgroup 1:8 · Nursery to UKG 1:10</p>
                 </div>
               </div>
 
