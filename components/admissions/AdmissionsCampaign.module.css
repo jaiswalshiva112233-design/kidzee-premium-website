@@ -66,3 +66,70 @@
 
 .mobileBar[hidden]{display:none}
 
+/* Shared admissions pages: readable copy takes priority over fitting above the fold. */
+.page{--muted:#5f5265;font-size:1rem;line-height:1.7;overflow-wrap:break-word}
+.lead,.intro,.heroBenefits li,.offerCell p:not(.offerNumber):not(.offerLabel),
+.timeline span,.value p,.programme p,.visitList li,.address p,.faq p,
+.parentStory p,.earlyReview blockquote,.closing p{font-size:1rem;line-height:1.75}
+.heroBenefits{gap:10px}
+.heroOffer span{font-size:1rem;line-height:1.65}
+.heroOffer small{font-size:.875rem;line-height:1.65}
+.heroOffer{gap:8px}
+.heroOffer strong{font-size:1.25rem;line-height:1.4}
+.centre,.phone,.session,.eyebrow,.micro,.photoNote,.formNote,.termsLink,
+.gallery figcaption,.programme small,.quote figcaption,.quote figcaption span,
+.reviewNote,.teamCard p,.teamCard small,.videoButton small,.daycarePhoto figcaption,
+.earlyReview figcaption,.footerInner{font-size:.875rem;line-height:1.65}
+.session,.eyebrow,.programme small{letter-spacing:.05em}
+.trustItem{font-size:1rem;line-height:1.6;align-items:flex-start}
+.trustItem small{font-size:.875rem;line-height:1.65;margin-top:4px}
+.timeline strong,.terms h3,.faq summary{font-size:1rem;line-height:1.65}
+.terms li{font-size:.875rem;line-height:1.8}
+.terms ul{gap:16px}
+.button,.actions .button,.services button{font-size:1rem;line-height:1.5}
+.button{white-space:normal}
+.button svg,.phone svg{flex-shrink:0}
+.quote blockquote{font-size:1.0625rem;line-height:1.8}
+.teamCard h3{font-size:1.125rem}
+.title{font-size:clamp(2.125rem,3.5vw,3.0625rem);line-height:1.15}
+.phone{min-height:44px}
+
+@media(max-width:1023px){
+  .mobileBar{grid-template-columns:.75fr 1.1fr 1.15fr}
+  .mobileBar .button{font-size:.875rem;line-height:1.4;min-height:52px;padding:8px 4px;gap:4px;flex-wrap:wrap;overflow-wrap:anywhere}
+  .page{padding-bottom:calc(7rem + env(safe-area-inset-bottom))}
+}
+@media(max-width:767px){
+  .headerInner{flex-wrap:wrap;padding-block:8px;gap:4px 12px}
+  .identity{flex-wrap:wrap}
+  .centre{font-size:.875rem}
+  .headerActions{margin-left:auto}
+  .headerActions .phone span{display:inline;font-size:.875rem}
+  .title{font-size:2.125rem;line-height:1.15}
+  .lead{margin-block:16px}
+  .heroBenefits{margin:16px 0 20px;gap:10px}
+  .heroOffer{padding:16px;gap:8px}
+  .services{gap:8px;margin-bottom:16px}
+  .services button{font-size:.875rem;padding:10px 12px;min-height:46px}
+  .trustGrid{gap:24px 18px}
+  .trustItem{font-size:1rem}
+  .trustItem small{font-size:.875rem}
+  .programme{padding:20px}
+  .timeline div{padding:20px}
+  .formColumn{scroll-margin-top:145px}
+}
+@media(max-width:479px){
+  .trustGrid,.programmes,.timeline{grid-template-columns:1fr}
+  .timeline div+div{border-left:0;border-top:1px solid var(--line)}
+  .headerInner{justify-content:center}
+  .identity{width:100%;justify-content:space-between}
+  .headerActions{margin-left:0}
+  .photoNote{position:static;border-radius:0;padding:10px 12px}
+  .teamCards{grid-template-columns:1fr}
+}
+@media(max-width:359px){
+  .title{font-size:2rem}
+  .mobileBar{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .mobileBar .button{flex-direction:column;gap:2px;min-height:60px}
+}
+

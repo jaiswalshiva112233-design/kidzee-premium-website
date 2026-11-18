@@ -822,7 +822,7 @@ export default function AdmissionForm({
             )}
           </button>
 
-          <div className="flex items-center justify-center gap-2 text-xs font-bold text-gray-600">
+          <div className={campaignIntent ? styles.callLine : "flex items-center justify-center gap-2 text-xs font-bold text-gray-600"}>
             <span>Prefer to call?</span>
             <a
               href={`tel:${site.phone}`}
@@ -840,7 +840,7 @@ export default function AdmissionForm({
           {handoffText || "Your enquiry is saved first. WhatsApp opens only after CentreOS confirms it."}
         </p> : null}
 
-        <p className="text-center text-xs leading-5 text-[#77707C]">
+        <p className={campaignIntent ? styles.privacy : "text-center text-xs leading-5 text-[#77707C]"}>
           By submitting, you agree to be contacted about this enquiry.{" "}
           <Link href="/privacy-policy" className="font-semibold text-[#5B2A86] underline underline-offset-2">Privacy Policy</Link>
         </p>
