@@ -175,12 +175,21 @@ export async function verifyWebsiteSession({browser,chromium,pool,origin,output,
     assert.equal(await external.isVisible(),true);
     assert.equal(await external.getAttribute('href'),'https://www.instagram.com/reel/DYg8ahfhUuq/');
     // Simulate a media delivery failure; the player must recover without an unhandled promise.
-    await page.route('**/playschool-security-review.mp4',route=>route.abort());
-    await page.reload({waitUntil:'networkidle'});
-    const failed=page.locator('[data-video-fixture="0"]');
-    await failed.getByRole('link',{name:'Open video in a new tab',exact:true}).waitFor();
+    const failureContext=await mediaBrowser.newContext({viewport:{width:390,height:844}});
+    const failurePage=await failureContext.newPage();
+    failurePage.on('pageerror',error=>errors.push(error.message));
+    let failedRequests=0;
+    await failurePage.route('**/playschool-security-review.mp4',async route=>{
+      failedRequests++;
+      await route.fulfill({status:503,contentType:'text/plain',body:'Isolated video delivery failure'});
+    });
+    await failurePage.goto(origin+'/website-browser-media-check',{waitUntil:'networkidle'});
+    const failed=failurePage.locator('[data-video-fixture="0"]');
     await failed.getByRole('button',{name:'Play Video 0',exact:true}).click();
+    await failed.getByRole('link',{name:'Open video in a new tab',exact:true}).waitFor();
+    assert.ok(failedRequests>0,'The failure check must actually interrupt media delivery');
     assert.equal(await failed.getByRole('link',{name:'Open video in a new tab'}).isVisible(),true);
+    await failureContext.close();
     assert.deepEqual(errors,[]);
     results.push({hostedVideos:2,localVideos:3,videoPlaybackAndPause:'pass',videoErrorFallback:'pass',externalEmbedFallback:'pass',slideshowControls:'pass'});
     await context.close();
