@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
     path: "/",
     title: "Kidzee Preschool & Daycare in Sector 12 Dwarka",
     description:
-      "Explore Playgroup, Nursery, Junior KG, Senior KG and daycare until 7 PM at Kidzee Preschool in Sector 12B, Dwarka. Book a school visit.",
+      "Explore 2027–28 preschool admissions and daycare until 7 PM at Kidzee Sector 12B, Dwarka. Playgroup, Nursery and KG for ages 2–6. Book a school visit.",
     keywords: [
       "preschool in Dwarka",
       "preschool in Sector 12 Dwarka",

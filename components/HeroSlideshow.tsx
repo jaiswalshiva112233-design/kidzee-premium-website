@@ -171,16 +171,15 @@ export default function HeroSlideshow({
                       type="button"
                       onClick={() => setActiveIndex(index)}
                       className={[
-                        "h-1.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white",
-                        index === visibleIndex
-                          ? "w-4 bg-[#F6C84B]"
-                          : "w-1.5 bg-white/65 hover:bg-white",
+                        "flex h-11 w-8 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white",
                       ].join(" ")}
                       aria-label={`Show photograph ${index + 1}`}
                       aria-current={
                         index === visibleIndex ? "true" : undefined
                       }
-                    />
+                    >
+                      <span aria-hidden="true" className={`h-1.5 rounded-full transition-all ${index === visibleIndex ? "w-4 bg-[#F6C84B]" : "w-1.5 bg-white/65"}`} />
+                    </button>
                   ))}
                 </div>
 
@@ -188,7 +187,7 @@ export default function HeroSlideshow({
                   <button
                     type="button"
                     onClick={() => setUserPaused((current) => !current)}
-                    className="ml-0.5 flex h-5 w-5 items-center justify-center rounded-full opacity-45 transition hover:bg-white/15 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                    className="ml-0.5 flex h-11 w-11 items-center justify-center rounded-full transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                     aria-label={
                       userPaused
                         ? "Resume automatic photographs"
@@ -196,9 +195,9 @@ export default function HeroSlideshow({
                     }
                   >
                     {userPaused ? (
-                      <Play aria-hidden="true" size={10} />
+                      <Play aria-hidden="true" size={16} />
                     ) : (
-                      <Pause aria-hidden="true" size={10} />
+                      <Pause aria-hidden="true" size={16} />
                     )}
                   </button>
                 ) : null}

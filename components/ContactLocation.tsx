@@ -14,6 +14,7 @@ import {
 
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
+import { preschoolHoursSummary } from "@/lib/website/admissionsSession";
 
 
 const quickInformation = [
@@ -186,7 +187,7 @@ export default function ContactLocation() {
                       <strong className="text-[#2C1735]">
                         Preschool:
                       </strong>{" "}
-                      Monday–Friday, 8:30 AM–1:00 PM
+                      Monday–Friday. {preschoolHoursSummary}
                     </p>
 
                     <p>

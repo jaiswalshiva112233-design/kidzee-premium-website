@@ -4,6 +4,12 @@ import { getPublishedBlogArticles } from "@/lib/sanity/blog";
 import { getPublishedGalleryAlbums } from "@/lib/sanity/gallery";
 import { posts, programmes, site } from "@/lib/site";
 import { prisma } from "@/lib/prisma";
+import { ADMISSIONS_CAMPAIGN_SLUG } from "@/lib/website/admissionsCampaign";
+import { ADMISSIONS_SESSION_UPDATED_AT } from "@/lib/website/admissionsSession";
+import { isIndexableLandingContent } from "@/lib/website/landingIndexing";
+
+export const revalidate = 3600;
+const sessionUpdatedPaths = new Set(["", "/admissions", "/contact", "/daycare", "/programmes"]);
 
 type SitemapChangeFrequency = NonNullable<
   MetadataRoute.Sitemap[number]["changeFrequency"]
@@ -53,12 +59,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [galleryAlbums, managedArticles, landingPages] = await Promise.all([
     getPublishedGalleryAlbums(),
     getPublishedBlogArticles(),
-    prisma.landingPage.findMany({ where: { status: "PUBLISHED" }, select: { slug: true, updatedAt: true } }).catch(() => []),
+    prisma.landingPage.findMany({ where: { status: "PUBLISHED" }, select: { slug: true, updatedAt: true, content: true } }).catch(() => []),
   ]);
 
   const staticEntries: MetadataRoute.Sitemap = staticPages.map((page) => ({
     url: absoluteUrl(page.path),
-    lastModified: websiteFoundationUpdatedAt,
+    lastModified: sessionUpdatedPaths.has(page.path) ? new Date(ADMISSIONS_SESSION_UPDATED_AT) : websiteFoundationUpdatedAt,
     changeFrequency: page.changeFrequency,
     priority: page.priority,
   }));
@@ -118,6 +124,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...programmeEntries,
     ...blogEntries,
     ...galleryEntries,
-    ...landingPages.map((page) => ({ url: absoluteUrl(`/landing/${page.slug}`), lastModified: page.updatedAt, changeFrequency: "weekly" as const, priority: 0.85 })),
+    ...landingPages
+      .filter((page) => page.slug !== ADMISSIONS_CAMPAIGN_SLUG && isIndexableLandingContent(page.content))
+      .map((page) => ({ url: absoluteUrl(`/landing/${page.slug}`), lastModified: page.updatedAt, changeFrequency: "weekly" as const, priority: 0.85 })),
   ];
 }

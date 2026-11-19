@@ -7,6 +7,7 @@ import AdmissionsCampaign from "@/components/admissions/AdmissionsCampaign";
 import { ADMISSIONS_CAMPAIGN_SLUG, ADMISSIONS_CAMPAIGN_TITLE, ADMISSIONS_CAMPAIGN_DESCRIPTION, ADMISSIONS_CAMPAIGN_IMAGE, getAdmissionsEnquiry } from "@/lib/website/admissionsCampaign";
 import { prisma } from "@/lib/prisma";
 import { site } from "@/lib/site";
+import { isIndexableLandingContent } from "@/lib/website/landingIndexing";
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       twitter: { card: "summary_large_image", title: ADMISSIONS_CAMPAIGN_TITLE, description: ADMISSIONS_CAMPAIGN_DESCRIPTION, images: [ADMISSIONS_CAMPAIGN_IMAGE] },
     };
   }
-  const content = page.content as { indexable?: boolean };
-  const indexable = content.indexable === true;
+  const indexable = isIndexableLandingContent(page.content);
   return { title: page.seoTitle, description: page.metaDescription, alternates: { canonical: `${site.url}/landing/${page.slug}` }, robots: { index: indexable, follow: indexable } };
 }
 

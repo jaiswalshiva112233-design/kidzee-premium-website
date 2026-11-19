@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
+import { mkdir, readFile, writeFile, unlink, rmdir } from "node:fs/promises";
 
 import { PGlite } from "@electric-sql/pglite";
 import { PGLiteSocketServer } from "@electric-sql/pglite-socket";
@@ -8,6 +9,8 @@ const database = new PGlite();
 const port = 55441;
 const server = new PGLiteSocketServer({ db: database, port, host: "127.0.0.1", maxConnections: 20 });
 const databaseUrl = `postgresql://postgres:postgres@127.0.0.1:${port}/postgres?sslmode=disable`;
+const mediaFixtureDirectory = path.join(process.cwd(), "app", "website-browser-media-check");
+let mediaFixtureCreated = false;
 
 function run(args, extraEnvironment = {}) {
   return new Promise((resolve, reject) => {
@@ -47,6 +50,12 @@ function run(args, extraEnvironment = {}) {
 }
 
 try {
+  if (process.env.ADMISSIONS_BROWSER_CHECK === "true") {
+    // CI-only route; never part of the normal production build or deployment.
+    await mkdir(mediaFixtureDirectory);
+    mediaFixtureCreated = true;
+    await writeFile(path.join(mediaFixtureDirectory, "page.tsx"), await readFile("tests/fixtures/website-media-page.tsx"), { flag: "wx" });
+  }
   await server.start();
   const prismaCli = path.join(process.cwd(), "node_modules", "prisma", "build", "index.js");
   await run([prismaCli, "migrate", "deploy"]);
@@ -59,6 +68,10 @@ try {
     console.log(await run([path.join(process.cwd(), "scripts", "verify-admissions-browser.mjs")]));
   }
 } finally {
+  if (mediaFixtureCreated) {
+    await unlink(path.join(mediaFixtureDirectory, "page.tsx")).catch(() => undefined);
+    await rmdir(mediaFixtureDirectory);
+  }
   await server.stop().catch(() => undefined);
   await database.close();
 }

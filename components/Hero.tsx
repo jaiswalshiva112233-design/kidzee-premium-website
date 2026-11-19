@@ -9,6 +9,7 @@ import { getWebsiteContactSettings } from "@/lib/sanity/contactSettings";
 import { getWebsiteContentSettings } from "@/lib/sanity/contentSettings";
 import { getWebsiteMedia } from "@/lib/sanity/media";
 import { buildSiteContact } from "@/lib/siteContact";
+import Link from "next/link";
 
 const genericAltText = new Set([
   "main hero photo",
@@ -180,6 +181,11 @@ export default async function Hero() {
           <p className="mt-3 max-w-[620px] text-pretty text-base font-semibold leading-7 text-[#665A6C] sm:text-lg sm:leading-8">
             {contentSettings.homeHeroSupport}
           </p>
+
+          <Link href="/admissions#early-start-offer" className="mt-4 inline-flex min-h-11 items-center gap-2 text-base font-bold text-[#5B2A86] underline underline-offset-4">
+            Explore our 2027–28 Early Start Advantage
+            <ArrowRight aria-hidden="true" size={18} className="shrink-0" />
+          </Link>
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Button

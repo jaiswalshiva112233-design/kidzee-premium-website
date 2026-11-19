@@ -4,6 +4,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Pool } from "pg";
 import sharp from "sharp";
+import { verifyWebsiteSession } from "./verify-website-session-browser.mjs";
 const { chromium } = await import(process.env.ADMISSIONS_PLAYWRIGHT_MODULE || "playwright");
 
 const origin = "http://127.0.0.1:3100";
@@ -60,7 +61,9 @@ try {
   }
   assert.ok(ready, "Next.js did not start: " + logs.slice(-5000));
   browser = await chromium.launch();
-  const routes = ["/admissions", "/landing/" + slug];
+  // The website admissions page has its own navigation and full form.
+  // Campaign-only assertions stay here; its complete replacement coverage is below.
+  const routes = ["/landing/" + slug];
 
   for (const route of routes) {
     for (const width of [320, 360, 390, 430, 768, 1440]) {
@@ -268,7 +271,7 @@ try {
     const mediaBrowser = await chromium.launch({ channel: "chrome" });
     const context = await mediaBrowser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
-    await page.goto(origin + "/admissions?enquiry=FEES", { waitUntil: "networkidle" });
+    await page.goto(origin + "/landing/" + slug + "?enquiry=FEES", { waitUntil: "networkidle" });
     assert.ok(await page.getByRole("button", { name: "Request Admissions Callback", exact: true }).isVisible());
     await page.getByText("Add a visit date or other details (optional)", { exact: true }).click();
     assert.ok(await page.locator("#childName").isVisible());
@@ -413,6 +416,7 @@ try {
     await context.close();
     results.push({ otherManagedContent: "pass", otherManagedVariantAttribution: "pass", otherFullForm: "pass" });
   }
+  await verifyWebsiteSession({ browser, chromium, pool, origin, output, results });
   await writeFile(output + "/verification.json", JSON.stringify(results, null, 2));
   console.log("Admissions browser verification passed: 12 responsive layouts, compact single-row mobile headers, image loading, visit links, form validation, CentreOS persistence, attribution and retry deduplication.");
 } catch (error) {

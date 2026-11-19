@@ -4,6 +4,7 @@ import { cache } from "react";
 
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { ADMISSIONS_SESSION } from "@/lib/website/admissionsSession";
 
 export const WEBSITE_OPERATIONS_KEY = "website-operations-v2";
 
@@ -25,7 +26,7 @@ export type WebsiteOperationalSettings = {
 };
 
 export const DEFAULT_WEBSITE_OPERATIONS: WebsiteOperationalSettings = {
-  admissionsYear: "2026-27",
+  admissionsYear: ADMISSIONS_SESSION,
   defaultCampaignName: "Admissions",
   defaultUtmSource: "",
   defaultUtmMedium: "",

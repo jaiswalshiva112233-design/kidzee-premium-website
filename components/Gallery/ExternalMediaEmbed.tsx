@@ -18,7 +18,8 @@ export default function ExternalMediaEmbed({ provider, embedUrl, publicUrl, post
 
   if (active) {
     return (
-      <div className={provider === "INSTAGRAM" ? "aspect-[9/16]" : "aspect-video"}>
+      <div>
+        <div className={provider === "INSTAGRAM" ? "aspect-[9/16]" : "aspect-video"}>
         <iframe
           src={embedUrl}
           title={title}
@@ -28,6 +29,13 @@ export default function ExternalMediaEmbed({ provider, embedUrl, publicUrl, post
           referrerPolicy="strict-origin-when-cross-origin"
           className="h-full w-full border-0 bg-[#170B1E]"
         />
+        </div>
+        <p className="bg-[#25102F] p-4 text-sm leading-6 text-white">
+          Video not loading?{" "}
+          <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center font-bold text-[#F6C84B] underline underline-offset-4">
+            Open on {provider === "INSTAGRAM" ? "Instagram" : "YouTube"}
+          </a>
+        </p>
       </div>
     );
   }
