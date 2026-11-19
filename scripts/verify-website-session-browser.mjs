@@ -1,5 +1,17 @@
 import assert from 'node:assert/strict';
 
+async function prepareScreenshots(page) {
+  // Visit each viewport so normal scroll-reveal animations finish before a full-page capture.
+  await page.evaluate(async()=>{
+    for(let y=0;y<document.documentElement.scrollHeight;y+=innerHeight*.8){
+      window.scrollTo({top:y,behavior:'instant'});
+      await new Promise(resolve=>setTimeout(resolve,75));
+    }
+    window.scrollTo({top:0,behavior:'instant'});
+  });
+  await page.waitForTimeout(400);
+}
+
 export async function verifyWebsiteSession({browser,chromium,pool,origin,output,results}) {
   for (const width of [320,360,390,430,768,1440]) {
     const context=await browser.newContext({viewport:{width,height:900}});
@@ -34,6 +46,7 @@ export async function verifyWebsiteSession({browser,chromium,pool,origin,output,
     });
     assert.deepEqual(await page.locator('img').evaluateAll(images=>images.filter(img=>!img.complete||!img.naturalWidth).map(img=>img.src)),[]);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'Website admissions overflow at '+width);
+    await prepareScreenshots(page);
     await page.screenshot({path:output+'/website-admissions-'+width+'.png',fullPage:true});
     await page.screenshot({path:output+'/website-admissions-'+width+'-viewport.png'});
     if(width===390) {
@@ -123,6 +136,7 @@ export async function verifyWebsiteSession({browser,chromium,pool,origin,output,
       });
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,route+' overflow at '+width);
       assert.deepEqual(await page.locator('img').evaluateAll(images=>images.filter(img=>!img.complete||!img.naturalWidth).map(img=>img.src)),[],route+' images');
+      await prepareScreenshots(page);
       await page.screenshot({path:output+'/website-'+(route==='/'?'home':route.slice(1).replaceAll('/','-'))+'-'+width+'.png',fullPage:true});
     }
     assert.deepEqual(errors,[],route+' browser errors');

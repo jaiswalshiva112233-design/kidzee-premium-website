@@ -317,6 +317,8 @@ export default async function AdmissionsPage({
               <AdmissionForm
                 badgeText={`Admissions ${ADMISSIONS_SESSION}`}
                 autoOpenWhatsApp={false}
+                subtitle="Share your details and our centre team will contact you to discuss your child’s programme, availability or a school visit."
+                handoffText="Your enquiry is saved securely. After confirmation, you can choose to continue on WhatsApp."
                 initialProgramme={initialProgramme}
                 initialEnquiryType={initialEnquiryType}
               />
