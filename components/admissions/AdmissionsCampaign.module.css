@@ -100,10 +100,13 @@
   .page{padding-bottom:calc(7rem + env(safe-area-inset-bottom))}
 }
 @media(max-width:767px){
-  .headerInner{flex-wrap:wrap;padding-block:8px;gap:4px 12px}
-  .identity{flex-wrap:wrap}
-  .centre{font-size:.875rem}
-  .headerActions{margin-left:auto}
+  .headerInner{flex-wrap:nowrap;justify-content:space-between;min-height:72px;padding-block:8px;gap:12px}
+  .identity{flex:0 1 120px;min-width:40px;flex-wrap:nowrap;gap:0}
+  .identity .logo{width:100%;max-width:120px;height:44px;object-fit:contain;object-position:left center}
+  .centre{display:none}
+  .headerActions{margin-left:auto;flex:0 1 auto;min-width:0;gap:0}
+  .headerActions .phone{min-height:44px;gap:6px}
+  .headerActions .phone svg{width:18px;height:18px}
   .headerActions .phone span{display:inline;font-size:.875rem}
   .title{font-size:2.125rem;line-height:1.15}
   .lead{margin-block:16px}
@@ -116,14 +119,11 @@
   .trustItem small{font-size:.875rem}
   .programme{padding:20px}
   .timeline div{padding:20px}
-  .formColumn{scroll-margin-top:145px}
+  .formColumn{scroll-margin-top:95px}
 }
 @media(max-width:479px){
   .trustGrid,.programmes,.timeline{grid-template-columns:1fr}
   .timeline div+div{border-left:0;border-top:1px solid var(--line)}
-  .headerInner{justify-content:center}
-  .identity{width:100%;justify-content:space-between}
-  .headerActions{margin-left:0}
   .photoNote{position:static;border-radius:0;padding:10px 12px}
   .teamCards{grid-template-columns:1fr}
 }
