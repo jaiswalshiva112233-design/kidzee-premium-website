@@ -63,7 +63,7 @@ try {
   const routes = ["/admissions", "/landing/" + slug];
 
   for (const route of routes) {
-    for (const width of [320, 390, 768, 1440]) {
+    for (const width of [320, 360, 390, 430, 768, 1440]) {
       const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce" });
       const page = await context.newPage();
       await page.addInitScript(() => {
@@ -123,6 +123,18 @@ try {
       });
       for (const [name,size] of Object.entries(readability.sizes)) assert.ok(size>=16, name + ' must be at least 16px: ' + size);
       assert.deepEqual(readability.smallText, [], 'Supporting text must be at least 14px: ' + JSON.stringify(readability.smallText));
+      if (width < 768) {
+        const header = await page.locator('header').boundingBox();
+        const logo = await page.locator('header img[alt="Kidzee"]').boundingBox();
+        const phoneLink = page.locator('header a[href^="tel:"]');
+        const phone = await phoneLink.boundingBox();
+        assert.ok(header.height<=80, 'Mobile header must remain a compact single row: '+header.height);
+        assert.ok(Math.abs((logo.y+logo.height/2)-(phone.y+phone.height/2))<=2, 'Logo and phone must align on the same row');
+        assert.ok(logo.x+logo.width+8<=phone.x, 'Logo and phone must not overlap');
+        assert.ok(phone.height>=44, 'Phone must retain a usable tap target');
+        assert.ok(await phoneLink.locator('span').isVisible(), 'Full phone number must remain visible on phones');
+        assert.match(await phoneLink.getAttribute('href'), /^tel:\+/);
+      }
       assert.equal(await page.locator('#reviews').count(), 1, 'Existing reviews sitelink has a real target');
       const brokenLocalLinks = await page.locator('a[href^="#"]').evaluateAll(links => links.map(link=>link.getAttribute('href')).filter(href => href.length > 1 && !document.getElementById(decodeURIComponent(href.slice(1)))));
       assert.deepEqual(brokenLocalLinks, [], 'In-page CTA and asset anchors must exist');
@@ -137,10 +149,17 @@ try {
       await page.screenshot({ path: output + "/" + (route.includes("landing") ? "ads" : "admissions") + "-" + width + ".png", fullPage: true });
       await page.screenshot({ path: output + "/" + (route.includes("landing") ? "ads" : "admissions") + "-" + width + "-viewport.png" });
       if (width === 390) {
-        await page.evaluate(() => { document.documentElement.style.fontSize='200%'; });
+        const largeTextStyle = await page.addStyleTag({content:'html { font-size:200% !important; }'});
+        const enlargedRatioSize = () => page.locator('ul[aria-label="Preschool benefits"] li').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize));
+        await page.waitForFunction(() => parseFloat(getComputedStyle(document.querySelector('ul[aria-label="Preschool benefits"] li')).fontSize)>=32, null, {timeout:5000}).catch(async error => {
+          const diagnostics=await page.evaluate(()=>({rootFont:getComputedStyle(document.documentElement).fontSize,ratioFont:getComputedStyle(document.querySelector('ul[aria-label="Preschool benefits"] li')).fontSize,styles:[...document.querySelectorAll('style')].map(el=>el.textContent).filter(text=>text.includes('200%'))}));
+          throw new Error('Large-text style did not settle: '+JSON.stringify(diagnostics),{cause:error});
+        });
+        assert.ok(await enlargedRatioSize()>=32, 'Large-text check must actually render the 16px ratio text at double size');
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, 'Larger text must reflow without horizontal scrolling: ' + route);
         await page.screenshot({path:output + '/' + (route.includes('landing') ? 'ads' : 'admissions') + '-390-large-text.png'});
-        await page.evaluate(() => { document.documentElement.style.removeProperty('font-size'); });
+        assert.ok(await enlargedRatioSize()>=32, 'Large-text screenshot must retain the enlarged size');
+        await largeTextStyle.evaluate(el=>el.remove());
       }
       if (route.includes("landing") && (width === 390 || width === 1440)) {
         const screenshot = await page.screenshot();
@@ -159,7 +178,7 @@ try {
       await page.getByText("How does the January start work?", { exact: true }).click();
       assert.ok(await page.getByText(/Tuition Begins in March/).first().isVisible());
       assert.deepEqual(errors, [], "Browser errors at " + route);
-      results.push({ route, width, layout: "pass", images: "pass", navigation: "pass", readability: "pass", fontSizes: readability.sizes });
+      results.push({ route, width, layout: "pass", images: "pass", navigation: "pass", readability: "pass", mobileHeader: width<768?'pass':'desktop unchanged', fontSizes: readability.sizes });
       await context.close();
     }
   }
@@ -395,7 +414,7 @@ try {
     results.push({ otherManagedContent: "pass", otherManagedVariantAttribution: "pass", otherFullForm: "pass" });
   }
   await writeFile(output + "/verification.json", JSON.stringify(results, null, 2));
-  console.log("Admissions browser verification passed: 8 responsive layouts, image loading, visit links, form validation, CentreOS persistence, attribution and retry deduplication.");
+  console.log("Admissions browser verification passed: 12 responsive layouts, compact single-row mobile headers, image loading, visit links, form validation, CentreOS persistence, attribution and retry deduplication.");
 } catch (error) {
   console.error("ADMISSIONS_BROWSER_ERROR: " + (error?.stack || error));
   console.error("ADMISSIONS_TEST_SERVER: " + logs.slice(-8000));
