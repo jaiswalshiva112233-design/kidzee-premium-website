@@ -31,6 +31,7 @@ import AdmissionForm from "@/components/AdmissionForm";
 import type { WebsiteTeamMember } from "@/lib/sanity/team";
 import AdmissionsCampaign from "@/components/admissions/AdmissionsCampaign";
 import { ADMISSIONS_CAMPAIGN_SLUG } from "@/lib/website/admissionsCampaign";
+import { ADMISSIONS_SESSION, preschoolHoursSummary, earlyStartOffer } from "@/lib/website/admissionsSession";
 import CareerApplicationForm from "@/components/careers/CareerApplicationForm";
 import { useSiteContact } from "@/components/SiteContactProvider";
 
@@ -201,8 +202,8 @@ const faqs = [
     a: "You get the best of both worlds: The national credibility and research-backed Péntemind curriculum of India's largest preschool network (2,000+ centres), combined with our Sector 12 centre's adult-child ratios of 1:8 for Playgroup and 1:10 for Nursery to UKG, 24/7 CCTV, and extended daycare till 7 PM.",
   },
   {
-    q: "What is the 30% Annual Fee Offer for Playgroup and Nursery?",
-    a: "For the academic session 2026–27, we are offering a flat 30% discount on the annual fee for Playgroup and Nursery admissions when you book a campus visit through this page.",
+    q: "What is the Early Start Advantage?",
+    a: earlyStartOffer.introduction + " 30% Off Annual Charges, January settling-in, Tuition Begins in March and Summer Camp Included. Eligibility and terms are confirmed by the centre.",
   },
   {
     q: "What is the adult-child ratio at Kidzee Sector 12 Dwarka?",
@@ -210,7 +211,7 @@ const faqs = [
   },
   {
     q: "What are the school and daycare timings?",
-    a: "Preschool operates from 8:30 AM to 1:00 PM (Monday to Friday). Extended daycare operates from 12:30 PM to 7:00 PM (Monday to Saturday) with freshly cooked warm meals and dedicated rest areas.",
+    a: `${preschoolHoursSummary}, Monday to Friday. Daycare operates from 12:30 PM to 7:00 PM, Monday to Saturday. Ask the centre about optional meals and the daily routine.`,
   },
   {
     q: "Is there a trial period available before final admission?",
@@ -385,7 +386,7 @@ function ManagedLandingPageExperience({
           <span>🎉</span>
           <span>
             {content.offerText ||
-              "Limited Time Offer: Flat 30% Off Annual Fee on Playgroup & Nursery Admissions (2026–27) | Complimentary 3-Day Trial"}
+              `Early Start Advantage ${ADMISSIONS_SESSION}: 30% Off Annual Charges · Tuition Begins in March · Summer Camp Included. Terms apply.`}
           </span>
         </span>
       </div>
@@ -443,10 +444,10 @@ function ManagedLandingPageExperience({
 
             <p className="text-base sm:text-lg leading-relaxed text-gray-700 font-medium">
               {content.description ||
-                "Admissions open for Playgroup, Nursery, Junior KG & Senior KG (2026–27). Adult-child ratio: Playgroup 1:8; Nursery to UKG 1:10. Air-conditioned activity rooms, and extended daycare till 7:00 PM with fresh warm meals."}
+                `Admissions open for Playgroup, Nursery, Junior KG & Senior KG (${ADMISSIONS_SESSION}). Adult-child ratio: Playgroup 1:8; Nursery to UKG 1:10. Explore our classrooms and afternoon daycare until 7:00 PM.`}
             </p>
 
-            {/* Admissions 2026-27 Trust Highlights */}
+            {/* Preschool programme highlights */}
             <div className="flex flex-wrap items-center gap-2 pt-1 text-xs font-bold text-[#5B2A86]">
               <span className="rounded-full bg-purple-50 border border-purple-200 px-3 py-1">✓ Playgroup (2 – 3 Years)</span>
               <span className="rounded-full bg-purple-50 border border-purple-200 px-3 py-1">✓ Nursery (3 – 4 Years)</span>
@@ -538,7 +539,7 @@ function ManagedLandingPageExperience({
               <AdmissionForm
                 title="Book Campus Visit & Claim 30% Off"
                 subtitle="Experience classrooms, meet educators, and claim 30% off annual fee."
-                badgeText="Admissions Desk 2026–27"
+                badgeText={`Admissions Desk ${ADMISSIONS_SESSION}`}
                 submitButtonText="Book Campus Visit & Claim 30% Off"
                 initialProgramme={
                   content.programme || (page.pageType === "DAYCARE" ? "DAYCARE" : "")
@@ -1078,7 +1079,8 @@ function ManagedLandingPageExperience({
                   <div>
                     <h3 className="text-sm font-bold text-gray-900">Admissions & Visit Hours</h3>
                     <p className="mt-1 text-xs text-gray-600">
-                      Monday to Saturday: <span className="font-bold text-gray-900">8:30 AM – 6:30 PM</span>
+                      Preschool, Monday–Friday: <span className="font-bold text-gray-900">{preschoolHoursSummary}</span>
+                      <br />Daycare, Monday–Saturday: <span className="font-bold text-gray-900">12:30 PM–7:00 PM</span>
                     </p>
                   </div>
                 </div>
@@ -1157,7 +1159,7 @@ function ManagedLandingPageExperience({
               Kidzee Preschool & Daycare — Building No. 19, Sector 12B, Dwarka, New Delhi 110078
             </p>
             <p className="text-[11px] text-purple-400">
-              *Flat 30% discount applies to annual fees for Playgroup & Nursery admissions for Academic Session 2026–27.
+              *Early Start Advantage applies to eligible preschool enrolments for {ADMISSIONS_SESSION}. Confirm all terms and joining arrangements with the centre.
             </p>
             <div className="flex justify-center gap-4 pt-2 text-[11px] text-purple-300">
               <Link href="/privacy-policy" className="underline hover:text-white">

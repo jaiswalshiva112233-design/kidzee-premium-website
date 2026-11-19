@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 
 import { sanityServerClient } from "@/lib/sanity/serverClient";
+import { ADMISSIONS_SESSION } from "@/lib/website/admissionsSession";
 
 export type WebsiteContentSettings = {
   academicYear: string;
@@ -30,16 +31,16 @@ export type WebsiteContentSettings = {
 };
 
 export const defaultWebsiteContentSettings: WebsiteContentSettings = {
-  academicYear: "2026–27",
+  academicYear: ADMISSIONS_SESSION,
   admissionsOpen: true,
   homeHeroAutoRotate: true,
   homeHeroRotationSeconds: 5,
   homeHeroHeading: "Kidzee Preschool & Daycare in",
   homeHeroHighlight: "Sector 12, Dwarka.",
   homeHeroLead:
-    "Playgroup to Senior KG for children aged 2–6 years, with trusted daycare support until 7:00 PM.",
+    "A caring first school for ages 2–6, from Playgroup to Senior KG. Explore admissions for 2027–28 and afternoon daycare until 7:00 PM.",
   homeHeroSupport:
-    "Children learn through stories, conversation, movement, art and play, supported by teachers who help them settle at their own pace.",
+    "See how stories, movement, art and everyday play fit into your child's day. Visit the classrooms, meet the team and talk through settling-in before you decide.",
   aboutHeroHeading: "A preschool where children feel known and",
   aboutHeroHighlight: "ready to grow.",
   aboutHeroIntro:
@@ -55,7 +56,7 @@ export const defaultWebsiteContentSettings: WebsiteContentSettings = {
   admissionsHeroHeading:
     "Preschool admissions, made simpler for your family.",
   admissionsHeroIntro:
-    "Tell us what you are looking for, visit the centre and meet the team before you decide. We will help you understand the right programme and the next steps without rushing you.",
+    "Planning your child's first school or their next step? Explore 2027–28 admissions, compare programmes and meet the centre team before deciding. We will guide you through availability, settling-in and enrolment.",
   primaryCtaLabel: "Book a School Visit",
   secondaryCtaLabel: "Call Admissions",
   updatedAt: null,

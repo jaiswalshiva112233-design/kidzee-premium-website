@@ -17,6 +17,7 @@ import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
 import { useSiteContact } from "@/components/SiteContactProvider";
 import { programmes } from "@/lib/site";
+import { preschoolProgrammeHours } from "@/lib/website/admissionsSession";
 
 const quickLinks = [
   { href: "/about", label: "About" },
@@ -302,7 +303,11 @@ export default function Footer() {
                       Preschool:
                     </span>
                     <br />
-                    {site.preschoolHours.display}
+                    Playgroup &amp; Nursery: {preschoolProgrammeHours.playgroup}
+                    <br />
+                    Junior &amp; Senior KG: {preschoolProgrammeHours.juniorKg}
+                    <br />
+                    {site.preschoolHours.days}
                   </p>
 
                   <p className="!text-white/75">

@@ -1,5 +1,6 @@
 import { getWebsiteContactSettings } from "@/lib/sanity/contactSettings";
 import { buildSiteContact } from "@/lib/siteContact";
+import { preschoolProgrammeHours } from "@/lib/website/admissionsSession";
 import {
   Clock3,
   MapPin,
@@ -17,8 +18,12 @@ export default async function Location() {
   );
   const timings = [
     {
-      label: "Preschool",
-      value: `${site.preschoolHours.days}, ${site.preschoolHours.display}`,
+      label: "Playgroup & Nursery",
+      value: `${site.preschoolHours.days}, ${preschoolProgrammeHours.playgroup}`,
+    },
+    {
+      label: "Junior & Senior KG",
+      value: `${site.preschoolHours.days}, ${preschoolProgrammeHours.juniorKg}`,
     },
     {
       label: "Daycare",

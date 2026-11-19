@@ -17,6 +17,7 @@ import {
 import { getWebsiteContactSettings } from "@/lib/sanity/contactSettings";
 import { buildWebsitePageMetadata } from "@/lib/sanity/seo";
 import { buildSiteContact } from "@/lib/siteContact";
+import { preschoolHoursSummary } from "@/lib/website/admissionsSession";
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildWebsitePageMetadata({
@@ -272,7 +273,7 @@ export default async function ContactPage() {
                           <div className="flex items-start justify-between gap-4 border-b border-yellow-200 pb-3">
                             <span className="text-slate-600">Preschool</span>
                             <span className="text-right font-black text-slate-950">
-                              8:30 AM–1:00 PM
+                              {preschoolHoursSummary}
                             </span>
                           </div>
 

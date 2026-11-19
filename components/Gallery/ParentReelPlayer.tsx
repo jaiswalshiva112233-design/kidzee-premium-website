@@ -46,6 +46,18 @@ export default function ParentReelPlayer({
   const [muted, setMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [playbackError, setPlaybackError] = useState(false);
+
+  async function playVideo(video: HTMLVideoElement) {
+    setPlaybackError(false);
+    try {
+      await video.play();
+      setStarted(true);
+    } catch {
+      setPlaying(false);
+      setPlaybackError(true);
+    }
+  }
 
   function syncDuration(video: HTMLVideoElement) {
     if (Number.isFinite(video.duration) && video.duration > 0) {
@@ -66,8 +78,8 @@ export default function ParentReelPlayer({
     }
 
     if (video.paused) {
-      setStarted(true);
-      await video.play();
+      if (video.error) video.load();
+      await playVideo(video);
     } else {
       video.pause();
     }
@@ -82,8 +94,7 @@ export default function ParentReelPlayer({
 
     video.currentTime = 0;
     setEnded(false);
-    setStarted(true);
-    void video.play();
+    void playVideo(video);
   }
 
   function toggleMute() {
@@ -127,6 +138,7 @@ export default function ParentReelPlayer({
           setEnded(false);
         }}
         onPause={() => setPlaying(false)}
+        onError={() => { setPlaying(false); setPlaybackError(true); }}
         onTimeUpdate={(event) => {
           syncDuration(event.currentTarget);
           setCurrentTime(event.currentTarget.currentTime);
@@ -182,6 +194,15 @@ export default function ParentReelPlayer({
           </span>
         )}
       </button>
+
+      {playbackError ? (
+        <div role="status" className="absolute inset-x-4 bottom-24 z-20 rounded-2xl bg-[#281034]/95 p-4 text-base leading-6 text-white">
+          <p>This video could not play here. Tap play to retry, or open it directly.</p>
+          <a href={src} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center font-bold text-[#F6C84B] underline underline-offset-4">
+            Open video in a new tab
+          </a>
+        </div>
+      ) : null}
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4 sm:p-5">
         <div className="pointer-events-auto flex items-end justify-between gap-3">

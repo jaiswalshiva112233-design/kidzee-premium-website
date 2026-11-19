@@ -251,7 +251,7 @@ export default async function Daycare() {
                   </p>
 
                   <h3 className="mt-2 text-2xl font-black text-[#281034]">
-                    Monday to Saturday
+                    Monday to Friday
                   </h3>
                 </div>
 

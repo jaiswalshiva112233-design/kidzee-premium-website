@@ -2,6 +2,7 @@ import {
   VERIFIED_FULL_CENTRE_ADDRESS,
   VERIFIED_SHORT_CENTRE_ADDRESS,
 } from "@/lib/centreAddress";
+import { ADMISSIONS_SESSION, preschoolProgrammeHours } from "@/lib/website/admissionsSession";
 
 const phoneNumber = "919667038673";
 
@@ -82,9 +83,9 @@ export const site = {
 
   preschoolHours: {
     days: "Monday to Friday",
-    opens: "08:30",
+    opens: "09:30",
     closes: "13:00",
-    display: "8:30 AM–1:00 PM",
+    display: "9:30 AM–1:00 PM (programme timings vary)",
   },
 
   daycareHours: {
@@ -107,7 +108,7 @@ export const site = {
   },
 
   admissions: {
-    academicYear: "2026–27",
+    academicYear: ADMISSIONS_SESSION,
     primaryAction: "Book a School Visit",
     secondaryAction: "Call Admissions",
   },
@@ -121,7 +122,7 @@ export const programmes = [
     age: "2–3 years",
     minimumAge: 2,
     maximumAge: 3,
-    time: "9:30 AM–12:30 PM",
+    time: preschoolProgrammeHours.playgroup,
     image: "/images/programmes/playgroup.jpg",
     intro:
       "A warm first-school experience where children become comfortable with routines, teachers, classmates and learning through play.",
@@ -138,7 +139,7 @@ export const programmes = [
     age: "3–4 years",
     minimumAge: 3,
     maximumAge: 4,
-    time: "9:30 AM–12:30 PM",
+    time: preschoolProgrammeHours.nursery,
     image: "/images/programmes/nursery.jpg",
     intro:
       "A playful, purposeful programme that develops communication, curiosity, independence and early literacy and number readiness.",
@@ -155,7 +156,7 @@ export const programmes = [
     age: "4–5 years",
     minimumAge: 4,
     maximumAge: 5,
-    time: "9:30 AM–1:00 PM",
+    time: preschoolProgrammeHours.juniorKg,
     image: "/images/programmes/junior-kg.jpg",
     intro:
       "A structured but engaging stage that strengthens reading readiness, writing practice, number understanding and independent thinking.",
@@ -172,7 +173,7 @@ export const programmes = [
     age: "5–6 years",
     minimumAge: 5,
     maximumAge: 6,
-    time: "9:30 AM–1:00 PM",
+    time: preschoolProgrammeHours.seniorKg,
     image: "/images/programmes/senior-kg.jpg",
     intro:
       "A school-readiness programme that builds stronger academic foundations, communication, independence and confidence for primary school.",
