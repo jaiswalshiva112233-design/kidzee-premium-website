@@ -151,7 +151,7 @@ try {
       if (width === 390) {
         const largeTextStyle = await page.addStyleTag({content:'html { font-size:200% !important; }'});
         const enlargedRatioSize = () => page.locator('ul[aria-label="Preschool benefits"] li').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize));
-        await page.waitForFunction(() => parseFloat(getComputedStyle(document.querySelector('ul[aria-label="Preschool benefits"] li')).fontSize)>=32, {timeout:5000}).catch(async error => {
+        await page.waitForFunction(() => parseFloat(getComputedStyle(document.querySelector('ul[aria-label="Preschool benefits"] li')).fontSize)>=32, null, {timeout:5000}).catch(async error => {
           const diagnostics=await page.evaluate(()=>({rootFont:getComputedStyle(document.documentElement).fontSize,ratioFont:getComputedStyle(document.querySelector('ul[aria-label="Preschool benefits"] li')).fontSize,styles:[...document.querySelectorAll('style')].map(el=>el.textContent).filter(text=>text.includes('200%'))}));
           throw new Error('Large-text style did not settle: '+JSON.stringify(diagnostics),{cause:error});
         });
