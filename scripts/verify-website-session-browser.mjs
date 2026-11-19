@@ -12,6 +12,16 @@ async function prepareScreenshots(page) {
   await page.waitForTimeout(400);
 }
 
+async function waitForImages(page) {
+  await page.evaluate(()=>document.querySelectorAll('img').forEach(img=>{img.loading='eager';}));
+  // A viewport resize can replace currentSrc after decode() has started. Wait for
+  // the selected responsive resource, not a cancelled decode of the prior size.
+  await page.waitForFunction(()=>[...document.images].every(img=>img.complete&&img.naturalWidth>0),null,{timeout:30000}).catch(async error=>{
+    const failed=await page.locator('img').evaluateAll(images=>images.filter(img=>!img.complete||!img.naturalWidth).map(img=>({src:img.currentSrc||img.src,complete:img.complete,width:img.naturalWidth})));
+    throw new Error('Responsive images did not load: '+JSON.stringify(failed),{cause:error});
+  });
+}
+
 export async function verifyWebsiteSession({browser,chromium,pool,origin,output,results}) {
   for (const width of [320,360,390,430,768,1440]) {
     const context=await browser.newContext({viewport:{width,height:900}});
@@ -40,10 +50,7 @@ export async function verifyWebsiteSession({browser,chromium,pool,origin,output,
       assert.equal(await page.getByRole('dialog',{name:'Mobile navigation'}).count(),0);
       assert.equal(await page.evaluate(()=>document.body.style.overflow),'');
     }
-    await page.evaluate(async()=>{
-      document.querySelectorAll('img').forEach(img=>{img.loading='eager';});
-      await Promise.all([...document.images].map(img=>img.decode().catch(()=>{})));
-    });
+    await waitForImages(page);
     assert.deepEqual(await page.locator('img').evaluateAll(images=>images.filter(img=>!img.complete||!img.naturalWidth).map(img=>img.src)),[]);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'Website admissions overflow at '+width);
     await prepareScreenshots(page);
@@ -130,10 +137,7 @@ export async function verifyWebsiteSession({browser,chromium,pool,origin,output,
     if(!['/privacy-policy','/terms'].includes(route))assert.doesNotMatch(await page.locator('main').innerText(),/2026[–-]27|8:30 AM/);
     for(const width of [320,768,1440]) {
       await page.setViewportSize({width,height:900});
-      await page.evaluate(async()=>{
-        document.querySelectorAll('img').forEach(img=>{img.loading='eager';});
-        await Promise.all([...document.images].map(img=>img.decode().catch(()=>{})));
-      });
+      await waitForImages(page);
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,route+' overflow at '+width);
       assert.deepEqual(await page.locator('img').evaluateAll(images=>images.filter(img=>!img.complete||!img.naturalWidth).map(img=>img.src)),[],route+' images');
       await prepareScreenshots(page);
