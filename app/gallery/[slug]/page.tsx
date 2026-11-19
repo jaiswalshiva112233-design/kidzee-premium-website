@@ -28,6 +28,7 @@ import {
   getPublishedGalleryAlbums,
 } from "@/lib/sanity/gallery";
 import { site } from "@/lib/site";
+import { conciseMetaDescription } from "@/lib/website/metaDescription";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +45,7 @@ function cleanDescription(value: string) {
     return "See approved photographs and short videos from learning, play and centre life at Kidzee Preschool & Daycare, Sector 12 Dwarka.";
   }
 
-  return description.slice(0, 155);
+  return conciseMetaDescription(description);
 }
 
 export async function generateMetadata({

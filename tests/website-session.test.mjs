@@ -3,7 +3,14 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { ADMISSIONS_SESSION, preschoolProgrammeHours, earlyStartOffer } from '../lib/website/admissionsSession.ts';
 import { isIndexableLandingContent } from '../lib/website/landingIndexing.ts';
+import { conciseMetaDescription } from '../lib/website/metaDescription.ts';
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
+
+test('gallery search summaries end on readable words and preserve short descriptions', () => {
+  assert.equal(conciseMetaDescription('  A short\n description. '), 'A short description.');
+  assert.equal(conciseMetaDescription('Our children celebrate a joyful morning', 25), 'Our children celebrate a…');
+  assert.ok(conciseMetaDescription('a'.repeat(300)).length<=155);
+});
 
 test('confirmed next-session hours and offer remain programme-specific', () => {
   assert.equal(ADMISSIONS_SESSION, '2027–28');

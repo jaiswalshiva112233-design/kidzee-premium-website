@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
     path: "/programmes",
     title: "Preschool Programmes",
     description:
-      "Explore Playgroup, Nursery, Junior KG and Senior KG programmes at Kidzee Sector 12, Dwarka. Compare age groups, learning goals, meals and school readiness for children aged 2 to 6 years.",
+      "Compare Playgroup, Nursery and KG for ages 2–6 at Kidzee Sector 12, Dwarka. Explore timings, adult-child ratios, play-based learning and school readiness.",
     keywords: [
       "preschool programmes in Dwarka",
       "Playgroup in Sector 12 Dwarka",

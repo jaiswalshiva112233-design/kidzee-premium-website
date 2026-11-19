@@ -316,6 +316,7 @@ export default async function AdmissionsPage({
 
               <AdmissionForm
                 badgeText={`Admissions ${ADMISSIONS_SESSION}`}
+                autoOpenWhatsApp={false}
                 initialProgramme={initialProgramme}
                 initialEnquiryType={initialEnquiryType}
               />
