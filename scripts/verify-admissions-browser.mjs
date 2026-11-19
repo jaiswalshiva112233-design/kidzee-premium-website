@@ -149,10 +149,13 @@ try {
       await page.screenshot({ path: output + "/" + (route.includes("landing") ? "ads" : "admissions") + "-" + width + ".png", fullPage: true });
       await page.screenshot({ path: output + "/" + (route.includes("landing") ? "ads" : "admissions") + "-" + width + "-viewport.png" });
       if (width === 390) {
-        await page.evaluate(() => { document.documentElement.style.fontSize='200%'; });
+        const largeTextStyle = await page.addStyleTag({content:'html { font-size:200% !important; }'});
+        const enlargedRatioSize = () => page.locator('ul[aria-label="Preschool benefits"] li').first().evaluate(el=>parseFloat(getComputedStyle(el).fontSize));
+        assert.ok(await enlargedRatioSize()>=32, 'Large-text check must actually render the 16px ratio text at double size');
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, 'Larger text must reflow without horizontal scrolling: ' + route);
         await page.screenshot({path:output + '/' + (route.includes('landing') ? 'ads' : 'admissions') + '-390-large-text.png'});
-        await page.evaluate(() => { document.documentElement.style.removeProperty('font-size'); });
+        assert.ok(await enlargedRatioSize()>=32, 'Large-text screenshot must retain the enlarged size');
+        await largeTextStyle.evaluate(el=>el.remove());
       }
       if (route.includes("landing") && (width === 390 || width === 1440)) {
         const screenshot = await page.screenshot();
