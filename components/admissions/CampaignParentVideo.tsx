@@ -40,7 +40,7 @@ function ReviewPlayer({ review, number }: { review: CampaignParentReview; number
           controls playsInline preload="none" tabIndex={0} aria-label={title} onError={() => setFailed(true)}>
           Your browser cannot play this video.
         </video>}
-      {failed ? <p className={styles.failure} role="status">The video could not load. Please try another review or open the original below.</p> : null}
+      {failed ? <div className={styles.failure} role="status">The video could not load. Please try another review or open the original below.</div> : null}
     </div>
     {started ? <div className={styles.fallback}>
       {external ? "Video not loading? " : "Prefer a separate player? "}
