@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getPublishedWebsiteTeamMembers } from "@/lib/sanity/team";
+import { getPublishedGalleryAlbumBySlug } from "@/lib/sanity/gallery";
+import { getCampaignParentReviews, PARENT_REVIEW_ALBUM_SLUG } from "@/lib/website/parentReviews";
 import LandingPageExperience from "@/components/growth/LandingPageExperience";
 import AdmissionsCampaign from "@/components/admissions/AdmissionsCampaign";
 import { ADMISSIONS_CAMPAIGN_SLUG, ADMISSIONS_CAMPAIGN_TITLE, ADMISSIONS_CAMPAIGN_DESCRIPTION, ADMISSIONS_CAMPAIGN_IMAGE, getAdmissionsEnquiry } from "@/lib/website/admissionsCampaign";
@@ -38,8 +40,8 @@ export default async function ManagedLandingPage({ params, searchParams }: { par
   const page = await pageData(slug);
   if (!page) notFound();
   if (slug === ADMISSIONS_CAMPAIGN_SLUG) {
-    const [query, teamMembers] = await Promise.all([searchParams, getPublishedWebsiteTeamMembers()]);
-    return <AdmissionsCampaign landingPageId={page.id} teamMembers={teamMembers} {...getAdmissionsEnquiry(query)} />;
+    const [query, teamMembers, reviewAlbum] = await Promise.all([searchParams, getPublishedWebsiteTeamMembers(), getPublishedGalleryAlbumBySlug(PARENT_REVIEW_ALBUM_SLUG)]);
+    return <AdmissionsCampaign landingPageId={page.id} teamMembers={teamMembers} parentReviewVideos={getCampaignParentReviews(reviewAlbum?.media)} {...getAdmissionsEnquiry(query)} />;
   }
   return (
     <LandingPageExperience

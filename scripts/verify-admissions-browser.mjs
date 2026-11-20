@@ -5,6 +5,7 @@ import path from "node:path";
 import { Pool } from "pg";
 import sharp from "sharp";
 import { verifyWebsiteSession } from "./verify-website-session-browser.mjs";
+import { verifyParentReviews } from "./verify-parent-reviews-browser.mjs";
 const { chromium } = await import(process.env.ADMISSIONS_PLAYWRIGHT_MODULE || "playwright");
 
 const origin = "http://127.0.0.1:3100";
@@ -295,17 +296,7 @@ try {
     assert.equal(savedFees.status(), 201);
     assert.equal(savedFees.request().postDataJSON().enquiryType, 'CALLBACK');
     await page.getByRole('heading', { name: 'Thank you. We have your enquiry.' }).waitFor();
-    assert.equal(await page.locator('video').count(), 1, 'Only the owner-confirmed parent video belongs on the campaign');
-    assert.equal(await page.locator('video').getAttribute('preload'), 'none');
-    assert.equal(await page.locator('video').getAttribute('src'), null);
-    await page.getByRole('button', {name: /Watch a parent.s experience/}).click();
-    await page.waitForFunction(() => {
-      const video = document.querySelector('video');
-      return video && !video.paused && video.currentTime > 0.2 && video.videoWidth > 0;
-    }, null, {timeout: 30000});
-    assert.equal(await page.locator('video').getAttribute('src'), '/videos/parent-reviews-dwarka-sec12.mp4');
-    await page.locator('video').evaluate(video => video.pause());
-    assert.equal(await page.locator('video').evaluate(video => video.paused), true);
+    assert.equal(await page.locator('[data-parent-reviews]').count(), 0, 'An unavailable CMS must not fabricate reviews; fixture tests cover published videos');
     // Block external map networking: verify the real configured source without sending a test conversion.
     await page.route('https://www.google.com/maps**', route => route.fulfill({status:200,contentType:'text/html',body:'<p>Map test fixture</p>'}));
     await page.getByRole('button', {name: /Show centre on Google Maps/}).click();
@@ -316,7 +307,7 @@ try {
     assert.ok(await page.getByText(/including families completing admission in December 2026/).count() > 0);
     await context.close();
     await mediaBrowser.close();
-    results.push({ videoBrowser: "Google Chrome", expandedDetails: "pass", legacyFeeQueryMapsToCallback: "pass", noPublicPricing: "pass", testimonialVideo: "owner-confirmed asset; click-to-load, playback and pause pass", map: "click-to-load and directions pass", decemberEligibility: "pass" });
+    results.push({ expandedDetails: "pass", legacyFeeQueryMapsToCallback: "pass", noPublicPricing: "pass", unavailableReviewAlbum: "safe fallback to written reviews", map: "click-to-load and directions pass", decemberEligibility: "pass" });
   }
   {
     const context = await browser.newContext({viewport:{width:390,height:844}});
@@ -328,15 +319,13 @@ try {
     await page.route('https://www.google.com/maps**', route => route.fulfill({status:200,contentType:'text/html',body:'<p>Map test fixture</p>'}));
     await page.goto(origin+'/landing/'+slug, {waitUntil:'networkidle'});
     assert.deepEqual(mediaRequests, [], 'Neither the large video nor Google Maps should load on arrival');
-    await page.getByRole('button', {name:/Watch a parent.s experience/}).click();
-    await page.getByRole('status').filter({hasText:'The video could not load'}).waitFor();
-    assert.ok(await page.getByRole('link', {name:'open the original video'}).isVisible());
     await page.getByRole('button', {name:/Show centre on Google Maps/}).click();
     await page.getByTitle('Google Map: Kidzee Sector 12 Dwarka').waitFor();
     assert.equal(await page.evaluate(() => window.__admissionsEvents.filter(event => ['FORM_SUBMITTED','WHATSAPP_CLICK'].includes(event.eventType)).length), 0, 'Video and map interactions are not leads');
     await context.close();
-    results.push({mediaOnArrival:'none',videoFailureFallback:'pass',mapAndVideoDoNotCreateLeads:'pass'});
+    results.push({mediaOnArrival:'none',mapDoesNotCreateLeads:'pass'});
   }
+  results.push(...await verifyParentReviews({ chromium, origin, output }));
   for (const [index, route] of routes.entries()) {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
