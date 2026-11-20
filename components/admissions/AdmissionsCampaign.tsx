@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, CalendarCheck, Check, Heart, MapPin, MessageCircle, Phone, Sun, Users, Utensils } from "lucide-react";
 import AdmissionForm from "@/components/AdmissionForm";
 import CampaignParentVideo from "./CampaignParentVideo";
+import type { CampaignParentReview } from "@/lib/website/parentReviews";
 import CampaignMap from "./CampaignMap";
 import { useSiteContact } from "@/components/SiteContactProvider";
 import styles from "./AdmissionsCampaign.module.css";
@@ -15,6 +16,7 @@ import { admissionsCampaignFaqs, campaignPortraitUrl } from "@/lib/website/admis
 
 type AdmissionsCampaignProps = {
   teamMembers?: WebsiteTeamMember[];
+  parentReviewVideos?: CampaignParentReview[];
   initialProgramme?: string;
   initialEnquiryType?: string;
   landingPageId?: string;
@@ -36,6 +38,7 @@ const parentReviews = [
 
 export default function AdmissionsCampaign({
   teamMembers = [],
+  parentReviewVideos = [],
   initialProgramme = "",
   initialEnquiryType = "SCHOOL_VISIT",
   landingPageId = "",
@@ -203,10 +206,10 @@ export default function AdmissionsCampaign({
               <div id="reviews" style={{scrollMarginTop:100}}><p className={styles.eyebrow}>From families at our centre</p><h2 className={styles.heading}>Parents notice the everyday things.</h2></div>
               <a href={reviewsUrl} target="_blank" rel="noopener noreferrer" className={styles.termsLink}>Read current Google reviews <ArrowRight size={14} aria-hidden="true" /></a>
             </div>
-            <div className={styles.parentStory}>
-              <CampaignParentVideo />
-              <div><h3>Hear a parent&apos;s experience.</h3><p>See what a family at our centre has to share. Then visit with your child, meet our team and ask the questions that matter to you.</p><a href="#admission-enquiry" onClick={() => chooseEnquiry("SCHOOL_VISIT")} className={styles.button + " " + styles.secondary}>Meet the Team <ArrowRight size={16} aria-hidden="true" /></a></div>
-            </div>
+            {parentReviewVideos.length > 0 ? <div className={styles.parentStory}>
+              <CampaignParentVideo reviews={parentReviewVideos} />
+              <div><h3>Real parents. Their own words.</h3><p>Choose a review to hear a family&apos;s experience at our centre. Then visit with your child, meet our team and ask the questions that matter to you.</p><a href="#admission-enquiry" onClick={() => chooseEnquiry("SCHOOL_VISIT")} className={styles.button + " " + styles.secondary}>Meet the Team <ArrowRight size={16} aria-hidden="true" /></a></div>
+            </div> : null}
             <div className={styles.quotes}>
               {parentReviews.map((review) => (
                 <figure className={styles.quote} key={review.name}>

@@ -332,6 +332,7 @@ function refreshGalleryPages() {
   revalidatePath("/");
   revalidatePath("/gallery");
   revalidatePath("/gallery/[slug]", "page");
+  revalidatePath("/landing/preschool-admissions-dwarka-sector-12");
   revalidatePath("/admin/website/gallery");
 }
 
