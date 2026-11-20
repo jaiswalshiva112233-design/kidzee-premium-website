@@ -6,6 +6,12 @@ import { Play } from "lucide-react";
 import type { CampaignParentReview } from "@/lib/website/parentReviews";
 import styles from "./CampaignParentVideo.module.css";
 
+// Gallery uploads already have compressed web/thumbnail variants. Serve these
+// directly, matching the site's uploaded-photo delivery, not a second optimiser.
+function isPreparedGalleryImage(source: string) {
+  return source.startsWith("https://firebasestorage.googleapis.com/") || source.startsWith("https://storage.googleapis.com/");
+}
+
 function ReviewPlayer({ review, number }: { review: CampaignParentReview; number: number }) {
   const video = useRef<HTMLVideoElement>(null);
   const [started, setStarted] = useState(false);
@@ -29,7 +35,7 @@ function ReviewPlayer({ review, number }: { review: CampaignParentReview; number
   return <>
     <div className={styles.player}>
       {!started ? <button type="button" className={styles.poster} onClick={play} aria-label={`Play parent review ${number}`}>
-        {!posterFailed ? <Image src={review.poster} alt="" fill sizes="(max-width: 767px) calc(100vw - 32px), 420px" className={styles.posterImage} onError={() => setPosterFailed(true)} /> : null}
+        {!posterFailed ? <Image src={review.poster} alt="" fill unoptimized={isPreparedGalleryImage(review.poster)} sizes="(max-width: 767px) calc(100vw - 32px), 420px" className={styles.posterImage} onError={() => setPosterFailed(true)} /> : null}
         <span className={styles.shade} />
         <span className={styles.play}><Play size={26} aria-hidden="true" fill="currentColor" /></span>
         <span className={styles.posterLabel}><strong>Watch parent review {number}</strong><small>{external ? `Tap to load from ${provider}` : "Tap to play with sound"}</small></span>
@@ -75,7 +81,7 @@ export default function CampaignParentVideo({ reviews }: { reviews: CampaignPare
     {reviews.length > 1 ? <div ref={strip} className={styles.thumbnails} role="group" aria-label="Choose a parent review">
       {reviews.map((review, itemIndex) => <button type="button" key={review.id} data-review-index={itemIndex}
         className={styles.thumbnail} aria-label={`Choose parent review ${itemIndex + 1}`} aria-pressed={index === itemIndex} onClick={() => select(itemIndex)}>
-        <Image src={review.thumbnail} alt="" width={96} height={72} sizes="96px" />
+        <Image src={review.thumbnail} alt="" width={96} height={72} sizes="96px" unoptimized={isPreparedGalleryImage(review.thumbnail)} />
         <span>Review {itemIndex + 1}</span>
       </button>)}
     </div> : null}

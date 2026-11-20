@@ -83,6 +83,23 @@ export async function verifyParentReviews({ chromium, origin, output }) {
       results.push({uploadedVideo:fail?'failure fallback pass':'playback and pause pass',switchStopsPlayback:'pass'});
       await context.close();
     }
+    {
+      const context = await browser.newContext({viewport:{width:390,height:844}});
+      const page = await context.newPage();
+      const image = await page.request.get(origin+'/images/hero/hero-classroom.jpg');
+      const body = await image.body();
+      await page.route('https://firebasestorage.googleapis.com/v0/b/browser-fixture/**',r=>r.fulfill({status:200,contentType:'image/jpeg',body}));
+      await page.goto(origin+'/website-browser-media-check?campaignReviews=stored-images',{waitUntil:'networkidle'});
+      const gallery=page.locator('[data-parent-reviews]');
+      await gallery.scrollIntoViewIfNeeded();
+      await gallery.locator('img').evaluateAll(async images=>Promise.all(images.map(i=>i.decode())));
+      for(const locator of [gallery.getByRole('button',{name:'Play parent review 1',exact:true}),gallery.getByRole('button',{name:'Choose parent review 1',exact:true})]){
+        assert.match(await locator.locator('img').getAttribute('src'),/^https:\/\/firebasestorage\.googleapis\.com\//,'Prepared gallery photos must bypass the secondary image optimiser');
+        assert.ok(await locator.locator('img').evaluate(i=>i.complete&&i.naturalWidth>0));
+      }
+      results.push({preparedGalleryImageDelivery:'direct; both poster and thumbnail loaded'});
+      await context.close();
+    }
   } finally { await browser.close(); }
   return results;
 }

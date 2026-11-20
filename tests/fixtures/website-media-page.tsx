@@ -14,6 +14,7 @@ export default async function MediaVerificationFixture({ searchParams }: { searc
       { id: "two", poster: "/images/hero/hero-building.jpg", thumbnail: "/images/hero/hero-building.jpg", provider: "INSTAGRAM", source: "https://www.instagram.com/reel/DYg8ahfhUuq/embed/", publicUrl: "https://www.instagram.com/reel/DYg8ahfhUuq/" },
     ];
     if (campaignReviews === "native") reviews[0] = { ...reviews[0], provider: "VIDEO", source: "/videos/parent-reviews-dwarka-sec12.mp4", publicUrl: "/videos/parent-reviews-dwarka-sec12.mp4" };
+    if (campaignReviews === "stored-images") reviews[0] = { ...reviews[0], poster: "https://firebasestorage.googleapis.com/v0/b/browser-fixture/o/web.webp?alt=media", thumbnail: "https://firebasestorage.googleapis.com/v0/b/browser-fixture/o/thumbnail.webp?alt=media" };
     if (campaignReviews === "many") for (let i = 3; i <= 12; i++) reviews.push({ ...reviews[0], id: `future-${i}` });
     return <AdmissionsCampaign parentReviewVideos={reviews} />;
   }
