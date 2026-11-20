@@ -66,6 +66,23 @@
 
 .mobileBar[hidden]{display:none}
 
+/* Campaign-only proof and location: no third-party media loads before a parent asks. */
+.quickLinks{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:16px}
+.quickLinks a{display:inline-flex;align-items:center;gap:5px;min-height:44px;font-size:.875rem;font-weight:650;color:var(--purple);text-underline-offset:4px}
+.programme .programmeTime{font-size:.875rem;font-weight:700;color:var(--purple);border-top:1px solid var(--line);padding-top:12px}
+.videoFrame{min-width:0}
+.videoFrame .videoButton,.videoFrame .parentVideo{aspect-ratio:16/9;width:100%;min-height:0;max-height:none;object-fit:contain}
+.parentStory .button{margin-top:20px}
+.mediaFallback{border:1px solid var(--line);border-radius:16px;padding:24px;background:white;font-size:1rem;line-height:1.75}
+.mediaFallback a{color:var(--purple);text-underline-offset:3px}
+.page section[id="centre-location"]{scroll-margin-top:100px}
+.mapPanel{margin-top:24px;min-width:0}
+.mapPanel iframe,.mapButton{width:100%;height:280px;border:1px solid #d9cce1;border-radius:16px;background:#fffdf9}
+.mapButton{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;font-size:1rem;line-height:1.6;color:var(--purple);cursor:pointer}
+.mapPanel iframe{display:block}
+.mapPanel .micro{font-size:.875rem;line-height:1.7}
+.mapButton:focus-visible{outline:3px solid #dba52b;outline-offset:4px}
+
 /* Shared admissions pages: readable copy takes priority over fitting above the fold. */
 .page{--muted:#5f5265;font-size:1rem;line-height:1.7;overflow-wrap:break-word}
 .lead,.intro,.heroBenefits li,.offerCell p:not(.offerNumber):not(.offerLabel),
