@@ -79,7 +79,7 @@ try {
       assert.equal(await page.getByRole("heading", { level: 1 }).count(), 1);
       assert.match(await page.title(), /2027–28/);
       assert.match(await page.title(), /Preschool & Daycare/);
-      assert.match(await page.getByRole("heading", { level: 1 }).innerText(), /Preschool Admissions in Dwarka Sector 12/s);
+      assert.match(await page.getByRole("heading", { level: 1 }).innerText(), /Preschool & Play School in Dwarka Sector 12/s);
       assert.equal(await page.getByText("Old 2026–27 headline", { exact: true }).count(), 0);
       assert.equal(await page.getByText("Old 2026–27 variant", { exact: true }).count(), 0);
       assert.ok(await page.locator("section[aria-labelledby=\"admissions-heading\"]").getByText("30% Off Annual Charges", { exact: true }).isVisible());
@@ -92,6 +92,11 @@ try {
       assert.equal(await page.locator('form a[href="/privacy-policy"]').count(), 1);
       assert.equal(await page.getByRole("button", { name: "Ask MIRA, Kidzee Admissions Assistant", exact: true }).count(), 0);
       assert.equal(await page.locator("video[src]").count(), 0, "Parent video must not load before selection");
+      assert.equal(await page.locator('iframe[title="Google Map: Kidzee Sector 12 Dwarka"]').count(), 0, "Google Maps must not load before selection");
+      const sectionOrder = await page.evaluate(() => ['programmes','reviews','january-start','daycare'].map(id => document.getElementById(id).getBoundingClientRect().top));
+      assert.ok(sectionOrder.every((top,index) => index === 0 || top > sectionOrder[index-1]), 'Preschool programmes and parent proof must precede the offer and daycare');
+      assert.equal(await page.getByText('9:30 AM–12:30 PM', {exact:true}).count(), 2);
+      assert.equal(await page.getByText('9:30 AM–1:00 PM', {exact:true}).count(), 2);
       const mislabeledViews = await page.evaluate(() => window.__admissionsEvents.filter((event) => event.eventType === "LANDING_VARIANT_VIEW"));
       assert.equal(mislabeledViews.length, 0, "Fixed campaign must not emit legacy A/B variant views");
       const publicContent = await page.evaluate(() => document.body.innerText + '\n' + [...document.querySelectorAll('meta[content],script[type="application/ld+json"]')].map(el => el.getAttribute('content') || el.textContent).join('\n'));
@@ -290,11 +295,47 @@ try {
     assert.equal(savedFees.status(), 201);
     assert.equal(savedFees.request().postDataJSON().enquiryType, 'CALLBACK');
     await page.getByRole('heading', { name: 'Thank you. We have your enquiry.' }).waitFor();
-    assert.equal(await page.locator('video,audio').count(), 0, 'Unreviewed media must not disclose pricing on the campaign page');
+    assert.equal(await page.locator('video').count(), 1, 'Only the owner-confirmed parent video belongs on the campaign');
+    assert.equal(await page.locator('video').getAttribute('preload'), 'none');
+    assert.equal(await page.locator('video').getAttribute('src'), null);
+    await page.getByRole('button', {name: /Watch a parent.s experience/}).click();
+    await page.waitForFunction(() => {
+      const video = document.querySelector('video');
+      return video && !video.paused && video.currentTime > 0.2 && video.videoWidth > 0;
+    }, null, {timeout: 30000});
+    assert.equal(await page.locator('video').getAttribute('src'), '/videos/parent-reviews-dwarka-sec12.mp4');
+    await page.locator('video').evaluate(video => video.pause());
+    assert.equal(await page.locator('video').evaluate(video => video.paused), true);
+    // Block external map networking: verify the real configured source without sending a test conversion.
+    await page.route('https://www.google.com/maps**', route => route.fulfill({status:200,contentType:'text/html',body:'<p>Map test fixture</p>'}));
+    await page.getByRole('button', {name: /Show centre on Google Maps/}).click();
+    const map = page.getByTitle('Google Map: Kidzee Sector 12 Dwarka');
+    await map.waitFor();
+    assert.match(await map.getAttribute('src'), /^https:\/\/www\.google\.com\/maps(?:\/embed|\?)/);
+    assert.equal(await page.locator('#centre-location a[href^="http"]').count(), 2);
     assert.ok(await page.getByText(/including families completing admission in December 2026/).count() > 0);
     await context.close();
     await mediaBrowser.close();
-    results.push({ videoBrowser: "Google Chrome", expandedDetails: "pass", legacyFeeQueryMapsToCallback: "pass", noPublicPricing: "pass", testimonialVideo: "omitted pending full pricing-content review", decemberEligibility: "pass" });
+    results.push({ videoBrowser: "Google Chrome", expandedDetails: "pass", legacyFeeQueryMapsToCallback: "pass", noPublicPricing: "pass", testimonialVideo: "owner-confirmed asset; click-to-load, playback and pause pass", map: "click-to-load and directions pass", decemberEligibility: "pass" });
+  }
+  {
+    const context = await browser.newContext({viewport:{width:390,height:844}});
+    const page = await context.newPage();
+    const mediaRequests = [];
+    page.on('request', request => { if (/parent-reviews-dwarka-sec12\.mp4|google\.com\/maps/.test(request.url())) mediaRequests.push(request.url()); });
+    await page.addInitScript(() => { window.__admissionsEvents=[]; window.addEventListener('kidzee:website-event', event => window.__admissionsEvents.push(event.detail)); });
+    await page.route('**/videos/parent-reviews-dwarka-sec12.mp4', route => route.abort());
+    await page.route('https://www.google.com/maps**', route => route.fulfill({status:200,contentType:'text/html',body:'<p>Map test fixture</p>'}));
+    await page.goto(origin+'/landing/'+slug, {waitUntil:'networkidle'});
+    assert.deepEqual(mediaRequests, [], 'Neither the large video nor Google Maps should load on arrival');
+    await page.getByRole('button', {name:/Watch a parent.s experience/}).click();
+    await page.getByRole('status').filter({hasText:'The video could not load'}).waitFor();
+    assert.ok(await page.getByRole('link', {name:'open the original video'}).isVisible());
+    await page.getByRole('button', {name:/Show centre on Google Maps/}).click();
+    await page.getByTitle('Google Map: Kidzee Sector 12 Dwarka').waitFor();
+    assert.equal(await page.evaluate(() => window.__admissionsEvents.filter(event => ['FORM_SUBMITTED','WHATSAPP_CLICK'].includes(event.eventType)).length), 0, 'Video and map interactions are not leads');
+    await context.close();
+    results.push({mediaOnArrival:'none',videoFailureFallback:'pass',mapAndVideoDoNotCreateLeads:'pass'});
   }
   for (const [index, route] of routes.entries()) {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
@@ -302,6 +343,7 @@ try {
     await page.addInitScript(() => { window.__admissionsEvents = []; window.addEventListener('kidzee:website-event', (event) => window.__admissionsEvents.push(event.detail)); });
     await page.goto(origin + route + '?programme=DAYCARE&enquiry=DAYCARE&utm_source=google&gclid=synthetic_daycare_click', { waitUntil: 'networkidle' });
     assert.match(await page.getByRole('heading', { level: 1 }).innerText(), /Daycare in Dwarka Sector 12/);
+    assert.ok(await page.evaluate(() => document.getElementById('daycare').getBoundingClientRect().top < document.getElementById('programmes').getBoundingClientRect().top), 'Daycare visitors see their service before preschool programmes');
     assert.ok(await page.getByRole('button', { name: 'Request Daycare Callback', exact: true }).isVisible());
     assert.equal(await page.getByRole('heading', { name: 'Ask About Daycare', exact: true }).count(), 1);
     await page.locator('#parentName').fill('Browser Daycare Parent ' + index);
@@ -344,7 +386,7 @@ try {
     await contact.click();
     assert.ok(await page.getByRole('button', {name: 'Save & Open WhatsApp', exact:true}).isVisible());
     await page.getByRole('button', {name:'Preschool',exact:true}).click();
-    assert.match(await page.getByRole('heading', {level:1}).innerText(), /Preschool Admissions/);
+    assert.match(await page.getByRole('heading', {level:1}).innerText(), /Preschool & Play School/);
     await context.close();
     results.push({route, daycareResponsiveWidths:[390,1440], daycareImages:'pass', daycarePreset:'pass', serviceSwitch:'pass', daycareCentreOS:'pass', daycareDeduplication:'pass', whatsAppLink:'pass'});
   }
