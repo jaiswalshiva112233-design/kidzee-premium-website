@@ -19,8 +19,12 @@ test('confirmed next-session hours and offer remain programme-specific', () => {
   assert.equal(preschoolProgrammeHours.juniorKg, '9:30 AM–1:00 PM');
   assert.equal(preschoolProgrammeHours.seniorKg, preschoolProgrammeHours.juniorKg);
   const offer = JSON.stringify(earlyStartOffer);
-  for (const text of ['30% Off Annual Charges', 'Tuition Begins in March', 'Summer Camp Included', 'December 2026']) assert.ok(offer.includes(text));
+  for (const text of ['30% Off Annual Charges', 'Tuition begins in March', 'limited number', 'Summer Camp Included']) assert.ok(offer.includes(text));
+  assert.equal(earlyStartOffer.disclaimer, 'Terms and conditions apply.');
   assert.doesNotMatch(offer, /₹|\bINR\b/);
+  for (const file of ['lib/website/admissionsSession.ts','lib/website/admissionsCampaign.ts','components/admissions/AdmissionsCampaign.tsx','components/admissions/WebsiteAdmissionsOffer.tsx']) {
+    assert.doesNotMatch(read(file), /instal+ment|(?:collect|payable|due|payment).{0,70}(?:enrol+l?ment|at admission)/i, file);
+  }
 });
 test('managed pages only enter the sitemap with explicit indexing consent', () => {
   for (const content of [null, undefined, false, [], {}, {indexable:false}, {indexable:'true'}, {indexable:1}]) assert.equal(isIndexableLandingContent(content), false);

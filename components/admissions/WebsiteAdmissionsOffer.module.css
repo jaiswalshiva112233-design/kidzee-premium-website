@@ -4,7 +4,8 @@
 .eyebrow { color: #5b2a86; font-size: .875rem; font-weight: 800; letter-spacing: .04em; }
 .intro h2 { margin: 1rem 0; font-size: clamp(1.875rem, 3vw, 2.75rem); font-weight: 900; line-height: 1.15; text-wrap: balance; }
 .intro > p:last-child, .card p, .action p, .terms li { font-size: 1rem; line-height: 1.75; color: #5f5265; }
-.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 2rem 0; }
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 2rem 0 .5rem; }
+.disclaimer { margin: 0 0 1.5rem; font-size: .875rem; line-height: 1.5; color: #5f5265; scroll-margin-top: 110px; }
 .card { background: #fff; border: 1px solid #eadff0; border-radius: 1.25rem; padding: 1.5rem; }
 .card svg { color: #5b2a86; }
 .card h3 { margin: 1rem 0 .5rem; font-size: 1.25rem; line-height: 1.4; font-weight: 800; }

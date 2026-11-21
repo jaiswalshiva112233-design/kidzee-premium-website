@@ -27,14 +27,11 @@ export default function WebsiteAdmissionsOffer() {
               );
             })}
           </div>
+          <p id="offer-terms" className={styles.disclaimer}>{earlyStartOffer.disclaimer}</p>
           <div className={styles.action}>
             <a href="#admission-enquiry">Ask About the Early Start Offer <ArrowRight aria-hidden="true" size={19} /></a>
             <p>Speak to the centre team about your child’s programme, joining date and eligibility.</p>
           </div>
-          <details id="offer-terms" className={styles.terms}>
-            <summary>Offer details and eligibility</summary>
-            <ul>{earlyStartOffer.terms.map((term) => <li key={term}>{term}</li>)}</ul>
-          </details>
         </div>
       </Container>
     </section>

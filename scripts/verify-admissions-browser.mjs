@@ -185,7 +185,8 @@ try {
       await page.waitForTimeout(400);
       assert.ok(await page.locator("#parentName").isVisible());
       await page.getByText("How does the January start work?", { exact: true }).click();
-      assert.ok(await page.getByText(/Tuition Begins in March/).first().isVisible());
+      assert.ok(await page.locator('details[open]').filter({hasText:'How does the January start work?'}).getByText(/before tuition begins in March/i).isVisible());
+      assert.equal(await page.locator('#offer-terms').innerText(), 'Terms and conditions apply.');
       assert.deepEqual(errors, [], "Browser errors at " + route);
       results.push({ route, width, layout: "pass", images: "pass", navigation: "pass", readability: "pass", mobileHeader: width<768?'pass':'desktop unchanged', fontSizes: readability.sizes });
       await context.close();
@@ -304,10 +305,11 @@ try {
     await map.waitFor();
     assert.match(await map.getAttribute('src'), /^https:\/\/www\.google\.com\/maps(?:\/embed|\?)/);
     assert.equal(await page.locator('#centre-location a[href^="http"]').count(), 2);
-    assert.ok(await page.getByText(/including families completing admission in December 2026/).count() > 0);
+    assert.equal(await page.locator('#offer-terms').innerText(), 'Terms and conditions apply.');
+    assert.doesNotMatch(await page.locator('main').textContent(), /instal+ment/i);
     await context.close();
     await mediaBrowser.close();
-    results.push({ expandedDetails: "pass", legacyFeeQueryMapsToCallback: "pass", noPublicPricing: "pass", unavailableReviewAlbum: "safe fallback to written reviews", map: "click-to-load and directions pass", decemberEligibility: "pass" });
+    results.push({ expandedDetails: "pass", legacyFeeQueryMapsToCallback: "pass", noPublicPricing: "pass", unavailableReviewAlbum: "safe fallback to written reviews", map: "click-to-load and directions pass", offerDisclaimer: "pass" });
   }
   {
     const context = await browser.newContext({viewport:{width:390,height:844}});

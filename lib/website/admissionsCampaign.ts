@@ -1,6 +1,6 @@
 export const ADMISSIONS_CAMPAIGN_SLUG = "preschool-admissions-dwarka-sector-12";
 export const ADMISSIONS_CAMPAIGN_TITLE = "Preschool & Daycare 2027–28 | Kidzee Dwarka Sector 12";
-export const ADMISSIONS_CAMPAIGN_DESCRIPTION = "Preschool admissions 2027–28 at Kidzee Dwarka Sector 12. Daycare from 12:30 PM. Book a visit. 30% Off Annual Charges, Tuition Begins in March, Summer Camp Included. Terms apply.";
+export const ADMISSIONS_CAMPAIGN_DESCRIPTION = "Explore preschool and daycare at Kidzee, Dwarka Sector 12. Book a visit and ask about 30% off annual charges for eligible 2027–28 preschool places.";
 export const ADMISSIONS_CAMPAIGN_IMAGE = "/images/landing/kidzee-creative-learning.jpg";
 
 export function campaignPortraitUrl(source: string) {
@@ -24,9 +24,9 @@ export function getAdmissionsEnquiry(query: Record<string, string | string[] | u
 
 export const admissionsCampaignFaqs = [
   { question: "How do I enquire about nursery or play school admission?", answer: "Send your name and mobile number or call Kidzee Sector 12B, Dwarka. Our centre team will discuss your child's age, explain Playgroup, Nursery or KG placement and arrange a school visit. Sending an enquiry does not reserve a seat; admission and availability are confirmed by the centre." },
-  { question: "How does the January start work?", answer: "For eligible children joining in January 2027, including families completing admission in December 2026, January and February are a settling-in attendance period. Your child gets to know the teachers, friends and preschool routine. Tuition Begins in March. Ask the admissions team to explain the approved offer terms before enrolling." },
-  { question: "What is the Early Start Advantage?", answer: "Eligible 2027–28 preschool enrolments can receive 30% Off Annual Charges, January settling-in with Tuition Begins in March, and Summer Camp Included. The admissions team will explain eligibility and the approved terms during your conversation or school visit." },
-  { question: "Which enrolments include summer camp?", answer: "Summer Camp Included applies to eligible 2027–28 preschool enrolments under the approved offer. The centre will confirm eligibility and share the camp dates and timings when the schedule is ready." },
+  { question: "How does the January start work?", answer: "Children joining in January have time to get to know their teachers, make friends and settle into a routine before tuition begins in March. Our centre head can answer your questions during your visit." },
+  { question: "What is the Early Start Advantage?", answer: "It’s our early-bird offer for a limited number of 2027–28 preschool places: 30% off annual charges, a January settling-in period and summer camp. Ask our team whether a place is available for your child’s programme." },
+  { question: "Which enrolments include summer camp?", answer: "Summer camp is included for eligible 2027–28 preschool enrolments under the early-bird offer. The centre will confirm eligibility and share the camp dates and timings when the schedule is ready." },
   { question: "Can we visit before taking admission?", answer: "Yes. Send the short enquiry form and add a preferred date if you wish. Our team will call to confirm a convenient time so you can see the classrooms and play spaces, meet the team and discuss your child's needs." },
   { question: "Which class would suit my child?", answer: "Playgroup is generally for ages 2–3, Nursery for 3–4, Junior KG for 4–5 and Senior KG for 5–6. We also consider readiness and previous preschool experience. If you are unsure, leave the optional programme field at 'Please guide me'." },
   { question: "Which days do preschool classes run?", answer: "Preschool classes run Monday to Friday. Playgroup and Nursery run from 9:30 AM to 12:30 PM. Junior KG (LKG) and Senior KG (UKG) run from 9:30 AM to 1:00 PM. Our team will discuss your child's settling-in routine." },
