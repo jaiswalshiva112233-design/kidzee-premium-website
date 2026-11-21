@@ -92,6 +92,7 @@
 .heroOffer span{font-size:1rem;line-height:1.65}
 .heroOffer small{font-size:.875rem;line-height:1.65}
 .heroOffer{gap:8px}
+.offerDisclaimer{margin:.5rem 0 0;font-size:.875rem;line-height:1.5;color:var(--muted);scroll-margin-top:110px}
 .heroOffer strong{font-size:1.25rem;line-height:1.4}
 .centre,.phone,.session,.eyebrow,.micro,.photoNote,.formNote,.termsLink,
 .gallery figcaption,.programme small,.quote figcaption,.quote figcaption span,

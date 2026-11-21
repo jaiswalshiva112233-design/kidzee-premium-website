@@ -35,11 +35,12 @@ export async function verifyWebsiteSession({browser,chromium,pool,origin,output,
     assert.equal(await page.locator('#childName').isVisible(),true,'The website retains its full enquiry form');
     assert.equal(await page.locator('#enquiryType').inputValue(),'SCHOOL_VISIT');
     assert.equal(await page.locator('#parentName').evaluate(el=>parseFloat(getComputedStyle(el).fontSize))>=16,true);
-    await page.locator('#offer-terms summary').click();
-    assert.match(await page.locator('#offer-terms').innerText(), /December 2026/);
-    assert.match(await page.locator('#offer-terms').innerText(), /Tuition Begins in March/);
-    assert.doesNotMatch(await page.locator('main').innerText(), /₹|2026[–-]27/);
-    await page.locator('#offer-terms summary').click();
+    const disclaimer=page.locator('#early-start-offer #offer-terms');
+    assert.equal(await disclaimer.innerText(), 'Terms and conditions apply.');
+    assert.ok(await disclaimer.isVisible());
+    assert.ok(await disclaimer.evaluate(el=>parseFloat(getComputedStyle(el).fontSize)>=14));
+    assert.match(await page.locator('#early-start-offer').innerText(), /tuition begins in march/i);
+    assert.doesNotMatch(await page.locator('main').textContent(), /₹|2026[–-]27|instal+ment/i);
     const anchors=await page.locator('main a[href^="#"]').evaluateAll(links=>links.map(a=>a.getAttribute('href')).filter(h=>!document.getElementById(h.slice(1))));
     assert.deepEqual(anchors,[]);
     if(width<1280) {

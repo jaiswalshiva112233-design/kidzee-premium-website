@@ -9,6 +9,7 @@ import AdmissionForm from "@/components/AdmissionForm";
 import CampaignParentVideo from "./CampaignParentVideo";
 import type { CampaignParentReview } from "@/lib/website/parentReviews";
 import CampaignMap from "./CampaignMap";
+import { earlyStartOffer } from "@/lib/website/admissionsSession";
 import { useSiteContact } from "@/components/SiteContactProvider";
 import styles from "./AdmissionsCampaign.module.css";
 import { admissionsCampaignFaqs, campaignPortraitUrl } from "@/lib/website/admissionsCampaign";
@@ -130,7 +131,7 @@ export default function AdmissionsCampaign({
                 <li><Check size={16} aria-hidden="true" /><span>{isDaycare ? "Quiet time, activities & homework support" : "Vegetarian preschool breakfast included"}</span></li>
               </ul>
               <div className={styles.heroOffer}>
-                {isDaycare ? <><strong>Daycare from 12:30 PM to 7:00 PM</strong><span>Tell us your preferred days and pickup time.</span><small><a href="#daycare">Explore our daycare routine</a></small></> : <><strong>30% Off Annual Charges</strong><span>January settling-in · Tuition Begins in March</span><small>Summer Camp Included · <a href="#offer-terms">Preschool offer terms</a></small></>}
+                {isDaycare ? <><strong>Daycare from 12:30 PM to 7:00 PM</strong><span>Tell us your preferred days and pickup time.</span><small><a href="#daycare">Explore our daycare routine</a></small></> : <><strong>30% Off Annual Charges</strong><span>January settling-in · Tuition begins in March · Summer camp included</span><small>{earlyStartOffer.disclaimer}</small></>}
               </div>
               <nav className={styles.quickLinks} aria-label="Explore the centre">
                 <a href="#programmes">Ages &amp; school timings</a>
@@ -224,7 +225,7 @@ export default function AdmissionsCampaign({
 
         <section id="january-start" className={styles.section + " " + styles.soft} style={{ scrollMarginTop: 100 }}>
           <div className={styles.wrap}>
-            <p className={styles.eyebrow}>Preschool · Early Start Advantage</p>
+            <p className={styles.eyebrow}>Preschool · Limited-seat early-bird offer</p>
             <h2 className={styles.heading}>A gentler start to the 2027–28 session.</h2>
             <p className={styles.intro}>
               Eligible January starters can get to know the teachers, make friends and settle into a preschool routine before the academic session begins in March.
@@ -238,7 +239,7 @@ export default function AdmissionsCampaign({
               <article className={styles.offerCell}>
                 <Heart size={27} className={styles.offerIcon} aria-hidden="true" />
                 <h3 className={styles.offerLabel}>January &amp; February attendance</h3>
-                <p>Time to settle in before the academic session. Tuition Begins in March.</p>
+                <p>January starters can attend during both months without tuition charges.</p>
               </article>
               <article className={styles.offerCell}>
                 <Sun size={27} className={styles.offerIcon} aria-hidden="true" />
@@ -246,7 +247,7 @@ export default function AdmissionsCampaign({
                 <p>For eligible preschool enrolments. The centre will share the camp schedule.</p>
               </article>
             </div>
-            <a href="#offer-terms" className={styles.termsLink}>Read preschool offer terms</a>
+            <p id="offer-terms" className={styles.offerDisclaimer}>{earlyStartOffer.disclaimer}</p>
           </div>
         </section>
 
@@ -316,15 +317,6 @@ export default function AdmissionsCampaign({
             <div className={styles.faqGrid}>
               <div><p className={styles.eyebrow}>A few practical questions</p><h2 className={styles.heading}>Clear answers before you visit.</h2><p className={styles.intro}>Call us if you would rather talk it through. We&apos;ll explain what applies to your child.</p></div>
               <div>{admissionsCampaignFaqs.map((faq) => <details className={styles.faq} key={faq.question}><summary>{faq.question}</summary><p>{faq.answer}</p></details>)}</div>
-            </div>
-            <div id="offer-terms" className={styles.terms}>
-              <h3>Admissions 2027–28 · Offer details</h3>
-              <ul>
-                <li>30% Off Annual Charges applies to eligible 2027–28 preschool admissions at this centre. Contact the admissions team to discuss the approved terms.</li>
-                <li>January and February are a settling-in attendance period for eligible children joining in January 2027, including families completing admission in December 2026. Tuition Begins in March. Attendance follows the centre&apos;s working days and agreed routine.</li>
-                <li>Summer Camp Included for eligible 2027–28 preschool enrolments. Dates and timings follow the centre&apos;s camp schedule.</li>
-                <li>These preschool benefits do not describe a daycare offer. Discuss daycare, meals, transport arrangements, placement and availability directly with the admissions team before enrolling.</li>
-              </ul>
             </div>
           </div>
         </section>
